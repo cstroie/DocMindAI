@@ -518,11 +518,14 @@ function preprocessImageForOCR($image_path) {
             background: white;
             padding: 16px;
             border-radius: 8px;
-            border-left: 4px solid #667eea;
-            white-space: pre-wrap;
+            border: 1px solid #667eea;
             font-family: monospace;
+            width: 100%;
+            min-height: 200px;
             max-height: 400px;
-            overflow-y: auto;
+            resize: vertical;
+            font-size: 14px;
+            line-height: 1.5;
         }
         
         @keyframes spin {
@@ -561,7 +564,7 @@ function preprocessImageForOCR($image_path) {
                         <h2 style="color: #111827; font-size: 20px;">OCR Result</h2>
                     </div>
                     
-                    <div class="markdown-result"><?php echo $result; ?></div>
+                    <textarea class="markdown-result" readonly><?php echo htmlspecialchars($result); ?></textarea>
                 </div>
                 
                 <?php if (isset($preprocessed_image_base64)): ?>
