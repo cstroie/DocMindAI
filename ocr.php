@@ -55,13 +55,7 @@ if (file_exists('config.php')) {
 
 // Available models
 $AVAILABLE_MODELS = [
-    'llama3.2-vision' => 'Llama 3.2 Vision',
-    'gemma3:1b' => 'Gemma 3 (1B)',
-    'gemma2:2b' => 'Gemma 2 (2B)',
-    'qwen3:1.7b' => 'Qwen 3 (1.7B)',
-    'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)',
-    'phi3:mini' => 'Phi 3 Mini (3.8B)',
-    'llama3.2:1b' => 'Llama 3.2 (1B)'
+    'llama3.2-vision' => 'Llama 3.2 Vision'
 ];
 
 // Available output languages
@@ -98,7 +92,7 @@ $language_instructions = [
  * Falls back to default model if invalid model is selected
  */
 if (!array_key_exists($MODEL, $AVAILABLE_MODELS)) {
-    $MODEL = 'qwen2.5:1.5b'; // Default to a valid model
+    $MODEL = 'llama3.2-vision'; // Default to the only valid model
 }
 
 /**
