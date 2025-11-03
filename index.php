@@ -24,12 +24,12 @@ $AVAILABLE_LANGUAGES = [
 ];
 
 // Get selected model and language
-$MODEL = isset($_POST['model']) ? $_POST['model'] : 'gemma2:2b';
+$MODEL = isset($_POST['model']) ? $_POST['model'] : 'qwen2.5:1.5b';
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : 'ro';
 
 // Validate model selection
 if (!array_key_exists($MODEL, $AVAILABLE_MODELS)) {
-    $MODEL = 'gemma2:2b'; // Default to a valid model
+    $MODEL = 'qwen2.5:1.5b'; // Default to a valid model
 }
 
 // Validate language selection
@@ -327,7 +327,7 @@ function getSeverityLabel($severity) {
             background: #f9fafb;
             border-radius: 12px;
             padding: 24px;
-            margin-top: 24px;
+            margin-bottom: 24px;
             border: 2px solid #e5e7eb;
         }
         
@@ -442,8 +442,42 @@ function getSeverityLabel($severity) {
             <h1>🏥 Analizor Rapoarte Radiologice</h1>
             <p>Analiză automată cu AI a rapoartelor medicale</p>
         </div>
-        
+
         <div class="content">
+            <?php if ($error): ?>
+                <div class="error">
+                    <strong>⚠️ Eroare:</strong> <?php echo htmlspecialchars($error); ?>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($result): ?>
+                <div class="result-card">
+                    <div class="result-header">
+                        <h2 style="color: #111827; font-size: 20px;">Rezultat Analiză</h2>
+                        <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
+                            <?php echo $result['pathologic'] === 'yes' ? '⚠️ Patologic' : '✓ Normal'; ?>
+                        </span>
+                    </div>
+                    
+                    <div class="severity-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <strong style="color: #374151;">Severitate:</strong>
+                            <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
+                                <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
+                            </span>
+                        </div>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width: <?php echo $result['severity'] * 10; ?>%; background: <?php echo getSeverityColor($result['severity']); ?>;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="diagnostic-box">
+                        <div class="diagnostic-label">Diagnostic</div>
+                        <div class="diagnostic-text"><?php echo htmlspecialchars($result['diagnostic']); ?></div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <form method="POST" action="" id="analysisForm">
                 <div class="form-group">
                     <label for="model">Model AI:</label>
@@ -479,40 +513,6 @@ function getSeverityLabel($severity) {
                     🔄 Analiză Nouă
                 </button>
             </form>
-            
-            <?php if ($error): ?>
-                <div class="error">
-                    <strong>⚠️ Eroare:</strong> <?php echo htmlspecialchars($error); ?>
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($result): ?>
-                <div class="result-card">
-                    <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">Rezultat Analiză</h2>
-                        <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
-                            <?php echo $result['pathologic'] === 'yes' ? '⚠️ Patologic' : '✓ Normal'; ?>
-                        </span>
-                    </div>
-                    
-                    <div class="severity-container">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <strong style="color: #374151;">Severitate:</strong>
-                            <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
-                                <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
-                            </span>
-                        </div>
-                        <div class="severity-bar">
-                            <div class="severity-fill" style="width: <?php echo $result['severity'] * 10; ?>%; background: <?php echo getSeverityColor($result['severity']); ?>;"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="diagnostic-box">
-                        <div class="diagnostic-label">Diagnostic</div>
-                        <div class="diagnostic-text"><?php echo htmlspecialchars($result['diagnostic']); ?></div>
-                    </div>
-                </div>
-            <?php endif; ?>
         </div>
     </div>
     
