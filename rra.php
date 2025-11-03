@@ -75,11 +75,16 @@ $AVAILABLE_LANGUAGES = [
     'it' => 'Italiano'
 ];
 
-// Get selected model and language
+/**
+ * Get selected model and language from POST data or use defaults
+ */
 $MODEL = isset($_POST['model']) ? $_POST['model'] : 'qwen2.5:1.5b';
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : 'ro';
 
-// System prompt with language support
+/**
+ * Language instructions for the AI model
+ * Maps language codes to natural language instructions
+ */
 $language_instructions = [
     'ro' => 'Respond in Romanian.',
     'en' => 'Respond in English.',
@@ -89,17 +94,27 @@ $language_instructions = [
     'it' => 'Rispondi in italiano.'
 ];
 
-// Validate model selection
+/**
+ * Validate model selection
+ * Falls back to default model if invalid model is selected
+ */
 if (!array_key_exists($MODEL, $AVAILABLE_MODELS)) {
     $MODEL = 'qwen2.5:1.5b'; // Default to a valid model
 }
 
-// Validate language selection
+/**
+ * Validate language selection
+ * Falls back to Romanian if invalid language is selected
+ */
 if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
     $LANGUAGE = 'ro'; // Default to Romanian
 }
 
-// System prompt
+/**
+ * System prompt for the AI model
+ * Contains instructions for analyzing radiology reports and returning structured JSON
+ * Includes language-specific instructions and examples
+ */
 $SYSTEM_PROMPT = "You are a medical assistant analyzing radiology reports.
 
 TASK: Read the report and extract the main pathological information in JSON format.
@@ -132,12 +147,23 @@ Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
 Report: \"Displaced fracture of the right distal femur with significant hematoma\"
 Response: {\"pathologic\": \"yes\", \"severity\": 8, \"diagnostic\": \"femur fracture\"}";
 
+/**
+ * Application state variables
+ * @var array|null $result Analysis result data
+ * @var string|null $error Error message if any
+ * @var bool $processing Whether analysis is in progress
+ * @var bool $is_api_request Whether request is API call (not web form)
+ */
 $result = null;
 $error = null;
 $processing = false;
 $is_api_request = false;
 
-// Handle POST request
+/**
+ * Handle POST request for report analysis
+ * Processes both web form submissions and API requests
+ * Validates input, calls AI API, and processes response
+ */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
     $processing = true;
     $is_api_request = !isset($_POST['submit']); // If no submit button, it's an API request
