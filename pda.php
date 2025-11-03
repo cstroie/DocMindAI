@@ -1,12 +1,12 @@
 <?php
 /**
- * Radiology Report Analyzer
+ * Discharge Paper Analyzer
  * 
- * A PHP web application that uses AI to analyze radiology reports and extract
- * key medical information in a structured JSON format.
+ * A PHP web application that uses AI to analyze patient discharge papers and summarize
+ * key medical information for radiology use in a structured JSON format.
  * 
  * Features:
- * - AI-powered analysis of radiology reports
+ * - AI-powered analysis of patient discharge papers
  * - Multiple lightweight AI models support
  * - Multilingual output (6 languages)
  * - Web interface with real-time results
@@ -21,12 +21,12 @@
  * 
  * Usage:
  * - Web interface: Access via browser
- * - API endpoint: POST /rra.php with report data
+ * - API endpoint: POST /pda.php with discharge paper data
  * 
  * API Usage:
- * POST /rra.php
+ * POST /pda.php
  * Parameters:
- * - report (required): Radiology report text
+ * - report (required): Patient discharge paper text
  * - model (optional): AI model to use (default: qwen2.5:1.5b)
  * - language (optional): Output language (default: ro)
  * 
@@ -115,37 +115,37 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  * Contains instructions for analyzing radiology reports and returning structured JSON
  * Includes language-specific instructions and examples
  */
-$SYSTEM_PROMPT = "You are a medical assistant analyzing radiology reports.
+$SYSTEM_PROMPT = "You are a medical assistant analyzing patient discharge papers for radiology relevance.
 
-TASK: Read the report and extract the main pathological information in JSON format.
+TASK: Read the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation.
 
 " . $language_instructions[$LANGUAGE] . "
 
 OUTPUT FORMAT (JSON):
 {
   \"pathologic\": \"yes/no\",
-  \"severity\": 1-10,
+  \"severity\": 0-10,
   \"diagnostic\": \"1-5 words\"
 }
 
 RULES:
-- \"pathologic\": \"yes\" if any anomaly exists, otherwise \"no\"
-- \"severity\": 1=minimal, 5=moderate, 10=critical/urgent
-- \"diagnostic\": maximum 5 words (e.g., \"fracture\", \"pneumonia\", \"lung nodule\")
-- If everything is normal: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
-- Ignore spelling errors
+- \"pathologic\": \"yes\" if the discharge paper contains any findings relevant to radiology
+- \"severity\": 0=normal, 1=minimal, 5=moderate, 10=critical/urgent
+- \"diagnostic\": maximum 5 words summarizing radiology-relevant information
+- Focus on findings, conditions, treatments affecting radiology
+- Ignore non-radiology relevant information
 - Respond ONLY with the JSON, without additional text
 
 EXAMPLES:
 
-Report: \"Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate.\"
-Response: {\"pathologic\": \"yes\", \"severity\": 6, \"diagnostic\": \"pulmonary consolidation\"}
+Discharge: \"Patient discharged after treatment for pneumonia. Chest X-ray shows resolved infiltrate.\"
+Response: {\"pathologic\": \"yes\", \"severity\": 2, \"diagnostic\": \"resolved pneumonia\"}
 
-Report: \"No pathological changes. Heart of normal size.\"
-Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
+Discharge: \"Post-operative knee surgery. X-ray shows proper hardware placement.\"
+Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal post-op\"}
 
-Report: \"Displaced fracture of the right distal femur with significant hematoma\"
-Response: {\"pathologic\": \"yes\", \"severity\": 8, \"diagnostic\": \"femur fracture\"}";
+Discharge: \"Acute appendicitis, laparoscopic appendectomy. Post-op CT showed small abscess.\"
+Response: {\"pathologic\": \"yes\", \"severity\": 5, \"diagnostic\": \"post-op abscess\"}";
 
 /**
  * Application state variables
@@ -295,7 +295,7 @@ function getSeverityLabel($severity) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radiology report analyzer</title>
+    <title>Discharge Paper Analyzer</title>
     <style>
         * {
             margin: 0;
@@ -540,8 +540,8 @@ function getSeverityLabel($severity) {
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏥 Radiology report analyzer</h1>
-            <p>AI-powered automatic analysis of medical reports</p>
+            <h1>🏥 Discharge paper analyzer</h1>
+            <p>AI-powered summary of patient discharge papers for radiology use</p>
         </div>
 
         <div class="content">
@@ -554,7 +554,7 @@ function getSeverityLabel($severity) {
             <?php if ($result): ?>
                 <div class="result-card">
                     <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">Analysis Result</h2>
+                        <h2 style="color: #111827; font-size: 20px;">Discharge Paper Summary</h2>
                         <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
                             <?php echo $result['pathologic'] === 'yes' ? '⚠️ Pathological' : '✓ Normal'; ?>
                         </span>
@@ -605,13 +605,13 @@ function getSeverityLabel($severity) {
                 </div>
                 
                 <div class="form-group">
-                    <label for="report">Radiology report:</label>
+                    <label for="report">Patient discharge paper:</label>
                     <textarea 
                         id="report" 
                         name="report" 
                         rows="8" 
                         required
-                        placeholder="Enter the radiology report here...&#10;&#10;Example: Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum."
+                        placeholder="Enter the patient discharge paper here...&#10;&#10;Example: Patient discharged after treatment for pneumonia. Chest X-ray shows resolved infiltrate."
                     ><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
                 </div>
                 
