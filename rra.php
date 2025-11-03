@@ -205,7 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
         'Content-Type: application/json',
         'Authorization: Bearer ' . $API_KEY
     ]);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 300);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
     
