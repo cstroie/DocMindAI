@@ -27,6 +27,16 @@ $AVAILABLE_LANGUAGES = [
 $MODEL = isset($_POST['model']) ? $_POST['model'] : 'gemma2:2b';
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : 'ro';
 
+// Validate model selection
+if (!array_key_exists($MODEL, $AVAILABLE_MODELS)) {
+    $MODEL = 'gemma2:2b'; // Default to a valid model
+}
+
+// Validate language selection
+if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
+    $LANGUAGE = 'ro'; // Default to Romanian
+}
+
 // System prompt
 $SYSTEM_PROMPT = "Ești un asistent medical care analizează rapoarte radiologice în limba română.
 
@@ -67,7 +77,23 @@ $is_api_request = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
     $processing = true;
     $is_api_request = !isset($_POST['submit']); // If no submit button, it's an API request
+    
+    // Sanitize and validate input
     $report = trim($_POST['report']);
+    
+    // Validate report length (prevent extremely large inputs)
+    if (strlen($report) > 10000) {
+        $error = 'Raportul este prea lung. Maxim 10.000 caractere permise.';
+        $processing = false;
+    } 
+    // Validate report is not empty after trimming
+    elseif (empty($report)) {
+        $error = 'Raportul nu poate fi gol.';
+        $processing = false;
+    }
+    
+    // Only proceed with API call if validation passed
+    if ($processing) {
     
     // Prepare API request
     $data = [
@@ -90,6 +116,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
         'Authorization: Bearer ' . $API_KEY
     ]);
     curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
     
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -101,7 +129,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
     } else {
         $response_data = json_decode($response, true);
         
-        if (isset($response_data['choices'][0]['message']['content'])) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $error = 'Invalid API response format: ' . json_last_error_msg();
+        } elseif (isset($response_data['choices'][0]['message']['content'])) {
             $content = trim($response_data['choices'][0]['message']['content']);
             
             // Extract JSON from response (in case model adds extra text)
@@ -111,6 +141,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                 
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     $error = 'Invalid JSON response: ' . json_last_error_msg();
+                } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['diagnostic'])) {
+                    $error = 'JSON response missing required fields';
+                } elseif (!in_array($result['pathologic'], ['yes', 'no'])) {
+                    $error = 'Invalid pathologic value in response';
+                } elseif (!is_numeric($result['severity']) || $result['severity'] < 0 || $result['severity'] > 10) {
+                    $error = 'Invalid severity value in response';
+                } elseif (!is_string($result['diagnostic']) || empty($result['diagnostic'])) {
+                    $error = 'Invalid diagnostic value in response';
                 }
             } else {
                 $error = 'No JSON found in response: ' . $content;
@@ -133,6 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
         exit;
     }
 }
+} // Close the if ($processing) block
 
 // Helper function to get severity color
 function getSeverityColor($severity) {
