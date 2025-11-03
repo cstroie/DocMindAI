@@ -55,7 +55,8 @@ if (file_exists('config.php')) {
 
 // Available models
 $AVAILABLE_MODELS = [
-    'llama3.2-vision' => 'Llama 3.2 Vision'
+    'llama3.2-vision' => 'Llama 3.2 Vision',
+    'gemma3:4b' => 'Gemma 3 (4B)'
 ];
 
 // Available output languages
@@ -92,7 +93,7 @@ $language_instructions = [
  * Falls back to default model if invalid model is selected
  */
 if (!array_key_exists($MODEL, $AVAILABLE_MODELS)) {
-    $MODEL = 'llama3.2-vision'; // Default to the only valid model
+    $MODEL = 'llama3.2-vision'; // Default to a valid model
 }
 
 /**
