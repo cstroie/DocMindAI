@@ -354,12 +354,19 @@ function getSeverityLabel($severity) {
                     ><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
                 </div>
                 
-                <button type="submit" class="btn">
-                    <?php if ($processing && !$result && !$error): ?>
-                        <span class="loading"></span>
-                    <?php endif; ?>
-                    Analizează Raport
-                </button>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn" style="flex: 1;">
+                        <?php if ($processing && !$result && !$error): ?>
+                            <span class="loading"></span>
+                        <?php endif; ?>
+                        Analizează Raport
+                    </button>
+                    <button type="button" class="btn" onclick="document.getElementById('report').value=''; 
+                        <?php if ($result || $error): ?>window.location.href='<?php echo $_SERVER['PHP_SELF']; ?>';<?php endif; ?>" 
+                        style="background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%); flex: 1;">
+                        Șterge Formular
+                    </button>
+                </div>
             </form>
             
             <?php if ($error): ?>
