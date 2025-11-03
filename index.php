@@ -2,7 +2,7 @@
 // Configuration
 $API_ENDPOINT = 'http://192.168.3.16:11434/v1/chat/completions'; // Change to your API endpoint
 $API_KEY = ''; // Add your API key if needed (leave empty for Ollama)
-$MODEL = 'gemma2:2b'; // Change to your model
+$MODEL = 'gemma3:1b'; // Change to your model
 
 // System prompt
 $SYSTEM_PROMPT = "Ești un asistent medical care analizează rapoarte radiologice în limba română.
