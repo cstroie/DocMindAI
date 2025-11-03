@@ -42,9 +42,9 @@
  * - $API_ENDPOINT: AI API endpoint URL
  * - $API_KEY: API key (if required)
  * 
- * @author [Author Name]
+ * @author Costin Stroie <costinstroie@eridu.eu.org>
  * @version 1.0
- * @license MIT
+ * @license GPL 3
  */
 // Configuration - Load from config.php if available, otherwise use defaults
 if (file_exists('config.php')) {
