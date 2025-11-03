@@ -12,8 +12,19 @@ $AVAILABLE_MODELS = [
     'gemma:2b' => 'Gemma 1 (2B)'
 ];
 
-// Get selected model
+// Available output languages
+$AVAILABLE_LANGUAGES = [
+    'ro' => 'Română',
+    'en' => 'English',
+    'es' => 'Español',
+    'fr' => 'Français',
+    'de' => 'Deutsch',
+    'it' => 'Italiano'
+];
+
+// Get selected model and language
 $MODEL = isset($_POST['model']) ? $_POST['model'] : 'gemma2:2b';
+$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : 'ro';
 
 // System prompt
 $SYSTEM_PROMPT = "Ești un asistent medical care analizează rapoarte radiologice în limba română.
