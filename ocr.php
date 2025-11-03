@@ -76,7 +76,7 @@ $AVAILABLE_LANGUAGES = [
 /**
  * Get selected model and language from POST data or use defaults
  */
-$MODEL = isset($_POST['model']) ? $_POST['model'] : 'llama3.2-vision';
+$MODEL = isset($_POST['model']) ? $_POST['model'] : 'gemma3:4b';
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : 'ro';
 
 /**
