@@ -510,7 +510,7 @@ function getSeverityLabel($severity) {
                 </div>
                 
                 <div class="form-group">
-                    <label for="language">Response language</label>
+                    <label for="language">Response language:</label>
                     <select id="language" name="language">
                         <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
                             <option value="<?php echo htmlspecialchars($value); ?>" 
