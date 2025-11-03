@@ -58,7 +58,8 @@ $AVAILABLE_MODELS = [
     'llama3.2-vision' => 'Llama 3.2 Vision',
     'gemma3:4b' => 'Gemma 3 (4B)',
     'qwen2.5vl:3b' => 'Qwen 2.5 VL (3B)',
-    'qwen3-vl:4b' => 'Qwen 3 VL (4B)'
+    'qwen3-vl:4b' => 'Qwen 3 VL (4B)',
+    'llava-phi3:3.8b' => 'LLaVA-Phi 3 (3.8B)'
 ];
 
 // Available output languages
