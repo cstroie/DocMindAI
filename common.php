@@ -221,4 +221,50 @@ function getAvailableModels($api_endpoint, $api_key = '') {
     
     return $models;
 }
+
+/**
+ * Make API call to LLM server
+ * 
+ * @param string $api_endpoint_chat The chat API endpoint URL
+ * @param array $data The request data
+ * @param string $api_key The API key (if required)
+ * @return array|false API response data or false on error
+ */
+function callLLMApi($api_endpoint_chat, $data, $api_key = '') {
+    // Make API request
+    $ch = curl_init($api_endpoint_chat);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $api_key
+    ]);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 300);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+    
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    
+    if (curl_errno($ch)) {
+        $error = 'Connection error: ' . curl_error($ch);
+        curl_close($ch);
+        return ['error' => $error];
+    } elseif ($http_code !== 200) {
+        $error = 'API error: HTTP ' . $http_code;
+        curl_close($ch);
+        return ['error' => $error];
+    }
+    
+    curl_close($ch);
+    
+    $response_data = json_decode($response, true);
+    
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ['error' => 'Invalid API response format: ' . json_last_error_msg()];
+    }
+    
+    return $response_data;
+}
 ?>

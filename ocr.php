@@ -183,41 +183,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
             'max_tokens' => 2048
         ];
         
-        // Make API request
-        $ch = curl_init($API_ENDPOINT_CHAT);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $API_KEY
-        ]);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+        // Make API request using common function
+        $response_data = callLLMApi($API_ENDPOINT_CHAT, $data, $API_KEY);
         
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        
-        if (curl_errno($ch)) {
-            $error = 'Connection error: ' . curl_error($ch);
-        } elseif ($http_code !== 200) {
-            $error = 'API error: HTTP ' . $http_code;
+        if (isset($response_data['error'])) {
+            $error = $response_data['error'];
+        } elseif (isset($response_data['choices'][0]['message']['content'])) {
+            $result = trim($response_data['choices'][0]['message']['content']);
+            // Remove markdown code fences if present
+            $result = preg_replace('/^```(?:markdown)?\s*(.*?)\s*```$/s', '$1', $result);
         } else {
-            $response_data = json_decode($response, true);
-            
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $error = 'Invalid API response format: ' . json_last_error_msg();
-            } elseif (isset($response_data['choices'][0]['message']['content'])) {
-                $result = trim($response_data['choices'][0]['message']['content']);
-                // Remove markdown code fences if present
-                $result = preg_replace('/^```(?:markdown)?\s*(.*?)\s*```$/s', '$1', $result);
-            } else {
-                $error = 'Invalid API response format';
-            }
+            $error = 'Invalid API response format';
         }
-        
-        curl_close($ch);
         
         // Set cookies with the selected model and language only for web requests
         if (!$is_api_request) {

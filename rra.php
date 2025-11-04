@@ -181,59 +181,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
         'max_tokens' => 150
     ];
     
-    // Make API request
-    $ch = curl_init($API_ENDPOINT_CHAT);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $API_KEY
-    ]);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 300);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+    // Make API request using common function
+    $response_data = callLLMApi($API_ENDPOINT_CHAT, $data, $API_KEY);
     
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    
-    if (curl_errno($ch)) {
-        $error = 'Connection error: ' . curl_error($ch);
-    } elseif ($http_code !== 200) {
-        $error = 'API error: HTTP ' . $http_code;
-    } else {
-        $response_data = json_decode($response, true);
+    if (isset($response_data['error'])) {
+        $error = $response_data['error'];
+    } elseif (isset($response_data['choices'][0]['message']['content'])) {
+        $content = trim($response_data['choices'][0]['message']['content']);
         
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $error = 'Invalid API response format: ' . json_last_error_msg();
-        } elseif (isset($response_data['choices'][0]['message']['content'])) {
-            $content = trim($response_data['choices'][0]['message']['content']);
+        // Extract JSON from response (in case model adds extra text)
+        if (preg_match('/\{[^}]+\}/', $content, $matches)) {
+            $json_str = $matches[0];
+            $result = json_decode($json_str, true);
             
-            // Extract JSON from response (in case model adds extra text)
-            if (preg_match('/\{[^}]+\}/', $content, $matches)) {
-                $json_str = $matches[0];
-                $result = json_decode($json_str, true);
-                
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    $error = 'Invalid JSON response: ' . json_last_error_msg();
-                } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['diagnostic'])) {
-                    $error = 'JSON response missing required fields';
-                } elseif (!in_array($result['pathologic'], ['yes', 'no'])) {
-                    $error = 'Invalid pathologic value in response';
-                } elseif (!is_numeric($result['severity']) || $result['severity'] < 0 || $result['severity'] > 10) {
-                    $error = 'Invalid severity value in response';
-                } elseif (!is_string($result['diagnostic']) || empty($result['diagnostic'])) {
-                    $error = 'Invalid diagnostic value in response';
-                }
-            } else {
-                $error = 'No JSON found in response: ' . $content;
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $error = 'Invalid JSON response: ' . json_last_error_msg();
+            } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['diagnostic'])) {
+                $error = 'JSON response missing required fields';
+            } elseif (!in_array($result['pathologic'], ['yes', 'no'])) {
+                $error = 'Invalid pathologic value in response';
+            } elseif (!is_numeric($result['severity']) || $result['severity'] < 0 || $result['severity'] > 10) {
+                $error = 'Invalid severity value in response';
+            } elseif (!is_string($result['diagnostic']) || empty($result['diagnostic'])) {
+                $error = 'Invalid diagnostic value in response';
             }
         } else {
-            $error = 'Invalid API response format';
+            $error = 'No JSON found in response: ' . $content;
         }
+    } else {
+        $error = 'Invalid API response format';
     }
-    
-    curl_close($ch);
     
     // Set cookies with the selected model and language only for web requests
     if (!$is_api_request) {
