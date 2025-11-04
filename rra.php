@@ -76,34 +76,11 @@ if (empty($AVAILABLE_MODELS)) {
     ];
 }
 
-// Available output languages
-$AVAILABLE_LANGUAGES = [
-    'ro' => 'Română',
-    'en' => 'English',
-    'es' => 'Español',
-    'fr' => 'Français',
-    'de' => 'Deutsch',
-    'it' => 'Italiano'
-];
-
 /**
  * Get selected model and language from POST data, cookies, or use defaults
  */
 $MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['rra-model']) ? $_COOKIE['rra-model'] : 'qwen2.5:1.5b');
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_COOKIE['rra-language']) ? $_COOKIE['rra-language'] : 'ro');
-
-/**
- * Language instructions for the AI model
- * Maps language codes to natural language instructions
- */
-$language_instructions = [
-    'ro' => 'Respond in Romanian.',
-    'en' => 'Respond in English.',
-    'es' => 'Responde en español.',
-    'fr' => 'Répondez en français.',
-    'de' => 'Antworte auf Deutsch.',
-    'it' => 'Rispondi in italiano.'
-];
 
 /**
  * Validate model selection
@@ -126,6 +103,8 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  * Contains instructions for analyzing radiology reports and returning structured JSON
  * Includes language-specific instructions and examples
  */
+// Include the language instructions from common.php
+global $language_instructions;
 $SYSTEM_PROMPT = "You are a medical assistant analyzing radiology reports.
 
 TASK: Read the report and extract the main pathological information in JSON format.

@@ -10,6 +10,31 @@
  */
 
 /**
+ * Available output languages
+ */
+$AVAILABLE_LANGUAGES = [
+    'ro' => 'Română',
+    'en' => 'English',
+    'es' => 'Español',
+    'fr' => 'Français',
+    'de' => 'Deutsch',
+    'it' => 'Italiano'
+];
+
+/**
+ * Language instructions for the AI model
+ * Maps language codes to natural language instructions
+ */
+$language_instructions = [
+    'ro' => 'Respond in Romanian.',
+    'en' => 'Respond in English.',
+    'es' => 'Responde en español.',
+    'fr' => 'Répondez en français.',
+    'de' => 'Antworte auf Deutsch.',
+    'it' => 'Rispondi in italiano.'
+];
+
+/**
  * Get the color associated with a severity level
  * 
  * @param int $severity Severity level (0-10)

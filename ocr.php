@@ -75,34 +75,11 @@ if (empty($AVAILABLE_MODELS)) {
     ];
 }
 
-// Available output languages
-$AVAILABLE_LANGUAGES = [
-    'ro' => 'Română',
-    'en' => 'English',
-    'es' => 'Español',
-    'fr' => 'Français',
-    'de' => 'Deutsch',
-    'it' => 'Italiano'
-];
-
 /**
  * Get selected model and language from POST data, cookies, or use defaults
  */
 $MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['ocr-model']) ? $_COOKIE['ocr-model'] : 'gemma3:4b');
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_COOKIE['ocr-language']) ? $_COOKIE['ocr-language'] : 'ro');
-
-/**
- * Language instructions for the AI model
- * Maps language codes to natural language instructions
- */
-$language_instructions = [
-    'ro' => 'Respond in Romanian.',
-    'en' => 'Respond in English.',
-    'es' => 'Responde en español.',
-    'fr' => 'Répondez en français.',
-    'de' => 'Antworte auf Deutsch.',
-    'it' => 'Rispondi in italiano.'
-];
 
 /**
  * Validate model selection
@@ -124,6 +101,8 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  * System prompt for the AI model
  * Contains instructions for performing OCR on images
  */
+// Include the language instructions from common.php
+global $language_instructions;
 $SYSTEM_PROMPT = "Perform Optical Character Recognition (OCR) on the following image data. Extract and return ONLY the text you see in the image, formatted appropriately in Markdown. Do not add any explanations or introductions. Return only the Markdown formatted text content.
 
 " . $language_instructions[$LANGUAGE];

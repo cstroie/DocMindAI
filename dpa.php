@@ -72,34 +72,11 @@ if (empty($AVAILABLE_MODELS)) {
     ];
 }
 
-// Available output languages
-$AVAILABLE_LANGUAGES = [
-    'ro' => 'Română',
-    'en' => 'English',
-    'es' => 'Español',
-    'fr' => 'Français',
-    'de' => 'Deutsch',
-    'it' => 'Italiano'
-];
-
 /**
  * Get selected model and language from POST data, cookies, or use defaults
  */
 $MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['dpa-model']) ? $_COOKIE['dpa-model'] : 'qwen2.5:1.5b');
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_COOKIE['dpa-language']) ? $_COOKIE['dpa-language'] : 'ro');
-
-/**
- * Language instructions for the AI model
- * Maps language codes to natural language instructions
- */
-$language_instructions = [
-    'ro' => 'Respond in Romanian.',
-    'en' => 'Respond in English.',
-    'es' => 'Responde en español.',
-    'fr' => 'Répondez en français.',
-    'de' => 'Antworte auf Deutsch.',
-    'it' => 'Rispondi in italiano.'
-];
 
 /**
  * Validate model selection
@@ -152,6 +129,8 @@ Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"Post-opera
 Discharge: \"Acute appendicitis, laparoscopic appendectomy. Post-op CT showed small abscess.\"
 Response: {\"pathologic\": \"yes\", \"severity\": 5, \"diagnostic\": \"Post-operative appendectomy patient with small abscess identified on CT scan requiring monitoring.\"}";
 
+// Include the language instructions from common.php
+global $language_instructions;
 $SYSTEM_PROMPT .= "\n" . $language_instructions[$LANGUAGE];
 
 /**
