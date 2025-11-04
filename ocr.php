@@ -57,7 +57,7 @@ if (file_exists('config.php')) {
 }
 
 // Create chat endpoint URL
-$API_ENDPOINT_CHAT = $API_ENDPOINT;
+$API_ENDPOINT_CHAT = $API_ENDPOINT . '/chat/completions';
 
 // Fetch available models from API
 $AVAILABLE_MODELS = getAvailableModels($API_ENDPOINT, $API_KEY);

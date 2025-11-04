@@ -144,6 +144,16 @@ function preprocessImageForOCR($image_path) {
 function getAvailableModels($api_endpoint, $api_key = '') {
     // Extract base URL from endpoint
     $parsed_url = parse_url($api_endpoint);
+    $base_url = $parsed_url['scheme'] . '://' . $parsed_url['host'];
+    if (isset($parsed_url['port'])) {
+        $base_url .= ':' . $parsed_url['port'];
+    }
+    if (isset($parsed_url['path'])) {
+        // Remove /chat/completions or /v1 from path to get base path
+        $base_path = preg_replace('#/(chat/)?completions$#', '', $parsed_url['path']);
+        $base_path = preg_replace('#/v1$#', '', $base_path);
+        $base_url .= $base_path;
+    }
     $models_url = $base_url . '/models';
     
     // Make API request
