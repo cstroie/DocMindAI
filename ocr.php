@@ -267,6 +267,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image OCR Tool</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="scripts.js"></script>
 </head>
 <body>
     <div class="container">

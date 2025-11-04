@@ -281,6 +281,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Radiology report analyzer</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="scripts.js"></script>
 </head>
 <body>
     <div class="container">
