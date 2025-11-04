@@ -166,6 +166,55 @@ function preprocessImageForOCR($image_path) {
 }
 
 /**
+ * Extract images from PDF file
+ * 
+ * @param string $pdf_path Path to the PDF file
+ * @return array|false Array of image data or false on error
+ */
+function extractImagesFromPDF($pdf_path) {
+    // Check if Imagick extension is available
+    if (!extension_loaded('imagick')) {
+        return false;
+    }
+    
+    try {
+        $images = [];
+        $imagick = new Imagick();
+        $imagick->readImage($pdf_path);
+        
+        // Set resolution for better quality
+        $imagick->setResolution(200, 200);
+        
+        // Get number of pages
+        $page_count = $imagick->getNumberImages();
+        
+        if ($page_count === 0) {
+            return false;
+        }
+        
+        // Process first page only for OCR
+        $imagick->setIteratorIndex(0);
+        $page = $imagick->getImage();
+        
+        // Convert to PNG format
+        $page->setImageFormat('png');
+        $page->stripImage(); // Remove metadata
+        
+        // Get image data
+        $image_data = $page->getImageBlob();
+        $images[] = $image_data;
+        
+        // Clean up
+        $page->destroy();
+        $imagick->destroy();
+        
+        return $images;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+/**
  * Fetch available models from the LLM server API
  * 
  * @param string $api_endpoint The API endpoint URL

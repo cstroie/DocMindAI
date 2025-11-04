@@ -124,40 +124,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
     // Validate file upload
     $image_file = $_FILES['image'];
     
-    // Check file size (max 5MB)
-    if ($image_file['size'] > 5 * 1024 * 1024) {
-        $error = 'The image file is too large. Maximum 5MB allowed.';
+    // Check file size (max 10MB to accommodate PDFs)
+    if ($image_file['size'] > 10 * 1024 * 1024) {
+        $error = 'The file is too large. Maximum 10MB allowed.';
         $processing = false;
     }
     
     // Check file type
-    $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
     if (!in_array($image_file['type'], $allowed_types)) {
-        $error = 'Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.';
+        $error = 'Invalid file type. Only JPEG, PNG, GIF, WebP images and PDF documents are allowed.';
         $processing = false;
     }
     
     // Only proceed with API call if validation passed
     if ($processing) {
-        // Preprocess image for better OCR
-        $preprocessed_image_path = preprocessImageForOCR($image_file['tmp_name']);
-        if ($preprocessed_image_path === false) {
-            $error = 'Failed to preprocess the image for OCR.';
-            $processing = false;
-        } else {
-            // Read and encode preprocessed image
-            $image_data = file_get_contents($preprocessed_image_path);
-            if ($image_data === false) {
-                $error = 'Failed to read the preprocessed image file.';
+        // Handle PDF files
+        if ($image_file['type'] === 'application/pdf') {
+            // Extract images from PDF
+            $images = extractImagesFromPDF($image_file['tmp_name']);
+            if ($images === false || empty($images)) {
+                $error = 'Failed to extract images from PDF or PDF contains no images.';
                 $processing = false;
             } else {
-                $base64_image = base64_encode($image_data);
-                $image_url = 'data:image/png;base64,' . $base64_image;
-                // Store base64 for display
-                $preprocessed_image_base64 = $base64_image;
+                // Use the first image from PDF for OCR
+                $temp_image_path = tempnam(sys_get_temp_dir(), 'pdf_') . '.png';
+                if (file_put_contents($temp_image_path, $images[0]) === false) {
+                    $error = 'Failed to save extracted PDF image.';
+                    $processing = false;
+                } else {
+                    // Preprocess the extracted image
+                    $preprocessed_image_path = preprocessImageForOCR($temp_image_path);
+                    unlink($temp_image_path); // Clean up temporary file
+                }
             }
-            // Clean up temporary file
-            unlink($preprocessed_image_path);
+        } else {
+            // Handle regular image files
+            $preprocessed_image_path = preprocessImageForOCR($image_file['tmp_name']);
+        }
+        
+        if ($processing && isset($preprocessed_image_path)) {
+            if ($preprocessed_image_path === false) {
+                $error = 'Failed to preprocess the image for OCR.';
+                $processing = false;
+            } else {
+                // Read and encode preprocessed image
+                $image_data = file_get_contents($preprocessed_image_path);
+                if ($image_data === false) {
+                    $error = 'Failed to read the preprocessed image file.';
+                    $processing = false;
+                } else {
+                    $base64_image = base64_encode($image_data);
+                    $image_url = 'data:image/png;base64,' . $base64_image;
+                    // Store base64 for display
+                    $preprocessed_image_base64 = $base64_image;
+                }
+                // Clean up temporary file
+                unlink($preprocessed_image_path);
+            }
         }
     }
     
@@ -296,7 +320,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
                         required
                     >
                     <div class="file-info">
-                        Supported formats: JPEG, PNG, GIF, WebP. Maximum size: 5MB.
+                        Supported formats: JPEG, PNG, GIF, WebP, PDF. Maximum size: 10MB.
                     </div>
                 </div>
                 
