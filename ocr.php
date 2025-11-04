@@ -282,10 +282,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
                     <div class="result-header">
                         <h2 style="color: #111827; font-size: 20px;">Preprocessed Image</h2>
                     </div>
-                    <div style="text-align: center;">
+                    <div class="preprocessed-image-container">
                         <img src="data:image/png;base64,<?php echo $preprocessed_image_base64; ?>" 
                              alt="Preprocessed image for OCR" 
-                             style="max-width: 100%; max-height: 400px; border: 1px solid #ddd; border-radius: 8px;">
+                             class="preprocessed-image">
                     </div>
                 </div>
                 <?php endif; ?>
