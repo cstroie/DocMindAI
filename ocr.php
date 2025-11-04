@@ -86,10 +86,10 @@ $AVAILABLE_LANGUAGES = [
 ];
 
 /**
- * Get selected model and language from POST data or use defaults
+ * Get selected model and language from POST data, cookies, or use defaults
  */
-$MODEL = isset($_POST['model']) ? $_POST['model'] : 'gemma3:4b';
-$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : 'ro';
+$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['last_model']) ? $_COOKIE['last_model'] : 'gemma3:4b');
+$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_COOKIE['last_language']) ? $_COOKIE['last_language'] : 'ro');
 
 /**
  * Language instructions for the AI model
@@ -246,6 +246,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
         }
         
         curl_close($ch);
+        
+        // Set cookies with the selected model and language
+        setcookie('last_model', $MODEL, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+        setcookie('last_language', $LANGUAGE, time() + (30 * 24 * 60 * 60), '/'); // 30 days
         
         // Return JSON if it's an API request
         if ($is_api_request) {
