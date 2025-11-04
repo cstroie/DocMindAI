@@ -141,9 +141,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
     if ($processing) {
         // Handle PDF files
         if ($image_file['type'] === 'application/pdf') {
-            // Check if Imagick extension is available
-            if (!extension_loaded('imagick')) {
-                $error = 'PDF processing requires the ImageMagick extension which is not installed or enabled.';
+            // Check if Imagick or Gmagick extension is available
+            if (!extension_loaded('imagick') && !extension_loaded('gmagick')) {
+                $error = 'PDF processing requires either the ImageMagick or GraphicsMagick extension which is not installed or enabled.';
                 $processing = false;
             } else {
                 // Extract images from PDF

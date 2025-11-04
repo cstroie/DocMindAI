@@ -172,46 +172,85 @@ function preprocessImageForOCR($image_path) {
  * @return array|false Array of image data or false on error
  */
 function extractImagesFromPDF($pdf_path) {
-    // Check if Imagick extension is available
-    if (!extension_loaded('imagick')) {
-        return false;
+    // Try Imagick first
+    if (extension_loaded('imagick')) {
+        try {
+            $images = [];
+            $imagick = new Imagick();
+            $imagick->readImage($pdf_path);
+            
+            // Set resolution for better quality
+            $imagick->setResolution(200, 200);
+            
+            // Get number of pages
+            $page_count = $imagick->getNumberImages();
+            
+            if ($page_count === 0) {
+                return false;
+            }
+            
+            // Process first page only for OCR
+            $imagick->setIteratorIndex(0);
+            $page = $imagick->getImage();
+            
+            // Convert to PNG format
+            $page->setImageFormat('png');
+            $page->stripImage(); // Remove metadata
+            
+            // Get image data
+            $image_data = $page->getImageBlob();
+            $images[] = $image_data;
+            
+            // Clean up
+            $page->destroy();
+            $imagick->destroy();
+            
+            return $images;
+        } catch (Exception $e) {
+            // Fall through to try Gmagick
+        }
     }
     
-    try {
-        $images = [];
-        $imagick = new Imagick();
-        $imagick->readImage($pdf_path);
-        
-        // Set resolution for better quality
-        $imagick->setResolution(200, 200);
-        
-        // Get number of pages
-        $page_count = $imagick->getNumberImages();
-        
-        if ($page_count === 0) {
+    // Try Gmagick as fallback
+    if (extension_loaded('gmagick')) {
+        try {
+            $images = [];
+            $gmagick = new Gmagick();
+            $gmagick->readImage($pdf_path);
+            
+            // Set resolution for better quality
+            $gmagick->setresolution(200, 200);
+            
+            // Get number of pages
+            $page_count = $gmagick->getnumberimages();
+            
+            if ($page_count === 0) {
+                return false;
+            }
+            
+            // Process first page only for OCR
+            $gmagick->setimageindex(0);
+            $page = clone $gmagick;
+            
+            // Convert to PNG format
+            $page->setimageformat('png');
+            
+            // Get image data
+            $image_data = $page->getimageblob();
+            $images[] = $image_data;
+            
+            // Clean up
+            $page->clear();
+            $gmagick->clear();
+            
+            return $images;
+        } catch (Exception $e) {
             return false;
         }
-        
-        // Process first page only for OCR
-        $imagick->setIteratorIndex(0);
-        $page = $imagick->getImage();
-        
-        // Convert to PNG format
-        $page->setImageFormat('png');
-        $page->stripImage(); // Remove metadata
-        
-        // Get image data
-        $image_data = $page->getImageBlob();
-        $images[] = $image_data;
-        
-        // Clean up
-        $page->destroy();
-        $imagick->destroy();
-        
-        return $images;
-    } catch (Exception $e) {
-        return false;
     }
+    
+    // If neither extension is available
+    return false;
 }
 
 /**
