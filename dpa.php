@@ -51,7 +51,7 @@ if (file_exists('config.php')) {
     include 'config.php';
 } else {
     // Safe defaults
-    $API_ENDPOINT = 'http://192.168.3.16:11434/v1/chat/completions';
+    $API_ENDPOINT = 'http://127.0.0.1:11434/v1/chat/completions';
     $API_KEY = '';
 }
 
