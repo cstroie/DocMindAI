@@ -261,9 +261,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
     
     curl_close($ch);
     
-    // Set cookies with the selected model and language
-    setcookie('rra-model', $MODEL, time() + (30 * 24 * 60 * 60), '/'); // 30 days
-    setcookie('rra-language', $LANGUAGE, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+    // Set cookies with the selected model and language only for web requests
+    if (!$is_api_request) {
+        setcookie('rra-model', $MODEL, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+        setcookie('rra-language', $LANGUAGE, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+    }
     
     // Return JSON if it's an API request
     if ($is_api_request) {
