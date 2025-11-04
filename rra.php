@@ -56,6 +56,7 @@ if (file_exists('config.php')) {
     // Safe defaults
     $API_ENDPOINT = 'http://127.0.0.1:11434/v1';
     $API_KEY = '';
+    $DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
 }
 
 // Create chat endpoint URL
@@ -73,10 +74,15 @@ if (empty($AVAILABLE_MODELS)) {
     ];
 }
 
+// Set default model if not defined in config
+if (!isset($DEFAULT_TEXT_MODEL)) {
+    $DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
+}
+
 /**
  * Get selected model and language from POST data, cookies, or use defaults
  */
-$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['rra-model']) ? $_COOKIE['rra-model'] : 'qwen2.5:1.5b');
+$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['rra-model']) ? $_COOKIE['rra-model'] : $DEFAULT_TEXT_MODEL);
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_COOKIE['rra-language']) ? $_COOKIE['rra-language'] : 'ro');
 
 /**
