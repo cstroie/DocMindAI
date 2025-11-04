@@ -34,7 +34,7 @@
  * {
  *   "pathologic": "yes/no",
  *   "severity": 0-10,
- *   "diagnostic": "diagnosis text"
+ *   "summary": "summary text"
  * }
  * 
  * Configuration:
@@ -101,19 +101,20 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  */
 $SYSTEM_PROMPT = "You are a medical assistant analyzing patient discharge papers for radiology relevance.
 
-TASK: Read the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation.
+TASK: Read the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation. Do not exceed 50 words.
+" . getLanguageInstruction($LANGUAGE) . "
 
 OUTPUT FORMAT (JSON):
 {
   \"pathologic\": \"yes/no\",
   \"severity\": 0-10,
-  \"diagnostic\": \"summary paragraph\"
+  \"summary\": \"summary paragraph\"
 }
 
 RULES:
 - \"pathologic\": \"yes\" if the discharge paper contains any findings relevant to radiology
 - \"severity\": 0=normal, 1=minimal, 5=moderate, 10=critical/urgent
-- \"diagnostic\": one paragraph summarizing radiology-relevant information
+- \"summary\": maximum 50 words summarizing radiology-relevant information
 - Focus on findings, conditions, treatments affecting radiology
 - Ignore non-radiology relevant information
 - Respond ONLY with the JSON, without additional text
@@ -121,15 +122,13 @@ RULES:
 EXAMPLES:
 
 Discharge: \"Patient discharged after treatment for pneumonia. Chest X-ray shows resolved infiltrate.\"
-Response: {\"pathologic\": \"yes\", \"severity\": 2, \"diagnostic\": \"Patient treated for pneumonia with resolved infiltrate on chest X-ray. No current radiological concerns.\"}
+Response: {\"pathologic\": \"yes\", \"severity\": 2, \"summary\": \"Patient treated for pneumonia with resolved infiltrate on chest X-ray. No current radiological concerns.\"}
 
 Discharge: \"Post-operative knee surgery. X-ray shows proper hardware placement.\"
-Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"Post-operative knee surgery with proper hardware placement confirmed on X-ray. Normal findings.\"}
+Response: {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"Post-operative knee surgery with proper hardware placement confirmed on X-ray. Normal findings.\"}
 
 Discharge: \"Acute appendicitis, laparoscopic appendectomy. Post-op CT showed small abscess.\"
-Response: {\"pathologic\": \"yes\", \"severity\": 5, \"diagnostic\": \"Post-operative appendectomy patient with small abscess identified on CT scan requiring monitoring.\"}
-
-" . getLanguageInstruction($LANGUAGE);
+Response: {\"pathologic\": \"yes\", \"severity\": 5, \"summary\": \"Post-operative appendectomy patient with small abscess identified on CT scan requiring monitoring.\"}";
 
 /**
  * Application state variables
@@ -177,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
             ['role' => 'user', 'content' => "REPORT TO ANALYZE:\n" . $report]
         ],
         'temperature' => 0.1,
-        'max_tokens' => 150
+        'max_tokens' => 500
     ];
     
     // Make API request using common function
@@ -195,14 +194,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
             
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $error = 'Invalid JSON response: ' . json_last_error_msg();
-            } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['diagnostic'])) {
+            } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['summary'])) {
                 $error = 'JSON response missing required fields';
             } elseif (!in_array($result['pathologic'], ['yes', 'no'])) {
                 $error = 'Invalid pathologic value in response';
             } elseif (!is_numeric($result['severity']) || $result['severity'] < 0 || $result['severity'] > 10) {
                 $error = 'Invalid severity value in response';
-            } elseif (!is_string($result['diagnostic']) || empty($result['diagnostic'])) {
-                $error = 'Invalid diagnostic value in response';
+            } elseif (!is_string($result['summary']) || empty($result['summary'])) {
+                $error = 'Invalid summary value in response';
             }
         } else {
             $error = 'No JSON found in response: ' . $content;
@@ -274,9 +273,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                         </div>
                     </div>
                     
-                    <div class="diagnostic-box">
-                        <div class="diagnostic-label">Diagnosis</div>
-                        <div class="diagnostic-text"><?php echo htmlspecialchars($result['diagnostic']); ?></div>
+                    <div class="summary-box">
+                        <div class="summary-label">Summary</div>
+                        <div class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></div>
                     </div>
                 </div>
             <?php endif; ?>

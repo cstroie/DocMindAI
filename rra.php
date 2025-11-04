@@ -34,7 +34,7 @@
  * {
  *   "pathologic": "yes/no",
  *   "severity": 0-10,
- *   "diagnostic": "diagnosis text"
+ *   "summary": "summary text"
  * }
  * 
  * Configuration:
@@ -103,34 +103,34 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
 $SYSTEM_PROMPT = "You are a medical assistant analyzing radiology reports.
 
 TASK: Read the report and extract the main pathological information in JSON format.
+" . getLanguageInstruction($LANGUAGE) . "
 
 OUTPUT FORMAT (JSON):
 {
   \"pathologic\": \"yes/no\",
   \"severity\": 1-10,
-  \"diagnostic\": \"1-5 words\"
+  \"summary\": \"1-5 words\"
 }
 
 RULES:
 - \"pathologic\": \"yes\" if any anomaly exists, otherwise \"no\"
 - \"severity\": 1=minimal, 5=moderate, 10=critical/urgent
-- \"diagnostic\": maximum 5 words (e.g., \"fracture\", \"pneumonia\", \"lung nodule\")
-- If everything is normal: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
+- \"summary\": diagnosis in maximum 5 words (e.g., \"fracture\", \"pneumonia\", \"lung nodule\")
+- If everything is normal: {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"normal\"}
 - Ignore spelling errors
 - Respond ONLY with the JSON, without additional text
 
 EXAMPLES:
 
 Report: \"Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate.\"
-Response: {\"pathologic\": \"yes\", \"severity\": 6, \"diagnostic\": \"pulmonary consolidation\"}
+Response: {\"pathologic\": \"yes\", \"severity\": 6, \"summary\": \"pulmonary consolidation\"}
 
 Report: \"No pathological changes. Heart of normal size.\"
-Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
+Response: {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"normal\"}
 
 Report: \"Displaced fracture of the right distal femur with significant hematoma\"
-Response: {\"pathologic\": \"yes\", \"severity\": 8, \"diagnostic\": \"femur fracture\"}
+Response: {\"pathologic\": \"yes\", \"severity\": 8, \"summary\": \"femur fracture\"}";
 
-" . getLanguageInstruction($LANGUAGE);
 
 /**
  * Application state variables
@@ -196,14 +196,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
             
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $error = 'Invalid JSON response: ' . json_last_error_msg();
-            } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['diagnostic'])) {
+            } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['summary'])) {
                 $error = 'JSON response missing required fields';
             } elseif (!in_array($result['pathologic'], ['yes', 'no'])) {
                 $error = 'Invalid pathologic value in response';
             } elseif (!is_numeric($result['severity']) || $result['severity'] < 0 || $result['severity'] > 10) {
                 $error = 'Invalid severity value in response';
-            } elseif (!is_string($result['diagnostic']) || empty($result['diagnostic'])) {
-                $error = 'Invalid diagnostic value in response';
+            } elseif (!is_string($result['summary']) || empty($result['summary'])) {
+                $error = 'Invalid summary value in response';
             }
         } else {
             $error = 'No JSON found in response: ' . $content;
@@ -275,9 +275,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                         </div>
                     </div>
                     
-                    <div class="diagnostic-box">
-                        <div class="diagnostic-label">Diagnosis</div>
-                        <div class="diagnostic-text"><?php echo htmlspecialchars($result['diagnostic']); ?></div>
+                    <div class="summary-box">
+                        <div class="summary-label">Summary</div>
+                        <div class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></div>
                     </div>
                 </div>
             <?php endif; ?>
