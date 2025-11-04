@@ -145,7 +145,7 @@ select:focus {
     background: #f9fafb;
     border-radius: 12px;
     padding: 24px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     border: 2px solid #e5e7eb;
 }
 
@@ -225,7 +225,7 @@ select:focus {
     color: #dc2626;
     padding: 16px;
     border-radius: 8px;
-    margin-top: 20px;
+    margin-bottom: 20px;
     border-left: 4px solid #dc2626;
 }
 
