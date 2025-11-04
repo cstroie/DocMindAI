@@ -76,7 +76,7 @@ if (empty($AVAILABLE_MODELS)) {
 
 // Set default model if not defined in config
 if (!isset($DEFAULT_TEXT_MODEL)) {
-    $DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
+    $DEFAULT_TEXT_MODEL = !empty($AVAILABLE_MODELS) ? array_keys($AVAILABLE_MODELS)[0] : 'qwen2.5:1.5b';
 }
 
 /**

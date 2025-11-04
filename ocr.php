@@ -73,7 +73,7 @@ if (empty($AVAILABLE_MODELS)) {
 
 // Set default model if not defined in config
 if (!isset($DEFAULT_VISION_MODEL)) {
-    $DEFAULT_VISION_MODEL = 'gemma3:4b';
+    $DEFAULT_VISION_MODEL = !empty($AVAILABLE_MODELS) ? array_keys($AVAILABLE_MODELS)[0] : 'gemma3:4b';
 }
 
 /**
