@@ -148,7 +148,7 @@ function getAvailableModels($api_endpoint, $api_key = '') {
     if (isset($parsed_url['port'])) {
         $base_url .= ':' . $parsed_url['port'];
     }
-    $models_url = $base_url . '/api/tags';
+    $models_url = $base_url . '/v1/models';
     
     // Make API request
     $ch = curl_init($models_url);
@@ -174,15 +174,15 @@ function getAvailableModels($api_endpoint, $api_key = '') {
     
     $response_data = json_decode($response, true);
     
-    if (json_last_error() !== JSON_ERROR_NONE || !isset($response_data['models'])) {
+    if (json_last_error() !== JSON_ERROR_NONE || !isset($response_data['data'])) {
         return [];
     }
     
     $models = [];
-    foreach ($response_data['models'] as $model) {
-        if (isset($model['name'])) {
+    foreach ($response_data['data'] as $model) {
+        if (isset($model['id'])) {
             // For vision models, we'll use a more user-friendly name
-            $name = $model['name'];
+            $name = $model['id'];
             if (strpos($name, 'vision') !== false || strpos($name, 'vl') !== false) {
                 $models[$name] = ucfirst(str_replace(':', ' ', $name)) . ' (Vision)';
             } else {
