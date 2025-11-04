@@ -127,9 +127,9 @@ Discharge: \"Post-operative knee surgery. X-ray shows proper hardware placement.
 Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"Post-operative knee surgery with proper hardware placement confirmed on X-ray. Normal findings.\"}
 
 Discharge: \"Acute appendicitis, laparoscopic appendectomy. Post-op CT showed small abscess.\"
-Response: {\"pathologic\": \"yes\", \"severity\": 5, \"diagnostic\": \"Post-operative appendectomy patient with small abscess identified on CT scan requiring monitoring.\"}";
+Response: {\"pathologic\": \"yes\", \"severity\": 5, \"diagnostic\": \"Post-operative appendectomy patient with small abscess identified on CT scan requiring monitoring.\"}
 
-$SYSTEM_PROMPT .= "\n" . getLanguageInstruction($LANGUAGE);
+" . getLanguageInstruction($LANGUAGE);
 
 /**
  * Application state variables

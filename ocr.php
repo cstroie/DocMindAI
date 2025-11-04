@@ -65,12 +65,7 @@ $AVAILABLE_MODELS = getAvailableModels($API_ENDPOINT, $API_KEY);
 // If API call fails, use default models
 if (empty($AVAILABLE_MODELS)) {
     $AVAILABLE_MODELS = [
-        'llama3.2-vision' => 'Llama 3.2 Vision',
         'gemma3:4b' => 'Gemma 3 (4B)',
-        'qwen2.5vl:3b' => 'Qwen 2.5 VL (3B)',
-        'qwen3-vl:4b' => 'Qwen 3 VL (4B)',
-        'qwen3-vl:2b' => 'Qwen 3 VL (2B)',
-        'llava-phi3:3.8b' => 'LLA-Phi 3 (3.8B)',
         'moondream:1.8b' => 'Moondream (1.8B)'
     ];
 }
@@ -86,7 +81,7 @@ $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_COOKIE['oc
  * Falls back to default model if invalid model is selected
  */
 if (!array_key_exists($MODEL, $AVAILABLE_MODELS)) {
-    $MODEL = 'llama3.2-vision'; // Default to a valid model
+    $MODEL = 'gemma3:4b'; // Default to a valid model
 }
 
 /**

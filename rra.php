@@ -68,11 +68,8 @@ $AVAILABLE_MODELS = getAvailableModels($API_ENDPOINT, $API_KEY);
 if (empty($AVAILABLE_MODELS)) {
     $AVAILABLE_MODELS = [
         'gemma3:1b' => 'Gemma 3 (1B)',
-        'gemma2:2b' => 'Gemma 2 (2B)',
         'qwen3:1.7b' => 'Qwen 3 (1.7B)',
-        'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)',
-        'phi3:mini' => 'Phi 3 Mini (3.8B)',
-        'llama3.2:1b' => 'Llama 3.2 (1B)'
+        'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)'
     ];
 }
 
@@ -107,8 +104,6 @@ $SYSTEM_PROMPT = "You are a medical assistant analyzing radiology reports.
 
 TASK: Read the report and extract the main pathological information in JSON format.
 
-" . getLanguageInstruction($LANGUAGE) . "
-
 OUTPUT FORMAT (JSON):
 {
   \"pathologic\": \"yes/no\",
@@ -133,7 +128,9 @@ Report: \"No pathological changes. Heart of normal size.\"
 Response: {\"pathologic\": \"no\", \"severity\": 0, \"diagnostic\": \"normal\"}
 
 Report: \"Displaced fracture of the right distal femur with significant hematoma\"
-Response: {\"pathologic\": \"yes\", \"severity\": 8, \"diagnostic\": \"femur fracture\"}";
+Response: {\"pathologic\": \"yes\", \"severity\": 8, \"diagnostic\": \"femur fracture\"}
+
+" . getLanguageInstruction($LANGUAGE);
 
 /**
  * Application state variables
