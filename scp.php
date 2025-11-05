@@ -298,7 +298,7 @@ function scrapeUrl($url) {
             <?php if ($result): ?>
                 <div class="result-card">
                     <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">Page Content</h2>
+                        <h2 style="color: #111827; font-size: 20px;">Markdown / DokuWiki Content</h2>
                     </div>
                     
                     <textarea class="markdown-result" readonly><?php echo htmlspecialchars($result); ?></textarea>
