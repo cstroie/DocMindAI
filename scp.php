@@ -301,6 +301,21 @@ function scrapeUrl($url) {
 
             <form method="POST" action="" id="scrapingForm">
                 <div class="form-group">
+                    <label for="url">Web page URL:</label>
+                    <input 
+                        type="url" 
+                        id="url" 
+                        name="url" 
+                        value="<?php echo isset($_POST['url']) ? htmlspecialchars($_POST['url']) : ''; ?>"
+                        placeholder="https://example.com/article"
+                        required
+                    >
+                    <div class="file-info">
+                        Enter the full URL of the web page you want to parse.
+                    </div>
+                </div>
+                
+                <div class="form-group">
                     <label for="model">AI model:</label>
                     <select id="model" name="model">
                         <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
@@ -320,21 +335,6 @@ function scrapeUrl($url) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="url">Web page URL:</label>
-                    <input 
-                        type="url" 
-                        id="url" 
-                        name="url" 
-                        value="<?php echo isset($_POST['url']) ? htmlspecialchars($_POST['url']) : ''; ?>"
-                        placeholder="https://example.com/article"
-                        required
-                    >
-                    <div class="file-info">
-                        Enter the full URL of the web page you want to parse.
-                    </div>
                 </div>
                 
                 <button type="submit" name="submit" value="1" class="btn btn-primary">
