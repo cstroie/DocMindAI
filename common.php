@@ -126,14 +126,22 @@ function preprocessImageForOCR($image_path) {
     $width = imagesx($image);
     $height = imagesy($image);
     
-    // Calculate new dimensions (max 1000x1000)
+    // Only scale if image is larger than max_size
     $max_size = 1000;
-    $ratio = min($max_size / $width, $max_size / $height);
-    $new_width = intval($width * $ratio);
-    $new_height = intval($height * $ratio);
-    
-    // Create new image with new dimensions
-    $resized_image = imagecreatetruecolor($new_width, $new_height);
+    if ($width > $max_size || $height > $max_size) {
+        // Calculate new dimensions (max 1000x1000)
+        $ratio = min($max_size / $width, $max_size / $height);
+        $new_width = intval($width * $ratio);
+        $new_height = intval($height * $ratio);
+        
+        // Create new image with new dimensions
+        $resized_image = imagecreatetruecolor($new_width, $new_height);
+    } else {
+        // Keep original dimensions
+        $new_width = $width;
+        $new_height = $height;
+        $resized_image = imagecreatetruecolor($new_width, $new_height);
+    }
     
     // Preserve transparency for PNG
     if ($image_info[2] === IMAGETYPE_PNG) {
