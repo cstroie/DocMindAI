@@ -24,7 +24,7 @@
  * - API endpoint: POST /pda.php with discharge paper data
  * 
  * API Usage:
- * POST /pda.php
+ * POST /dpa.php
  * Parameters:
  * - report (required): Patient discharge paper text
  * - model (optional): AI model to use (default: qwen2.5:1.5b)
@@ -290,8 +290,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                     <label for="model">AI model:</label>
                     <select id="model" name="model">
                         <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
-                            <option value="<?php echo htmlspecialchars($value); ?>" 
-                                <?php echo ($MODEL === $value) ? 'selected' : ''; ?>>
+                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($MODEL === $value) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($label); ?>
                             </option>
                         <?php endforeach; ?>
@@ -302,8 +301,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                     <label for="language">Response language:</label>
                     <select id="language" name="language">
                         <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
-                            <option value="<?php echo htmlspecialchars($value); ?>" 
-                                <?php echo ($LANGUAGE === $value) ? 'selected' : ''; ?>>
+                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($LANGUAGE === $value) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($label); ?>
                             </option>
                         <?php endforeach; ?>
@@ -312,19 +310,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                 
                 <div class="form-group">
                     <label for="report">Patient discharge paper:</label>
-                    <textarea 
-                        id="report" 
-                        name="report" 
-                        rows="8" 
-                        required
-                        placeholder="Enter the patient discharge paper here...&#10;&#10;Example: Patient discharged after treatment for pneumonia. Chest X-ray shows resolved infiltrate."
-                    ><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
+                    <textarea id="report" name="report" rows="8" required placeholder="Enter the patient discharge paper here...&#10;&#10;Example: Patient discharged after treatment for pneumonia. Chest X-ray shows resolved infiltrate."><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
                 </div>
                 
                 <button type="submit" name="submit" value="1" class="btn btn-primary">
-                    <?php if ($processing && !$result && !$error): ?>
-                        <span class="loading"></span>
-                    <?php endif; ?>
                     📋 Analyze report
                 </button>
                 
