@@ -292,8 +292,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                     <label for="model">AI model:</label>
                     <select id="model" name="model">
                         <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
-                            <option value="<?php echo htmlspecialchars($value); ?>" 
-                                <?php echo ($MODEL === $value) ? 'selected' : ''; ?>>
+                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($MODEL === $value) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($label); ?>
                             </option>
                         <?php endforeach; ?>
@@ -304,8 +303,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                     <label for="language">Response language:</label>
                     <select id="language" name="language">
                         <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
-                            <option value="<?php echo htmlspecialchars($value); ?>" 
-                                <?php echo ($LANGUAGE === $value) ? 'selected' : ''; ?>>
+                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($LANGUAGE === $value) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($label); ?>
                             </option>
                         <?php endforeach; ?>
