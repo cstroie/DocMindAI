@@ -253,41 +253,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
         </div>
 
         <div class="content">
-            <?php if ($error): ?>
-                <div class="error">
-                    <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
+            <form method="POST" action="" id="analysisForm">
+                <div class="form-group">
+                    <label for="report">Radiology report:</label>
+                    <textarea 
+                        id="report" 
+                        name="report" 
+                        rows="8" 
+                        required
+                        placeholder="Enter the radiology report here...&#10;&#10;Example: Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum."
+                    ><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
                 </div>
-            <?php endif; ?>
-            
-            <?php if ($result): ?>
-                <div class="result-card">
-                    <div class="result-header">
-                        <h2 style="color: #111827; font-size: 20px;">Analysis Result</h2>
-                        <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
-                            <?php echo $result['pathologic'] === 'yes' ? '⚠️ Pathological' : '✓ Normal'; ?>
-                        </span>
+                
+                <?php if ($error): ?>
+                    <div class="error">
+                        <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
                     </div>
-                    
-                    <div class="severity-container">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <strong style="color: #374151;">Severity:</strong>
-                            <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
-                                <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
+                <?php endif; ?>
+                
+                <?php if ($result): ?>
+                    <div class="result-card">
+                        <div class="result-header">
+                            <h2 style="color: #111827; font-size: 20px;">Analysis Result</h2>
+                            <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
+                                <?php echo $result['pathologic'] === 'yes' ? '⚠️ Pathological' : '✓ Normal'; ?>
                             </span>
                         </div>
-                        <div class="severity-bar">
-                            <div class="severity-fill" style="width: <?php echo $result['severity'] * 10; ?>%; background: <?php echo getSeverityColor($result['severity']); ?>;"></div>
+                        
+                        <div class="severity-container">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <strong style="color: #374151;">Severity:</strong>
+                                <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
+                                    <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
+                                </span>
+                            </div>
+                            <div class="severity-bar">
+                                <div class="severity-fill" style="width: <?php echo $result['severity'] * 10; ?>%; background: <?php echo getSeverityColor($result['severity']); ?>;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-box">
+                            <div class="summary-label">Summary</div>
+                            <div class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></div>
                         </div>
                     </div>
-                    
-                    <div class="summary-box">
-                        <div class="summary-label">Summary</div>
-                        <div class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></div>
-                    </div>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
 
-            <form method="POST" action="" id="analysisForm">
                 <div class="form-group">
                     <label for="model">AI model:</label>
                     <select id="model" name="model">
@@ -308,17 +319,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="report">Radiology report:</label>
-                    <textarea 
-                        id="report" 
-                        name="report" 
-                        rows="8" 
-                        required
-                        placeholder="Enter the radiology report here...&#10;&#10;Example: Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum."
-                    ><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
                 </div>
                 
                 <button type="submit" name="submit" value="1" class="btn btn-primary">
