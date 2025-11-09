@@ -55,13 +55,14 @@ if (file_exists('config.php')) {
     $LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1';
     $LLM_API_KEY = '';
     $DEFAULT_VISION_MODEL = 'gemma3:4b';
+    $LLM_API_FILTER = '/free/';
 }
 
 // Create chat endpoint URL
 $LLM_API_ENDPOINT_CHAT = $LLM_API_ENDPOINT . '/chat/completions';
 
-// Fetch available models from API, filtering for free models
-$AVAILABLE_MODELS = getAvailableModels($LLM_API_ENDPOINT, $LLM_API_KEY, '/free/');
+// Fetch available models from API, filtering with configured filter
+$AVAILABLE_MODELS = getAvailableModels($LLM_API_ENDPOINT, $LLM_API_KEY, $LLM_API_FILTER);
 
 // If API call fails, use default models
 if (empty($AVAILABLE_MODELS)) {
