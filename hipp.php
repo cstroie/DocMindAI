@@ -1,5 +1,64 @@
 <?php
-// hipp.php - Hipocrate Patient Analyzer Interface
+/**
+ * Hipocrate Patient Analyzer
+ * 
+ * A PHP web application that interfaces with the Hipocrate medical system API
+ * to search for patients and retrieve their medical information including
+ * checkouts, analyses, and medical imaging reports.
+ * 
+ * Features:
+ * - Patient search by name or CNP
+ * - Display of patient information
+ * - Medical imaging reports retrieval
+ * - Checkout information display with diagnosis, epicrisis, and recommendations
+ * - Web interface with real-time results
+ * - REST API support
+ * 
+ * Requirements:
+ * - PHP 7.0+
+ * - cURL extension
+ * - JSON extension
+ * - Access to Hipocrate API at http://10.200.8.16:44660
+ * 
+ * Usage:
+ * - Web interface: Access via browser
+ * - API endpoint: POST /hipp.php with search data or GET with parameters
+ * 
+ * API Usage:
+ * 1. Patient Search:
+ *    POST /hipp.php
+ *    Parameters:
+ *    - search (required): Patient name or CNP
+ *    
+ *    Response:
+ *    {
+ *      "status": "success",
+ *      "patient": { ... },
+ *      "analyses": { ... },
+ *      "reports": [ ... ]
+ *    }
+ *    
+ *    Or for GET requests:
+ *    GET /hipp.php?search=patient_name_or_cnp
+ * 
+ * 2. Checkout Retrieval:
+ *    GET /hipp.php?checkout=checkout_id
+ *    
+ *    Response:
+ *    {
+ *      "status": "success",
+ *      "patient_name": "...",
+ *      "admission_diagnostic": "...",
+ *      "epicrisis": "...",
+ *      "diagnostic": "...",
+ *      "surgery": "...",
+ *      "recommendations": "..."
+ *    }
+ * 
+ * @author Costin Stroie <costinstroie@eridu.eu.org>
+ * @version 1.0
+ * @license GPL 3
+ */
 
 // Include common functions
 include 'common.php';
