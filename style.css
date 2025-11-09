@@ -71,7 +71,7 @@ textarea:focus {
     border-color: #667eea;
 }
 
-input[type="file"] {
+input, select {
     width: 100%;
     padding: 12px;
     border: 2px solid #e5e7eb;
@@ -83,24 +83,7 @@ input[type="file"] {
     transition: border-color 0.3s;
 }
 
-input[type="file"]:focus {
-    outline: none;
-    border-color: #667eea;
-}
-
-select {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: inherit;
-    background: white;
-    cursor: pointer;
-    transition: border-color 0.3s;
-}
-
-select:focus {
+input:focus, select:focus {
     outline: none;
     border-color: #667eea;
 }

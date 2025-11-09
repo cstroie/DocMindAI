@@ -37,8 +37,8 @@
  * 
  * Configuration:
  * Create a config.php file with:
- * - $API_ENDPOINT: AI API endpoint URL
- * - $API_KEY: API key (if required)
+ * - $LLM_API_ENDPOINT: AI API endpoint URL
+ * - $LLM_API_KEY: API key (if required)
  * 
  * @author Costin Stroie <costinstroie@eridu.eu.org>
  * @version 1.0
@@ -52,16 +52,16 @@ if (file_exists('config.php')) {
     include 'config.php';
 } else {
     // Safe defaults
-    $API_ENDPOINT = 'http://127.0.0.1:11434/v1';
-    $API_KEY = '';
+    $LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1';
+    $LLM_API_KEY = '';
     $DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
 }
 
 // Create chat endpoint URL
-$API_ENDPOINT_CHAT = $API_ENDPOINT . '/chat/completions';
+$LLM_API_ENDPOINT_CHAT = $LLM_API_ENDPOINT . '/chat/completions';
 
 // Fetch available models from API, filtering for free models
-$AVAILABLE_MODELS = getAvailableModels($API_ENDPOINT, $API_KEY, '/free/');
+$AVAILABLE_MODELS = getAvailableModels($LLM_API_ENDPOINT, $LLM_API_KEY, '/free/');
 
 // If API call fails, use default models
 if (empty($AVAILABLE_MODELS)) {
@@ -191,11 +191,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) {
                     ['role' => 'user', 'content' => "URL: " . $url . "\n\nCONTENT TO PROCESS:\n" . $scraped_content]
                 ],
                 'temperature' => 0.1,
-                'max_tokens' => 4000
+                'max_tokens' => 16384
             ];
             
             // Make API request using common function
-            $response_data = callLLMApi($API_ENDPOINT_CHAT, $data, $API_KEY);
+            $response_data = callLLMApi($LLM_API_ENDPOINT_CHAT, $data, $LLM_API_KEY);
             
             if (isset($response_data['error'])) {
                 $error = $response_data['error'];
