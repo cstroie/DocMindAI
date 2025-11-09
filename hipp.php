@@ -28,6 +28,9 @@ $checkout_id = isset($_GET['id']) ? trim($_GET['id']) : "";
 // Check if search term is provided in query string
 $query_search_term = isset($_GET['search']) ? trim($_GET['search']) : "";
 
+// Check if this is an API request (no submit button)
+$is_api_request = !isset($_POST['submit']);
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search'])) {
     $search_term = trim($_POST['search']);
@@ -65,6 +68,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search'])) {
         } else {
             $error_message = $search_result['message'] ?? "Patient not found.";
         }
+        
+        // If this is an API request, return JSON response
+        if ($is_api_request) {
+            header('Content-Type: application/json');
+            
+            if ($error_message) {
+                echo json_encode(['status' => 'error', 'message' => $error_message]);
+            } else {
+                $response = [
+                    'status' => 'success',
+                    'patient' => $patient_data,
+                    'analyses' => $analyses_data,
+                    'reports' => $reports_data
+                ];
+                echo json_encode($response);
+            }
+            exit;
+        }
     }
 }
 // Handle search from query string
@@ -101,6 +122,24 @@ elseif (!empty($query_search_term)) {
     } else {
         $error_message = $search_result['message'] ?? "Patient not found.";
     }
+    
+    // If this is an API request, return JSON response
+    if ($is_api_request && !empty($query_search_term)) {
+        header('Content-Type: application/json');
+        
+        if ($error_message) {
+            echo json_encode(['status' => 'error', 'message' => $error_message]);
+        } else {
+            $response = [
+                'status' => 'success',
+                'patient' => $patient_data,
+                'analyses' => $analyses_data,
+                'reports' => $reports_data
+            ];
+            echo json_encode($response);
+        }
+        exit;
+    }
 }
 
 // If a checkout ID is provided, fetch that specific checkout
@@ -108,8 +147,22 @@ if (!empty($checkout_id)) {
     $checkout_result = getCheckout($checkout_id);
     if ($checkout_result['status'] === 'success') {
         $checkout_data = $checkout_result;
+        
+        // If this is an API request, return JSON response
+        if ($is_api_request) {
+            header('Content-Type: application/json');
+            echo json_encode($checkout_result);
+            exit;
+        }
     } else {
         $error_message = $checkout_result['message'] ?? "Failed to retrieve checkout information.";
+        
+        // If this is an API request, return JSON error response
+        if ($is_api_request) {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => $error_message]);
+            exit;
+        }
     }
 }
 
@@ -323,6 +376,7 @@ function getCheckout($checkout_id) {
             <?php else: ?>
                 <!-- Display search form -->
                 <form method="POST" action="">
+                    <input type="hidden" name="submit" value="1">
                     <?php if ($error_message): ?>
                         <div class="error">
                             <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error_message); ?>
