@@ -633,7 +633,15 @@ function getCheckout($checkout_id) {
                                             <?php echo implode(', ', $value); ?>
                                         <?php endif; ?>
                                     <?php else: ?>
-                                        <?php echo htmlspecialchars($value); ?>
+                                        <?php 
+                                        // Check if this is a single checkout_id or checkin_id
+                                        if ($key === 'checkout_id' || $key === 'checkin_id'): ?>
+                                            <a href="hipp.php?checkout=<?php echo urlencode($value); ?>&get=page" class="btn btn-secondary" style="display: inline-block; margin: 2px; padding: 4px 8px; font-size: 12px;">
+                                                <?php echo htmlspecialchars($value); ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <?php echo htmlspecialchars($value); ?>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
