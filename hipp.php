@@ -23,14 +23,14 @@ $error_message = "";
 $success_message = "";
 
 // Check if a specific checkout is requested
-$checkout_id = isset($_GET['checkout']) ? trim($_GET['checkout']) : "";
+$checkout_id = isset($_GET['id']) ? trim($_GET['id']) : "";
 
 // Check if search term is provided in query string
 $query_search_term = isset($_GET['search']) ? trim($_GET['search']) : "";
 
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
-    $search_term = trim($_POST['search_term']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search'])) {
+    $search_term = trim($_POST['search']);
     
     if (empty($search_term)) {
         $error_message = "Please enter a patient name or CNP.";
@@ -336,11 +336,11 @@ function getCheckout($checkout_id) {
                     <?php endif; ?>
                     
                     <div class="form-group">
-                        <label for="search_term">Patient Search:</label>
+                        <label for="search">Patient Search:</label>
                         <input 
                             type="text" 
-                            id="search_term"
-                            name="search_term" 
+                            id="search"
+                            name="search" 
                             required
                             placeholder="Enter patient name or CNP" 
                             value="<?php echo htmlspecialchars($search_term); ?>"
@@ -369,7 +369,7 @@ function getCheckout($checkout_id) {
                                     <?php if (is_array($value)): ?>
                                         <?php if ($key === 'checkout_ids'): ?>
                                             <?php foreach ($value as $id): ?>
-                                                <a href="?checkout=<?php echo urlencode($id); ?>" class="btn btn-secondary" style="display: inline-block; margin: 2px; padding: 4px 8px; font-size: 12px;">
+                                                <a href="?id=<?php echo urlencode($id); ?>" class="btn btn-secondary" style="display: inline-block; margin: 2px; padding: 4px 8px; font-size: 12px;">
                                                     <?php echo htmlspecialchars($id); ?>
                                                 </a>
                                             <?php endforeach; ?>
@@ -394,7 +394,7 @@ function getCheckout($checkout_id) {
                         <div class="summary-box">
                             <?php foreach ($patient_data['checkout_ids'] as $id): ?>
                                 <div class="report-item">
-                                    <a href="?checkout=<?php echo urlencode($id); ?>" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
+                                    <a href="?id=<?php echo urlencode($id); ?>" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
                                         View Checkout #<?php echo htmlspecialchars($id); ?>
                                     </a>
                                 </div>
@@ -483,7 +483,7 @@ function getCheckout($checkout_id) {
     
     <script>
         function clearForm() {
-            document.getElementById('search_term').value = '';
+            document.getElementById('search').value = '';
             // Reload page to clear results
             window.location.href = window.location.pathname;
         }
