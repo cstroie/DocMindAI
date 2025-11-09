@@ -61,6 +61,10 @@
  *    Response:
  *    OpenAPI 3.0 specification in JSON format
  * 
+ * Web Interface Usage:
+ * - Add ?get=page to any GET request to return the web page
+ * - For POST requests, include a hidden input with name="get" and value="page"
+ * 
  * @author Costin Stroie <costinstroie@eridu.eu.org>
  * @version 1.0
  * @license GPL 3
@@ -96,8 +100,11 @@ $query_search_term = isset($_GET['search']) ? trim($_GET['search']) : "";
 // Check if API spec is requested
 $show_spec = (isset($_GET['get']) && $_GET['get'] === 'spec');
 
-// Check if this is an API request (no submit button)
-$is_api_request = !isset($_POST['submit']);
+// Check if this is a web page request (get=page in GET or submit button with value 'page' in POST)
+$is_web_request = (isset($_GET['get']) && $_GET['get'] === 'page') || (isset($_POST['get']) && $_GET['get'] === 'page');
+
+// Check if this is an API request (no get=page parameter and no submit button with value 'page')
+$is_api_request = !$is_web_request;
 
 // If spec is requested, return the API specification
 if ($show_spec) {
@@ -503,7 +510,7 @@ function getCheckout($checkout_id) {
                 <div class="result-card">
                     <div class="result-header">
                         <h2 style="color: #111827; font-size: 20px;">Checkout Information</h2>
-                        <a href="hipp.php" class="btn btn-secondary" style="margin-left: 10px;">← Back to Search</a>
+                        <a href="hipp.php?get=page" class="btn btn-secondary" style="margin-left: 10px;">← Back to Search</a>
                     </div>
                     
                     <div class="summary-box">
@@ -571,7 +578,7 @@ function getCheckout($checkout_id) {
             <?php else: ?>
                 <!-- Display search form -->
                 <form method="POST" action="">
-                    <input type="hidden" name="submit" value="1">
+                    <input type="hidden" name="get" value="page">
                     <?php if ($error_message): ?>
                         <div class="error">
                             <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error_message); ?>
@@ -618,7 +625,7 @@ function getCheckout($checkout_id) {
                                     <?php if (is_array($value)): ?>
                                         <?php if ($key === 'checkout_ids'): ?>
                                             <?php foreach ($value as $id): ?>
-                                                <a href="?checkout=<?php echo urlencode($id); ?>" class="btn btn-secondary" style="display: inline-block; margin: 2px; padding: 4px 8px; font-size: 12px;">
+                                                <a href="?checkout=<?php echo urlencode($id); ?>&get=page" class="btn btn-secondary" style="display: inline-block; margin: 2px; padding: 4px 8px; font-size: 12px;">
                                                     <?php echo htmlspecialchars($id); ?>
                                                 </a>
                                             <?php endforeach; ?>
@@ -643,7 +650,7 @@ function getCheckout($checkout_id) {
                         <div class="summary-box">
                             <?php foreach ($patient_data['checkout_ids'] as $id): ?>
                                 <div class="report-item">
-                                    <a href="?checkout=<?php echo urlencode($id); ?>" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
+                                    <a href="?checkout=<?php echo urlencode($id); ?>&get=page" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
                                         View Checkout #<?php echo htmlspecialchars($id); ?>
                                     </a>
                                 </div>
