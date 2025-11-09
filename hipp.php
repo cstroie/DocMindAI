@@ -23,7 +23,7 @@ $error_message = "";
 $success_message = "";
 
 // Check if a specific checkout is requested
-$checkout_id = isset($_GET['id']) ? trim($_GET['id']) : "";
+$checkout_id = isset($_GET['checkout']) ? trim($_GET['checkout']) : "";
 
 // Check if search term is provided in query string
 $query_search_term = isset($_GET['search']) ? trim($_GET['search']) : "";
@@ -423,7 +423,7 @@ function getCheckout($checkout_id) {
                                     <?php if (is_array($value)): ?>
                                         <?php if ($key === 'checkout_ids'): ?>
                                             <?php foreach ($value as $id): ?>
-                                                <a href="?id=<?php echo urlencode($id); ?>" class="btn btn-secondary" style="display: inline-block; margin: 2px; padding: 4px 8px; font-size: 12px;">
+                                                <a href="?checkout=<?php echo urlencode($id); ?>" class="btn btn-secondary" style="display: inline-block; margin: 2px; padding: 4px 8px; font-size: 12px;">
                                                     <?php echo htmlspecialchars($id); ?>
                                                 </a>
                                             <?php endforeach; ?>
@@ -448,7 +448,7 @@ function getCheckout($checkout_id) {
                         <div class="summary-box">
                             <?php foreach ($patient_data['checkout_ids'] as $id): ?>
                                 <div class="report-item">
-                                    <a href="?id=<?php echo urlencode($id); ?>" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
+                                    <a href="?checkout=<?php echo urlencode($id); ?>" class="btn btn-secondary" style="display: inline-block; margin: 5px 0;">
                                         View Checkout #<?php echo htmlspecialchars($id); ?>
                                     </a>
                                 </div>
