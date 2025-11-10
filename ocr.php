@@ -108,13 +108,34 @@ $SYSTEM_PROMPT = "Perform Optical Character Recognition (OCR) on the following i
 " . getLanguageInstruction($LANGUAGE);
 
 /**
+ * System prompt for the summary AI model
+ * Contains instructions for summarizing text content
+ */
+$SUMMARY_SYSTEM_PROMPT = "You are a helpful assistant that creates concise summaries of text content.
+
+TASK: Create a brief summary of the provided text content. Focus on the main points and key information. Keep the summary under 100 words.
+" . getLanguageInstruction($LANGUAGE) . "
+
+OUTPUT FORMAT (JSON):
+{
+  \"summary\": \"summary text\"
+}
+
+RULES:
+- Focus on main points and key information
+- Keep summary under 100 words
+- Respond ONLY with the JSON, without additional text";
+
+/**
  * Application state variables
  * @var string|null $result Extracted text result
+ * @var string|null $summary Generated summary of the text
  * @var string|null $error Error message if any
  * @var bool $processing Whether analysis is in progress
  * @var bool $is_api_request Whether request is API call (not web form)
  */
 $result = null;
+$summary = null;
 $error = null;
 $processing = false;
 $is_api_request = false;
@@ -229,6 +250,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
             $result = trim($response_data['choices'][0]['message']['content']);
             // Remove markdown code fences if present
             $result = preg_replace('/^```(?:markdown)?\s*(.*?)\s*```$/s', '$1', $result);
+            
+            // Generate summary of the extracted text
+            if (!empty($result)) {
+                // Prepare summary API request
+                $summary_data = [
+                    'model' => $DEFAULT_TEXT_MODEL ?? 'qwen2.5:1.5b',
+                    'messages' => [
+                        ['role' => 'system', 'content' => $SUMMARY_SYSTEM_PROMPT],
+                        ['role' => 'user', 'content' => "TEXT TO SUMMARIZE:\n" . $result]
+                    ],
+                    'temperature' => 0.3,
+                    'max_tokens' => 300
+                ];
+                
+                // Make summary API request
+                $summary_response = callLLMApi($LLM_API_ENDPOINT_CHAT, $summary_data, $LLM_API_KEY);
+                
+                if (isset($summary_response['choices'][0]['message']['content'])) {
+                    $summary_content = trim($summary_response['choices'][0]['message']['content']);
+                    
+                    // Extract JSON from summary response
+                    if (preg_match('/\{[^}]+\}/', $summary_content, $summary_matches)) {
+                        $summary_json_str = $summary_matches[0];
+                        $summary_result = json_decode($summary_json_str, true);
+                        
+                        if (json_last_error() === JSON_ERROR_NONE && isset($summary_result['summary'])) {
+                            $summary = $summary_result['summary'];
+                        }
+                    }
+                }
+            }
         } else {
             $error = 'Invalid API response format';
         }
@@ -276,9 +328,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
                 <?php endif; ?>
                 
                 <?php if ($result): ?>
+                    <?php if ($summary): ?>
                     <div class="result-card">
                         <div class="result-header">
-                            <h2 style="color: #111827; font-size: 20px;">OCR Result</h2>
+                            <h2 style="color: #111827; font-size: 20px;">📄 Summary</h2>
+                        </div>
+                        
+                        <div class="summary-box">
+                            <div class="summary-text"><?php echo htmlspecialchars($summary); ?></div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <div class="result-card">
+                        <div class="result-header">
+                            <h2 style="color: #111827; font-size: 20px;">🔍 OCR Result</h2>
                         </div>
                         
                         <textarea class="markdown-result" readonly><?php echo htmlspecialchars($result); ?></textarea>
@@ -296,6 +360,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
                         </div>
                     </div>
                     <?php endif; ?>
+                <?php endif; ?>
+                
+                <?php if ($is_api_request && $result): ?>
+                <div class="result-card">
+                    <div class="result-header">
+                        <h2 style="color: #111827; font-size: 20px;">📄 Summary</h2>
+                    </div>
+                    
+                    <div class="summary-box">
+                        <div class="summary-text"><?php echo htmlspecialchars($summary ?? 'No summary available'); ?></div>
+                    </div>
+                </div>
                 <?php endif; ?>
 
                 <div class="form-group">
