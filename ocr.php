@@ -2,6 +2,17 @@
 /**
  * Optical Character Recognition (OCR) Tool
  * 
+ * Handle hupl configuration request
+ */
+if (isset($_GET['hupl'])) {
+    header('Content-Type: text/plain');
+    echo "endpoint: " . ($_SERVER['HTTPS'] ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'] . "\n";
+    exit;
+}
+
+/**
+ * Optical Character Recognition (OCR) Tool
+ * 
  * A PHP web application that uses AI to perform OCR on uploaded images and extract
  * text in Markdown format.
  * 
