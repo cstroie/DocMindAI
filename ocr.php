@@ -133,12 +133,14 @@ RULES:
  * @var string|null $error Error message if any
  * @var bool $processing Whether analysis is in progress
  * @var bool $is_api_request Whether request is API call (not web form)
+ * @var bool $is_hupl_request Whether request is hupl-compatible call
  */
 $result = null;
 $summary = null;
 $error = null;
 $processing = false;
 $is_api_request = false;
+$is_hupl_request = false;
 
 /**
  * Handle POST request for image OCR
@@ -148,6 +150,7 @@ $is_api_request = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     $processing = true;
     $is_api_request = !isset($_POST['submit']); // If no submit button, it's an API request
+    $is_hupl_request = isset($_POST['file']); // Check for hupl-compatible request
     
     // Validate file upload
     $image_file = $_FILES['image'];
@@ -293,11 +296,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image']) && $_FILES[
         
         // Return JSON if it's an API request
         if ($is_api_request) {
-            header('Content-Type: application/json');
-            if ($error) {
-                echo json_encode(['error' => $error]);
+            if ($is_hupl_request) {
+                // For hupl-compatible requests, return only the text
+                header('Content-Type: text/plain');
+                if ($error) {
+                    echo $error;
+                } else {
+                    echo $result;
+                }
             } else {
-                echo json_encode(['text' => $result]);
+                // Regular API request returns JSON
+                header('Content-Type: application/json');
+                if ($error) {
+                    echo json_encode(['error' => $error]);
+                } else {
+                    echo json_encode(['text' => $result]);
+                }
             }
             exit;
         }
