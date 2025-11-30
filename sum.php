@@ -107,7 +107,7 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  * System prompt for the AI model
  * Contains instructions for summarizing web page content in structured format
  */
-$SYSTEM_PROMPT = "You are a content summarization assistant. Your task is to analyze web page content and create a structured summary of the most important points.
+$SYSTEM_PROMPT = "You are a content summarization assistant. Your task is to identify the main content of a web page and create a structured summary of the most important points.
 
 " . getLanguageInstruction($LANGUAGE) . "
 
@@ -120,17 +120,18 @@ OUTPUT FORMAT (JSON):
 }
 
 RULES:
-- \"title\": Extract or create a concise title for the article
-- \"summary\": Create a 2-3 sentence summary of the main content
-- \"key_points\": Extract exactly 5 key points from the article (as strings)
-- \"keywords\": Extract exactly 3 relevant keywords (as strings)
-- Focus on factual information and main points
-- Ignore navigation, ads, and other non-content elements
+- \"title\": Extract or create a concise title for the main article
+- \"summary\": Create a 2-3 sentence summary of ONLY the main article content
+- \"key_points\": Extract exactly 5 key points from the main article content (as strings)
+- \"keywords\": Extract exactly 3 relevant keywords from the main content (as strings)
+- Focus ONLY on the primary article content
+- IGNORE navigation menus, sidebars, footers, ads, related articles, and other secondary content
+- IGNORE links, comments, and social media elements
 - Respond ONLY with the JSON, without additional text or markdown formatting
 
 EXAMPLE:
 
-Input: A web page about climate change with scientific data
+Input: A web page with a main article about climate change, plus sidebars and navigation
 Response: {
   \"title\": \"Climate Change: Latest Scientific Findings\",
   \"summary\": \"Recent studies show global temperatures have risen by 1.2°C since pre-industrial times. The primary driver is greenhouse gas emissions from human activities. Immediate action is needed to limit warming to 1.5°C.\",
