@@ -126,12 +126,13 @@ $SYSTEM_PROMPT = "You are a content extraction assistant. Your task is to identi
 Instructions:
 " . getLanguageInstruction($LANGUAGE) . "
 
-1. Extract ONLY the primary content of the page (article text, main information)
-2. Remove navigation menus, footers, sidebars, ads, and other non-essential elements
-3. Convert the main content to clean " . $AVAILABLE_FORMATS[$FORMAT] . " format with proper headings, lists, etc.
-4. Preserve important formatting like bold, italics, links
-5. Do not include any explanations or extra text
-6. Return ONLY the " . $AVAILABLE_FORMATS[$FORMAT] . " content
+1. Extract ONLY the primary article content (main text, key information)
+2. IGNORE navigation menus, sidebars, footers, ads, related articles, and other secondary content
+3. IGNORE links, comments, and social media elements
+4. Convert the main content to clean " . $AVAILABLE_FORMATS[$FORMAT] . " format with proper headings, lists, etc.
+5. Preserve important formatting like bold, italics, links
+6. Do not include any explanations or extra text
+7. Return ONLY the " . $AVAILABLE_FORMATS[$FORMAT] . " content
 
 " . ($FORMAT === 'dokuwiki' ? "DOKUWIKI FORMATTING GUIDE:
 - Headings: Use ====== for h1, ===== for h2, ==== for h3, etc.
@@ -143,7 +144,7 @@ Instructions:
 - Code blocks: Use <code>...</code> or <file>...</file>
 
 " : "") . "Example:
-Input HTML might contain a full web page with headers, nav bars, etc.
+Input HTML might contain a full web page with headers, nav bars, sidebars, etc.
 Output should be just the main article content in clean " . $AVAILABLE_FORMATS[$FORMAT] . " format.";
 
 /**
