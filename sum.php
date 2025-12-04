@@ -347,18 +347,18 @@ function scrapeUrl($url) {
             
             <?php if ($result): ?>
                 <article class="result-card">
-                    <header class="result-header">
+                    <header>
                         <h2><?php echo htmlspecialchars($result['title']); ?></h2>
                     </header>
                     
                     <section>
                         <h3>Summary</h3>
-                        <p class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></p>
+                        <p><?php echo htmlspecialchars($result['summary']); ?></p>
                     </section>
                     
                     <section>
                         <h3>Key Points</h3>
-                        <ul class="key-points">
+                        <ul>
                             <?php foreach ($result['key_points'] as $point): ?>
                                 <li><?php echo htmlspecialchars($point); ?></li>
                             <?php endforeach; ?>
@@ -367,9 +367,9 @@ function scrapeUrl($url) {
                     
                     <footer>
                         <h3>Keywords</h3>
-                        <div class="keywords-container">
+                        <div>
                             <?php foreach ($result['keywords'] as $keyword): ?>
-                                <span class="keyword"><?php echo htmlspecialchars($keyword); ?></span>
+                                <span><?php echo htmlspecialchars($keyword); ?></span>
                             <?php endforeach; ?>
                         </div>
                     </footer>

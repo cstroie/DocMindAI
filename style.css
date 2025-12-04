@@ -211,33 +211,33 @@ ul {
     margin-left: 20px;
 }
 
-.result-header h2 {
+.result-card > header h2 {
     color: #111827;
     font-size: 20px;
 }
 
-.summary-text {
+.result-card > section > p {
     font-size: 16px;
     line-height: 1.5;
 }
 
-.key-points {
+.result-card > section > ul {
     list-style-type: disc;
     padding-left: 20px;
 }
 
-.key-points li {
+.result-card > section > ul li {
     margin-bottom: 8px;
 }
 
-.keywords-container {
+.result-card > footer > div {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 8px;
 }
 
-.keyword {
+.result-card > footer > div span {
     background: #e0e7ff;
     color: #4f46e5;
     padding: 4px 12px;
