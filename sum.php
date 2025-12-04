@@ -334,39 +334,39 @@ function scrapeUrl($url) {
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <header class="header">
             <h1>📝 Web Page Summarizer</h1>
             <p>AI-powered structured summary of web articles</p>
-        </div>
+        </header>
 
-        <div class="content">
+        <main class="content">
             <?php if ($error): ?>
-                <div class="error">
+                <section class="error">
                     <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
-                </div>
+                </section>
             <?php endif; ?>
             
             <?php if ($result): ?>
-                <div class="result-card">
-                    <div class="result-header">
+                <article class="result-card">
+                    <header class="result-header">
                         <h2 style="color: #111827; font-size: 20px;"><?php echo htmlspecialchars($result['title']); ?></h2>
-                    </div>
+                    </header>
                     
-                    <div class="summary-box">
+                    <section class="summary-box">
                         <div class="summary-label">Summary</div>
                         <div class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></div>
-                    </div>
+                    </section>
                     
-                    <div style="margin-top: 20px;">
+                    <section style="margin-top: 20px;">
                         <div class="summary-label">Key Points</div>
                         <ul style="padding-left: 20px; margin-top: 8px;">
                             <?php foreach ($result['key_points'] as $point): ?>
                                 <li style="margin-bottom: 8px;"><?php echo htmlspecialchars($point); ?></li>
                             <?php endforeach; ?>
                         </ul>
-                    </div>
+                    </section>
                     
-                    <div style="margin-top: 20px;">
+                    <section style="margin-top: 20px;">
                         <div class="summary-label">Keywords</div>
                         <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
                             <?php foreach ($result['keywords'] as $keyword): ?>
@@ -375,12 +375,12 @@ function scrapeUrl($url) {
                                 </span>
                             <?php endforeach; ?>
                         </div>
-                    </div>
-                </div>
+                    </section>
+                </article>
             <?php endif; ?>
 
             <form method="POST" action="" id="summarizeForm">
-                <div class="form-group">
+                <section class="form-group">
                     <label for="url">Web page URL:</label>
                     <input 
                         type="url" 
@@ -393,9 +393,9 @@ function scrapeUrl($url) {
                     <div class="file-info">
                         Enter the full URL of the web page you want to summarize.
                     </div>
-                </div>
+                </section>
                 
-                <div class="form-group">
+                <section class="form-group">
                     <label for="model">AI model:</label>
                     <select id="model" name="model">
                         <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
@@ -404,9 +404,9 @@ function scrapeUrl($url) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
+                </section>
                 
-                <div class="form-group">
+                <section class="form-group">
                     <label for="language">Response language:</label>
                     <select id="language" name="language">
                         <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
@@ -415,7 +415,7 @@ function scrapeUrl($url) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
+                </section>
                 
                 <button type="submit" name="submit" value="1" class="btn btn-primary">
                     <?php if ($processing && !$result && !$error): ?>
@@ -428,7 +428,7 @@ function scrapeUrl($url) {
                     🔄 New Summary
                 </button>
             </form>
-        </div>
+        </main>
     </div>
     
     <script>
