@@ -353,8 +353,8 @@ function scrapeUrl($url) {
                     </header>
                     
                     <section class="summary-box">
-                        <div class="summary-label">Summary</div>
-                        <div class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></div>
+                        <h3 class="summary-label">Summary</h3>
+                        <p class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></p>
                     </section>
                     
                     <section style="margin-top: 20px;">
