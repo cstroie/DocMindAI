@@ -380,7 +380,7 @@ function scrapeUrl($url) {
             <?php endif; ?>
 
             <form method="POST" action="" id="summarizeForm">
-                <div class="form-group">
+                <fieldset>
                     <label for="url">Web page URL:</label>
                     <input 
                         type="url" 
@@ -393,9 +393,7 @@ function scrapeUrl($url) {
                     <small class="file-info">
                         Enter the full URL of the web page you want to summarize.
                     </small>
-                </div>
                 
-                <div class="form-group">
                     <label for="model">AI model:</label>
                     <select id="model" name="model">
                         <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
@@ -404,9 +402,7 @@ function scrapeUrl($url) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
                 
-                <div class="form-group">
                     <label for="language">Response language:</label>
                     <select id="language" name="language">
                         <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
@@ -415,7 +411,7 @@ function scrapeUrl($url) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
+                </fieldset>
                 
                 <button type="submit" name="submit" value="1" class="btn btn-primary">
                     <?php if ($processing && !$result && !$error): ?>
