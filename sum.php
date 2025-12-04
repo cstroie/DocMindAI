@@ -100,7 +100,7 @@ if (!array_key_exists($MODEL, $AVAILABLE_MODELS)) {
  * Falls back to English if invalid language is selected
  */
 if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
-    $LANGUAGE = 'en'; // Default to English
+    $LANGUAGE = 'ro'; // Default to Romanian
 }
 
 /**
@@ -192,7 +192,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) ||
                     ['role' => 'system', 'content' => $SYSTEM_PROMPT],
                     ['role' => 'user', 'content' => "URL: " . $url . "\n\nCONTENT TO SUMMARIZE:\n" . $scraped_content]
                 ],
-                'temperature' => 0.3,
                 'max_tokens' => 1000
             ];
             
@@ -334,10 +333,10 @@ function scrapeUrl($url) {
 </head>
 <body>
     <div class="container">
-        <header class="header">
+        <hgroup class="header">
             <h1>📝 Web Page Summarizer</h1>
             <p>AI-powered structured summary of web articles</p>
-        </header>
+        </hgroup>
 
         <main class="content">
             <?php if ($error): ?>
