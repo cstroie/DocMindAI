@@ -211,6 +211,10 @@ ul {
     margin-left: 20px;
 }
 
+.result-card > header {
+    margin-bottom: 20px;
+}
+
 .result-card > header h2 {
     color: #111827;
     font-size: 20px;
