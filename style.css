@@ -189,7 +189,7 @@ input:focus, select:focus {
     border-left: 4px solid #667eea;
 }
 
-.summary-label {
+.summary-label, h3.summary-label {
     font-size: 12px;
     text-transform: uppercase;
     color: #6b7280;
