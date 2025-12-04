@@ -390,9 +390,9 @@ function scrapeUrl($url) {
                         placeholder="https://example.com/article"
                         required
                     >
-                    <div class="file-info">
+                    <small class="file-info">
                         Enter the full URL of the web page you want to summarize.
-                    </div>
+                    </small>
                 </section>
                 
                 <section class="form-group">
