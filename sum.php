@@ -400,6 +400,9 @@ function scrapeUrl($url) {
                             </option>
                         <?php endforeach; ?>
                     </select>
+                    <small class="file-info">
+                        Select the AI model to use for summarization.
+                    </small>
                 
                     <label for="language">Response language:</label>
                     <select id="language" name="language">
@@ -409,6 +412,9 @@ function scrapeUrl($url) {
                             </option>
                         <?php endforeach; ?>
                     </select>
+                    <small class="file-info">
+                        Select the language for the summary output.
+                    </small>
                 </fieldset>
                 
                 <button type="submit" name="submit" value="1" class="btn btn-primary">
