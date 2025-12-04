@@ -83,6 +83,12 @@ input, select {
     transition: border-color 0.3s;
 }
 
+fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
 input:focus, select:focus {
     outline: none;
     border-color: #667eea;
