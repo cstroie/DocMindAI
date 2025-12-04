@@ -201,6 +201,10 @@ section {
     margin-bottom: 16px;
 }
 
+ul {
+    margin-left: 20px;
+}
+
 .summary-text {
     font-size: 20px;
     font-weight: 600;
