@@ -51,7 +51,7 @@ body {
 label {
     display: block;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin: 8px 0 4px 0;
     color: #374151;
 }
 
@@ -86,7 +86,7 @@ input, select {
 fieldset {
     border: none;
     padding: 0;
-    margin: 0;
+    margin: 10px 0;
 }
 
 input:focus, select:focus {
