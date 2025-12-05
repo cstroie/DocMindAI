@@ -126,6 +126,30 @@ input:focus, select:focus {
     transform: translateY(0);
 }
 
+.bookmarklet {
+    display: inline-block;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    margin-left: 10px;
+}
+
+.bookmarklet:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(245, 87, 108, 0.4);
+}
+
+.bookmarklet:active {
+    transform: translateY(0);
+}
+
 article {
     background: #f9fafb;
     border-radius: 12px;
