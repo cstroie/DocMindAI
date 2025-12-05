@@ -244,6 +244,50 @@ small {
     line-height: 1.5;
 }
 
+.pathology-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    margin-left: 12px;
+}
+
+.pathology-yes {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.pathology-no {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.severity-bar {
+    width: 100%;
+    height: 12px;
+    background-color: #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.severity-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+.summary-text {
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    font-size: 16px;
+    line-height: 1.5;
+    margin-top: 8px;
+}
+
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
