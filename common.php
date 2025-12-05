@@ -502,6 +502,10 @@ function markdownToHtml($markdown) {
     // Handle line breaks within paragraphs
     $markdown = str_replace("\n", '<br>', $markdown);
     
+    // Remove empty paragraphs
+    $markdown = preg_replace('/<p>\s*<\/p>/', '', $markdown);
+    $markdown = preg_replace('/<p><br\s*\/?>\s*<\/p>/', '', $markdown);
+    
     return $markdown;
 }
 ?>
