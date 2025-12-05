@@ -319,6 +319,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
         if ($is_api_request) {
             if ($is_hupl_request) {
                 // For hupl-compatible requests, return only the text
+                header('Access-Control-Allow-Origin: *');
                 header('Content-Type: text/plain');
                 if ($error) {
                     echo $error;
@@ -327,6 +328,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
                 }
             } else {
                 // Regular API request returns JSON
+                header('Access-Control-Allow-Origin: *');
                 header('Content-Type: application/json');
                 if ($error) {
                     echo json_encode(['error' => $error]);

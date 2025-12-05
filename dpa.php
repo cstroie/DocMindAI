@@ -237,6 +237,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
     
     // Return JSON if it's an API request
     if ($is_api_request) {
+        header('Access-Control-Allow-Origin: *');
         header('Content-Type: application/json');
         if ($error) {
             echo json_encode(['error' => $error]);
