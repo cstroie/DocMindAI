@@ -156,6 +156,7 @@ article {
     padding: 24px;
     margin-bottom: 20px;
     border: 2px solid #e5e7eb;
+    font-size: 14px;
 }
 
 article > header,
@@ -184,8 +185,10 @@ article > header {
     margin-bottom: 20px;
 }
 
-article > header h2 {
+article > header h3 {
+    font-size: 20px;
     color: #111827;
+    font-weight: 700;
 }
 
 article > section > p {
@@ -209,7 +212,7 @@ article > section > ul li {
 }
 
 .diagnosis-item h4 {
-    margin-top: 16px;
+    margin-top: 8px;
 }
 
 .diagnosis-item h3 {
@@ -312,12 +315,12 @@ article ul {
 }
 
 .markdown-result h4 {
-    margin-top: 16px;
+    margin-top: 8px;
 }
 
 .markdown-result h5,
 .markdown-result h6 {
-    margin-top: 12px;
+    margin-top: 8px;
     font-weight: 600;
     color: #374151;
 }
