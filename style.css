@@ -211,6 +211,7 @@ article > section > ul li {
     font-weight: 700;
     color: #111827;
     text-transform: none;
+    flex: 1;
 }
 
 article > footer > div {

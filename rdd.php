@@ -364,11 +364,11 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                     
                     <?php foreach ($result['diagnoses'] as $index => $diagnosis): ?>
                     <section class="diagnosis-item">
-                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
                             <h3>
                                 <?php echo ($index + 1) . '. ' . htmlspecialchars($diagnosis['condition']); ?>
                             </h3>
-                            <span style="font-weight: 600; color: <?php echo getProbabilityColor($diagnosis['probability']); ?>">
+                            <span style="font-weight: 600; color: <?php echo getProbabilityColor($diagnosis['probability']); ?>; margin-left: auto;">
                                 <?php echo $diagnosis['probability']; ?>%
                             </span>
                         </div>
