@@ -224,62 +224,90 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
         } elseif (isset($response_data['choices'][0]['message']['content'])) {
             $content = trim($response_data['choices'][0]['message']['content']);
             
-            // Extract JSON from response (in case model adds extra text)
-            if (preg_match('/\{[^}]+\}/s', $content, $matches)) {
+            // Try to extract JSON from response (in case model adds extra text)
+            $json_str = null;
+            
+            // First try to find JSON between code fences
+            if (preg_match('/```(?:json)?\s*({.*?})\s*```/s', $content, $matches)) {
+                $json_str = $matches[1];
+            } 
+            // Then try to find any JSON object
+            elseif (preg_match('/\{.*\}/s', $content, $matches)) {
                 $json_str = $matches[0];
+            }
+            
+            if ($json_str) {
+                // Clean up the JSON string
+                $json_str = trim($json_str);
+                
+                // Try to decode JSON
                 $result = json_decode($json_str, true);
                 
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    $error = 'Invalid JSON response: ' . json_last_error_msg();
-                } elseif (!isset($result['diagnoses']) || !is_array($result['diagnoses'])) {
-                    $error = 'JSON response missing diagnoses array';
-                } elseif (count($result['diagnoses']) < 1) {
-                    $error = 'No differential diagnoses provided';
-                } else {
-                    // Validate each diagnosis
-                    foreach ($result['diagnoses'] as $index => $diagnosis) {
-                        if (!isset($diagnosis['condition']) || !is_string($diagnosis['condition']) || empty($diagnosis['condition'])) {
-                            $error = 'Invalid condition in diagnosis ' . ($index + 1);
-                            break;
-                        }
-                        if (!isset($diagnosis['probability']) || !is_numeric($diagnosis['probability']) || 
-                            $diagnosis['probability'] < 0 || $diagnosis['probability'] > 100) {
-                            $error = 'Invalid probability in diagnosis ' . ($index + 1);
-                            break;
-                        }
-                        if (!isset($diagnosis['description']) || !is_string($diagnosis['description']) || empty($diagnosis['description'])) {
-                            $error = 'Invalid description in diagnosis ' . ($index + 1);
-                            break;
-                        }
-                        if (!isset($diagnosis['supporting_features']) || !is_array($diagnosis['supporting_features']) || 
-                            count($diagnosis['supporting_features']) < 1) {
-                            $error = 'Invalid supporting features in diagnosis ' . ($index + 1);
-                            break;
-                        }
-                        if (!isset($diagnosis['references']) || !is_array($diagnosis['references'])) {
-                            $error = 'Invalid references in diagnosis ' . ($index + 1);
-                            break;
-                        }
-                        
-                        // Validate supporting features
-                        foreach ($diagnosis['supporting_features'] as $feature) {
-                            if (!is_string($feature) || empty($feature)) {
-                                $error = 'Invalid supporting feature in diagnosis ' . ($index + 1);
-                                break 2;
+                    // Try to fix common JSON issues
+                    $json_str = preg_replace('/,\s*([\]}])/m', '$1', $json_str); // Remove trailing commas
+                    $json_str = preg_replace('/([{,])\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/', '$1"$2":', $json_str); // Add quotes to keys
+                    $json_str = preg_replace('/:\s*\'([^\']*)\'/', ':"$1"', $json_str); // Replace single quotes with double quotes
+                    $json_str = preg_replace('/\s+/', ' ', $json_str); // Normalize whitespace
+                    
+                    $result = json_decode($json_str, true);
+                    
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        $error = 'Invalid JSON response: ' . json_last_error_msg() . ' (Content: ' . substr($json_str, 0, 200) . '...)';
+                    }
+                }
+                
+                if (!$error) {
+                    if (!isset($result['diagnoses']) || !is_array($result['diagnoses'])) {
+                        $error = 'JSON response missing diagnoses array';
+                    } elseif (count($result['diagnoses']) < 1) {
+                        $error = 'No differential diagnoses provided';
+                    } else {
+                        // Validate each diagnosis
+                        foreach ($result['diagnoses'] as $index => $diagnosis) {
+                            if (!isset($diagnosis['condition']) || !is_string($diagnosis['condition']) || empty($diagnosis['condition'])) {
+                                $error = 'Invalid condition in diagnosis ' . ($index + 1);
+                                break;
                             }
-                        }
-                        
-                        // Validate references
-                        foreach ($diagnosis['references'] as $reference) {
-                            if (!is_string($reference) || empty($reference)) {
-                                $error = 'Invalid reference in diagnosis ' . ($index + 1);
-                                break 2;
+                            if (!isset($diagnosis['probability']) || !is_numeric($diagnosis['probability']) || 
+                                $diagnosis['probability'] < 0 || $diagnosis['probability'] > 100) {
+                                $error = 'Invalid probability in diagnosis ' . ($index + 1);
+                                break;
+                            }
+                            if (!isset($diagnosis['description']) || !is_string($diagnosis['description']) || empty($diagnosis['description'])) {
+                                $error = 'Invalid description in diagnosis ' . ($index + 1);
+                                break;
+                            }
+                            if (!isset($diagnosis['supporting_features']) || !is_array($diagnosis['supporting_features']) || 
+                                count($diagnosis['supporting_features']) < 1) {
+                                $error = 'Invalid supporting features in diagnosis ' . ($index + 1);
+                                break;
+                            }
+                            if (!isset($diagnosis['references']) || !is_array($diagnosis['references'])) {
+                                $error = 'Invalid references in diagnosis ' . ($index + 1);
+                                break;
+                            }
+                            
+                            // Validate supporting features
+                            foreach ($diagnosis['supporting_features'] as $feature) {
+                                if (!is_string($feature) || empty($feature)) {
+                                    $error = 'Invalid supporting feature in diagnosis ' . ($index + 1);
+                                    break 2;
+                                }
+                            }
+                            
+                            // Validate references
+                            foreach ($diagnosis['references'] as $reference) {
+                                if (!is_string($reference) || empty($reference)) {
+                                    $error = 'Invalid reference in diagnosis ' . ($index + 1);
+                                    break 2;
+                                }
                             }
                         }
                     }
                 }
             } else {
-                $error = 'No JSON found in response: ' . $content;
+                $error = 'No JSON found in response: ' . substr($content, 0, 200) . '...';
             }
         } else {
             $error = 'Invalid API response format';
