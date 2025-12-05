@@ -81,10 +81,10 @@ if (!isset($DEFAULT_TEXT_MODEL)) {
 }
 
 /**
- * Get selected model and language from POST data, cookies, or use defaults
+ * Get selected model and language from POST/GET data, cookies, or use defaults
  */
-$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_COOKIE['rra-model']) ? $_COOKIE['rra-model'] : $DEFAULT_TEXT_MODEL);
-$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_COOKIE['rra-language']) ? $_COOKIE['rra-language'] : 'ro');
+$MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['rra-model']) ? $_COOKIE['rra-model'] : $DEFAULT_TEXT_MODEL));
+$LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_GET['language']) ? $_GET['language'] : (isset($_COOKIE['rra-language']) ? $_COOKIE['rra-language'] : 'ro'));
 
 /**
  * Validate model selection
@@ -152,13 +152,17 @@ $processing = false;
 $is_api_request = false;
 
 /**
- * Handle POST request for report analysis
+ * Handle POST/GET requests for report analysis
  * Processes both web form submissions and API requests
  * Validates input, calls AI API, and processes response
  */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
+if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) || 
+    ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET['report']))) {
     $processing = true;
-    $is_api_request = !isset($_POST['submit']); // If no submit button, it's an API request
+    $is_api_request = (!isset($_POST['submit']) && !isset($_GET['submit'])); // If no submit button, it's an API request
+    
+    // Sanitize and validate input
+    $report = trim(isset($_POST['report']) ? $_POST['report'] : $_GET['report']);
     
     // Sanitize and validate input
     $report = trim($_POST['report']);
@@ -236,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
         exit;
     }
 }
-} // Close the if ($processing) block
+}
 ?>
 <!DOCTYPE html>
 <html lang="ro">
@@ -248,48 +252,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <hgroup>
             <h1>🏥 Radiology report analyzer</h1>
             <p>AI-powered automatic analysis of medical reports</p>
-        </div>
+        </hgroup>
 
-        <div class="content">
-            <form method="POST" action="" id="analysisForm">
-                <?php if ($error): ?>
-                    <div class="error">
-                        <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
-                    </div>
-                <?php endif; ?>
-                
-                <?php if ($result): ?>
-                    <div class="result-card">
-                        <div class="result-header">
-                            <h2 style="color: #111827; font-size: 20px;">Analysis Result</h2>
-                            <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
-                                <?php echo $result['pathologic'] === 'yes' ? '⚠️ Pathological' : '✓ Normal'; ?>
+        <main>
+            <?php if ($error): ?>
+                <section role="alert" class="error">
+                    <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
+                </section>
+            <?php endif; ?>
+            
+            <?php if ($result): ?>
+                <article>
+                    <header>
+                        <h2>Analysis Result</h2>
+                        <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
+                            <?php echo $result['pathologic'] === 'yes' ? '⚠️ Pathological' : '✓ Normal'; ?>
+                        </span>
+                    </header>
+                    
+                    <section>
+                        <h3>Severity</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <strong>Level:</strong>
+                            <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
+                                <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
                             </span>
                         </div>
-                        
-                        <div class="severity-container">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <strong style="color: #374151;">Severity:</strong>
-                                <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
-                                    <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
-                                </span>
-                            </div>
-                            <div class="severity-bar">
-                                <div class="severity-fill" style="width: <?php echo $result['severity'] * 10; ?>%; background: <?php echo getSeverityColor($result['severity']); ?>;"></div>
-                            </div>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width: <?php echo $result['severity'] * 10; ?>%; background: <?php echo getSeverityColor($result['severity']); ?>;"></div>
                         </div>
-                        
-                        <div class="summary-box">
-                            <div class="summary-label">Summary</div>
-                            <div class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></div>
-                        </div>
-                    </div>
-                <?php endif; ?>
+                    </section>
+                    
+                    <footer>
+                        <h3>Summary</h3>
+                        <div class="summary-text"><?php echo htmlspecialchars($result['summary']); ?></div>
+                    </footer>
+                </article>
+            <?php endif; ?>
 
-                <div class="form-group">
+            <form method="POST" action="" id="analysisForm">
+                <fieldset>
                     <label for="report">Radiology report:</label>
                     <textarea 
                         id="report" 
@@ -297,10 +302,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                         rows="8" 
                         required
                         placeholder="Enter the radiology report here...&#10;&#10;Example: Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum."
-                    ><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : ''; ?></textarea>
-                </div>
+                    ><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : (isset($_GET['report']) ? htmlspecialchars($_GET['report']) : ''); ?></textarea>
+                    <small>
+                        Enter the radiology report you want to analyze.
+                    </small>
 
-                <div class="form-group">
                     <label for="model">AI model:</label>
                     <select id="model" name="model">
                         <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
@@ -309,9 +315,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
+                    <small>
+                        Select the AI model to use for analysis.
+                    </small>
                 
-                <div class="form-group">
                     <label for="language">Response language:</label>
                     <select id="language" name="language">
                         <?php foreach ($AVAILABLE_LANGUAGES as $value => $label): ?>
@@ -320,7 +327,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                </div>
+                    <small>
+                        Select the language for the analysis output.
+                    </small>
+                </fieldset>
                 
                 <button type="submit" name="submit" value="1" class="btn btn-primary">
                     <?php if ($processing && !$result && !$error): ?>
@@ -333,7 +343,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) {
                     🔄 New analysis
                 </button>
             </form>
-        </div>
+        </main>
     </div>
     
     <script>
