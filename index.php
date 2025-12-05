@@ -76,6 +76,12 @@ include 'common.php';
                     <h3>Patient Education Content</h3>
                     <p>Convert complex medical information into patient-friendly educational content.</p>
                 </a>
+                
+                <a href="sml.php" class="tool-card">
+                    <div class="tool-icon">📚</div>
+                    <h3>Search Medical Literature</h3>
+                    <p>Search medical literature databases and get AI-summarized research papers.</p>
+                </a>
             </section>
         </main>
     </div>
