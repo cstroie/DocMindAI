@@ -281,9 +281,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                                 <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
                             </span>
                         </div>
-                        <div class="severity-bar">
-                            <div class="severity-fill" style="width: <?php echo $result['severity'] * 10; ?>%; background: <?php echo getSeverityColor($result['severity']); ?>;"></div>
-                        </div>
+                        <progress class="severity-bar" value="<?php echo $result['severity']; ?>" max="10" data-severity="<?php echo $result['severity']; ?>"></progress>
                     </section>
                     
                     <footer>
@@ -347,6 +345,32 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
     </div>
     
     <script>
+        // Set progress bar color based on severity
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressBar = document.querySelector('.severity-bar');
+            if (progressBar) {
+                const severity = progressBar.dataset.severity;
+                const color = getSeverityColor(severity);
+                
+                // Set color for WebKit browsers
+                progressBar.style.setProperty('--progress-color', color);
+                
+                // For Firefox, we need to use a different approach
+                if (typeof InstallTrigger !== 'undefined') {
+                    // Firefox
+                    progressBar.style.accentColor = color;
+                }
+            }
+        });
+        
+        // Helper function to get severity color (matching PHP function)
+        function getSeverityColor(severity) {
+            if (severity == 0) return '#10b981'; // green
+            if (severity <= 3) return '#3b82f6'; // blue
+            if (severity <= 6) return '#f59e0b'; // orange
+            return '#ef4444'; // red
+        }
+        
         function clearForm() {
             document.getElementById('report').value = '';
             document.getElementById('model').selectedIndex = 0;
