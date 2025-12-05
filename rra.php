@@ -286,9 +286,8 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                     </header>
                     
                     <section>
-                        <h3>Severity</h3>
+                        <h3>Severity level</h3>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <strong>Level:</strong>
                             <span style="font-weight: 600; color: <?php echo getSeverityColor($result['severity']); ?>">
                                 <?php echo getSeverityLabel($result['severity']); ?> (<?php echo $result['severity']; ?>/10)
                             </span>
