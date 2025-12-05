@@ -447,11 +447,9 @@ function fetchArticleDetails($ids) {
                     
                     <?php foreach ($result as $index => $article): ?>
                     <section class="diagnosis-item">
-                        <div class="diagnosis-header">
-                            <h3>
-                                <?php echo ($index + 1) . '. ' . htmlspecialchars($article['title']); ?>
-                            </h3>
-                        </div>
+                        <h3>
+                            <?php echo ($index + 1) . '. ' . htmlspecialchars($article['title']); ?>
+                        </h3>
                         
                         <div>
                             <p><strong>Authors:</strong> <?php echo htmlspecialchars(implode(', ', $article['authors'])); ?></p>
