@@ -28,12 +28,12 @@ include 'common.php';
         </hgroup>
 
         <main>
-            <div class="welcome-section">
+            <section class="welcome-section">
                 <h2>Welcome to the Medical AI Tools Suite</h2>
                 <p>A collection of specialized tools designed to help medical professionals process, analyze, and extract key information from various medical documents using artificial intelligence.</p>
-            </div>
+            </section>
             
-            <div class="tools-grid">
+            <section class="tools-grid">
                 <a href="rra.php" class="tool-card">
                     <div class="tool-icon">🔍</div>
                     <h3>Radiology Report Analyzer</h3>
@@ -68,7 +68,7 @@ include 'common.php';
                     <p>Scrape web pages and return a structured summary of the most important points.</p>
                     <div class="btn btn-primary">Access Tool</div>
                 </a>
-            </div>
+            </section>
             
             <section style="margin-top: 40px; text-align: center;">
                 <h3>Configuration</h3>
