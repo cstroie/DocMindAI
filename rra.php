@@ -116,27 +116,29 @@ OUTPUT FORMAT (JSON):
 {
   \"pathologic\": \"yes/no\",
   \"severity\": 1-10,
-  \"summary\": \"1-5 words\"
+  \"summary\": \"1-5 words\",
+  \"diagnoses\": [\"diagnosis1\", \"diagnosis2\", \"diagnosis3\"]
 }
 
 RULES:
 - \"pathologic\": \"yes\" if any anomaly exists, otherwise \"no\"
 - \"severity\": 1=minimal, 5=moderate, 10=critical/urgent
 - \"summary\": diagnosis in maximum 5 words (e.g., \"fracture\", \"pneumonia\", \"lung nodule\")
-- If everything is normal: {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"normal\"}
+- \"diagnoses\": exactly 3 specific medical diagnoses based on the report
+- If everything is normal: {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"normal\", \"diagnoses\": [\"normal\", \"no significant findings\", \"within normal limits\"]}
 - Ignore spelling errors
 - Respond ONLY with the JSON, without additional text
 
 EXAMPLES:
 
 Report: \"Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate.\"
-Response: {\"pathologic\": \"yes\", \"severity\": 6, \"summary\": \"pulmonary consolidation\"}
+Response: {\"pathologic\": \"yes\", \"severity\": 6, \"summary\": \"pulmonary consolidation\", \"diagnoses\": [\"pneumonia\", \"lung infiltrate\", \"respiratory infection\"]}
 
 Report: \"No pathological changes. Heart of normal size.\"
-Response: {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"normal\"}
+Response: {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"normal\", \"diagnoses\": [\"normal\", \"no significant findings\", \"within normal limits\"]}
 
 Report: \"Displaced fracture of the right distal femur with significant hematoma\"
-Response: {\"pathologic\": \"yes\", \"severity\": 8, \"summary\": \"femur fracture\"}";
+Response: {\"pathologic\": \"yes\", \"severity\": 8, \"summary\": \"femur fracture\", \"diagnoses\": [\"bone fracture\", \"hematoma\", \"orthopedic trauma\"]}";
 
 
 /**
@@ -207,7 +209,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
             
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $error = 'Invalid JSON response: ' . json_last_error_msg();
-            } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['summary'])) {
+            } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['summary']) || !isset($result['diagnoses'])) {
                 $error = 'JSON response missing required fields';
             } elseif (!in_array($result['pathologic'], ['yes', 'no'])) {
                 $error = 'Invalid pathologic value in response';
@@ -215,6 +217,17 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                 $error = 'Invalid severity value in response';
             } elseif (!is_string($result['summary']) || empty($result['summary'])) {
                 $error = 'Invalid summary value in response';
+            } elseif (!is_array($result['diagnoses']) || count($result['diagnoses']) < 1) {
+                $error = 'Invalid diagnoses in response (must be array with at least 1 item)';
+            } else {
+                // Validate diagnoses array contents (take first 3 if more are provided)
+                $result['diagnoses'] = array_slice($result['diagnoses'], 0, 3);
+                foreach ($result['diagnoses'] as $diagnosis) {
+                    if (!is_string($diagnosis) || empty($diagnosis)) {
+                        $error = 'Invalid diagnosis in response';
+                        break;
+                    }
+                }
             }
         } else {
             $error = 'No JSON found in response: ' . $content;
@@ -285,9 +298,11 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                     </section>
                     
                     <footer>
-                        <h3>Summary</h3>
+                        <h3>Diagnoses</h3>
                         <div>
-                            <span><?php echo htmlspecialchars($result['summary']); ?></span>
+                            <?php foreach ($result['diagnoses'] as $diagnosis): ?>
+                                <span><?php echo htmlspecialchars($diagnosis); ?></span>
+                            <?php endforeach; ?>
                         </div>
                     </footer>
                 </article>
