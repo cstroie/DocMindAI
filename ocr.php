@@ -386,12 +386,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
                         <h2>Preprocessed Image</h2>
                     </header>
                     
-                    <figure>
-                        <div class="preprocessed-image-container">
-                            <img src="data:image/png;base64,<?php echo $preprocessed_image_base64; ?>" 
-                                 alt="Preprocessed image for OCR" 
-                                 class="preprocessed-image">
-                        </div>
+                    <figure class="preprocessed-image-container">
+                        <img src="data:image/png;base64,<?php echo $preprocessed_image_base64; ?>" 
+                             alt="Preprocessed image for OCR" 
+                             class="preprocessed-image">
                     </figure>
                 </article>
                 <?php endif; ?>
