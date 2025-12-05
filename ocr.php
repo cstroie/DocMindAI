@@ -368,9 +368,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
                         <h2>📄 Summary</h2>
                     </header>
                     
-                    <section>
-                        <p><?php echo htmlspecialchars($summary); ?></p>
-                    </section>
+                    <p><?php echo htmlspecialchars($summary); ?></p>
                 </article>
                 <?php endif; ?>
                 
@@ -387,13 +385,14 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
                     <header>
                         <h2>Preprocessed Image</h2>
                     </header>
-                    <section>
+                    
+                    <figure>
                         <div class="preprocessed-image-container">
                             <img src="data:image/png;base64,<?php echo $preprocessed_image_base64; ?>" 
                                  alt="Preprocessed image for OCR" 
                                  class="preprocessed-image">
                         </div>
-                    </section>
+                    </figure>
                 </article>
                 <?php endif; ?>
             <?php endif; ?>
