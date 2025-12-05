@@ -499,12 +499,18 @@ function markdownToHtml($markdown) {
     $markdown = preg_replace('/\n\s*\n/', '</p><p>', $markdown);
     $markdown = '<p>' . $markdown . '</p>';
     
-    // Handle line breaks within paragraphs
-    $markdown = str_replace("\n", '<br>', $markdown);
+    // Handle line breaks within paragraphs - only replace newlines that are inside paragraph tags
+    $markdown = preg_replace_callback('/<p>(.*?)<\/p>/s', function($matches) {
+        // Replace single newlines with <br> but not multiple newlines (which would be paragraph breaks)
+        $content = $matches[1];
+        // Replace single newlines with <br>, but preserve paragraph structure
+        $content = preg_replace('/([^\n])\n([^\n])/s', '$1<br>$2', $content);
+        return '<p>' . $content . '</p>';
+    }, $markdown);
     
     // Remove empty paragraphs
     $markdown = preg_replace('/<p>\s*<\/p>/', '', $markdown);
-    $markdown = preg_replace('/<p><br\s*\/?>\s*<\/p>/', '', $markdown);
+    $markdown = preg_replace('/<p>\s*<br\s*\/?>\s*<\/p>/', '', $markdown);
     
     return $markdown;
 }
