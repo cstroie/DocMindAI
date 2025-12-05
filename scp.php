@@ -56,7 +56,6 @@ if (file_exists('config.php')) {
     $LLM_API_KEY = '';
     $DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
     $LLM_API_FILTER = '/free/';
-    $LLM_API_FILTER = '/free/';
 }
 
 // Create chat endpoint URL
@@ -303,9 +302,9 @@ function scrapeUrl($url) {
 
         <main>
             <?php if ($error): ?>
-                <div class="error">
+                <section role="alert" class="error">
                     <strong>⚠️ Error:</strong> <?php echo htmlspecialchars($error); ?>
-            </section>
+                </section>
             
             <?php if ($result): ?>
                 <article>
