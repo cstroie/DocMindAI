@@ -251,7 +251,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['content'])) ||
                         <h2>Patient-Friendly Content</h2>
                     </header>
                     
-                    <div class="markdown-result" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; white-space: pre-wrap;">
+                    <div class="markdown-result" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; white-space: pre-wrap; max-height: 400px; overflow-y: auto;">
                         <?php echo markdownToHtml(htmlspecialchars($result)); ?>
                     </div>
                 </article>
