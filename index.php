@@ -72,7 +72,7 @@ include 'common.php';
                 </a>
                 
                 <a href="pec.php" class="tool-card">
-                    <div class="tool-icon">📚</div>
+                    <div class="tool-icon">🤓</div>
                     <h3>Patient Education Content</h3>
                     <p>Convert complex medical information into patient-friendly educational content.</p>
                 </a>
