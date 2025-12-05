@@ -64,6 +64,12 @@ include 'common.php';
                     <h3>Web Page Summarizer</h3>
                     <p>Scrape web pages and return a structured summary of the most important points.</p>
                 </a>
+                
+                <a href="pec.php" class="tool-card">
+                    <div class="tool-icon">📚</div>
+                    <h3>Patient Education Content</h3>
+                    <p>Convert complex medical information into patient-friendly educational content.</p>
+                </a>
             </section>
         </main>
     </div>
