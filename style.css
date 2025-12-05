@@ -150,6 +150,10 @@ section {
     margin-bottom: 16px;
 }
 
+article > section:last-child {
+    margin-bottom: 0;
+}
+
 article > header {
     margin-bottom: 20px;
 }
