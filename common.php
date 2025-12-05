@@ -461,6 +461,130 @@ function callLLMApi($api_endpoint_chat, $data, $api_key = '') {
 }
 
 /**
+ * Handle common request processing for AI applications
+ * 
+ * @param string $input The input data (report, content, etc.)
+ * @param int $max_length Maximum allowed length
+ * @return array Processing result with validation status
+ */
+function processInput($input, $max_length = 10000) {
+    $result = [
+        'valid' => true,
+        'error' => null,
+        'data' => null
+    ];
+    
+    // Sanitize and validate input
+    $data = trim($input);
+    
+    // Validate length
+    if (strlen($data) > $max_length) {
+        $result['valid'] = false;
+        $result['error'] = 'The input is too long. Maximum ' . $max_length . ' characters allowed.';
+    } 
+    // Validate is not empty after trimming
+    elseif (empty($data)) {
+        $result['valid'] = false;
+        $result['error'] = 'The input cannot be empty.';
+    } else {
+        $result['data'] = $data;
+    }
+    
+    return $result;
+}
+
+/**
+ * Handle common URL validation and processing
+ * 
+ * @param string $url The URL to validate
+ * @return array Processing result with validation status
+ */
+function processUrl($url) {
+    $result = [
+        'valid' => true,
+        'error' => null,
+        'data' => null
+    ];
+    
+    // Sanitize and validate input
+    $data = trim($url);
+    
+    // Validate URL format
+    if (!filter_var($data, FILTER_VALIDATE_URL)) {
+        $result['valid'] = false;
+        $result['error'] = 'Invalid URL format. Please enter a valid URL including http:// or https://';
+    } else {
+        $result['data'] = $data;
+    }
+    
+    return $result;
+}
+
+/**
+ * Set common cookies for AI applications
+ * 
+ * @param array $cookies Cookie data to set
+ * @param int $expire_time Cookie expiration time
+ */
+function setCommonCookies($cookies, $expire_time = 2592000) { // 30 days default
+    foreach ($cookies as $name => $value) {
+        setcookie($name, $value, time() + $expire_time, '/');
+    }
+}
+
+/**
+ * Send JSON response and exit
+ * 
+ * @param array $data Response data
+ * @param bool $is_api_request Whether this is an API request
+ */
+function sendJsonResponse($data, $is_api_request = false) {
+    if ($is_api_request) {
+        header('Access-Control-Allow-Origin: *');
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit;
+    }
+}
+
+/**
+ * Extract JSON from AI response content
+ * 
+ * @param string $content AI response content
+ * @return array|null Extracted JSON data or null if not found
+ */
+function extractJsonFromResponse($content) {
+    // Try to find JSON between code fences
+    if (preg_match('/```(?:json)?\s*({.*?})\s*```/s', $content, $matches)) {
+        $json_str = $matches[1];
+    } 
+    // Then try to find any JSON object
+    elseif (preg_match('/\{.*\}/s', $content, $matches)) {
+        $json_str = $matches[0];
+    } else {
+        return null;
+    }
+    
+    // Clean up the JSON string
+    $json_str = trim($json_str);
+    
+    // Try to decode JSON
+    $result = json_decode($json_str, true);
+    
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        // Try to fix common JSON issues
+        $json_str = preg_replace('/,\s*([\]}])/m', '$1', $json_str); // Remove trailing commas
+        $json_str = preg_replace('/([{,])\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/', '$1"$2":', $json_str); // Add quotes to keys
+        $json_str = preg_replace('/:\s*\'([^\']*)\'/', ':"$1"', $json_str); // Replace single quotes with double quotes
+        $json_str = preg_replace('/\s+/', ' ', $json_str); // Normalize whitespace
+        
+        $result = json_decode($json_str, true);
+    }
+    
+    return $result;
+}
+
+/**
  * Convert basic markdown to HTML
  * 
  * @param string $markdown Markdown text to convert
