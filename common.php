@@ -591,6 +591,9 @@ function extractJsonFromResponse($content) {
  * @return string HTML output
  */
 function markdownToHtml($markdown) {
+    // Remove markdown code fences if present
+    $markdown = preg_replace('/^```(?:markdown)?\s*(.*?)\s*```$/s', '$1', $markdown);
+    
     // Normalize line endings
     $markdown = str_replace(["\r\n", "\r"], "\n", $markdown);
     
