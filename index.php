@@ -69,7 +69,9 @@ include 'common.php';
                     <div class="btn btn-primary">Access Tool</div>
                 </a>
             </section>
-            
+        </main>
+        
+        <footer>
             <section style="margin-top: 40px; text-align: center;">
                 <h3>Configuration</h3>
                 <p style="margin-top: 12px;">
@@ -84,7 +86,7 @@ $DEFAULT_VISION_MODEL = 'gemma3:4b';
 $LLM_API_FILTER = '/free/';
 ?&gt;</pre>
             </section>
-        </main>
+        </footer>
     </div>
 </body>
 </html>
