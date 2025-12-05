@@ -184,9 +184,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
         'messages' => [
             ['role' => 'system', 'content' => $SYSTEM_PROMPT],
             ['role' => 'user', 'content' => "REPORT TO ANALYZE:\n" . $report]
-        ],
-        'temperature' => 0.1,
-        'max_tokens' => 500
+        ]
     ];
     
     // Make API request using common function

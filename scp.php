@@ -192,9 +192,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) ||
                 'messages' => [
                     ['role' => 'system', 'content' => $SYSTEM_PROMPT],
                     ['role' => 'user', 'content' => "URL: " . $url . "\n\nCONTENT TO PROCESS:\n" . $scraped_content]
-                ],
-                'temperature' => 0.1,
-                'max_tokens' => 16384
+                ]
             ];
             
             // Make API request using common function

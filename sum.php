@@ -191,8 +191,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) ||
                 'messages' => [
                     ['role' => 'system', 'content' => $SYSTEM_PROMPT],
                     ['role' => 'user', 'content' => "URL: " . $url . "\n\nCONTENT TO SUMMARIZE:\n" . $scraped_content]
-                ],
-                'max_tokens' => 1000
+                ]
             ];
             
             // Make API request using common function
