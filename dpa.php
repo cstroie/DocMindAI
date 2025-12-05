@@ -115,13 +115,15 @@ OUTPUT FORMAT (JSON):
 {
   \"pathologic\": \"yes/no\",
   \"severity\": 0-10,
-  \"summary\": \"summary paragraph\"
+  \"summary\": \"summary paragraph\",
+  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\"]
 }
 
 RULES:
 - \"pathologic\": \"yes\" if the discharge paper contains any findings relevant to radiology
 - \"severity\": 0=normal, 1=minimal, 5=moderate, 10=critical/urgent
 - \"summary\": maximum 50 words summarizing radiology-relevant information
+- \"keywords\": exactly 3 relevant medical keywords from the discharge paper
 - Focus on findings, conditions, treatments affecting radiology
 - Ignore non-radiology relevant information
 - Respond ONLY with the JSON, without additional text
@@ -129,13 +131,13 @@ RULES:
 EXAMPLES:
 
 Discharge: \"Patient discharged after treatment for pneumonia. Chest X-ray shows resolved infiltrate.\"
-Response: {\"pathologic\": \"yes\", \"severity\": 2, \"summary\": \"Patient treated for pneumonia with resolved infiltrate on chest X-ray. No current radiological concerns.\"}
+Response: {\"pathologic\": \"yes\", \"severity\": 2, \"summary\": \"Patient treated for pneumonia with resolved infiltrate on chest X-ray. No current radiological concerns.\", \"keywords\": [\"pneumonia\", \"chest X-ray\", \"infiltrate\"]}
 
 Discharge: \"Post-operative knee surgery. X-ray shows proper hardware placement.\"
-Response: {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"Post-operative knee surgery with proper hardware placement confirmed on X-ray. Normal findings.\"}
+Response: {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"Post-operative knee surgery with proper hardware placement confirmed on X-ray. Normal findings.\", \"keywords\": [\"knee surgery\", \"X-ray\", \"hardware placement\"]}
 
 Discharge: \"Acute appendicitis, laparoscopic appendectomy. Post-op CT showed small abscess.\"
-Response: {\"pathologic\": \"yes\", \"severity\": 5, \"summary\": \"Post-operative appendectomy patient with small abscess identified on CT scan requiring monitoring.\"}";
+Response: {\"pathologic\": \"yes\", \"severity\": 5, \"summary\": \"Post-operative appendectomy patient with small abscess identified on CT scan requiring monitoring.\", \"keywords\": [\"appendectomy\", \"CT scan\", \"abscess\"]}";
 
 /**
  * Application state variables
@@ -202,7 +204,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
             
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $error = 'Invalid JSON response: ' . json_last_error_msg();
-            } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['summary'])) {
+            } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['summary']) || !isset($result['keywords'])) {
                 $error = 'JSON response missing required fields';
             } elseif (!in_array($result['pathologic'], ['yes', 'no'])) {
                 $error = 'Invalid pathologic value in response';
@@ -210,6 +212,17 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                 $error = 'Invalid severity value in response';
             } elseif (!is_string($result['summary']) || empty($result['summary'])) {
                 $error = 'Invalid summary value in response';
+            } elseif (!is_array($result['keywords']) || count($result['keywords']) < 1) {
+                $error = 'Invalid keywords in response (must be array with at least 1 item)';
+            } else {
+                // Validate keywords array contents (take first 3 if more are provided)
+                $result['keywords'] = array_slice($result['keywords'], 0, 3);
+                foreach ($result['keywords'] as $keyword) {
+                    if (!is_string($keyword) || empty($keyword)) {
+                        $error = 'Invalid keyword in response';
+                        break;
+                    }
+                }
             }
         } else {
             $error = 'No JSON found in response: ' . $content;
@@ -279,6 +292,15 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                             <progress class="severity-bar" value="<?php echo $result['severity']; ?>" max="10" data-severity="<?php echo $result['severity']; ?>" style="flex: 1;"></progress>
                         </div>
                     </section>
+                    
+                    <footer>
+                        <h3>Keywords</h3>
+                        <div>
+                            <?php foreach ($result['keywords'] as $keyword): ?>
+                                <span><?php echo htmlspecialchars($keyword); ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                    </footer>
                 </article>
             <?php endif; ?>
 
