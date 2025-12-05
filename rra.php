@@ -278,9 +278,11 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                 <article>
                     <header>
                         <h2>Analysis Result</h2>
-                        <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
-                            <?php echo htmlspecialchars($result['summary']); ?>
-                        </span>
+                        <div>
+                            <span class="pathology-badge <?php echo $result['pathologic'] === 'yes' ? 'pathology-yes' : 'pathology-no'; ?>">
+                                <?php echo htmlspecialchars($result['summary']); ?>
+                            </span>
+                        </div>
                     </header>
                     
                     <section>
