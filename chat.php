@@ -387,12 +387,15 @@ if ($is_post_request) {
             // For assistant messages, we'll process markdown
             let processedContent = content;
             if (role === 'assistant') {
-                // Use the markdownToHtml function from common.php via a hidden textarea
-                const tempDiv = document.createElement('div');
-                tempDiv.textContent = content; // Escape HTML first
-                processedContent = tempDiv.innerHTML;
+                // Escape HTML entities first
+                processedContent = content
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
                 
-                // Apply markdown parsing through a hidden form submission
+                // Apply markdown parsing
                 processedContent = processedContent
                     .replace(/\n/g, '<br>')
                     .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
