@@ -338,12 +338,15 @@ if ($is_post_request) {
             // For assistant messages, we'll process markdown
             let processedContent = content;
             if (role === 'assistant') {
-                // Convert common markdown to HTML
+                // Convert markdown to HTML using a simple approach
                 processedContent = content
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>')              // Italic
-                    .replace(/`(.*?)`/g, '<code>$1</code>')            // Inline code
-                    .replace(/\n/g, '<br>');                           // Line breaks
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`(.*?)`/g, '<code>$1</code>')
+                    .replace(/\n/g, '<br>');
             }
             
             messageDiv.innerHTML = `
