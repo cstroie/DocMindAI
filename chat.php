@@ -10,6 +10,7 @@ if (file_exists('config.php')) {
     $LLM_API_KEY = '';
     $DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
     $LLM_API_FILTER = '/free/';
+    $CHAT_HISTORY_LENGTH = 10;
 }
 
 // Create chat endpoint URL
@@ -31,8 +32,13 @@ if (!isset($DEFAULT_TEXT_MODEL)) {
     $DEFAULT_TEXT_MODEL = !empty($AVAILABLE_MODELS) ? array_keys($AVAILABLE_MODELS)[0] : 'qwen2.5:1.5b';
 }
 
+// Set default history length if not defined in config
+if (!isset($CHAT_HISTORY_LENGTH)) {
+    $CHAT_HISTORY_LENGTH = 10;
+}
+
 // Configuration
-$max_history = isset($_COOKIE['chat_history_limit']) ? intval($_COOKIE['chat_history_limit']) : 10;
+$max_history = $CHAT_HISTORY_LENGTH;
 $model = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['chat_model']) ? $_COOKIE['chat_model'] : $DEFAULT_TEXT_MODEL));
 $language = isset($_POST['language']) ? $_POST['language'] : (isset($_GET['language']) ? $_GET['language'] : (isset($_COOKIE['chat_language']) ? $_COOKIE['chat_language'] : 'en'));
 
@@ -241,10 +247,6 @@ if ($is_post_request) {
         
         <div class="config-panel">
             <label>
-                History Length:
-                <input type="number" id="history-limit" min="1" max="50" value="<?php echo $max_history; ?>">
-            </label>
-            <label>
                 Model:
                 <select id="model-selector" name="model">
                     <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
@@ -386,12 +388,10 @@ if ($is_post_request) {
         }
         
         function saveConfig() {
-            const historyLimit = document.getElementById('history-limit').value;
             const model = document.getElementById('model-selector').value;
             const language = document.getElementById('language-selector').value;
             
             // Save to cookies
-            document.cookie = `chat_history_limit=${historyLimit}; path=/`;
             document.cookie = `chat_model=${model}; path=/`;
             document.cookie = `chat_language=${language}; path=/`;
             
