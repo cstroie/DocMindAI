@@ -334,9 +334,21 @@ if ($is_post_request) {
             messageDiv.className = `message ${role}-message`;
             
             const roleLabel = role === 'user' ? 'You' : 'Assistant';
+            
+            // For assistant messages, we'll process markdown
+            let processedContent = content;
+            if (role === 'assistant') {
+                // Convert common markdown to HTML
+                processedContent = content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')              // Italic
+                    .replace(/`(.*?)`/g, '<code>$1</code>')            // Inline code
+                    .replace(/\n/g, '<br>');                           // Line breaks
+            }
+            
             messageDiv.innerHTML = `
                 <div class="message-header">${roleLabel}</div>
-                <div class="message-content">${content}</div>
+                <div class="message-content">${processedContent}</div>
             `;
             
             historyDiv.appendChild(messageDiv);
