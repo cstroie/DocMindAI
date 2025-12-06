@@ -1,9 +1,44 @@
 <?php
 require_once 'common.php';
 
+// Configuration - Load from config.php if available, otherwise use defaults
+if (file_exists('config.php')) {
+    include 'config.php';
+} else {
+    // Safe defaults
+    $LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1';
+    $LLM_API_KEY = '';
+    $DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
+    $LLM_API_FILTER = '/free/';
+}
+
+// Create chat endpoint URL
+$LLM_API_ENDPOINT_CHAT = $LLM_API_ENDPOINT . '/chat/completions';
+
+// Fetch available models from API, filtering with configured filter
+$AVAILABLE_MODELS = getAvailableModels($LLM_API_ENDPOINT, $LLM_API_KEY, $LLM_API_FILTER);
+
+// If API call fails, use default models
+if (empty($AVAILABLE_MODELS)) {
+    $AVAILABLE_MODELS = [
+        'gemma3:1b' => 'Gemma 3 (1B)',
+        'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)'
+    ];
+}
+
+// Set default model if not defined in config
+if (!isset($DEFAULT_TEXT_MODEL)) {
+    $DEFAULT_TEXT_MODEL = !empty($AVAILABLE_MODELS) ? array_keys($AVAILABLE_MODELS)[0] : 'qwen2.5:1.5b';
+}
+
 // Configuration
 $max_history = isset($_COOKIE['chat_history_limit']) ? intval($_COOKIE['chat_history_limit']) : 10;
-$model = isset($_COOKIE['chat_model']) ? $_COOKIE['chat_model'] : 'gpt-3.5-turbo';
+$model = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['chat_model']) ? $_COOKIE['chat_model'] : $DEFAULT_TEXT_MODEL));
+
+// Validate model selection
+if (!array_key_exists($model, $AVAILABLE_MODELS)) {
+    $model = $DEFAULT_TEXT_MODEL; // Default to a valid model
+}
 
 // Check if this is an API request
 $is_api_request = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) || 
@@ -45,8 +80,8 @@ if ($is_post_request) {
     $history[] = ['role' => 'user', 'content' => $message];
     
     // Prepare API call
-    $api_key = getenv('OPENAI_API_KEY'); // Set this in your environment
-    $api_endpoint = getenv('OPENAI_API_ENDPOINT') ?: 'https://api.openai.com/v1';
+    $api_key = $LLM_API_KEY;
+    $api_endpoint = $LLM_API_ENDPOINT;
     
     // Add medical context instruction
     $medical_instruction = "You are a medical assistant. Provide accurate, helpful medical information while being cautious about giving specific medical advice. Always recommend consulting with healthcare professionals for personal medical concerns.";
@@ -203,9 +238,12 @@ if ($is_post_request) {
             </label>
             <label>
                 Model:
-                <select id="model-selector">
-                    <option value="gpt-3.5-turbo" <?php echo ($model === 'gpt-3.5-turbo') ? 'selected' : ''; ?>>GPT-3.5 Turbo</option>
-                    <option value="gpt-4" <?php echo ($model === 'gpt-4') ? 'selected' : ''; ?>>GPT-4</option>
+                <select id="model-selector" name="model">
+                    <?php foreach ($AVAILABLE_MODELS as $value => $label): ?>
+                        <option value="<?php echo htmlspecialchars($value); ?>" <?php echo ($model === $value) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($label); ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
             </label>
             <button onclick="saveConfig()">Save Settings</button>
@@ -316,6 +354,62 @@ if ($is_post_request) {
             document.cookie = `chat_model=${model}; path=/`;
             
             alert('Settings saved! Refresh the page to apply changes.');
+        }
+        
+        // Update form submission to include model selection
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            const model = document.getElementById('model-selector').value;
+            
+            if (!message) return;
+            
+            // Add user message to UI
+            addMessageToUI('user', message);
+            
+            // Clear input
+            input.value = '';
+            
+            // Show typing indicator
+            document.getElementById('typing-indicator').style.display = 'block';
+            document.getElementById('send-button').disabled = true;
+            
+            // Send message to server
+            fetch('chat.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    history: chatHistory,
+                    model: model
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide typing indicator
+                document.getElementById('typing-indicator').style.display = 'none';
+                document.getElementById('send-button').disabled = false;
+                
+                if (data.error) {
+                    addMessageToUI('assistant', 'Error: ' + data.error);
+                } else {
+                    // Add assistant response to UI
+                    addMessageToUI('assistant', data.reply);
+                    
+                    // Update chat history
+                    chatHistory = data.history;
+                }
+            })
+            .catch(error => {
+                // Hide typing indicator
+                document.getElementById('typing-indicator').style.display = 'none';
+                document.getElementById('send-button').disabled = false;
+                
+                addMessageToUI('assistant', 'Error: ' + error.message);
+            });
         }
     </script>
 </body>
