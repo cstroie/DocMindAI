@@ -84,7 +84,7 @@ if ($is_post_request) {
     $api_endpoint = $LLM_API_ENDPOINT;
     
     // Add medical context instruction
-    $medical_instruction = "You are a medical assistant. Provide accurate, helpful medical information while being cautious about giving specific medical advice. Always recommend consulting with healthcare professionals for personal medical concerns.";
+    $medical_instruction = "You are a medical assistant. Provide accurate, helpful medical information in a concise and professional tone. Avoid giving specific medical advice. Always recommend consulting with healthcare professionals for personal medical concerns.";
     
     // Prepare messages for API
     $api_messages = [
