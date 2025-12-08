@@ -1,5 +1,62 @@
 <?php
-require_once 'common.php';
+/**
+ * Medical Chat Assistant
+ * 
+ * A PHP web application that provides a conversational interface with AI models
+ * for medical information and assistance.
+ * 
+ * Features:
+ * - Real-time chat interface with medical AI
+ * - Multiple AI personalities (Medical Assistant, GP, Specialist, Researcher, Skippy)
+ * - Multiple lightweight AI models support (filtered for free models)
+ * - Multilingual output (6 languages)
+ * - Web interface with real-time results
+ * - REST API support
+ * - Configurable API endpoint via external config.php
+ * 
+ * Requirements:
+ * - PHP 7.0+
+ * - cURL extension
+ * - JSON extension
+ * - Access to compatible AI API (e.g., Ollama)
+ * 
+ * Usage:
+ * - Web interface: Access via browser
+ * - API endpoint: POST /chat.php with message and history
+ * 
+ * API Usage:
+ * POST /chat.php
+ * Parameters:
+ * - message (required): User message
+ * - history (optional): Chat history array
+ * - model (optional): AI model to use (default: qwen2.5:1.5b)
+ * - personality (optional): AI personality (default: medical_assistant)
+ * - language (optional): Output language (default: en)
+ * 
+ * Response:
+ * {
+ *   "reply": "AI response",
+ *   "history": [chat history array],
+ *   "model": "model used",
+ *   "language": "language used",
+ *   "personality": "personality used"
+ * }
+ * 
+ * Configuration:
+ * Create a config.php file with:
+ * - $LLM_API_ENDPOINT: AI API endpoint URL
+ * - $LLM_API_KEY: API key (if required)
+ * - $DEFAULT_TEXT_MODEL: Default model to use
+ * - $LLM_API_FILTER: Regular expression to filter models
+ * - $CHAT_HISTORY_LENGTH: Maximum chat history length
+ * 
+ * @author Costin Stroie <costinstroie@eridu.eu.org>
+ * @version 1.0
+ * @license GPL 3
+ */
+
+// Include common functions
+include 'common.php';
 
 // Configuration - Load from config.php if available, otherwise use defaults
 if (file_exists('config.php')) {
@@ -46,34 +103,66 @@ $AVAILABLE_PERSONALITIES = [
     'skippy' => 'Skippy the Magnificent'
 ];
 
-// Configuration
-$max_history = $CHAT_HISTORY_LENGTH;
+/**
+ * Get selected model, language, and personality from POST/GET data, cookies, or use defaults
+ */
 $model = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['chat_model']) ? $_COOKIE['chat_model'] : $DEFAULT_TEXT_MODEL));
 $language = isset($_POST['language']) ? $_POST['language'] : (isset($_GET['language']) ? $_GET['language'] : (isset($_COOKIE['chat_language']) ? $_COOKIE['chat_language'] : 'en'));
 $personality = isset($_POST['personality']) ? $_POST['personality'] : (isset($_GET['personality']) ? $_GET['personality'] : (isset($_COOKIE['chat_personality']) ? $_COOKIE['chat_personality'] : 'medical_assistant'));
 
-// Validate model selection
+/**
+ * Validate model selection
+ * Falls back to default model if invalid model is selected
+ */
 if (!array_key_exists($model, $AVAILABLE_MODELS)) {
     $model = $DEFAULT_TEXT_MODEL; // Default to a valid model
 }
 
-// Validate language selection
+/**
+ * Validate language selection
+ * Falls back to English if invalid language is selected
+ */
 if (!array_key_exists($language, $AVAILABLE_LANGUAGES)) {
     $language = 'en'; // Default to English
 }
 
-// Validate personality selection
+/**
+ * Validate personality selection
+ * Falls back to medical assistant if invalid personality is selected
+ */
 if (!array_key_exists($personality, $AVAILABLE_PERSONALITIES)) {
     $personality = 'medical_assistant'; // Default to medical assistant
 }
 
-// Check if this is an API request
-$is_api_request = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) || 
-                  (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false);
-$is_post_request = $_SERVER['REQUEST_METHOD'] === 'POST';
+/**
+ * System prompt for the AI model
+ * Contains instructions for the selected personality and language
+ */
+$SYSTEM_PROMPT = getPersonalityInstruction($personality, $language) . " " . getLanguageInstruction($language);
 
-// Handle POST requests (chat messages)
-if ($is_post_request) {
+/**
+ * Application state variables
+ * @var array|null $result Chat response result
+ * @var string|null $error Error message if any
+ * @var bool $processing Whether chat is in progress
+ * @var bool $is_api_request Whether request is API call (not web form)
+ */
+$result = null;
+$error = null;
+$processing = false;
+$is_api_request = false;
+$chat_history = [];
+
+/**
+ * Handle POST requests for chat messages
+ * Processes both web form submissions and API requests
+ * Validates input, calls AI API, and processes response
+ */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $processing = true;
+    $is_api_request = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) || 
+                      (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false);
+    
     // Get POST data
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
@@ -87,81 +176,79 @@ if ($is_post_request) {
     
     // Validate input
     if (empty($message)) {
-        sendJsonResponse(['error' => 'Message is required'], true);
-        exit;
+        $error = 'Message is required';
+        $processing = false;
     }
     
     // Process input
     $processed = processInput($message);
     if (!$processed['valid']) {
-        sendJsonResponse(['error' => $processed['error']], true);
-        exit;
+        $error = $processed['error'];
+        $processing = false;
     }
     
-    // Limit history to max_history
-    if (count($history) > $max_history * 2) { // *2 because each exchange has user + assistant
-        $history = array_slice($history, -($max_history * 2));
+    // Only proceed with API call if validation passed
+    if ($processing) {
+        // Limit history to CHAT_HISTORY_LENGTH
+        if (count($history) > $CHAT_HISTORY_LENGTH * 2) { // *2 because each exchange has user + assistant
+            $history = array_slice($history, -($CHAT_HISTORY_LENGTH * 2));
+        }
+        
+        // Add user message to history
+        $history[] = ['role' => 'user', 'content' => $message];
+        
+        // Prepare API request
+        $api_data = [
+            'model' => $model,
+            'messages' => array_merge(
+                [['role' => 'system', 'content' => $SYSTEM_PROMPT]],
+                $history
+            ),
+            'temperature' => 0.7
+        ];
+        
+        // Make API request using common function
+        $response_data = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY);
+        
+        if (isset($response_data['error'])) {
+            $error = $response_data['error'];
+        } elseif (isset($response_data['choices'][0]['message']['content'])) {
+            $reply = $response_data['choices'][0]['message']['content'];
+            
+            // Add assistant response to history
+            $history[] = ['role' => 'assistant', 'content' => $reply];
+            
+            $result = [
+                'reply' => $reply,
+                'history' => $history,
+                'model' => $model,
+                'language' => $language,
+                'personality' => $personality
+            ];
+        } else {
+            $error = 'Invalid API response format';
+        }
+        
+        // Set cookies with the selected model, language, and personality only for web requests
+        if (!$is_api_request) {
+            setcookie('chat_model', $model, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+            setcookie('chat_language', $language, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+            setcookie('chat_personality', $personality, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+        }
+        
+        // Return JSON if it's an API request
+        if ($is_api_request) {
+            header('Access-Control-Allow-Origin: *');
+            header('Content-Type: application/json');
+            if ($error) {
+                echo json_encode(['error' => $error]);
+            } else {
+                echo json_encode($result);
+            }
+            exit;
+        }
     }
-    
-    // Add user message to history
-    $history[] = ['role' => 'user', 'content' => $message];
-    
-    // Prepare API call
-    $api_key = $LLM_API_KEY;
-    $api_endpoint = $LLM_API_ENDPOINT;
-    
-    // Get personality instruction
-    $personality_instruction = getPersonalityInstruction($personality, $language);
-    
-    // Add context instruction
-    $context_instruction = $personality_instruction . " " . getLanguageInstruction($language);
-    
-    // Prepare messages for API
-    $api_messages = [
-        ['role' => 'system', 'content' => $context_instruction]
-    ];
-    
-    // Add history
-    foreach ($history as $msg) {
-        $api_messages[] = $msg;
-    }
-    
-    // Prepare API data
-    $api_data = [
-        'model' => $model,
-        'messages' => $api_messages,
-        'temperature' => 0.7
-    ];
-    
-    // Call LLM API
-    $response = callLLMApi($api_endpoint . '/chat/completions', $api_data, $api_key);
-    
-    if (isset($response['error'])) {
-        sendJsonResponse(['error' => $response['error']], true);
-        exit;
-    }
-    
-    // Extract response content
-    $reply = '';
-    if (isset($response['choices'][0]['message']['content'])) {
-        $reply = $response['choices'][0]['message']['content'];
-    }
-    
-    // Add assistant response to history
-    $history[] = ['role' => 'assistant', 'content' => $reply];
-    
-    // Return response
-    sendJsonResponse([
-        'reply' => $reply,
-        'history' => $history,
-        'model' => $model,
-        'language' => $language,
-        'personality' => $personality
-    ], true);
-    exit;
 }
-
-// For GET requests, show the chat interface
 ?>
 <!DOCTYPE html>
 <html lang="en">
