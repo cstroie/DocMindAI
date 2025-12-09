@@ -314,9 +314,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Select the language for the chat responses.
                     </small>
                 </fieldset>
-                <button onclick="saveConfig()" class="btn btn-secondary">
-                    💾 Save Settings
-                </button>
             </section>
             
             <section class="chat-history" id="chat-history">
@@ -383,6 +380,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const model = document.getElementById('model').value;
             const personality = document.getElementById('personality').value;
             const language = document.getElementById('language').value;
+            
+            // Save settings to cookies when sending a message
+            saveConfig();
             
             // Send message to server
             fetch('chat.php', {
@@ -486,8 +486,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.cookie = `chat_model=${model}; path=/`;
             document.cookie = `chat_personality=${personality}; path=/`;
             document.cookie = `chat_language=${language}; path=/`;
-            
-            alert('Settings saved! Refresh the page to apply changes.');
         }
         
         function clearChat() {
