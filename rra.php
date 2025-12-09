@@ -153,6 +153,16 @@ $error = null;
 $processing = false;
 $is_api_request = false;
 
+// Initialize session for CSRF protection
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Generate CSRF token if not exists
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 /**
  * Handle POST/GET requests for report analysis
  * Processes both web form submissions and API requests
@@ -165,6 +175,15 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
     
     // Sanitize and validate input
     $report = trim(isset($_POST['report']) ? $_POST['report'] : $_GET['report']);
+    
+    // CSRF protection for web requests
+    if (!$is_api_request && (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token']))) {
+        $error = 'Security token validation failed. Please try again.';
+        $processing = false;
+    }
+    
+    // Sanitize input to prevent XSS
+    $report = filter_var($report, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
     
     // Validate report length (prevent extremely large inputs)
     if (strlen($report) > 10000) {
@@ -192,40 +211,100 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
     // Make API request using common function
     $response_data = callLLMApi($LLM_API_ENDPOINT_CHAT, $data, $LLM_API_KEY);
     
+    // Enhanced error handling for API responses
     if (isset($response_data['error'])) {
-        $error = $response_data['error'];
+        $error_code = $response_data['error']['code'] ?? null;
+        $error_message = $response_data['error']['message'] ?? $response_data['error'];
+        
+        switch ($error_code) {
+            case 429:
+                $error = 'Rate limit exceeded. Please wait a moment before trying again.';
+                break;
+            case 500:
+                $error = 'Server error occurred. Please try again later.';
+                break;
+            case 502:
+            case 503:
+            case 504:
+                $error = 'Service temporarily unavailable. Please try again in a moment.';
+                break;
+            case 400:
+                $error = 'Invalid request. Please check your input and try again.';
+                break;
+            case 401:
+                $error = 'Authentication failed. Please check your API credentials.';
+                break;
+            case 403:
+                $error = 'Access forbidden. You do not have permission to use this service.';
+                break;
+            default:
+                $error = 'API error: ' . $error_message;
+        }
     } elseif (isset($response_data['choices'][0]['message']['content'])) {
         $content = trim($response_data['choices'][0]['message']['content']);
         
         // Extract JSON from response (in case model adds extra text)
-        if (preg_match('/\{[^}]+\}/', $content, $matches)) {
-            $json_str = $matches[0];
+        // Try to extract JSON from response with multiple patterns
+        $json_patterns = [
+            '/```(?:json)?\s*({.*?})\s*```/s',  // JSON in code blocks
+            '/\{.*\}/s',                        // Any JSON object
+            '/({.*?})/s'                        // Capture any braces
+        ];
+        
+        $json_str = null;
+        foreach ($json_patterns as $pattern) {
+            if (preg_match($pattern, $content, $matches)) {
+                $json_str = $matches[1];
+                break;
+            }
+        }
+        
+        if ($json_str) {
+            // Clean up the JSON string
+            $json_str = trim($json_str);
+            
+            // Try to decode JSON
             $result = json_decode($json_str, true);
             
             if (json_last_error() !== JSON_ERROR_NONE) {
-                $error = 'Invalid JSON response: ' . json_last_error_msg();
-            } elseif (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['summary']) || !isset($result['diagnoses'])) {
-                $error = 'JSON response missing required fields';
-            } elseif (!in_array($result['pathologic'], ['yes', 'no'])) {
-                $error = 'Invalid pathologic value in response';
-            } elseif (!is_numeric($result['severity']) || $result['severity'] < 0 || $result['severity'] > 10) {
-                $error = 'Invalid severity value in response';
-            } elseif (!is_string($result['summary']) || empty($result['summary'])) {
-                $error = 'Invalid summary value in response';
-            } elseif (!is_array($result['diagnoses']) || count($result['diagnoses']) < 1) {
-                $error = 'Invalid diagnoses in response (must be array with at least 1 item)';
-            } else {
-                // Validate diagnoses array contents (take first 3 if more are provided)
-                $result['diagnoses'] = array_slice($result['diagnoses'], 0, 3);
-                foreach ($result['diagnoses'] as $diagnosis) {
-                    if (!is_string($diagnosis) || empty($diagnosis)) {
-                        $error = 'Invalid diagnosis in response';
-                        break;
+                // Try to fix common JSON issues
+                $json_str = preg_replace('/,\s*([\]}])/m', '$1', $json_str); // Remove trailing commas
+                $json_str = preg_replace('/([{,])\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/', '$1"$2":', $json_str); // Add quotes to keys
+                $json_str = preg_replace('/:\s*\'([^\']*)\'/', ':"$1"', $json_str); // Replace single quotes with double quotes
+                $json_str = preg_replace('/\s+/', ' ', $json_str); // Normalize whitespace
+                
+                $result = json_decode($json_str, true);
+                
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $error = 'Invalid JSON response: ' . json_last_error_msg() . '. Raw content: ' . substr($content, 0, 200);
+                }
+            }
+            
+            // Validate response structure if JSON was parsed successfully
+            if ($result && is_array($result)) {
+                if (!isset($result['pathologic']) || !isset($result['severity']) || !isset($result['summary']) || !isset($result['diagnoses'])) {
+                    $error = 'JSON response missing required fields. Expected: pathologic, severity, summary, diagnoses';
+                } elseif (!in_array($result['pathologic'], ['yes', 'no'])) {
+                    $error = 'Invalid pathologic value in response. Must be "yes" or "no".';
+                } elseif (!is_numeric($result['severity']) || $result['severity'] < 0 || $result['severity'] > 10) {
+                    $error = 'Invalid severity value in response. Must be a number between 0 and 10.';
+                } elseif (!is_string($result['summary']) || empty(trim($result['summary']))) {
+                    $error = 'Invalid summary value in response. Must be a non-empty string.';
+                } elseif (!is_array($result['diagnoses']) || count($result['diagnoses']) < 1) {
+                    $error = 'Invalid diagnoses in response. Must be an array with at least 1 item.';
+                } else {
+                    // Validate diagnoses array contents (take first 3 if more are provided)
+                    $result['diagnoses'] = array_slice($result['diagnoses'], 0, 3);
+                    foreach ($result['diagnoses'] as $diagnosis) {
+                        if (!is_string($diagnosis) || empty(trim($diagnosis))) {
+                            $error = 'Invalid diagnosis in response. All diagnoses must be non-empty strings.';
+                            break;
+                        }
                     }
                 }
             }
         } else {
-            $error = 'No JSON found in response: ' . $content;
+            $error = 'No valid JSON found in AI response. Raw content: ' . substr($content, 0, 200);
         }
     } else {
         $error = 'Invalid API response format';
@@ -307,6 +386,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
             <?php endif; ?>
 
             <form method="POST" action="" id="analysisForm">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                 <fieldset>
                     <label for="report">Radiology report:</label>
                     <textarea 
@@ -317,7 +397,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                         placeholder="Enter the radiology report here...&#10;&#10;Example: Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum."
                     ><?php echo isset($_POST['report']) ? htmlspecialchars($_POST['report']) : (isset($_GET['report']) ? htmlspecialchars($_GET['report']) : ''); ?></textarea>
                     <small>
-                        Enter the radiology report you want to analyze.
+                        Enter the radiology report you want to analyze. Maximum 10,000 characters.
                     </small>
 
                     <label for="model">AI model:</label>
@@ -345,7 +425,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                     </small>
                 </fieldset>
                 
-                <button type="submit" name="submit" value="1" class="btn btn-primary">
+                <button type="submit" name="submit" value="1" class="btn btn-primary" id="analyzeButton">
                     <?php if ($processing && !$result && !$error): ?>
                         <span class="loading"></span>
                     <?php endif; ?>
@@ -393,6 +473,39 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
             // Reload page to clear results
             window.location.href = window.location.pathname;
         }
+        
+        // Add real-time validation feedback
+        document.addEventListener('DOMContentLoaded', function() {
+            const reportInput = document.getElementById('report');
+            const analyzeButton = document.getElementById('analyzeButton');
+            
+            if (reportInput) {
+                reportInput.addEventListener('input', function() {
+                    const length = this.value.length;
+                    const maxLength = 10000;
+                    
+                    // Show character count
+                    let small = this.nextElementSibling;
+                    if (small && small.tagName === 'SMALL') {
+                        small.textContent = `Enter the radiology report you want to analyze. Maximum 10,000 characters. (${length}/${maxLength})`;
+                    }
+                    
+                    // Warn when approaching limit
+                    if (length > maxLength * 0.9) {
+                        small.style.color = '#ef4444';
+                        small.style.fontWeight = '600';
+                    } else {
+                        small.style.color = '#6b7280';
+                        small.style.fontWeight = 'normal';
+                    }
+                    
+                    // Disable button if empty
+                    if (analyzeButton) {
+                        analyzeButton.disabled = length === 0;
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
