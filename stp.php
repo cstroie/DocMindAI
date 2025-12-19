@@ -124,13 +124,11 @@ if (!array_key_exists($PROMPT_TYPE, $AVAILABLE_PROMPTS)) {
 function getSystemPrompt($prompt_type, $language) {
     global $AVAILABLE_LANGUAGES;
     
-    $language_instruction = getLanguageInstruction($language);
-    
     switch ($prompt_type) {
         case 'problem_idea_evidence':
             return "You are an academic paper analyzer. Your task is to analyze research papers and extract key information using a structured approach.
 
-$language_instruction
+" . getLanguageInstruction($language) . "
 
 OUTPUT FORMAT (JSON):
 {
@@ -157,12 +155,12 @@ Response: {
   \"evidence\": \"They tested their approach on 5 benchmark datasets with varying noise levels and compared performance against 3 state-of-the-art methods.\",
   \"results\": \"The new algorithm achieved 15% better accuracy on average and reduced preprocessing time by 80%.\"
 }";
-            
+
         case 'three_pass':
         default:
             return "You are an academic paper analyzer. Your task is to analyze research papers using a three-pass approach.
 
-$language_instruction
+" . getLanguageInstruction($language) . "
 
 OUTPUT FORMAT (JSON):
 {
@@ -332,28 +330,41 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
                         <h2>Analysis Result</h2>
                     </header>
                     
-                    <div class="markdown-result">
                         <?php 
                         // Try to decode as JSON first
                         $json_result = json_decode($result, true);
                         if (json_last_error() === JSON_ERROR_NONE) {
                             // Format JSON result nicely
                             if (isset($json_result['pass1']) && isset($json_result['pass2']) && isset($json_result['pass3'])) {
-                                echo '<h3>Pass 1: Quick Skim</h3>';
+                                echo '<section>';
+                                echo '<h3>Quick Skim</h3>';
                                 echo '<p>' . htmlspecialchars($json_result['pass1']) . '</p>';
-                                echo '<h3>Pass 2: Main Ideas</h3>';
+                                echo '</section>';
+                                echo '<section>';
+                                echo '<h3>Main Ideas</h3>';
                                 echo '<p>' . htmlspecialchars($json_result['pass2']) . '</p>';
-                                echo '<h3>Pass 3: Deeper Details</h3>';
+                                echo '</section>';
+                                echo '<section>';
+                                echo '<h3>Deeper Details</h3>';
                                 echo '<p>' . htmlspecialchars($json_result['pass3']) . '</p>';
+                                echo '</section>';
                             } elseif (isset($json_result['problem']) && isset($json_result['idea']) && isset($json_result['evidence']) && isset($json_result['results'])) {
+                                echo '<section>';
                                 echo '<h3>Problem</h3>';
                                 echo '<p>' . htmlspecialchars($json_result['problem']) . '</p>';
+                                echo '</section>';
+                                echo '<section>';
                                 echo '<h3>Main Idea</h3>';
                                 echo '<p>' . htmlspecialchars($json_result['idea']) . '</p>';
+                                echo '</section>';
+                                echo '<section>';
                                 echo '<h3>Evidence</h3>';
                                 echo '<p>' . htmlspecialchars($json_result['evidence']) . '</p>';
+                                echo '</section>';
+                                echo '<section>';
                                 echo '<h3>Results Meaning</h3>';
                                 echo '<p>' . htmlspecialchars($json_result['results']) . '</p>';
+                                echo '</section>';
                             } else {
                                 // Generic JSON display
                                 echo '<pre>' . htmlspecialchars(json_encode($json_result, JSON_PRETTY_PRINT)) . '</pre>';
@@ -363,7 +374,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
                             echo '<pre>' . htmlspecialchars($result) . '</pre>';
                         }
                         ?>
-                    </div>
                 </article>
             <?php endif; ?>
 
