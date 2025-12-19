@@ -65,7 +65,7 @@ include 'common.php';
                     <p>Scrape web pages and convert them to clean Markdown format using AI processing.</p>
                 </a>
                 
-                <a href="sum.php" class="tool-card">
+                <a href="wps.php" class="tool-card">
                     <div class="tool-icon">📝</div>
                     <h3>Web Page Summarizer</h3>
                     <p>Scrape web pages and return a structured summary of the most important points.</p>
