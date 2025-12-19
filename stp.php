@@ -206,7 +206,7 @@ $is_api_request = false;
  * Processes both web form submissions and API requests
  * Validates input, calls AI API, and processes response
  */
-if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK)))) || 
+if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK))) || 
     ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET['content']))) {
     $processing = true;
     $is_api_request = (!isset($_POST['submit']) && !isset($_GET['submit'])); // If no submit button, it's an API request
