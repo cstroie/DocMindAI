@@ -248,8 +248,8 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
     }
     
     // Validate content length (prevent extremely large inputs)
-    if ($processing && strlen($content) > 50000) {
-        $error = 'The content is too long. Maximum 50000 characters allowed.';
+    if ($processing && strlen($content) > 1000000) {
+        $error = 'The content is too long. Maximum 1,000,000 characters allowed.';
         $processing = false;
     }
     
