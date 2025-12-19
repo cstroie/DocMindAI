@@ -71,6 +71,12 @@ include 'common.php';
                     <p>Scrape web pages and return a structured summary of the most important points.</p>
                 </a>
                 
+                <a href="stp.php" class="tool-card">
+                    <div class="tool-icon">📄</div>
+                    <h3>Summarize This Paper</h3>
+                    <p>AI-powered academic paper summarization with structured approaches.</p>
+                </a>
+                
                 <a href="pec.php" class="tool-card">
                     <div class="tool-icon">🤓</div>
                     <h3>Patient Education Content</h3>
