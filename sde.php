@@ -77,10 +77,11 @@ if (!isset($DEFAULT_TEXT_MODEL)) {
 }
 
 /**
- * Get selected model and language from POST/GET data, cookies, or use defaults
+ * Get selected model, language, and output format from POST/GET data, cookies, or use defaults
  */
 $MODEL = isset($_POST['model']) ? $_POST['model'] : (isset($_GET['model']) ? $_GET['model'] : (isset($_COOKIE['sde-model']) ? $_COOKIE['sde-model'] : $DEFAULT_TEXT_MODEL));
 $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_GET['language']) ? $_GET['language'] : (isset($_COOKIE['sde-language']) ? $_COOKIE['sde-language'] : 'en'));
+$OUTPUT_FORMAT = isset($_POST['output_format']) ? $_POST['output_format'] : (isset($_GET['output_format']) ? $_GET['output_format'] : (isset($_COOKIE['sde-output-format']) ? $_COOKIE['sde-output-format'] : 'json'));
 
 /**
  * Validate model selection
@@ -102,7 +103,7 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  * System prompt for the AI model
  * Contains instructions for extracting structured data
  */
-$SYSTEM_PROMPT = "You are a data extraction API. Respond ONLY with JSON.";
+$SYSTEM_PROMPT = "You are a data extraction API. Respond ONLY with " . strtoupper($OUTPUT_FORMAT) . ".";
 
 /**
  * Application state variables
@@ -159,23 +160,30 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
         } elseif (isset($response_data['choices'][0]['message']['content'])) {
             $content = trim($response_data['choices'][0]['message']['content']);
             
-            // Try to extract JSON from response
-            $json_result = extractJsonFromResponse($content);
-            
-            if ($json_result) {
-                $result = $json_result;
-            } else {
-                // If no JSON found, use raw content
+            // Process response based on output format
+            if ($OUTPUT_FORMAT === 'yaml') {
+                // For YAML, we'll use the raw content and try to convert it
                 $result = $content;
+            } else {
+                // For JSON, try to extract JSON from response
+                $json_result = extractJsonFromResponse($content);
+
+                if ($json_result) {
+                    $result = $json_result;
+                } else {
+                    // If no JSON found, use raw content
+                    $result = $content;
+                }
             }
         } else {
             $error = 'Invalid API response format';
         }
         
-        // Set cookies with the selected model and language only for web requests
+        // Set cookies with the selected model, language, and output format only for web requests
         if (!$is_api_request) {
             setcookie('sde-model', $MODEL, time() + (30 * 24 * 60 * 60), '/'); // 30 days
             setcookie('sde-language', $LANGUAGE, time() + (30 * 24 * 60 * 60), '/'); // 30 days
+            setcookie('sde-output-format', $OUTPUT_FORMAT, time() + (30 * 24 * 60 * 60), '/'); // 30 days
         }
         
         // Return JSON if it's an API request
@@ -225,8 +233,13 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                         <?php
                         // Check if result is an array (parsed JSON) or string
                         if (is_array($result)) {
-                            // Display as formatted JSON
-                            echo '<pre>' . htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT)) . '</pre>';
+                            if ($OUTPUT_FORMAT === 'yaml') {
+                                // Convert array to YAML and display
+                                echo '<pre>' . htmlspecialchars(arrayToYaml($result)) . '</pre>';
+                            } else {
+                                // Display as formatted JSON
+                                echo '<pre>' . htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT)) . '</pre>';
+                            }
                         } else {
                             // Display as plain text
                             echo '<pre>' . htmlspecialchars($result) . '</pre>';
@@ -272,6 +285,15 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                     </select>
                     <small>
                         Select the language for the extracted data output.
+                    </small>
+
+                    <label for="output_format">Output format:</label>
+                    <select id="output_format" name="output_format">
+                        <option value="json" <?php echo ($OUTPUT_FORMAT === 'json') ? 'selected' : ''; ?>>JSON</option>
+                        <option value="yaml" <?php echo ($OUTPUT_FORMAT === 'yaml') ? 'selected' : ''; ?>>YAML</option>
+                    </select>
+                    <small>
+                        Select the output format for the extracted data.
                     </small>
                 </fieldset>
                 
