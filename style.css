@@ -325,6 +325,40 @@ article ul {
     color: #374151;
 }
 
+/* JSON syntax highlighting styles */
+pre {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+pre .key {
+    color: #9cdcfe;
+}
+
+pre .string {
+    color: #ce9178;
+}
+
+pre .number {
+    color: #b5cea8;
+}
+
+pre .boolean {
+    color: #569cd6;
+}
+
+pre .null {
+    color: #569cd6;
+}
+
 .pathology-badge {
     display: inline-block;
     padding: 6px 12px;

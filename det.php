@@ -297,6 +297,45 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
             // Reload page to clear results
             window.location.href = window.location.pathname;
         }
+
+        // JSON syntax highlighting function
+        function syntaxHighlight(json) {
+            if (typeof json !== 'string') {
+                json = JSON.stringify(json, undefined, 2);
+            }
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'key';
+                    } else {
+                        cls = 'string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        // Apply syntax highlighting to JSON results
+        document.addEventListener('DOMContentLoaded', function() {
+            const jsonElements = document.querySelectorAll('pre');
+            jsonElements.forEach(function(element) {
+                try {
+                    const text = element.textContent;
+                    if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+                        const json = JSON.parse(text);
+                        element.innerHTML = syntaxHighlight(json);
+                    }
+                } catch (e) {
+                    // Not valid JSON, leave as is
+                }
+            });
+        });
     </script>
 </body>
 </html>
