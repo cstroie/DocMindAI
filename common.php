@@ -325,6 +325,70 @@ function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dil
 }
 
 /**
+ * Extract text from various document formats
+ * 
+ * @param string $file_path Path to the file
+ * @param string $mime_type MIME type of the file
+ * @return string|false Extracted text or false on error
+ */
+function extractTextFromDocument($file_path, $mime_type) {
+    // Try specific tools based on file type
+    $text = false;
+
+    switch ($mime_type) {
+        case 'application/msword': // .doc
+            if (file_exists('/usr/bin/antiword')) {
+                $text = shell_exec('antiword ' . escapeshellarg($file_path) . ' 2>&1');
+            } elseif (file_exists('/usr/bin/catdoc')) {
+                $text = shell_exec('catdoc ' . escapeshellarg($file_path) . ' 2>&1');
+            }
+            break;
+
+        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': // .docx
+            if (file_exists('/usr/bin/docx2txt')) {
+                $text = shell_exec('docx2txt ' . escapeshellarg($file_path) . ' 2>&1');
+            } elseif (file_exists('/usr/bin/catdoc')) {
+                $text = shell_exec('catdoc ' . escapeshellarg($file_path) . ' 2>&1');
+            }
+            break;
+
+        case 'application/pdf': // .pdf
+            if (file_exists('/usr/bin/pdftotext')) {
+                $text = shell_exec('pdftotext ' . escapeshellarg($file_path) . ' - 2>&1');
+            }
+            break;
+
+        case 'application/vnd.oasis.opendocument.text': // .odt
+            if (file_exists('/usr/bin/odt2txt')) {
+                $text = shell_exec('odt2txt ' . escapeshellarg($file_path) . ' 2>&1');
+            }
+            break;
+
+        case 'text/plain': // .txt
+        case 'text/markdown': // .md
+            $text = file_get_contents($file_path);
+            break;
+    }
+
+    // Fallback to pandoc if specific tools failed
+    if (empty($text) && file_exists('/usr/bin/pandoc')) {
+        $text = shell_exec('pandoc -t plain ' . escapeshellarg($file_path) . ' 2>&1');
+    }
+
+    // Clean up the extracted text
+    if ($text !== false) {
+        $text = trim($text);
+        // Remove error messages from stderr
+        $text = preg_replace('/^.*error.*$/im', '', $text);
+        $text = preg_replace('/^.*warning.*$/im', '', $text);
+        $text = preg_replace('/^.*not found.*$/im', '', $text);
+        $text = trim($text);
+    }
+
+    return $text;
+}
+
+/**
  * Extract images from PDF file
  * 
  * @param string $pdf_path Path to the PDF file

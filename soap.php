@@ -183,9 +183,14 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
         $file = $_FILES['file'];
 
         // Validate file type
-        $allowed_types = ['text/plain', 'text/markdown', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $allowed_types = [
+            'text/plain', 'text/markdown',
+            'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+            'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/pdf', 'application/vnd.oasis.opendocument.text'
+        ];
         if (!in_array($file['type'], $allowed_types)) {
-            $error = 'Invalid file type. Only plain text (.txt), Markdown (.md), and image files (JPEG, PNG, GIF, WEBP) are allowed.';
+            $error = 'Invalid file type. Only text (.txt, .md), document (.doc, .docx, .pdf, .odt), and image files (JPEG, PNG, GIF, WEBP) are allowed.';
             $processing = false;
         }
 
@@ -222,10 +227,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
                     $content = "IMAGE_TRANSCRIPT_PLACEHOLDER";
                 }
             } else {
-                // Text file (plain text or markdown)
-                $content = file_get_contents($file['tmp_name']);
+                // Document file - try to extract text
+                $content = extractTextFromDocument($file['tmp_name'], $file['type']);
                 if ($content === false) {
-                    $error = 'Failed to read the uploaded file.';
+                    $error = 'Failed to extract text from the uploaded document. Please ensure you have the required tools installed (antiword, catdoc, pdftotext, odt2txt, or pandoc).';
                     $processing = false;
                 } else {
                     // Clean up the text content
@@ -424,10 +429,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
                         type="file"
                         id="file"
                         name="file"
-                        accept=".txt,.md,text/plain,text/markdown,image/jpeg,image/png,image/gif,image/webp"
+                        accept=".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp"
                     >
                     <small>
-                        Upload a plain text (.txt), Markdown (.md) file, or an image of the medical transcript. Maximum size: 2MB.
+                        Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file of the medical transcript. Maximum size: 2MB.
                     </small>
 
                     <label for="model">AI model:</label>
