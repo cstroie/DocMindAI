@@ -216,9 +216,14 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
         $file = $_FILES['file'];
         
         // Validate file type
-        $allowed_types = ['text/plain', 'text/markdown'];
+        $allowed_types = [
+            'text/plain', 'text/markdown',
+            'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+            'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/pdf', 'application/vnd.oasis.opendocument.text'
+        ];
         if (!in_array($file['type'], $allowed_types)) {
-            $error = 'Invalid file type. Only plain text (.txt) and Markdown (.md) files are allowed.';
+            $error = 'Invalid file type. Only text (.txt, .md), document (.doc, .docx, .pdf, .odt), and image files (JPEG, PNG, GIF, WEBP) are allowed.';
             $processing = false;
         }
         
@@ -229,10 +234,25 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
         }
         
         if ($processing) {
-            $content = file_get_contents($file['tmp_name']);
-            if ($content === false) {
-                $error = 'Failed to read the uploaded file.';
+            // Check if it's an image
+            $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (in_array($file['type'], $image_types)) {
+                $error = 'Image files are not supported for paper summarization. Please upload text or document files.';
                 $processing = false;
+            } else {
+                // Document file - try to extract text
+                $content = extractTextFromDocument($file['tmp_name'], $file['type']);
+                if ($content === false) {
+                    $error = 'Failed to extract text from the uploaded document. Please ensure you have the required tools installed (antiword, catdoc, pdftotext, odt2txt, or pandoc).';
+                    $processing = false;
+                } else {
+                    // Clean up the text content
+                    $content = trim($content);
+                    // Remove BOM if present
+                    $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
+                    // Normalize line endings
+                    $content = str_replace(["\r\n", "\r"], "\n", $content);
+                }
             }
         }
     } 
