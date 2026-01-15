@@ -17,21 +17,21 @@ include 'common.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical AI Tools Suite</title>
+    <title>AI Document Processing Suite</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A5%3C/text%3E%3C/svg%3E">
 </head>
 <body>
     <div class="container">
         <hgroup>
-            <h1>🏥 Medical AI Tools Suite</h1>
-            <p>AI-powered medical document processing and analysis</p>
+            <h1>📄 AI Document Processing Suite</h1>
+            <p>AI-powered document processing and analysis tools</p>
         </hgroup>
 
         <main>
             <section class="welcome-section">
-                <h2>Welcome to the Medical AI Tools Suite</h2>
-                <p>A collection of specialized tools designed to help medical professionals process, analyze, and extract key information from various medical documents using artificial intelligence.</p>
+                <h2>Welcome to the AI Document Processing Suite</h2>
+                <p>A collection of specialized tools designed to process, analyze, and extract key information from various documents using artificial intelligence.</p>
             </section>
             
             <section class="tools-grid">
