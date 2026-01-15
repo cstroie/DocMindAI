@@ -415,10 +415,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
                         type="file" 
                         id="file" 
                         name="file" 
-                        accept=".txt,.md,text/plain,text/markdown"
-                    >
+                        accept=".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-
+officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text">
                     <small>
-                        Upload a plain text (.txt) or Markdown (.md) file. Maximum size: 1MB.
+                        Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file of the paper. Maximum size: 1MB.
                     </small>
 
                     <label for="prompt_type">Analysis approach:</label>
