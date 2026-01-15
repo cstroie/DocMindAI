@@ -222,11 +222,18 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
                     $content = "IMAGE_TRANSCRIPT_PLACEHOLDER";
                 }
             } else {
-                // Text file
+                // Text file (plain text or markdown)
                 $content = file_get_contents($file['tmp_name']);
                 if ($content === false) {
                     $error = 'Failed to read the uploaded file.';
                     $processing = false;
+                } else {
+                    // Clean up the text content
+                    $content = trim($content);
+                    // Remove BOM if present
+                    $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
+                    // Normalize line endings
+                    $content = str_replace(["\r\n", "\r"], "\n", $content);
                 }
             }
         }
