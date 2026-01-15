@@ -140,13 +140,16 @@ A comprehensive SOAP note has to take into account all subjective and objective 
 
 OUTPUT FORMAT (JSON):
 {
-  \"subjective\": \"patient reported symptoms and history\",
-  \"objective\": \"clinician observations and measurements\",
-  \"assessment\": \"diagnostic impression\",
-  \"plan\": \"next steps and recommendations\"
+  \"subjective\": [\"patient reported symptom 1\", \"patient reported symptom 2\", \"patient reported history\"],
+
+  \"objective\": [\"clinician observation 1\", \"clinician observation 2\", \"measurement 1\"],
+
+  \"assessment\": [\"diagnostic impression 1\", \"diagnostic impression 2\"],
+
+  \"plan\": [\"next step 1\", \"next step 2\", \"recommendation 1\"]
 }
 
-Respond ONLY with the JSON, without additional text.";
+Respond ONLY with the JSON, without additional text. Each section must be an array of strings, with each string representing a single bullet point.";
 }
 
 /**
