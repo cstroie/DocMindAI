@@ -6,3 +6,4 @@ Given the following symptoms and patient history, provide possible diagnoses wit
 Include differential diagnoses and recommend appropriate next steps for evaluation.
 
 SYMPTOMS
+- 

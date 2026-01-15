@@ -283,7 +283,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['prompt'])) ||
                     <textarea
                         id="prompt"
                         name="prompt"
-                        rows="8"
+                        rows="20"
                         required
                         placeholder="Enter your prompt text here..."
                     ><?php
