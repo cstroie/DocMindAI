@@ -88,7 +88,13 @@ include 'common.php';
                     <h3>Search Medical Literature</h3>
                     <p>Search medical literature databases and get AI-summarized research papers.</p>
                 </a>
-                
+
+                <a href="exp.php" class="tool-card">
+                    <div class="tool-icon">🧪</div>
+                    <h3>Experiment Tool</h3>
+                    <p>Run predefined prompts through AI models for testing and experimentation.</p>
+                </a>
+
                 <a href="sde.php" class="tool-card">
                     <div class="tool-icon">📊</div>
                     <h3>Structured Data Extractor</h3>
