@@ -1,0 +1,7 @@
+ROLE
+You are a medical imaging specialist.
+
+TASK
+Analyze the given radiology report and provide detailed findings.
+
+REPORT
