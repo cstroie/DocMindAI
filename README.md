@@ -306,6 +306,7 @@ Content-Type: application/json
 - JSON extension
 - ImageMagick or GraphicsMagick PHP extensions (for OCR PDF processing)
 - Access to compatible AI API (e.g., Ollama, MedGemma)
+- [highlight.js](https://highlightjs.org/) for syntax highlighting (included in the repository)
 
 ## 🔧 Configuration
 
@@ -324,6 +325,21 @@ $DEFAULT_VISION_MODEL = 'gemma3:4b';
 $LLM_API_FILTER = '/free/';
 $CHAT_HISTORY_LENGTH = 10;
 ?>
+
+### Syntax Highlighting
+
+The application uses [highlight.js](https://highlightjs.org/) for syntax highlighting. The library is included in the repository as `highlight.min.js`. To customize the highlighting style, you can:
+
+1. Replace the CSS file in the HTML head section
+2. Choose from available styles at https://highlightjs.org/static/demo/
+3. Or create your own custom theme
+
+The current configuration uses the GitHub theme:
+```html
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+```
+
+To change the theme, simply replace the URL with another style from the highlight.js collection.
 - ImageMagick or GraphicsMagick PHP extensions (for OCR PDF processing)
 
 ## 🚀 Quick Start
