@@ -126,6 +126,9 @@ $LANGUAGE = isset($_POST['language']) ? $_POST['language'] : (isset($_GET['langu
 $default_prompt_type = !empty($PREDEFINED_PROMPTS) ? array_keys($PREDEFINED_PROMPTS)[0] : '';
 $PROMPT_TYPE = isset($_POST['prompt_type']) ? $_POST['prompt_type'] : (isset($_GET['prompt_type']) ? $_GET['prompt_type'] : (isset($_COOKIE['exp-prompt-type']) ? $_COOKIE['exp-prompt-type'] : $default_prompt_type));
 
+// Store the current prompt for reference
+$current_prompt = isset($_POST['prompt']) ? $_POST['prompt'] : (isset($_GET['prompt']) ? $_GET['prompt'] : '');
+
 /**
  * Validate model selection
  * Falls back to default model if invalid model is selected
@@ -282,7 +285,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
             if ($error) {
                 echo json_encode(['error' => $error]);
             } else {
-                echo json_encode(['result' => $result]);
+                echo json_encode(['result' => $result, 'prompt' => $user_content]);
             }
             exit;
         }
@@ -382,9 +385,14 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
 
             <form method="POST" action="" id="experimentForm" enctype="multipart/form-data">
                 <fieldset>
-                    <?php if (!empty($PREDEFINED_PROMPTS)): ?>
+                    <?php if (!empty($PREDEFINED_PROMPTS) || !empty($current_prompt)): ?>
                         <label for="prompt_type">Predefined Prompt:</label>
                         <select id="prompt_type" name="prompt_type" onchange="updatePrompt()">
+                            <?php if (!empty($current_prompt)): ?>
+                                <option value="current" <?php echo ('current' === $PROMPT_TYPE) ? 'selected' : ''; ?>>
+                                    Current prompt
+                                </option>
+                            <?php endif; ?>
                             <?php foreach ($PREDEFINED_PROMPTS as $key => $prompt_data): ?>
                                 <option value="<?php echo htmlspecialchars($key); ?>" <?php echo ($PROMPT_TYPE === $key) ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($prompt_data['label']); ?>
@@ -392,7 +400,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                             <?php endforeach; ?>
                         </select>
                         <small>
-                            Select a predefined prompt type or choose "Custom" to enter your own.
+                            Select a predefined prompt type or choose "Current prompt" to use the last submitted prompt.
                         </small>
                     <?php endif; ?>
 
@@ -480,7 +488,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
             // Get predefined prompts from PHP (we'll embed them in JavaScript)
             const predefinedPrompts = <?php echo json_encode($PREDEFINED_PROMPTS); ?>;
 
-            if (predefinedPrompts[promptType]) {
+            if (promptType === 'current') {
+                // Keep the current prompt value
+                return;
+            } else if (predefinedPrompts[promptType]) {
                 promptTextarea.value = predefinedPrompts[promptType].prompt;
             } else {
                 promptTextarea.value = '';
