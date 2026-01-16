@@ -103,13 +103,13 @@ function loadPromptsFromDirectory() {
                 if ($content !== false) {
                     $prompts[$key] = [
                         'label' => $label,
-                        'prompt' => trim($content)
+                        'prompt' => $content
                     ];
                 }
             }
         }
     }
-
+    // Return the loaded prompts
     return $prompts;
 }
 
@@ -233,7 +233,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
         // Add user message with prompt and file content
         $user_content = $prompt;
         if (!empty($file_content)) {
-            $user_content .= "\n\nFILE CONTENT:\n" . $file_content;
+            $user_content .= $file_content;
         }
 
         $api_data['messages'][] = ['role' => 'user', 'content' => $user_content];
