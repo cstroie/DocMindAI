@@ -408,6 +408,33 @@ pre .comment {
     font-style: italic;
 }
 
+/* XML syntax highlighting styles */
+pre .xml-tag {
+    color: #16a34a;
+    font-weight: bold;
+}
+
+pre .xml-attribute {
+    color: #0d6efd;
+}
+
+pre .xml-string {
+    color: #218838;
+}
+
+pre .xml-comment {
+    color: #6c757d;
+    font-style: italic;
+}
+
+pre .xml-processing {
+    color: #7c3aed;
+}
+
+pre .xml-cdata {
+    color: #dc2626;
+}
+
 .pathology-badge {
     display: inline-block;
     padding: 6px 12px;
