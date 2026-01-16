@@ -206,24 +206,13 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
             if (in_array($file['type'], $image_types)) {
                 $is_image = true;
                 $image_path = $file['tmp_name'];
+                $image_data = file_get_contents($image_path);
 
-                // Try to extract text from image using OCR
-                $ocr_text = '';
-                if (extension_loaded('imagick') || extension_loaded('gmagick')) {
-                    $images = extractImagesFromPDF($image_path);
-                    if ($images && !empty($images[0])) {
-                        $temp_image = tempnam(sys_get_temp_dir(), 'ocr_') . '.png';
-                        file_put_contents($temp_image, $images[0]);
-
-                        // Preprocess image for OCR
-                        $processed_image = preprocessImageForOCR($temp_image, true, true);
-                        if ($processed_image) {
-                            // Here you would typically call an OCR API
-                            // For now, we'll just use the image directly with vision model
-                            $content = "IMAGE_TRANSCRIPT_PLACEHOLDER";
-                        }
-                    }
+                if ($image_data === false) {
+                    $error = 'Failed to read the uploaded image.';
+                    $processing = false;
                 } else {
+                    // For image processing, we'll send the image directly to the vision model
                     $content = "IMAGE_TRANSCRIPT_PLACEHOLDER";
                 }
             } else {
@@ -266,28 +255,33 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
         $SYSTEM_PROMPT = getSoapSystemPrompt($LANGUAGE);
 
         // Prepare API request
-        if ($is_image) {
-            // For image processing, we need to handle it differently
-            // Since we're using a text-based API, we'll describe the image approach
-            $data = [
-                'model' => $MODEL,
-                'messages' => [
-                    ['role' => 'system', 'content' => $SYSTEM_PROMPT],
-                    ['role' => 'user', 'content' => "PLEASE ANALYZE THIS MEDICAL TRANSCRIPT IMAGE AND CONVERT IT TO SOAP FORMAT:\n\n[IMAGE CONTENT - Medical transcript showing patient-clinician dialogue]"]
-                ]
-            ];
-        } else {
-            $data = [
-                'model' => $MODEL,
-                'messages' => [
-                    ['role' => 'system', 'content' => $SYSTEM_PROMPT],
-                    ['role' => 'user', 'content' => "MEDICAL TRANSCRIPT TO CONVERT TO SOAP FORMAT:\n" . $content]
+        $api_data = [
+            'model' => $MODEL,
+            'messages' => [
+                ['role' => 'system', 'content' => $SYSTEM_PROMPT]
+            ]
+        ];
+
+        // Add user message with content
+        $user_content = "MEDICAL TRANSCRIPT TO CONVERT TO SOAP FORMAT:\n" . $content;
+
+        $api_data['messages'][] = ['role' => 'user', 'content' => $user_content];
+
+        // If it's an image, add it as a separate message with image data
+        if ($is_image && isset($image_data)) {
+            // Convert image to base64
+            $base64_image = base64_encode($image_data);
+            $mime_type = $file['type'];
+            $api_data['messages'][] = [
+                'role' => 'user',
+                'content' => [
+                    ['type' => 'image_url', 'image_url' => ['url' => "data:$mime_type;base64,$base64_image"]]
                 ]
             ];
         }
 
         // Make API request using common function
-        $response_data = callLLMApi($LLM_API_ENDPOINT_CHAT, $data, $LLM_API_KEY);
+        $response_data = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY);
 
         if (isset($response_data['error'])) {
             $error = $response_data['error'];
