@@ -352,15 +352,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                                             ?>
                                             <?php if (!empty($highlight_function)): ?>
                                                 <pre class="<?php echo $highlight_class; ?>"></pre>
-                                                <script>
-                                                    document.addEventListener('DOMContentLoaded', function() {
-                                                        const pre = document.querySelector('pre.<?php echo $highlight_class; ?>:not(.highlighted)');
-                                                        if (pre) {
-                                                            pre.innerHTML = <?php echo $highlight_function; ?>('<?php echo addslashes($text); ?>');
-                                                            pre.classList.add('highlighted');
-                                                        }
-                                                    });
-                                                </script>
                                             <?php else: ?>
                                                 <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
                                             <?php endif; ?>
