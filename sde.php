@@ -104,6 +104,11 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  * Contains instructions for extracting structured data
  */
 $SYSTEM_PROMPT = "You are a data extraction API. Respond ONLY with " . strtoupper($OUTPUT_FORMAT) . ".";
+if ($is_image) {
+    $SYSTEM_PROMPT .= " You will receive an image. Extract structured data from the image content.";
+} elseif (!empty($file_content)) {
+    $SYSTEM_PROMPT .= " You will receive text data that may include file content. Extract structured data from all provided text.";
+}
 
 /**
  * Application state variables
@@ -122,22 +127,64 @@ $is_api_request = false;
  * Processes both web form submissions and API requests
  * Validates input, calls AI API, and processes response
  */
-if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) || 
+if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['data']) || (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK))) || 
     ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET['data']))) {
     $processing = true;
     $is_api_request = (!isset($_POST['submit']) && !isset($_GET['submit'])); // If no submit button, it's an API request
     
     // Sanitize and validate input
-    $data = trim(isset($_POST['data']) ? $_POST['data'] : $_GET['data']);
+    $data = trim(isset($_POST['data']) ? $_POST['data'] : (isset($_GET['data']) ? $_GET['data'] : ''));
+
+    // Handle file upload if present
+    $file_content = '';
+    $is_image = false;
+    $image_data = null;
+
+    if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['file'];
+
+        // Validate file size (max 10MB)
+        if ($file['size'] > 10 * 1024 * 1024) {
+            $error = 'The file is too large. Maximum 10MB allowed.';
+            $processing = false;
+        } else {
+            // Check if it's an image
+            $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (in_array($file['type'], $image_types)) {
+                $is_image = true;
+                // Read image data
+                $image_data = file_get_contents($file['tmp_name']);
+                if ($image_data === false) {
+                    $error = 'Failed to read the uploaded image.';
+                    $processing = false;
+                }
+            } else {
+                // Text document - try to extract text
+                $file_content = extractTextFromDocument($file['tmp_name'], $file['type']);
+                if ($file_content === false) {
+                    $error = 'Failed to extract text from the uploaded document. Please ensure you have the required tools installed (antiword, catdoc, pdftotext, odt2txt, or pandoc).';
+                    $processing = false;
+                } else {
+                    // Clean up the text content
+                    $file_content = trim($file_content);
+                    // Remove BOM if present
+                    $file_content = preg_replace('/^\xEF\xBB\xBF/', '', $file_content);
+                    // Normalize line endings
+                    $file_content = str_replace(["\r\n", "\r"], "\n", $file_content);
+                }
+            }
+        }
+    }
     
-    // Validate data length (prevent extremely large inputs)
-    if (strlen($data) > 10000) {
-        $error = 'The data is too long. Maximum 10000 characters allowed.';
+    // Validate data length (including file content if it's text)
+    $total_length = strlen($data) + strlen($file_content);
+    if ($total_length > 10000) {
+        $error = 'The data (including file content) is too long. Maximum 10000 characters allowed.';
         $processing = false;
-    } 
-    // Validate data is not empty after trimming
-    elseif (empty($data)) {
-        $error = 'The data cannot be empty.';
+    }
+    // Validate data is not empty after trimming (unless we have an image)
+    elseif (empty($data) && !$is_image) {
+        $error = 'The data cannot be empty unless you upload an image.';
         $processing = false;
     }
     
@@ -147,10 +194,30 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
         $api_data = [
             'model' => $MODEL,
             'messages' => [
-                ['role' => 'system', 'content' => $SYSTEM_PROMPT],
-                ['role' => 'user', 'content' => "Extract structured data from: " . $data]
+                ['role' => 'system', 'content' => $SYSTEM_PROMPT]
             ]
         ];
+
+        // Add user message with data and file content
+        $user_content = $data;
+        if (!empty($file_content)) {
+            $user_content .= "\n\nFile content:\n" . $file_content;
+        }
+
+        $api_data['messages'][] = ['role' => 'user', 'content' => "Extract structured data from: " . $user_content];
+
+        // If it's an image, add it as a separate message with image data
+        if ($is_image && $image_data !== null) {
+            // Convert image to base64
+            $base64_image = base64_encode($image_data);
+            $mime_type = $file['type'];
+            $api_data['messages'][] = [
+                'role' => 'user',
+                'content' => [
+                    ['type' => 'image_url', 'image_url' => ['url' => "data:$mime_type;base64,$base64_image"]]
+                ]
+            ];
+        }
         
         // Make API request using common function
         $response_data = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY);
@@ -292,7 +359,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                 </article>
             <?php endif; ?>
 
-            <form method="POST" action="" id="extractionForm">
+            <form method="POST" action="" id="extractionForm" enctype="multipart/form-data">
                 <fieldset>
                     <label for="data">Text data:</label>
                     <textarea 
