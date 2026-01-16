@@ -486,7 +486,17 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
             const promptTextarea = document.getElementById('prompt');
 
             // Get predefined prompts from PHP (we'll embed them in JavaScript)
-            const predefinedPrompts = <?php echo json_encode($PREDEFINED_PROMPTS); ?>;
+            const predefinedPrompts = <?php
+                // Add current prompt to predefined prompts if it exists
+                $allPrompts = $PREDEFINED_PROMPTS;
+                if (!empty($current_prompt)) {
+                    $allPrompts['current'] = [
+                        'label' => 'Current prompt',
+                        'prompt' => $current_prompt
+                    ];
+                }
+                echo json_encode($allPrompts);
+            ?>;
 
             if (promptType === 'current') {
                 // Keep the current prompt value
