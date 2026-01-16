@@ -1,6 +1,6 @@
-# Medical AI Tools Suite
+# AI Tools Suite
 
-A comprehensive collection of 10 PHP web applications that use AI to process medical documents and extract key information in structured formats.
+A comprehensive collection of 10 PHP web applications that use AI to process documents and extract key information in structured formats.
 
 ## Tools Included
 
