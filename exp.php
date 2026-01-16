@@ -338,42 +338,111 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                                             <?php
                                                 $text = $content_item['text'] ?? '';
                                                 $highlight_class = '';
+                                                $highlight_function = '';
                                                 if (preg_match('/^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s', $text, $matches)) {
                                                     $highlight_class = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
                                                     $text = $matches[2];
+                                                    $lang = strtolower($matches[1]);
+                                                    if ($lang === 'json') {
+                                                        $highlight_function = 'jsonSyntaxHighlight';
+                                                    } elseif ($lang === 'yaml' || $lang === 'yml') {
+                                                        $highlight_function = 'yamlSyntaxHighlight';
+                                                    }
                                                 }
                                             ?>
-                                            <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
+                                            <?php if (!empty($highlight_function)): ?>
+                                                <pre class="<?php echo $highlight_class; ?>"></pre>
+                                                <script>
+                                                    document.addEventListener('DOMContentLoaded', function() {
+                                                        const pre = document.querySelector('pre.<?php echo $highlight_class; ?>:not(.highlighted)');
+                                                        if (pre) {
+                                                            pre.innerHTML = <?php echo $highlight_function; ?>('<?php echo addslashes($text); ?>');
+                                                            pre.classList.add('highlighted');
+                                                        }
+                                                    });
+                                                </script>
+                                            <?php else: ?>
+                                                <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <?php
                                         $text = $result['content'];
                                         $highlight_class = '';
+                                        $highlight_function = '';
                                         if (preg_match('/^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s', $text, $matches)) {
                                             $highlight_class = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
                                             $text = $matches[2];
+                                            $lang = strtolower($matches[1]);
+                                            if ($lang === 'json') {
+                                                $highlight_function = 'jsonSyntaxHighlight';
+                                            } elseif ($lang === 'yaml' || $lang === 'yml') {
+                                                $highlight_function = 'yamlSyntaxHighlight';
+                                            }
                                         }
                                     ?>
-                                    <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
+                                    <?php if (!empty($highlight_function)): ?>
+                                        <pre class="<?php echo $highlight_class; ?>"></pre>
+                                        <script>
+                                            document.addEventListener('DOMContentLoaded', function() {
+                                                const pre = document.querySelector('pre.<?php echo $highlight_class; ?>:not(.highlighted)');
+                                                if (pre) {
+                                                    pre.innerHTML = <?php echo $highlight_function; ?>('<?php echo addslashes($text); ?>');
+                                                    pre.classList.add('highlighted');
+                                                }
+                                            });
+                                        </script>
+                                    <?php else: ?>
+                                        <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             <?php else: ?>
                                 <?php
                                     $text = json_encode($result, JSON_PRETTY_PRINT);
                                     $highlight_class = 'highlight-json';
                                 ?>
-                                <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
+                                <pre class="<?php echo $highlight_class; ?>"></pre>
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const pre = document.querySelector('pre.<?php echo $highlight_class; ?>:not(.highlighted)');
+                                        if (pre) {
+                                            pre.innerHTML = jsonSyntaxHighlight('<?php echo addslashes($text); ?>');
+                                            pre.classList.add('highlighted');
+                                        }
+                                    });
+                                </script>
                             <?php endif; ?>
                         <?php else: ?>
                             <?php
                                 $text = $result;
                                 $highlight_class = '';
+                                $highlight_function = '';
                                 if (preg_match('/^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s', $text, $matches)) {
                                     $highlight_class = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
                                     $text = $matches[2];
+                                    $lang = strtolower($matches[1]);
+                                    if ($lang === 'json') {
+                                        $highlight_function = 'jsonSyntaxHighlight';
+                                    } elseif ($lang === 'yaml' || $lang === 'yml') {
+                                        $highlight_function = 'yamlSyntaxHighlight';
+                                    }
                                 }
                             ?>
-                            <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
+                            <?php if (!empty($highlight_function)): ?>
+                                <pre class="<?php echo $highlight_class; ?>"></pre>
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const pre = document.querySelector('pre.<?php echo $highlight_class; ?>:not(.highlighted)');
+                                        if (pre) {
+                                            pre.innerHTML = <?php echo $highlight_function; ?>('<?php echo addslashes($text); ?>');
+                                            pre.classList.add('highlighted');
+                                        }
+                                    });
+                                </script>
+                            <?php else: ?>
+                                <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </section>
                 </article>
