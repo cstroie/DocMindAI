@@ -198,11 +198,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['data']) || (isset(
             ]
         ];
 
-        // Add user message with data and file content
-        $user_content = $data;
-        if (!empty($file_content)) {
-            $user_content .= "\n\nFile content:\n" . $file_content;
-        }
 
         // If it's an image, add it as a separate message with image data
         if ($is_image && $image_data !== null) {
@@ -216,6 +211,11 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['data']) || (isset(
                 ]
             ];
         } else {
+            // Add user message with data and file content
+            $user_content = $data;
+            if (!empty($file_content)) {
+                $user_content .= "\n\nFile content:\n" . $file_content;
+            }
             $api_data['messages'][] = ['role' => 'user', 'content' => "Extract structured data from: " . $user_content];
         }
         
@@ -366,7 +366,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['data']) || (isset(
                         id="data" 
                         name="data" 
                         rows="8" 
-                        required
                         placeholder="Enter the text data you want to extract structured data from...&#10;&#10;Example: Patient: John Doe, Age: 45, Diagnosis: Type 2 Diabetes, Treatment: Metformin 500mg twice daily"
                     ><?php echo isset($_POST['data']) ? htmlspecialchars($_POST['data']) : (isset($_GET['data']) ? htmlspecialchars($_GET['data']) : ''); ?></textarea>
                     <small>
