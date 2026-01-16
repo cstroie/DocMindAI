@@ -779,7 +779,7 @@ function arrayToYaml($array) {
  */
 function checkConfigStatus() {
     if (file_exists('config.php')) {
-        return '<div class="config-status success">✅ Configuration file found. System is ready to use.</div>';
+        return '';
     } else {
         $message = '<div class="error">';
         $message .= '<strong>⚠️ Configuration file not found.</strong> Please create config.php with your settings.';
