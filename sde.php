@@ -228,6 +228,8 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Structured Data Extractor</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+    <script src="highlight.min.js"></script>
     <script src="script.js" type="text/javascript"></script>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📊%3C/text%3E%3C/svg%3E">
 </head>
@@ -258,27 +260,27 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                             if ($OUTPUT_FORMAT === 'yaml') {
                                 // Convert array to YAML and display
                                 $response_output = yaml_encode($result);
-                                $highlight_class = 'highlight-yaml';
+                                $highlight_class = 'yaml';
                             } elseif ($OUTPUT_FORMAT === 'xml') {
                                 // Convert array to XML and display
                                 $response_output = arrayToXml($result);
-                                $highlight_class = 'highlight-xml';
+                                $highlight_class = 'xml';
                             } elseif ($OUTPUT_FORMAT === 'markdown') {
                                 // Convert array to Markdown and display
                                 $response_output = markdownToHtml($result);
-                                $highlight_class = 'highlight-markdown';
+                                $highlight_class = 'markdown';
                             } else {
                                 // Display as formatted JSON
                                 $response_output = json_encode($result, JSON_PRETTY_PRINT);
-                                $highlight_class = 'highlight-json';
+                                $highlight_class = 'json';
                             }
-                            echo '<pre class="' . $highlight_class . '">' . htmlspecialchars($response_output) . '</pre>';
+                            echo '<pre><code class="' . htmlspecialchars($highlight_class) . '">' . htmlspecialchars($response_output) . '</code></pre>';
                         } else {
                             // Display as plain text
                             $fence_info = extractCodeFenceInfo($result, $OUTPUT_FORMAT);
-                            $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
+                            $highlight_class = !empty($fence_info['type']) ? $fence_info['type'] : 'text';
                             $text = $fence_info['text'];
-                            echo '<pre class="' . $highlight_class . '">' . htmlspecialchars($text) . '</pre>';
+                            echo '<pre><code class="' . htmlspecialchars($highlight_class) . '">' . htmlspecialchars($text) . '</code></pre>';
                         }
                         ?>
                     </section>

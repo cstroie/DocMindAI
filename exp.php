@@ -296,6 +296,8 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Experiment Tool</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+    <script src="highlight.min.js"></script>
     <script src="script.js"></script>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧪%3C/text%3E%3C/svg%3E">
 </head>
@@ -338,22 +340,20 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                                             <?php
                                                 $text = $content_item['text'] ?? '';
                                                 $fence_info = extractCodeFenceInfo($text);
-                                                $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
+                                                $highlight_class = !empty($fence_info['type']) ? $fence_info['type'] : 'text';
                                                 $text = $fence_info['text'];
-                                                $highlight_function = $fence_info['function'];
                                             ?>
-                                            <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
+                                            <pre><code class="<?php echo htmlspecialchars($highlight_class); ?>"><?php echo htmlspecialchars($text); ?></code></pre>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <?php
                                         $text = $result['content'];
                                         $fence_info = extractCodeFenceInfo($text, 'markdown');
-                                        $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
+                                        $highlight_class = !empty($fence_info['type']) ? $fence_info['type'] : 'text';
                                         $text = $fence_info['text'];
-                                        $highlight_function = $fence_info['function'];
                                     ?>
-                                    <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
+                                    <pre><code class="<?php echo htmlspecialchars($highlight_class); ?>"><?php echo htmlspecialchars($text); ?></code></pre>
                                 <?php endif; ?>
                             <?php else: ?>
                                 <?php
@@ -369,11 +369,10 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                             <?php
                                 $text = $result;
                                 $fence_info = extractCodeFenceInfo($text, 'markdown');
-                                $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
+                                $highlight_class = !empty($fence_info['type']) ? $fence_info['type'] : 'text';
                                 $text = $fence_info['text'];
-                                $highlight_function = $fence_info['function'];
                             ?>
-                            <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
+                            <pre><code class="<?php echo htmlspecialchars($highlight_class); ?>"><?php echo htmlspecialchars($text); ?></code></pre>
                         <?php endif; ?>
                     </section>
                 </article>
