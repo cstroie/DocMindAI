@@ -348,7 +348,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                                 <?php else: ?>
                                     <?php
                                         $text = $result['content'];
-                                        $fence_info = extractCodeFenceInfo($text);
+                                        $fence_info = extractCodeFenceInfo($text, 'markdown');
                                         $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
                                         $text = $fence_info['text'];
                                         $highlight_function = $fence_info['function'];
@@ -358,7 +358,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                             <?php else: ?>
                                 <?php
                                     $text = json_encode($result, JSON_PRETTY_PRINT);
-                                    $fence_info = extractCodeFenceInfo('```json' . PHP_EOL . $text . PHP_EOL . '```');
+                                    $fence_info = extractCodeFenceInfo($text, 'json');
                                     $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
                                     $text = $fence_info['text'];
                                     $highlight_function = $fence_info['function'];
@@ -368,7 +368,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                         <?php else: ?>
                             <?php
                                 $text = $result;
-                                $fence_info = extractCodeFenceInfo($text);
+                                $fence_info = extractCodeFenceInfo($text, 'markdown');
                                 $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
                                 $text = $fence_info['text'];
                                 $highlight_function = $fence_info['function'];
