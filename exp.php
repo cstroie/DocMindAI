@@ -390,7 +390,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                         <select id="prompt_type" name="prompt_type" onchange="updatePrompt()">
                             <?php if (!empty($current_prompt)): ?>
                                 <option value="current" <?php echo ('current' === $PROMPT_TYPE) ? 'selected' : ''; ?>>
-                                    Current prompt
+                                    Current prompt (<?php echo htmlspecialchars(substr($current_prompt, 0, 50)) . (strlen($current_prompt) > 50 ? '...' : ''); ?>)
                                 </option>
                             <?php endif; ?>
                             <?php foreach ($PREDEFINED_PROMPTS as $key => $prompt_data): ?>
