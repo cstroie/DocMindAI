@@ -98,8 +98,8 @@ function markdownSyntaxHighlight(markdown) {
  * Handles JSON, YAML, and Markdown content
  */
 function applySyntaxHighlighting() {
-    const jsonElements = document.querySelectorAll('pre');
-    jsonElements.forEach(function(element) {
+    const preElements = document.querySelectorAll('pre');
+    preElements.forEach(function(element) {
         try {
             const text = element.textContent;
             if (element.classList.contains('highlight-json') && (text.trim().startsWith('{') || text.trim().startsWith('['))) {
