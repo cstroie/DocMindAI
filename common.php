@@ -1003,9 +1003,10 @@ function getHighlightFunction($language) {
  * Extract code fence information from text
  * 
  * @param string $text Text to analyze
+ * @param string $default Default type when no fence is found (default: 'text')
  * @return array Array with 'type', 'function', and 'text' keys
  */
-function extractCodeFenceInfo($text) {
+function extractCodeFenceInfo($text, $default = 'text') {
     $result = [
         'type' => '',
         'function' => '',
@@ -1016,6 +1017,10 @@ function extractCodeFenceInfo($text) {
         $result['type'] = !empty($matches[1]) ? strtolower($matches[1]) : '';
         $result['text'] = $matches[2];
         $result['function'] = getHighlightFunction($result['type']);
+    } else {
+        // Set default type if no fence found
+        $result['type'] = $default;
+        $result['function'] = getHighlightFunction($default);
     }
 
     return $result;
