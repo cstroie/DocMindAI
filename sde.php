@@ -341,6 +341,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
         </main>
     </div>
     
+    <script src="script.js"></script>
     <script>
         function clearForm() {
             document.getElementById('data').value = '';
