@@ -119,17 +119,17 @@ function getSoapSystemPrompt($language) {
 
 Follow these rules:
 
-*S – Subjective*:
+*S - Subjective*:
 Include all information reported by the patient: symptoms, duration, history, complaints, and any relevant lifestyle or exposure context.
 Use the patient's own words when possible (paraphrased for clarity).
 
-*O – Objective*:
+*O - Objective*:
 Include observable findings such as vital signs, physical exam results, lab tests, imaging results, and clinician observations during the encounter.
 
-*A – Assessment*:
+*A - Assessment*:
 Provide a brief summary of the clinician's diagnostic impression. Include possible or confirmed diagnoses.
 
-*P – Plan*:
+*P - Plan*:
 Outline the next steps recommended by the clinician. This can include prescriptions, tests to be ordered, referrals, follow-up instructions, and lifestyle recommendations.
 
 Keep the format clear and professional. Do not include any parts of the transcript that are irrelevant or non-clinical. Do not invent information not found in the transcript. Always use a bullet point format for each section of the SOAP note.
@@ -141,11 +141,8 @@ A comprehensive SOAP note has to take into account all subjective and objective 
 OUTPUT FORMAT (JSON):
 {
   \"subjective\": [\"patient reported symptom 1\", \"patient reported symptom 2\", \"patient reported history\"],
-
   \"objective\": [\"clinician observation 1\", \"clinician observation 2\", \"measurement 1\"],
-
   \"assessment\": [\"diagnostic impression 1\", \"diagnostic impression 2\"],
-
   \"plan\": [\"next step 1\", \"next step 2\", \"recommendation 1\"]
 }
 
