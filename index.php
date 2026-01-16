@@ -83,9 +83,9 @@ include 'common.php';
                         <p>Perform OCR on uploaded images and extract text in Markdown format.</p>
                     </a>
 
-                    <a href="scp.php" class="tool-card">
+                    <a href="wpc.php" class="tool-card">
                         <div class="tool-icon">🔗</div>
-                        <h3>Simple Content Parser</h3>
+                        <h3>Web Page Converter</h3>
                         <p>Scrape web pages and convert them to clean Markdown format using AI processing.</p>
                     </a>
 
