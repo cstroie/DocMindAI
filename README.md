@@ -1,5 +1,7 @@
 # DocMind AI
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 A comprehensive collection of PHP web applications that use AI to process documents and extract key information in structured formats.
 
 ## Tools Included
@@ -297,20 +299,59 @@ Content-Type: application/json
 }
 ```
 
-## Requirements
+## 📋 Requirements
 
 - PHP 7.0+
 - cURL extension
 - JSON extension
-- Access to compatible AI API (e.g., Ollama)
+- ImageMagick or GraphicsMagick PHP extensions (for OCR PDF processing)
+- Access to compatible AI API (e.g., Ollama, MedGemma)
+
+## 🔧 Configuration
+
+Create a `config.php` file from the example:
+```bash
+cp config.php.example config.php
+```
+
+Then edit `config.php` with your AI API settings:
+```php
+<?php
+$LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1';
+$LLM_API_KEY = '';
+$DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
+$DEFAULT_VISION_MODEL = 'gemma3:4b';
+$LLM_API_FILTER = '/free/';
+$CHAT_HISTORY_LENGTH = 10;
+?>
 - ImageMagick or GraphicsMagick PHP extensions (for OCR PDF processing)
 
-## Installation
+## 🚀 Quick Start
 
-1. Clone or download this repository
-2. Place all files on a PHP-enabled web server
-3. Ensure the web server can write to the system's temporary directory
-4. Install and configure an AI API service (e.g., Ollama) locally or remotely
+### Installation
+```bash
+git clone https://github.com/yourusername/docmind-ai.git
+cd docmind-ai
+cp config.php.example config.php
+# Edit config.php with your AI API settings
+```
+
+### Prerequisites
+- PHP 7.0+
+- cURL extension
+- JSON extension
+- ImageMagick or GraphicsMagick (for OCR functionality)
+- Access to compatible AI API (e.g., Ollama, MedGemma)
+
+### Setup
+1. Clone this repository or download the files
+2. Create a `config.php` file from the example:
+   ```bash
+   cp config.php.example config.php
+   ```
+3. Edit `config.php` with your AI API endpoint and settings
+4. Ensure all required PHP extensions are installed and enabled
+5. Make sure your web server has write access to the system's temporary directory
 
 ## Configuration
 
@@ -327,7 +368,7 @@ $CHAT_HISTORY_LENGTH = 10;
 ?>
 ```
 
-## Usage
+## 📖 Usage
 
 ### Web Interface
 Access any of the tools directly through a web browser:
@@ -345,6 +386,16 @@ Access any of the tools directly through a web browser:
 ### API Endpoints
 All tools support REST API calls as described in their respective sections above.
 
+## 📝 Supported Languages
+
+All tools support these languages:
+- Romanian (ro)
+- English (en)
+- Spanish (es)
+- French (fr)
+- German (de)
+- Italian (it)
+
 ## Supported Languages
 
 All tools support these languages:
@@ -355,10 +406,34 @@ All tools support these languages:
 - German (de)
 - Italian (it)
 
-## License
+## 📄 License
 
-GPL 3
+This project is licensed under the GPL 3 License - see the [LICENSE](LICENSE) file for details.
 
-## Author
+## 🤝 Contributing
 
-Costin Stroie <costinstroie@eridu.eu.org>
+Contributions are welcome! Please follow these guidelines:
+- Fork the repository
+- Create a feature branch
+- Submit a pull request
+- Follow the existing code style
+
+## 📬 Contact
+
+Costin Stroie - costinstroie@eridu.eu.org
+
+Project Link: [https://github.com/yourusername/docmind-ai](https://github.com/yourusername/docmind-ai)
+
+## 📝 Acknowledgments
+
+- Thanks to all contributors
+- Inspired by medical AI research
+- Built with PHP and modern AI technologies
+
+## 📋 Changelog
+
+See the [commit history](https://github.com/yourusername/docmind-ai/commits/main) for detailed changes.
+
+## 🔒 Security
+
+For security issues, please contact costinstroie@eridu.eu.org directly.
