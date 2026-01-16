@@ -343,15 +343,20 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                                                     $highlight_class = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
                                                     $text = $matches[2];
                                                     $lang = strtolower($matches[1]);
-                                                    if ($lang === 'json') {
-                                                        $highlight_function = 'jsonSyntaxHighlight';
-                                                    } elseif ($lang === 'yaml' || $lang === 'yml') {
-                                                        $highlight_function = 'yamlSyntaxHighlight';
-                                                    }
+                                                    $highlight_function = getHighlightFunction($lang);
                                                 }
                                             ?>
                                             <?php if (!empty($highlight_function)): ?>
                                                 <pre class="<?php echo $highlight_class; ?>"></pre>
+                                                <script>
+                                                    document.addEventListener('DOMContentLoaded', function() {
+                                                        const pre = document.querySelector('pre.<?php echo $highlight_class; ?>:not(.highlighted)');
+                                                        if (pre) {
+                                                            pre.innerHTML = <?php echo $highlight_function; ?>('<?php echo addslashes($text); ?>');
+                                                            pre.classList.add('highlighted');
+                                                        }
+                                                    });
+                                                </script>
                                             <?php else: ?>
                                                 <pre class="<?php echo $highlight_class; ?>"><?php echo htmlspecialchars($text); ?></pre>
                                             <?php endif; ?>
@@ -366,11 +371,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                                             $highlight_class = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
                                             $text = $matches[2];
                                             $lang = strtolower($matches[1]);
-                                            if ($lang === 'json') {
-                                                $highlight_function = 'jsonSyntaxHighlight';
-                                            } elseif ($lang === 'yaml' || $lang === 'yml') {
-                                                $highlight_function = 'yamlSyntaxHighlight';
-                                            }
+                                            $highlight_function = getHighlightFunction($lang);
                                         }
                                     ?>
                                     <?php if (!empty($highlight_function)): ?>
@@ -392,13 +393,14 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                                 <?php
                                     $text = json_encode($result, JSON_PRETTY_PRINT);
                                     $highlight_class = 'highlight-json';
+                                    $highlight_function = getHighlightFunction('json');
                                 ?>
                                 <pre class="<?php echo $highlight_class; ?>"></pre>
                                 <script>
                                     document.addEventListener('DOMContentLoaded', function() {
                                         const pre = document.querySelector('pre.<?php echo $highlight_class; ?>:not(.highlighted)');
                                         if (pre) {
-                                            pre.innerHTML = jsonSyntaxHighlight('<?php echo addslashes($text); ?>');
+                                            pre.innerHTML = <?php echo $highlight_function; ?>('<?php echo addslashes($text); ?>');
                                             pre.classList.add('highlighted');
                                         }
                                     });
@@ -413,11 +415,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                                     $highlight_class = !empty($matches[1]) ? 'highlight-' . strtolower($matches[1]) : 'highlight-text';
                                     $text = $matches[2];
                                     $lang = strtolower($matches[1]);
-                                    if ($lang === 'json') {
-                                        $highlight_function = 'jsonSyntaxHighlight';
-                                    } elseif ($lang === 'yaml' || $lang === 'yml') {
-                                        $highlight_function = 'yamlSyntaxHighlight';
-                                    }
+                                    $highlight_function = getHighlightFunction($lang);
                                 }
                             ?>
                             <?php if (!empty($highlight_function)): ?>
