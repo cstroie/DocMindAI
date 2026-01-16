@@ -206,15 +206,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['data']) || (isset(
 
         // If it's an image, add it as a separate message with image data
         if ($is_image && $image_data !== null) {
-            $api_data['messages'][] = [
-                'role' => 'user',
-                'content' => [
-                    ['type' => 'image_url', 'image_url' => ['url' => "data:$mime_type;base64,$base64_image"]]
-                ]
-            ];
-        } else {
-            $api_data['messages'][] = ['role' => 'user', 'content' => "Extract structured data from: " . $user_content];
-        }
             // Convert image to base64
             $base64_image = base64_encode($image_data);
             $mime_type = $file['type'];
@@ -224,6 +215,8 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['data']) || (isset(
                     ['type' => 'image_url', 'image_url' => ['url' => "data:$mime_type;base64,$base64_image"]]
                 ]
             ];
+        } else {
+            $api_data['messages'][] = ['role' => 'user', 'content' => "Extract structured data from: " . $user_content];
         }
         
         // Make API request using common function
