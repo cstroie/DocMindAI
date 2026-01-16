@@ -330,7 +330,7 @@ $CHAT_HISTORY_LENGTH = 10;
 
 ### Installation
 ```bash
-git clone https://github.com/yourusername/docmind-ai.git
+git clone https://github.com/cstroie/DocMindAI.git
 cd docmind-ai
 cp config.php.example config.php
 # Edit config.php with your AI API settings
@@ -422,7 +422,7 @@ Contributions are welcome! Please follow these guidelines:
 
 Costin Stroie - costinstroie@eridu.eu.org
 
-Project Link: [https://github.com/yourusername/docmind-ai](https://github.com/yourusername/docmind-ai)
+Project Link: [https://github.com/cstroie/DocMindAI](https://github.com/cstroie/DocMindAI)
 
 ## 📝 Acknowledgments
 
@@ -432,7 +432,7 @@ Project Link: [https://github.com/yourusername/docmind-ai](https://github.com/yo
 
 ## 📋 Changelog
 
-See the [commit history](https://github.com/yourusername/docmind-ai/commits/main) for detailed changes.
+See the [commit history](https://github.com/cstroie/DocMindAI/commits/main) for detailed changes.
 
 ## 🔒 Security
 
