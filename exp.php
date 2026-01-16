@@ -504,22 +504,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
         // Initialize prompt on page load
         document.addEventListener('DOMContentLoaded', function() {
             updatePrompt();
-
-            // Apply syntax highlighting to all pre elements
-            const jsonElements = document.querySelectorAll('pre');
-            jsonElements.forEach(function(element) {
-                try {
-                    const text = element.textContent;
-                    if (element.classList.contains('highlight-json') && (text.trim().startsWith('{') || text.trim().startsWith('['))) {
-                        const json = JSON.parse(text);
-                        element.innerHTML = jsonSyntaxHighlight(json);
-                    } else if (element.classList.contains('highlight-yaml') || element.classList.contains('highlight-yml')) {
-                        element.innerHTML = yamlSyntaxHighlight(text);
-                    }
-                } catch (e) {
-                    // Not valid JSON/YAML, leave as is
-                }
-            });
+            applySyntaxHighlighting();
         });
     </script>
 </body>
