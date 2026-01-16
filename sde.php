@@ -267,7 +267,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                             echo '<pre class="' . $highlight_class . '">' . htmlspecialchars($response_output) . '</pre>';
                         } else {
                             // Display as plain text
-                            $fence_info = extractCodeFenceInfo($result);
+                            $fence_info = extractCodeFenceInfo($result, 'markdown');
                             $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
                             $text = $fence_info['text'];
                             echo '<pre class="' . $highlight_class . '">' . htmlspecialchars($text) . '</pre>';
