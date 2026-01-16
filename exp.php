@@ -314,7 +314,25 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                     </header>
 
                     <section>
-                        <pre><?php echo htmlspecialchars($result); ?></pre>
+                        <?php if (is_array($result)): ?>
+                            <?php if (isset($result['content'])): ?>
+                                <?php if (is_array($result['content'])): ?>
+                                    <?php foreach ($result['content'] as $content_item): ?>
+                                        <?php if (isset($content_item['type']) && $content_item['type'] === 'image_url'): ?>
+                                            <img src="<?php echo htmlspecialchars($content_item['image_url']['url']); ?>" alt="Uploaded image" style="max-width: 100%; height: auto; margin: 10px 0;">
+                                        <?php else: ?>
+                                            <pre><?php echo htmlspecialchars($content_item['text'] ?? ''); ?></pre>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <pre><?php echo htmlspecialchars($result['content']); ?></pre>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                <pre><?php echo htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT)); ?></pre>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <pre><?php echo htmlspecialchars($result); ?></pre>
+                        <?php endif; ?>
                     </section>
                 </article>
             <?php endif; ?>
