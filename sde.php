@@ -257,19 +257,14 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['data'])) ||
                         if (is_array($result)) {
                             if ($OUTPUT_FORMAT === 'yaml') {
                                 // Convert array to YAML and display
-                                $yaml_output = arrayToYaml($result);
-                                $fence_info = extractCodeFenceInfo('```yaml' . PHP_EOL . $yaml_output . PHP_EOL . '```');
-                                $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
-                                $yaml_output = $fence_info['text'];
-                                echo '<pre class="' . $highlight_class . '">' . htmlspecialchars($yaml_output) . '</pre>';
+                                $response_output = yaml_encode($result);
+                                $highlight_class = 'highlight-yaml';
                             } else {
                                 // Display as formatted JSON
-                                $json_output = json_encode($result, JSON_PRETTY_PRINT);
-                                $fence_info = extractCodeFenceInfo('```json' . PHP_EOL . $json_output . PHP_EOL . '```');
-                                $highlight_class = !empty($fence_info['type']) ? 'highlight-' . $fence_info['type'] : '';
-                                $json_output = $fence_info['text'];
-                                echo '<pre class="' . $highlight_class . '">' . htmlspecialchars($json_output) . '</pre>';
+                                $response_output = json_encode($result, JSON_PRETTY_PRINT);
+                                $highlight_class = 'highlight-json';
                             }
+                            echo '<pre class="' . $highlight_class . '">' . htmlspecialchars($response_output) . '</pre>';
                         } else {
                             // Display as plain text
                             $fence_info = extractCodeFenceInfo($result);
