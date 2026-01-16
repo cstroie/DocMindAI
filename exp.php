@@ -373,11 +373,11 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                         placeholder="Enter your prompt text here..."
                     ><?php
                         // If we have a selected prompt type, use its predefined text
-                        if (isset($PREDEFINED_PROMPTS[$PROMPT_TYPE])) {
+                        if (isset($PREDEFINED_PROMPTS[$PROMPT_TYPE]) && is_string($PREDEFINED_PROMPTS[$PROMPT_TYPE]['prompt'])) {
                             echo htmlspecialchars($PREDEFINED_PROMPTS[$PROMPT_TYPE]['prompt']);
-                        } elseif (isset($_POST['prompt'])) {
+                        } elseif (isset($_POST['prompt']) && is_string($_POST['prompt'])) {
                             echo htmlspecialchars($_POST['prompt']);
-                        } elseif (isset($_GET['prompt'])) {
+                        } elseif (isset($_GET['prompt']) && is_string($_GET['prompt'])) {
                             echo htmlspecialchars($_GET['prompt']);
                         }
                     ?></textarea>
