@@ -742,7 +742,7 @@ function extractJsonFromResponse($content) {
  * @param array $array Array to convert
  * @return string YAML formatted string
  */
-function arrayToYaml($array) {
+function yaml_encode($array) {
     $yaml = '';
     $indent = 0;
 
