@@ -40,6 +40,22 @@
 
                     <!-- Additional sections as needed -->
                 </article>
+
+                <!-- Output panel for displaying results -->
+                <article id="output-panel" style="display: none;">
+                    <header>
+                        <h2>[Output Title]</h2>
+                    </header>
+
+                    <section>
+                        <h3>[Output Section]</h3>
+                        <div id="output-content" class="markdown-result">
+                            <!-- Dynamic output content will be inserted here -->
+                        </div>
+                    </section>
+
+                    <!-- Additional output sections as needed -->
+                </article>
             </section>
 
             <!-- Main form -->
@@ -56,6 +72,18 @@
                     >
                     <small>
                         [Input description]
+                    </small>
+
+                    <!-- Textarea input for larger content -->
+                    <label for="main-textarea">[Textarea Label]:</label>
+                    <textarea
+                        id="main-textarea"
+                        name="main-textarea"
+                        rows="8"
+                        placeholder="[Textarea placeholder]"
+                    ></textarea>
+                    <small>
+                        [Textarea description]
                     </small>
 
                     <!-- Model selection -->
