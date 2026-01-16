@@ -376,13 +376,15 @@ function scrapeUrl($url) {
                     🔍 Parse Content
                 </button>
                 
-                <button type="button" class="btn btn-secondary" onclick="clearForm()">
-                    🔄 New Parse
-                </button>
+                <div class="button-grid">
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                        🔄 New Parse
+                    </button>
 
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">
-                    🏠 Back to Main Menu
-                </button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">
+                        🏠 Back to Main Menu
+                    </button>
+                </div>
             </form>
         </main>
     </div>

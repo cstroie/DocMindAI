@@ -344,13 +344,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </small>
                 </fieldset>
                 
-                <button type="button" class="btn btn-secondary" onclick="clearChat()">
-                    🔄 New Chat
-                </button>
+                <div class="button-grid">
+                    <button type="button" class="btn btn-secondary" onclick="clearChat()">
+                        🔄 New Chat
+                    </button>
 
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">
-                    🏠 Back to Main Menu
-                </button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">
+                        🏠 Back to Main Menu
+                    </button>
+                </div>
             </form>
         </main>
     </div>

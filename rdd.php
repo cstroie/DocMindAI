@@ -456,13 +456,15 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['report'])) ||
                     🩺 Generate Differential Diagnosis
                 </button>
                 
-                <button type="button" class="btn btn-secondary" onclick="clearForm()">
-                    🔄 New Diagnosis
-                </button>
+                <div class="button-grid">
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                        🔄 New Diagnosis
+                    </button>
 
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">
-                    🏠 Back to Main Menu
-                </button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">
+                        🏠 Back to Main Menu
+                    </button>
+                </div>
             </form>
         </main>
     </div>
