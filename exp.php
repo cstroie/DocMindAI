@@ -208,8 +208,11 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                     $error = 'Failed to read the uploaded image.';
                     $processing = false;
                 } else {
+                    // Get max image size from form or use default
+                    $max_size = isset($_POST['max_image_size']) ? intval($_POST['max_image_size']) : 500;
+
                     // Resize the image
-                    $resize_result = resizeImage($image);
+                    $resize_result = resizeImage($image, $max_size);
                     $resized_image = $resize_result['image'];
 
                     // Save resized image to temporary file
@@ -498,6 +501,17 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                     </select>
                     <small>
                         Select the language for the AI response.
+                    </small>
+
+                    <label for="max_image_size">Maximum image size:</label>
+                    <select id="max_image_size" name="max_image_size">
+                        <option value="200">200x200</option>
+                        <option value="500" selected>500x500</option>
+                        <option value="800">800x800</option>
+                        <option value="1000">1000x1000</option>
+                    </select>
+                    <small>
+                        Select the maximum dimensions for resizing uploaded images.
                     </small>
                 </fieldset>
 
