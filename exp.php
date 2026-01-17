@@ -238,7 +238,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                                 $processing = false;
                             }
                             // Clean up temporary file
-                            //unlink($temp_image_path);
+                            unlink($temp_image_path);
                         }
 
                         // Clean up image resources
