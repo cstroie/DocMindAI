@@ -1,0 +1,55 @@
+# Image Analysis & Poetry Prompt Generator
+
+## Step 1: Detailed Image Analysis
+Analyze the uploaded image thoroughly and describe:
+
+1. **Visual Elements**:
+   - Colors (dominant palette, contrasts, mood)
+   - Composition (framing, perspective, balance)
+   - Lighting (natural/artificial, shadows, highlights)
+   - Textures and patterns
+
+2. **Subject Matter**:
+   - Primary subjects (objects, people, landscapes)
+   - Secondary details (background, context, symbols)
+   - Emotional tone (serene, chaotic, melancholic, etc.)
+
+3. **Artistic Style** (if applicable):
+   - Genre (realism, impressionism, abstract, etc.)
+   - Technique (brushstrokes, digital effects, photography style)
+   - Historical/cultural references
+
+## Step 2: Thematic Interpretation
+Extract deeper meanings:
+- What story or emotion does the image evoke?
+- Are there metaphors or symbolic elements?
+- How might different viewers interpret it?
+
+## Step 3: Poetry Prompt Generation
+Craft a detailed prompt for a poetry-generating LLM, including:
+
+1. **Core Theme**: The central idea or emotion to express.
+2. **Structural Guidelines**:
+   - Form (free verse, sonnet, haiku, etc.)
+   - Rhyme/meter preferences (if any)
+   - Length (e.g., "10-14 lines")
+3. **Sensory Details**: Key visual/aesthetic elements to incorporate.
+4. **Tone/Mood**: Match the image's emotional resonance.
+5. **Optional Constraints**:
+   - Include specific words/phrases from the analysis.
+   - Avoid clichés or literal descriptions.
+
+## Example Output Format:
+```
+**Poetry Prompt**:
+Write a [form] poem (e.g., "free verse") capturing [theme] with a [tone] mood.
+Incorporate:
+- The [specific colors/lighting] to evoke [emotion].
+- References to [key subjects/symbols].
+- A focus on [textures/patterns] to create [sensory effect].
+Avoid literal descriptions; aim for metaphorical depth.
+```
+
+## Additional Notes:
+- If the image contains text, suggest whether to integrate it or ignore it.
+- For abstract images, emphasize emotional/symbolic interpretation over literal description.
