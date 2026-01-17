@@ -209,33 +209,42 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
                     $processing = false;
                 } else {
                     // Get max image size from form or use default
-                    $max_size = isset($_POST['max_image_size']) ? intval($_POST['max_image_size']) : 500;
+                    $max_size = isset($_POST['max_image_size']) ? $_POST['max_image_size'] : '500';
 
-                    // Resize the image
-                    $resize_result = resizeImage($image, $max_size);
-                    $resized_image = $resize_result['image'];
-
-                    // Save resized image to temporary file as JPEG
-                    $temp_image_path = tempnam(sys_get_temp_dir(), 'exp_') . '.jpg';
-                    $success = imagejpeg($resized_image, $temp_image_path, 85);
-
-                    if (!$success) {
-                        $error = 'Failed to process the uploaded image.';
-                        $processing = false;
-                    } else {
-                        // Read the resized image data
-                        $image_data = file_get_contents($temp_image_path);
+                    if ($max_size === 'original') {
+                        // Send original image without processing
+                        $image_data = file_get_contents($file['tmp_name']);
                         if ($image_data === false) {
-                            $error = 'Failed to read the processed image.';
+                            $error = 'Failed to read the uploaded image.';
                             $processing = false;
                         }
-                        // Clean up temporary file
-                        //unlink($temp_image_path);
-                    }
+                    } else {
+                        // Resize the image
+                        $resize_result = resizeImage($image, intval($max_size));
+                        $resized_image = $resize_result['image'];
 
-                    // Clean up image resources
-                    imagedestroy($image);
-                    imagedestroy($resized_image);
+                        // Save resized image to temporary file as JPEG
+                        $temp_image_path = tempnam(sys_get_temp_dir(), 'exp_') . '.jpg';
+                        $success = imagejpeg($resized_image, $temp_image_path, 85);
+
+                        if (!$success) {
+                            $error = 'Failed to process the uploaded image.';
+                            $processing = false;
+                        } else {
+                            // Read the resized image data
+                            $image_data = file_get_contents($temp_image_path);
+                            if ($image_data === false) {
+                                $error = 'Failed to read the processed image.';
+                                $processing = false;
+                            }
+                            // Clean up temporary file
+                            //unlink($temp_image_path);
+                        }
+
+                        // Clean up image resources
+                        imagedestroy($image);
+                        imagedestroy($resized_image);
+                    }
                 }
             } else {
                 // Text document - try to extract text
@@ -289,10 +298,14 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
         if ($is_image && $image_data !== null) {
             // Convert image to base64
             $base64_image = base64_encode($image_data);
+
+            // Use original MIME type if sending original image, otherwise use JPEG
+            $mime_type = ($max_size === 'original') ? $file['type'] : 'image/jpeg';
+
             $api_data['messages'][] = [
                 'role' => 'user',
                 'content' => [
-                    ['type' => 'image_url', 'image_url' => ['url' => "data:image/jpeg;base64,$base64_image"]]
+                    ['type' => 'image_url', 'image_url' => ['url' => "data:$mime_type;base64,$base64_image"]]
                 ]
             ];
         }
@@ -504,13 +517,14 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
 
                     <label for="max_image_size">Maximum image size:</label>
                     <select id="max_image_size" name="max_image_size">
+                        <option value="original">Original</option>
                         <option value="200">200x200</option>
                         <option value="500" selected>500x500</option>
                         <option value="800">800x800</option>
                         <option value="1000">1000x1000</option>
                     </select>
                     <small>
-                        Select the maximum dimensions for resizing uploaded images.
+                        Select the maximum dimensions for resizing uploaded images. Choose "Original" to send the image as-is without processing.
                     </small>
                 </fieldset>
 
