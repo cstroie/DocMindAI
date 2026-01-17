@@ -104,7 +104,7 @@ if (!array_key_exists($LANGUAGE, $AVAILABLE_LANGUAGES)) {
  * Contains instructions for extracting structured data
  */
 $SYSTEM_PROMPT = "You are a data extraction API. Respond ONLY with " . strtoupper($OUTPUT_FORMAT) . ".";
-if ($is_image) {
+if (isset($is_image) && $is_image) {
     $SYSTEM_PROMPT .= " You will receive an image. Extract structured data from the image content.";
 } elseif (!empty($file_content)) {
     $SYSTEM_PROMPT .= " You will receive text data that may include file content. Extract structured data from all provided text.";
@@ -151,53 +151,59 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['data']) || (isset(
             // Check if it's an image
             $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (in_array($file['type'], $image_types)) {
-                $is_image = true;
-                // Create image resource from uploaded file
-                $image = null;
-                switch ($file['type']) {
-                    case 'image/jpeg':
-                        $image = imagecreatefromjpeg($file['tmp_name']);
-                        break;
-                    case 'image/png':
-                        $image = imagecreatefrompng($file['tmp_name']);
-                        break;
-                    case 'image/gif':
-                        $image = imagecreatefromgif($file['tmp_name']);
-                        break;
-                    case 'image/webp':
-                        $image = imagecreatefromwebp($file['tmp_name']);
-                        break;
-                }
-
-                if ($image === false) {
-                    $error = 'Failed to read the uploaded image.';
+                // Check if GD library is available
+                if (!extension_loaded('gd')) {
+                    $error = 'Image processing requires the GD library which is not installed or enabled.';
                     $processing = false;
                 } else {
-                    // Resize the image
-                    $resize_result = resizeImage($image);
-                    $resized_image = $resize_result['image'];
-
-                    // Save resized image to temporary file
-                    $temp_image_path = tempnam(sys_get_temp_dir(), 'sde_') . '.png';
-                    $success = imagepng($resized_image, $temp_image_path, 9);
-
-                    if (!$success) {
-                        $error = 'Failed to process the uploaded image.';
-                        $processing = false;
-                    } else {
-                        // Read the resized image data
-                        $image_data = file_get_contents($temp_image_path);
-                        if ($image_data === false) {
-                            $error = 'Failed to read the processed image.';
-                            $processing = false;
-                        }
-                        // Clean up temporary file
-                        unlink($temp_image_path);
+                    $is_image = true;
+                    // Create image resource from uploaded file
+                    $image = null;
+                    switch ($file['type']) {
+                        case 'image/jpeg':
+                            $image = imagecreatefromjpeg($file['tmp_name']);
+                            break;
+                        case 'image/png':
+                            $image = imagecreatefrompng($file['tmp_name']);
+                            break;
+                        case 'image/gif':
+                            $image = imagecreatefromgif($file['tmp_name']);
+                            break;
+                        case 'image/webp':
+                            $image = imagecreatefromwebp($file['tmp_name']);
+                            break;
                     }
 
-                    // Clean up image resources
-                    imagedestroy($image);
-                    imagedestroy($resized_image);
+                    if ($image === false) {
+                        $error = 'Failed to read the uploaded image.';
+                        $processing = false;
+                    } else {
+                        // Resize the image
+                        $resize_result = resizeImage($image);
+                        $resized_image = $resize_result['image'];
+
+                        // Save resized image to temporary file
+                        $temp_image_path = tempnam(sys_get_temp_dir(), 'sde_') . '.png';
+                        $success = imagepng($resized_image, $temp_image_path, 9);
+
+                        if (!$success) {
+                            $error = 'Failed to process the uploaded image.';
+                            $processing = false;
+                        } else {
+                            // Read the resized image data
+                            $image_data = file_get_contents($temp_image_path);
+                            if ($image_data === false) {
+                                $error = 'Failed to read the processed image.';
+                                $processing = false;
+                            }
+                            // Clean up temporary file
+                            unlink($temp_image_path);
+                        }
+
+                        // Clean up image resources
+                        imagedestroy($image);
+                        imagedestroy($resized_image);
+                    }
                 }
             } else {
                 // Text document - try to extract text
