@@ -203,14 +203,58 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
             if (in_array($file['type'], $image_types)) {
                 $is_image = true;
                 $image_path = $file['tmp_name'];
-                $image_data = file_get_contents($image_path);
 
-                if ($image_data === false) {
+                // Create image resource from uploaded file
+                $image = null;
+                switch ($file['type']) {
+                    case 'image/jpeg':
+                        $image = imagecreatefromjpeg($image_path);
+                        break;
+                    case 'image/png':
+                        $image = imagecreatefrompng($image_path);
+                        break;
+                    case 'image/gif':
+                        $image = imagecreatefromgif($image_path);
+                        break;
+                    case 'image/webp':
+                        $image = imagecreatefromwebp($image_path);
+                        break;
+                }
+
+                if ($image === false) {
                     $error = 'Failed to read the uploaded image.';
                     $processing = false;
                 } else {
-                    // For image processing, we'll send the image directly to the vision model
-                    $content = "IMAGE_TRANSCRIPT_PLACEHOLDER";
+                    // Resize the image
+                    $resize_result = resizeImage($image);
+                    $resized_image = $resize_result['image'];
+
+                    // Save resized image to temporary file
+                    $temp_image_path = tempnam(sys_get_temp_dir(), 'soap_') . '.png';
+                    $success = imagepng($resized_image, $temp_image_path, 9);
+
+                    if (!$success) {
+                        $error = 'Failed to process the uploaded image.';
+                        $processing = false;
+                    } else {
+                        // Read the resized image data
+                        $image_data = file_get_contents($temp_image_path);
+                        if ($image_data === false) {
+                            $error = 'Failed to read the processed image.';
+                            $processing = false;
+                        }
+                        // Clean up temporary file
+                        unlink($temp_image_path);
+                    }
+
+                    // Clean up image resources
+                    imagedestroy($image);
+                    imagedestroy($resized_image);
+
+                    if ($processing) {
+                        // For image processing, we'll send the image directly to the vision model
+                        $content = "IMAGE_TRANSCRIPT_PLACEHOLDER";
+                    }
                 }
             } else {
                 // Document file - try to extract text
