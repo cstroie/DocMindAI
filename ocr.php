@@ -182,8 +182,8 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
     
     // Validate file upload
     // Check file size (max 10MB to accommodate PDFs)
-    if ($image_file['size'] > 10 * 1024 * 1024) {
-        $error = 'The file is too large. Maximum 10MB allowed.';
+    if ($image_file['size'] > MAX_FILE_SIZE) {
+        $error = 'The file is too large. Maximum ' . (MAX_FILE_SIZE / 1024 / 1024) . 'MB allowed.';
         $processing = false;
     }
     

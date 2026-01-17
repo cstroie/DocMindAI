@@ -143,9 +143,9 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['data']) || (isset(
     if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['file'];
 
-        // Validate file size (max 10MB)
-        if ($file['size'] > 10 * 1024 * 1024) {
-            $error = 'The file is too large. Maximum 10MB allowed.';
+        // Validate file size
+        if ($file['size'] > MAX_FILE_SIZE) {
+            $error = 'The file is too large. Maximum ' . (MAX_FILE_SIZE / 1024 / 1024) . 'MB allowed.';
             $processing = false;
         } else {
             // Check if it's an image

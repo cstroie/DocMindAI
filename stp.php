@@ -227,9 +227,9 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
             $processing = false;
         }
         
-        // Validate file size (max 10MB)
-        if ($file['size'] > 10 * 1024 * 1024) {
-            $error = 'The file is too large. Maximum 10MB allowed.';
+        // Validate file size
+        if ($file['size'] > MAX_FILE_SIZE) {
+            $error = 'The file is too large. Maximum ' . (MAX_FILE_SIZE / 1024 / 1024) . 'MB allowed.';
             $processing = false;
         }
         

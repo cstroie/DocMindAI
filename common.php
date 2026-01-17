@@ -10,6 +10,11 @@
  */
 
 /**
+ * Maximum file upload size (10MB)
+ */
+define('MAX_FILE_SIZE', 10 * 1024 * 1024);
+
+/**
  * Available output languages
  */
 $AVAILABLE_LANGUAGES = [

@@ -191,7 +191,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['content']) || (iss
             $processing = false;
         }
 
-        // Validate file size (max 2MB)
+        // Validate file size (max 2MB for SOAP notes)
         if ($file['size'] > 2 * 1024 * 1024) {
             $error = 'The file is too large. Maximum 2MB allowed.';
             $processing = false;
