@@ -187,11 +187,52 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['prompt']) || (isse
             $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (in_array($file['type'], $image_types)) {
                 $is_image = true;
-                // Read image data
-                $image_data = file_get_contents($file['tmp_name']);
-                if ($image_data === false) {
+                // Create image resource from uploaded file
+                $image = null;
+                switch ($file['type']) {
+                    case 'image/jpeg':
+                        $image = imagecreatefromjpeg($file['tmp_name']);
+                        break;
+                    case 'image/png':
+                        $image = imagecreatefrompng($file['tmp_name']);
+                        break;
+                    case 'image/gif':
+                        $image = imagecreatefromgif($file['tmp_name']);
+                        break;
+                    case 'image/webp':
+                        $image = imagecreatefromwebp($file['tmp_name']);
+                        break;
+                }
+
+                if ($image === false) {
                     $error = 'Failed to read the uploaded image.';
                     $processing = false;
+                } else {
+                    // Resize the image
+                    $resize_result = resizeImage($image);
+                    $resized_image = $resize_result['image'];
+
+                    // Save resized image to temporary file
+                    $temp_image_path = tempnam(sys_get_temp_dir(), 'exp_') . '.png';
+                    $success = imagepng($resized_image, $temp_image_path, 9);
+
+                    if (!$success) {
+                        $error = 'Failed to process the uploaded image.';
+                        $processing = false;
+                    } else {
+                        // Read the resized image data
+                        $image_data = file_get_contents($temp_image_path);
+                        if ($image_data === false) {
+                            $error = 'Failed to read the processed image.';
+                            $processing = false;
+                        }
+                        // Clean up temporary file
+                        unlink($temp_image_path);
+                    }
+
+                    // Clean up image resources
+                    imagedestroy($image);
+                    imagedestroy($resized_image);
                 }
             } else {
                 // Text document - try to extract text
