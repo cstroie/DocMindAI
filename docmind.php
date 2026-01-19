@@ -221,6 +221,47 @@ function handleProfileAction($profile_id) {
     // Get form data
     $form_data = $_POST;
 
+    // Handle file upload if present
+    $file_content = '';
+    $is_image = false;
+    $image_data = null;
+    $mime_type = null;
+
+    if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['file'];
+
+        // Check if it's an image
+        $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (in_array($file['type'], $image_types)) {
+            $is_image = true;
+            // Get max image size from form or use default
+            $max_size = isset($_POST['max_image_size']) ? $_POST['max_image_size'] : '500';
+
+            // Process uploaded image
+            $image_processing_result = processUploadedImage($file, $max_size);
+
+            if (isset($image_processing_result['error'])) {
+                sendJsonResponse(['error' => $image_processing_result['error']], true);
+            } else {
+                $image_data = $image_processing_result['image_data'];
+                $mime_type = $image_processing_result['mime_type'];
+            }
+        } else {
+            // Text document - try to extract text
+            $file_content = extractTextFromDocument($file['tmp_name'], $file['type']);
+            if ($file_content === false) {
+                sendJsonResponse(['error' => 'Failed to extract text from the uploaded document. Please ensure you have the required tools installed (antiword, catdoc, pdftotext, odt2txt, or pandoc).'], true);
+            } else {
+                // Clean up the text content
+                $file_content = trim($file_content);
+                // Remove BOM if present
+                $file_content = preg_replace('/^\xEF\xBB\xBF/', '', $file_content);
+                // Normalize line endings
+                $file_content = str_replace(["\r\n", "\r"], "\n", $file_content);
+            }
+        }
+    }
+
     // Validate required fields
     $required_fields = [];
     foreach ($profile['form']['fields'] as $field) {
@@ -239,14 +280,30 @@ function handleProfileAction($profile_id) {
     // Prepare API request data
     $api_data = [
         'model' => $form_data['model'] ?? '',
-        'messages' => [
-            [
-                'role' => 'user',
-                'content' => $prompt
-            ]
-        ],
+        'messages' => [],
         'stream' => false
     ];
+
+    // Add user message with prompt and file content
+    $user_content = $prompt;
+    if (!empty($file_content)) {
+        $user_content .= $file_content;
+    }
+
+    $api_data['messages'][] = ['role' => 'user', 'content' => $user_content];
+
+    // If it's an image, add it as a separate message with image data
+    if ($is_image && $image_data !== null) {
+        // Convert image to base64
+        $base64_image = base64_encode($image_data);
+
+        $api_data['messages'][] = [
+            'role' => 'user',
+            'content' => [
+                ['type' => 'image_url', 'image_url' => ['url' => "data:$mime_type;base64,$base64_image"]]
+            ]
+        ];
+    }
 
     // Add language instruction if available
     $language = $form_data['language'] ?? 'en';
