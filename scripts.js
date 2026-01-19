@@ -25,26 +25,39 @@ function escapeHtml(text) {
 }
 
 /**
+ * Load JSON resource from file
+ *
+ * @param {string} filename - The JSON file to load
+ * @param {string} rootKey - The root key to extract from the JSON data
+ * @returns {Promise<Object|null>} Promise resolving to the extracted data or null on error
+ */
+async function loadJSONResource(filename, rootKey) {
+    try {
+        // Load data from JSON file
+        const response = await fetch(filename);
+        const data = await response.json();
+
+        // Check for errors
+        if (data.error) {
+            console.error(`Failed to load ${filename}:`, data.error);
+            return null;
+        }
+
+        // Return the specified root key if it exists, otherwise return the entire data
+        return data[rootKey] ?? data;
+    } catch (error) {
+        console.error(`Failed to load ${filename}:`, error.message);
+        return null;
+    }
+}
+
+/**
  * Load categories from JSON file
  *
  * @returns {Promise<Object|null>} Promise resolving to categories object or null on error
  */
 async function loadCategories() {
-    try {
-        // Load categories data directly from JSON file
-        const response = await fetch('categories.json');
-        const data = await response.json();
-        // Check for errors
-        if (data.error) {
-            console.error('Failed to load categories:', data.error);
-            return null;
-        }
-        // Return categories object
-        return data.categories;
-    } catch (error) {
-        console.error('Failed to load categories:', error.message);
-        return null;
-    }
+    return loadJSONResource('categories.json', 'categories');
 }
 
 /**
@@ -53,21 +66,7 @@ async function loadCategories() {
  * @returns {Promise<Object|null>} Promise resolving to profiles object or null on error
  */
 async function loadProfiles() {
-    try {
-        // Load profiles data directly from JSON file
-        const response = await fetch('profiles.json');
-        const data = await response.json();
-        // Check for errors
-        if (data.error) {
-            console.error('Failed to load profiles:', data.error);
-            return null;
-        }
-        // Return profiles object
-        return data.profiles;
-    } catch (error) {
-        console.error('Failed to load profiles:', error.message);
-        return null;
-    }
+    return loadJSONResource('profiles.json', 'profiles');
 }
 
 /**
