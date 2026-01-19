@@ -1119,6 +1119,32 @@ function getProbabilityColor($probability) {
 }
 
 /**
+ * Load resource from JSON file
+ */
+function loadResourceFromJson($filename) {
+    // Check if resource file exists
+    if (!file_exists($filename)) {
+        $resource_name = ucfirst(str_replace('.json', '', $filename));
+        return ['error' => $resource_name . ' configuration file not found'];
+    }
+
+    // Read and decode JSON file
+    $json_content = file_get_contents($filename);
+    if ($json_content === false) {
+        return ['error' => 'Failed to read ' . $filename . ' configuration file'];
+    }
+
+    // Decode JSON content
+    $resource_data = json_decode($json_content, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ['error' => 'Invalid JSON format in ' . $filename . ' configuration: ' . json_last_error_msg()];
+    }
+
+    // Return the decoded resource data
+    return $resource_data;
+}
+
+/**
  * Get syntax highlighting function for a given language
  * 
  * @param string $language Language code
