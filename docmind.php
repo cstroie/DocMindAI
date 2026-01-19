@@ -305,13 +305,6 @@ function handleProfileAction($profile_id) {
         ];
     }
 
-    // Add language instruction if available
-    $language = $form_data['language'] ?? 'en';
-    $language_instruction = getLanguageInstruction($language);
-    if (!empty($language_instruction)) {
-        $api_data['messages'][0]['content'] = $language_instruction . "\n\n" . $api_data['messages'][0]['content'];
-    }
-
     // Call LLM API
     $response = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY);
 
