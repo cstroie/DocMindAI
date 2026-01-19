@@ -52,7 +52,7 @@ async function loadCategories() {
  *
  * @returns {Promise<Object|null>} Promise resolving to profiles object or null on error
  */
-async function loadProfilesData() {
+async function loadProfiles() {
     try {
         // Load profiles data directly from JSON file
         const response = await fetch('profiles.json');
@@ -62,40 +62,11 @@ async function loadProfilesData() {
             console.error('Failed to load profiles:', data.error);
             return null;
         }
-        return data;
+        // Return profiles object
+        return data.profiles;
     } catch (error) {
         console.error('Failed to load profiles:', error.message);
         return null;
-    }
-}
-
-/**
- * Load profiles from JSON file and display them in the UI
- *
- * @returns {Promise<void>}
- */
-async function loadProfiles() {
-    try {
-        // Use the global profilesData if available
-        if (profilesData && profilesData.profiles) {
-            // Extract just the profile metadata (id, name, description, category, icon)
-            const profiles = [];
-            for (const [profile_id, profile_data] of Object.entries(profilesData.profiles)) {
-                profiles.push({
-                    'id': profile_id,
-                    'name': profile_data.name,
-                    'description': profile_data.description,
-                    'category': profile_data.category,
-                    'icon': profile_data.icon
-                });
-            }
-            // Display profiles in the UI
-            displayProfiles(profiles);
-        } else {
-            showError('No profiles data available');
-        }
-    } catch (error) {
-        showError('Failed to load profiles: ' + error.message);
     }
 }
 
@@ -106,18 +77,17 @@ async function loadProfiles() {
  */
 function displayProfiles() {
     const profilesGrid = document.getElementById('profilesGrid');
-    const profileSelect = document.getElementById('profileSelect');
     profilesGrid.innerHTML = '';
 
     // Check if profilesData is available
-    if (!profilesData || !profilesData.profiles) {
+    if (!profilesData) {
         showError('No profiles data available');
         return;
     }
 
     // Group profiles by category
     const categories = {};
-    for (const [profile_id, profile_data] of Object.entries(profilesData.profiles)) {
+    for (const [profile_id, profile_data] of Object.entries(profilesData)) {
         const category = profile_data.category;
         if (!categories[category]) {
             categories[category] = [];
@@ -193,21 +163,24 @@ function displayProfiles() {
  * @param {HTMLSelectElement} profileSelect - The select element to populate
  * @returns {void}
  */
-function populateProfileSelect(profiles, profileSelect) {
+function populateProfileSelect(profileSelect) {
     // Group profiles by category
     const categories = {};
-    profiles.forEach(profile => {
+    profilesData.forEach(profile => {
         if (!categories[profile.category]) {
             categories[profile.category] = [];
         }
         categories[profile.category].push(profile);
     });
+
     // Add optgroups for each category
     for (const [category, categoryProfiles] of Object.entries(categories)) {
         const optgroup = document.createElement('optgroup');
+
         // Use category name from categories.json if available
         const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
         optgroup.label = categoryInfo ? categoryInfo.name : category;
+
         // Add profiles as options
         categoryProfiles.forEach(profile => {
             const option = document.createElement('option');
@@ -216,6 +189,7 @@ function populateProfileSelect(profiles, profileSelect) {
             option.textContent = `${profile.icon || '📄'} ${profile.name}`;
             optgroup.appendChild(option);
         });
+
         // Append optgroup to select
         profileSelect.appendChild(optgroup);
     }
@@ -233,31 +207,22 @@ async function loadProfileForm(profileId) {
         // Clear the page
         document.getElementById('profilesGrid').style.display = 'none';
         // Use the global profilesData if available
-        if (!profilesData || !profilesData.profiles) {
+        if (!profilesData) {
             showError('No profiles data available');
             return;
         }
 
         // Get the selected profile
-        const profile = profilesData.profiles[profileId];
-
+        const profile = profilesData[profileId];
         if (!profile) {
             showError('Profile not found');
             return;
         }
 
         // Show and populate the profile select dropdown with all profiles
-        const profiles = [];
-        for (const [id, profileData] of Object.entries(data.profiles)) {
-            profiles.push({
-                'id': id,
-                'name': profileData.name,
-                'category': profileData.category,
-                'icon': profileData.icon
-            });
-        }
+        const profileSelect = document.getElementById('profileSelect');
         profileSelect.style.display = 'block';
-        populateProfileSelect(profiles, profileSelect);
+        populateProfileSelect(profileSelect);
 
         // Use the form configuration from profiles.json
         const formConfig = profile.form;
@@ -566,9 +531,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load categories data
     categoriesData = await loadCategories();
     // Load profiles data
-    profilesData = await loadProfilesData();
-    // Load available profiles
-    loadProfiles();
+    profilesData = await loadProfiles();
+    // Display profiles in the UI
+    displayProfiles();
     // Set up form submission
     document.getElementById('apiForm')?.addEventListener('submit', handleFormSubmit);
 });
