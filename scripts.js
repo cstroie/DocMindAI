@@ -260,9 +260,16 @@ function displayProfileForm(profile) {
     actionInput.value = profile.id;
     formFields.innerHTML = '';
 
+    // Get cookies for model and language
+    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+        const [name, value] = cookie.trim().split('=');
+        acc[name] = decodeURIComponent(value);
+        return acc;
+    }, {});
+
     // Create form fields based on formConfig
     profile.form.fields.forEach(field => {
-        const fieldElement = createFormField(field);
+        const fieldElement = createFormField(field, cookies);
         formFields.appendChild(fieldElement);
     });
 
@@ -284,9 +291,10 @@ function displayProfileForm(profile) {
  * @param {boolean} [field.required] - Whether the field is required
  * @param {Array} [field.options] - Options for select fields
  * @param {string} [field.value] - Default value for the field
+ * @param {Object} cookies - Object containing cookie values
  * @returns {HTMLElement} The created form field element
  */
-function createFormField(field) {
+function createFormField(field, cookies = {}) {
     // Create container div
     const container = document.createElement('div');
     container.className = 'form-field';
@@ -325,7 +333,7 @@ function createFormField(field) {
                 loadingOption.textContent = 'Loading models...';
                 input.appendChild(loadingOption);
                 // Fetch models from API
-                fetchModelsForSelect(input);
+                fetchModelsForSelect(input, cookies);
             }
             // If options are empty and field name is 'language', use the languages object
             else if ((!field.options || field.options.length === 0) && field.name === 'language') {
@@ -347,6 +355,10 @@ function createFormField(field) {
                         const option = document.createElement('option');
                         option.value = langCode;
                         option.textContent = (langData.flag ? langData.flag + ' ' : '') + langData.name;
+                        // Set selected if this language matches the cookie
+                        if (cookies['docmind-language'] === langCode) {
+                            option.selected = true;
+                        }
                         input.appendChild(option);
                     }
                 } else {
@@ -363,6 +375,10 @@ function createFormField(field) {
                     const opt = document.createElement('option');
                     opt.value = option.value;
                     opt.textContent = option.label;
+                    // Set selected if this option matches the cookie
+                    if (field.name === 'model' && cookies['docmind-model'] === option.value) {
+                        opt.selected = true;
+                    }
                     input.appendChild(opt);
                 });
             }
@@ -399,9 +415,12 @@ function createFormField(field) {
 
 /**
  * Fetch models from API and populate select element
- * TODO : This function is currently not used since models are fetched directly in createFormField
+ *
+ * @param {HTMLSelectElement} selectElement - The select element to populate
+ * @param {Object} cookies - Object containing cookie values
+ * @returns {Promise<void>}
  */
-async function fetchModelsForSelect(selectElement) {
+async function fetchModelsForSelect(selectElement, cookies = {}) {
     try {
         const response = await fetch('docmind.php?action=get_models');
         const data = await response.json();
@@ -432,6 +451,10 @@ async function fetchModelsForSelect(selectElement) {
                 const option = document.createElement('option');
                 option.value = modelId;
                 option.textContent = modelName;
+                // Set selected if this model matches the cookie
+                if (cookies['docmind-model'] === modelId) {
+                    option.selected = true;
+                }
                 selectElement.appendChild(option);
             }
         }
