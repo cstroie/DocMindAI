@@ -254,7 +254,17 @@ function createFormField(field) {
             input.required = field.required || false;
             input.className = 'form-control';
 
-            if (field.options && field.options.length) {
+            // If options are empty and field name is 'model', fetch models from API
+            if ((!field.options || field.options.length === 0) && field.name === 'model') {
+                // Add a loading option
+                const loadingOption = document.createElement('option');
+                loadingOption.value = '';
+                loadingOption.textContent = 'Loading models...';
+                input.appendChild(loadingOption);
+
+                // Fetch models from API
+                fetchModelsForSelect(input);
+            } else if (field.options && field.options.length) {
                 field.options.forEach(option => {
                     const opt = document.createElement('option');
                     opt.value = option.value;
@@ -280,6 +290,54 @@ function createFormField(field) {
 
     container.appendChild(input);
     return container;
+}
+
+/**
+ * Fetch models from API and populate select element
+ */
+async function fetchModelsForSelect(selectElement) {
+    try {
+        const response = await fetch('docmind.php?action=get_models');
+        const data = await response.json();
+
+        if (data.error) {
+            console.error('Failed to load models:', data.error);
+            // Clear loading option and add error option
+            selectElement.innerHTML = '';
+            const errorOption = document.createElement('option');
+            errorOption.value = '';
+            errorOption.textContent = 'Failed to load models';
+            selectElement.appendChild(errorOption);
+            return;
+        }
+
+        // Clear loading option
+        selectElement.innerHTML = '';
+
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select a model';
+        selectElement.appendChild(defaultOption);
+
+        // Add models from API
+        if (data.models) {
+            for (const [modelId, modelName] of Object.entries(data.models)) {
+                const option = document.createElement('option');
+                option.value = modelId;
+                option.textContent = modelName;
+                selectElement.appendChild(option);
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load models:', error.message);
+        // Clear loading option and add error option
+        selectElement.innerHTML = '';
+        const errorOption = document.createElement('option');
+        errorOption.value = '';
+        errorOption.textContent = 'Failed to load models';
+        selectElement.appendChild(errorOption);
+    }
 }
 
 async function handleFormSubmit(event) {
