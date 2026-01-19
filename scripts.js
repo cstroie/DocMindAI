@@ -540,15 +540,14 @@ async function handleFormSubmit(event) {
  * @returns {void}
  */
 function displayResults(results) {
+    // Get results area elements
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
-
+    // Format and display results
     resultsContent.innerHTML = formatResults(results);
     resultsArea.style.display = 'block';
-
     // Apply syntax highlighting
     applySyntaxHighlighting();
-
     // Scroll to results
     resultsArea.scrollIntoView({ behavior: 'smooth' });
 }
@@ -560,18 +559,19 @@ function displayResults(results) {
  * @returns {string} HTML string for displaying the results
  */
 function formatResults(results) {
+    // Check for error in results
     if (results.error) {
         return `<div class="error">${escapeHtml(results.error)}</div>`;
     }
-
+    // If results contain HTML, return it directly
     if (results.html) {
         return results.html;
     }
-
+    // If results is an object, stringify it with indentation
     if (typeof results === 'object') {
         return `<pre><code class="json">${JSON.stringify(results, null, 2)}</code></pre>`;
     }
-
+    // Otherwise, escape and return as preformatted text
     return `<pre>${escapeHtml(results)}</pre>`;
 }
 
