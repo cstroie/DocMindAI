@@ -232,13 +232,13 @@ async function loadProfileForm(profileId) {
         }
 
         // Display the form
-        displayForm(formConfig, profileId, profile.name, profile.description);
+        displayProfileForm(formConfig, profileId, profile.name, profile.description);
     } catch (error) {
         showError('Failed to load form: ' + error.message);
     }
 }
 
-function displayForm(formConfig, profileId, profileName, profileDescription) {
+function displayProfileForm(formConfig, profileId, profileName, profileDescription) {
     const profileForm = document.getElementById('profileForm');
     const formTitle = document.getElementById('formTitle');
     const formFields = document.getElementById('formFields');
