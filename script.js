@@ -199,6 +199,18 @@ async function loadProfileForm(profileId) {
             return;
         }
 
+        // Populate the profile select dropdown with all profiles
+        const profiles = [];
+        for (const [id, profileData] of Object.entries(data.profiles)) {
+            profiles.push({
+                'id': id,
+                'name': profileData.name,
+                'category': profileData.category
+            });
+        }
+        const profileSelect = document.getElementById('profileSelect');
+        populateProfileSelect(profiles, profileSelect);
+
         // Use the form configuration from profiles.json
         const formConfig = profile.form;
 
