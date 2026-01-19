@@ -129,25 +129,51 @@
       "description": "Convert medical transcripts into structured SOAP notes",
       "category": "medical",
       "icon": "📋",
+      "prompt": "You are a clinical documentation assistant. Your task is to read medical transcripts (dialogues between clinicians and patients) and convert them into structured clinical notes using the SOAP format.\n\nFollow these rules:\n\n*S - Subjective*:\nInclude all information reported by the patient: symptoms, duration, history, complaints, and any relevant lifestyle or exposure context.\nUse the patient's own words when possible (paraphrased for clarity).\n\n*O - Objective*:\nInclude observable findings such as vital signs, physical exam results, lab tests, imaging results, and clinician observations during the encounter.\n\n*A - Assessment*:\nProvide a brief summary of the clinician's diagnostic impression. Include possible or confirmed diagnoses.\n\n*P - Plan*:\nOutline the next steps recommended by the clinician. This can include prescriptions, tests to be ordered, referrals, follow-up instructions, and lifestyle recommendations.\n\nKeep the format clear and professional. Do not include any parts of the transcript that are irrelevant or non-clinical. Do not invent information not found in the transcript. Always use a bullet point format for each section of the SOAP note.\n\nA comprehensive SOAP note has to take into account all subjective and objective information, and accurately assess it to create the patient-specific assessment and plan.\n\n{language_instruction}\n\nOUTPUT FORMAT (JSON):\n{\n  \"subjective\": [\"patient reported symptom 1\", \"patient reported symptom 2\", \"patient reported history\"],\n  \"objective\": [\"clinician observation 1\", \"clinician observation 2\", \"measurement 1\"],\n  \"assessment\": [\"diagnostic impression 1\", \"diagnostic impression 2\"],\n  \"plan\": [\"next step 1\", \"next step 2\", \"recommendation 1\"]\n}\n\nRespond ONLY with the JSON, without additional text. Each section must be an array of strings, with each string representing a single bullet point.",
       "form": {
         "fields": [
           {
             "name": "content",
             "type": "textarea",
             "label": "Medical Transcript",
+            "help": "Enter the medical transcript (patient-clinician dialogue) you want to convert to SOAP format. Maximum 1,000,000 characters.",
+            "placeholder": "Example:\nPhysician: What brings you in today?\nPatient: I've been having headaches for the past week...\n\nTip: You can also upload a text file or image of the transcript below.",
             "required": true
+          },
+          {
+            "name": "file",
+            "type": "file",
+            "label": "Upload File (optional)",
+            "help": "Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file of the medical transcript. Maximum size: 2MB.",
+            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
+            "required": false
           },
           {
             "name": "model",
             "type": "select",
             "label": "AI Model",
+            "help": "Select the AI model to use for SOAP note generation. MedGemma models work best for this task.",
             "options": []
           },
           {
             "name": "language",
             "type": "select",
             "label": "Response Language",
+            "help": "Select the language for the SOAP note output.",
             "options": []
+          },
+          {
+            "name": "max_image_size",
+            "type": "select",
+            "label": "Maximum Image Size",
+            "help": "Select the maximum dimensions for resizing uploaded images. Choose 'Original' to send the image as-is without processing.",
+            "options": [
+              {"value": "original", "label": "Original"},
+              {"value": "200", "label": "200x200"},
+              {"value": "500", "label": "500x500"},
+              {"value": "800", "label": "800x800"},
+              {"value": "1000", "label": "1000x1000"}
+            ]
           }
         ]
       }
