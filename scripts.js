@@ -504,6 +504,12 @@ function formatResults(results) {
     return `<pre>${escapeHtml(results)}</pre>`;
 }
 
+/**
+ * Display an error message in the results area
+ *
+ * @param {string} message - The error message to display
+ * @returns {void}
+ */
 function showError(message) {
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
