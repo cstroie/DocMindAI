@@ -55,6 +55,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('apiForm')?.addEventListener('submit', handleFormSubmit);
 });
 
+/**
+ * Load profiles from JSON file and display them in the UI
+ *
+ * @returns {Promise<void>}
+ */
 async function loadProfiles() {
     try {
         // Load profiles data directly from JSON file
