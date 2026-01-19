@@ -58,11 +58,44 @@
             "required": false
           },
           {
+            "name": "file",
+            "type": "file",
+            "label": "Upload File (optional)",
+            "help": "Upload a file to extract data from (text documents or images). Max 10MB.",
+            "accept": ".txt,.pdf,.doc,.docx,.odt,.md,.json,.csv,.xml,.png,.jpg,.jpeg,.gif,.webp",
+            "required": false
+          },
+          {
+            "name": "output_format",
+            "type": "select",
+            "label": "Output Format",
+            "help": "Select the output format for the extracted data.",
+            "options": [
+              {"value": "json", "label": "JSON"},
+              {"value": "yaml", "label": "YAML"},
+              {"value": "xml", "label": "XML"},
+              {"value": "markdown", "label": "Markdown"}
+            ]
+          },
+          {
             "name": "model",
             "type": "select",
             "label": "AI Model",
             "help": "Select the AI model to use for data extraction.",
             "options": []
+          },
+          {
+            "name": "max_image_size",
+            "type": "select",
+            "label": "Maximum Image Size",
+            "help": "Select the maximum dimensions for resizing uploaded images. Choose 'Original' to send the image as-is without processing.",
+            "options": [
+              {"value": "original", "label": "Original"},
+              {"value": "200", "label": "200x200"},
+              {"value": "500", "label": "500x500"},
+              {"value": "800", "label": "800x800"},
+              {"value": "1000", "label": "1000x1000"}
+            ]
           }
         ]
       }
