@@ -82,6 +82,61 @@
           }
         ]
       }
+    },
+    "rra": {
+      "id": "rra",
+      "name": "Radiology Report Analyzer",
+      "description": "AI-powered automatic analysis of medical reports",
+      "category": "Medical",
+      "form": {
+        "fields": [
+          {
+            "name": "report_text",
+            "type": "textarea",
+            "label": "Radiology Report",
+            "required": true
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "hidden",
+            "value": "en"
+          }
+        ]
+      }
+    },
+    "soap": {
+      "id": "soap",
+      "name": "SOAP Note Generator",
+      "description": "Convert medical transcripts into structured SOAP notes",
+      "category": "Medical",
+      "form": {
+        "fields": [
+          {
+            "name": "content",
+            "type": "textarea",
+            "label": "Medical Transcript",
+            "required": true
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "options": []
+          }
+        ]
+      }
     }
   }
 }
