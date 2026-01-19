@@ -65,12 +65,11 @@ async function loadProfiles() {
         // Load profiles data directly from JSON file
         const response = await fetch('profiles.json');
         const data = await response.json();
-
+        // Check for errors
         if (data.error) {
             showError(data.error);
             return;
         }
-
         // Extract just the profile metadata (id, name, description, category, icon)
         const profiles = [];
         for (const [profile_id, profile_data] of Object.entries(data.profiles)) {
@@ -82,6 +81,7 @@ async function loadProfiles() {
                 'icon': profile_data.icon
             });
         }
+        // Display profiles in the UI
         displayProfiles(profiles);
     } catch (error) {
         showError('Failed to load profiles: ' + error.message);
