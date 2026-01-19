@@ -25,6 +25,8 @@ function escapeHtml(text) {
 
 /**
  * Load categories from JSON file
+ *
+ * @returns {Promise<Object|null>} Promise resolving to categories object or null on error
  */
 async function loadCategories() {
     try {
