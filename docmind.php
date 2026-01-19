@@ -68,7 +68,18 @@ function handleGetModels() {
     $api_key = $_REQUEST['api_key'] ?? '';
     $filter = $_REQUEST['filter'] ?? '';
 
+    // Validate required parameters
+    if (empty($api_endpoint)) {
+        sendJsonResponse(['error' => 'API endpoint parameter is required'], true);
+    }
+
     $models = getAvailableModels($api_endpoint, $api_key, $filter);
+
+    // Check if models contain an error
+    if (isset($models['error'])) {
+        sendJsonResponse(['error' => $models['error']], true);
+    }
+
     sendJsonResponse(['models' => $models], true);
 }
 
