@@ -1,4 +1,7 @@
 
+// Global variable to store categories
+let categoriesData = null;
+
 /**
  * Apply syntax highlighting using highlight.js
  */
@@ -39,21 +42,6 @@ async function loadCategories() {
         return null;
     }
 }
-
-// Global variable to store categories
-let categoriesData = null;
-
-// DocMind-specific JavaScript
-document.addEventListener('DOMContentLoaded', async function() {
-    // Load categories data
-    categoriesData = await loadCategories();
-
-    // Load available profiles
-    loadProfiles();
-
-    // Set up form submission
-    document.getElementById('apiForm')?.addEventListener('submit', handleFormSubmit);
-});
 
 /**
  * Load profiles from JSON file and display them in the UI
@@ -520,3 +508,13 @@ function showError(message) {
     // Scroll to error
     resultsArea.scrollIntoView({ behavior: 'smooth' });
 }
+
+// DocMind-specific JavaScript
+document.addEventListener('DOMContentLoaded', async function() {
+    // Load categories data
+    categoriesData = await loadCategories();
+    // Load available profiles
+    loadProfiles();
+    // Set up form submission
+    document.getElementById('apiForm')?.addEventListener('submit', handleFormSubmit);
+});
