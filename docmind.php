@@ -404,42 +404,84 @@ function displayWebInterface() {
                 <?php echo checkConfigStatus(); ?>
             </div>
 
-            <main>
-                <div class="profile-selector">
-                    <h2>Available Profiles</h2>
-                    <div class="profile-select-container">
-                        <label for="profileSelect">Select a Profile:</label>
-                        <select id="profileSelect" class="form-control">
-                            <option value="">-- Select a profile --</option>
-                            <!-- Will be populated by JavaScript -->
-                        </select>
-                    </div>
-                    <div class="tools-grid" id="profilesGrid">
-                        <!-- Will be populated by JavaScript -->
-                    </div>
-                </div>
-
-                <div class="profile-form" id="profileForm" style="display: none;">
-                    <h2 id="formTitle">Profile Form</h2>
-                    <form id="apiForm">
-                        <input type="hidden" name="action" id="actionInput">
-                        <div id="formFields">
-                            <!-- Will be populated by JavaScript -->
-                        </div>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
-                    </form>
-                </div>
-
-                <div class="results-area" id="resultsArea" style="display: none;">
-                    <h2>Results</h2>
-                    <div id="resultsContent"></div>
-                </div>
-            </main>
-        </div>
-
-
-    </body>
-    </html>
-    <?php
+            <main>                                                                                                
+                <section class="profile-selector">                                                                
+                    <h2>Available Profiles</h2>                                                                   
+                    <div class="profile-select-container">                                                        
+                        <label for="profileSelect">Select a Profile:</label>                                      
+                        <select id="profileSelect" class="form-control">                                          
+                            <option value="">-- Select a profile --</option>                                      
+                            <!-- Will be populated by JavaScript -->                                              
+                        </select>                                                                                 
+                    </div>                                                                                        
+                    <div class="tools-grid" id="profilesGrid">                                                    
+                        <!-- Will be populated by JavaScript -->                                                  
+                    </div>                                                                                        
+                </section>                                                                                        
+                                                                                                                  
+                <section class="profile-form" id="profileForm" style="display: none;">                            
+                    <h2 id="formTitle">Profile Form</h2>                                                          
+                    <form id="apiForm">                                                                           
+                        <input type="hidden" name="action" id="actionInput">                                      
+                        <div id="formFields">                                                                     
+                            <!-- Will be populated by JavaScript -->                                              
+                        </div>                                                                                    
+                        <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>              
+                    </form>                                                                                       
+                </section>                                                                                        
+                                                                                                                  
+                <section class="results-area" id="resultsArea" style="display: none;">                            
+                    <h2>Results</h2>                                                                              
+                    <div id="resultsContent"></div>                                                               
+                </section>                                                                                        
+            </main>                                                                                               
+        </div>                                                                                                    
+                                                                                                                  
+        <!-- Error Template -->                                                                                   
+        <template id="errorTemplate">                                                                             
+            <section role="alert" class="error">                                                                  
+                <strong>⚠️ Error:</strong>                                                                        
+                <div class="error-message"></div>                                                                 
+            </section>                                                                                            
+        </template>                                                                                               
+                                                                                                                  
+        <!-- Loading Template -->                                                                                 
+        <template id="loadingTemplate">                                                                           
+            <div class="loading-indicator">                                                                       
+                <span class="loading"></span>                                                                     
+                <span class="loading-text">Processing...</span>                                                   
+            </div>                                                                                                
+        </template>                                                                                               
+                                                                                                                  
+        <!-- Profile Card Template -->                                                                            
+        <template id="profileCardTemplate">                                                                       
+            <a class="tool-card" href="#">                                                                        
+                <div class="tool-icon"></div>                                                                     
+                <h3></h3>                                                                                         
+                <p></p>                                                                                           
+            </a>                                                                                                  
+        </template>                                                                                               
+                                                                                                                  
+        <!-- Form Field Template -->                                                                              
+        <template id="formFieldTemplate">                                                                         
+            <div class="form-field">                                                                              
+                <label></label>                                                                                   
+                <div class="field-input"></div>                                                                   
+            </div>                                                                                                
+        </template>                                                                                               
+                                                                                                                  
+        <!-- Result Template -->                                                                                  
+        <template id="resultTemplate">                                                                            
+            <article>                                                                                             
+                <header>                                                                                          
+                    <h2>Results</h2>                                                                              
+                </header>                                                                                         
+                <div class="result-content"></div>                                                                
+            </article>                                                                                            
+        </template>                                                                                               
+                                                                                                                  
+    </body>                                                                                                       
+    </html>                                                                                                       
+    <?php                                                                                                         
 }
 ?>
