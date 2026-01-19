@@ -499,13 +499,12 @@ async function fetchLanguagesForSelect(selectElement) {
  */
 async function handleFormSubmit(event) {
     event.preventDefault();
-
+    // Get form data
     const form = event.target;
     const formData = new FormData(form);
-    const profile = formData.get('profile');
-    const submitBtn = document.getElementById('submitBtn');
 
     // Show loading state
+    const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="loading"></span> Processing...';
 
@@ -515,13 +514,15 @@ async function handleFormSubmit(event) {
             body: formData
         });
 
+        // Parse JSON response
         const result = await response.json();
-
+        // Check for errors
         if (result.error) {
             showError(result.error);
             return;
         }
 
+        // Display results
         displayResults(result);
     } catch (error) {
         showError('Failed to submit form: ' + error.message);
