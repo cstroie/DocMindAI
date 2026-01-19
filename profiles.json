@@ -5,6 +5,7 @@
       "name": "Radiology Report Analyzer",
       "description": "Analyze radiology reports and extract key medical information",
       "category": "Medical",
+      "icon": "🔍",
       "form": {
         "fields": [
           {
@@ -32,6 +33,7 @@
       "name": "Structured Data Extractor",
       "description": "Extract structured data from unstructured text",
       "category": "General",
+      "icon": "📊",
       "form": {
         "fields": [
           {
@@ -60,6 +62,7 @@
       "name": "Experiment Tool",
       "description": "Test AI models with predefined prompts",
       "category": "Development",
+      "icon": "🧪",
       "form": {
         "fields": [
           {
@@ -115,6 +118,7 @@
       "name": "SOAP Note Generator",
       "description": "Convert medical transcripts into structured SOAP notes",
       "category": "Medical",
+      "icon": "📋",
       "form": {
         "fields": [
           {
@@ -143,6 +147,7 @@
       "name": "Discharge Paper Analyzer",
       "description": "Analyze patient discharge papers and summarize key medical information for radiology use",
       "category": "Medical",
+      "icon": "📋",
       "form": {
         "fields": [
           {
@@ -171,6 +176,7 @@
       "name": "Radiology Differential Diagnosis",
       "description": "Generate differential diagnoses with supporting information from radiology reports",
       "category": "Medical",
+      "icon": "🩺",
       "form": {
         "fields": [
           {
@@ -199,6 +205,7 @@
       "name": "Patient Education Content",
       "description": "Convert complex medical information into patient-friendly educational content",
       "category": "Medical",
+      "icon": "🤓",
       "form": {
         "fields": [
           {
@@ -227,6 +234,7 @@
       "name": "Medical Chat Assistant",
       "description": "Interact directly with an AI medical assistant for real-time medical queries",
       "category": "Medical",
+      "icon": "💬",
       "form": {
         "fields": [
           {
@@ -267,6 +275,7 @@
       "name": "Image OCR Tool",
       "description": "Perform OCR on uploaded images and extract text in Markdown format",
       "category": "General",
+      "icon": "📷",
       "form": {
         "fields": [
           {
@@ -296,6 +305,7 @@
       "name": "Web Page Converter",
       "description": "Scrape web pages and convert them to clean Markdown format using AI processing",
       "category": "General",
+      "icon": "🔗",
       "form": {
         "fields": [
           {
@@ -334,6 +344,7 @@
       "name": "Web Page Summarizer",
       "description": "Scrape web pages and return a structured summary of the most important points",
       "category": "General",
+      "icon": "📝",
       "form": {
         "fields": [
           {
@@ -363,6 +374,7 @@
       "name": "Summarize This Paper",
       "description": "AI-powered academic paper summarization with structured approaches",
       "category": "Research",
+      "icon": "📄",
       "form": {
         "fields": [
           {
@@ -407,6 +419,7 @@
       "name": "Search Medical Literature",
       "description": "Search medical literature databases and get AI-summarized research papers",
       "category": "Research",
+      "icon": "📚",
       "form": {
         "fields": [
           {
