@@ -85,7 +85,24 @@ async function loadProfiles() {
 
 function displayProfiles(profiles) {
     const profilesGrid = document.getElementById('profilesGrid');
+    const profileSelect = document.getElementById('profileSelect');
     profilesGrid.innerHTML = '';
+
+    // Populate the select dropdown
+    profileSelect.innerHTML = '<option value="">-- Select a profile --</option>';
+    profiles.forEach(profile => {
+        const option = document.createElement('option');
+        option.value = profile.id;
+        option.textContent = `${profile.name} (${profile.category})`;
+        profileSelect.appendChild(option);
+    });
+
+    // Add event listener for profile selection
+    profileSelect.addEventListener('change', function() {
+        if (this.value) {
+            loadProfileForm(this.value);
+        }
+    });
 
     // Group profiles by category
     const categories = {};
