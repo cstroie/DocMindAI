@@ -39,11 +39,16 @@ function handleApiRequest() {
     $action = $_REQUEST['action'] ?? 'list_actions';
     $method = $_SERVER['REQUEST_METHOD'];
 
-    // Validate action
-    // FIXME append the list dynamically from profiles.json
-    $valid_actions = [
-        'get_models', 'get_form', 'get_prompts', 'get_profiles',
-    ];
+    // Validate action - load valid actions dynamically from profiles.json
+    $valid_actions = ['get_models', 'get_form', 'get_prompts', 'get_profiles'];
+
+    // Load profiles to get additional valid actions
+    $profiles_data = loadProfilesFromJson();
+    if (!isset($profiles_data['error']) && isset($profiles_data['profiles'])) {
+        foreach ($profiles_data['profiles'] as $profile_id => $profile_data) {
+            $valid_actions[] = $profile_id;
+        }
+    }
 
     if (!in_array($action, $valid_actions)) {
         sendJsonResponse(['error' => 'Invalid action'], true);
