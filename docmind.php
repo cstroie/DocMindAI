@@ -74,14 +74,14 @@ function handleApiRequest() {
 function handleGetModels() {
     global $LLM_API_ENDPOINT, $LLM_API_KEY, $LLM_API_FILTER;
 
-    // Use configured values if not provided in request
-    $api_endpoint = $_REQUEST['api_endpoint'] ?? $LLM_API_ENDPOINT;
-    $api_key = $_REQUEST['api_key'] ?? $LLM_API_KEY;
-    $filter = $_REQUEST['filter'] ?? $LLM_API_FILTER;
+    // Use server-side configured values
+    $api_endpoint = $LLM_API_ENDPOINT;
+    $api_key = $LLM_API_KEY;
+    $filter = $LLM_API_FILTER;
 
     // Validate required parameters
     if (empty($api_endpoint)) {
-        sendJsonResponse(['error' => 'API endpoint parameter is required'], true);
+        sendJsonResponse(['error' => 'API endpoint not configured'], true);
     }
 
     $models = getAvailableModels($api_endpoint, $api_key, $filter);
