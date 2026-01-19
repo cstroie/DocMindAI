@@ -137,6 +137,299 @@
           }
         ]
       }
+    },
+    "dpa": {
+      "id": "dpa",
+      "name": "Discharge Paper Analyzer",
+      "description": "Analyze patient discharge papers and summarize key medical information for radiology use",
+      "category": "Medical",
+      "form": {
+        "fields": [
+          {
+            "name": "report",
+            "type": "textarea",
+            "label": "Patient Discharge Paper",
+            "required": true
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "options": []
+          }
+        ]
+      }
+    },
+    "rdd": {
+      "id": "rdd",
+      "name": "Radiology Differential Diagnosis",
+      "description": "Generate differential diagnoses with supporting information from radiology reports",
+      "category": "Medical",
+      "form": {
+        "fields": [
+          {
+            "name": "report",
+            "type": "textarea",
+            "label": "Radiology Report",
+            "required": true
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "options": []
+          }
+        ]
+      }
+    },
+    "pec": {
+      "id": "pec",
+      "name": "Patient Education Content",
+      "description": "Convert complex medical information into patient-friendly educational content",
+      "category": "Medical",
+      "form": {
+        "fields": [
+          {
+            "name": "content",
+            "type": "textarea",
+            "label": "Medical Content",
+            "required": true
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "options": []
+          }
+        ]
+      }
+    },
+    "chat": {
+      "id": "chat",
+      "name": "Medical Chat Assistant",
+      "description": "Interact directly with an AI medical assistant for real-time medical queries",
+      "category": "Medical",
+      "form": {
+        "fields": [
+          {
+            "name": "message",
+            "type": "textarea",
+            "label": "Your Message",
+            "required": true
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "options": []
+          },
+          {
+            "name": "personality",
+            "type": "select",
+            "label": "AI Personality",
+            "options": [
+              {"value": "medical_assistant", "label": "Medical Assistant"},
+              {"value": "general_practitioner", "label": "General Practitioner"},
+              {"value": "specialist", "label": "Medical Specialist"},
+              {"value": "medical_researcher", "label": "Medical Researcher"},
+              {"value": "skippy", "label": "Skippy the Magnificent"}
+            ]
+          }
+        ]
+      }
+    },
+    "ocr": {
+      "id": "ocr",
+      "name": "Image OCR Tool",
+      "description": "Perform OCR on uploaded images and extract text in Markdown format",
+      "category": "General",
+      "form": {
+        "fields": [
+          {
+            "name": "image",
+            "type": "file",
+            "label": "Image File",
+            "required": true,
+            "accept": "image/jpeg,image/png,image/gif,image/webp,application/pdf"
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "options": []
+          }
+        ]
+      }
+    },
+    "wpc": {
+      "id": "wpc",
+      "name": "Web Page Converter",
+      "description": "Scrape web pages and convert them to clean Markdown format using AI processing",
+      "category": "General",
+      "form": {
+        "fields": [
+          {
+            "name": "url",
+            "type": "url",
+            "label": "Web Page URL",
+            "required": true,
+            "placeholder": "https://example.com/article"
+          },
+          {
+            "name": "format",
+            "type": "select",
+            "label": "Output Format",
+            "options": [
+              {"value": "markdown", "label": "Markdown"},
+              {"value": "dokuwiki", "label": "DokuWiki"}
+            ]
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "options": []
+          }
+        ]
+      }
+    },
+    "wps": {
+      "id": "wps",
+      "name": "Web Page Summarizer",
+      "description": "Scrape web pages and return a structured summary of the most important points",
+      "category": "General",
+      "form": {
+        "fields": [
+          {
+            "name": "url",
+            "type": "url",
+            "label": "Web Page URL",
+            "required": true,
+            "placeholder": "https://example.com/article"
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "options": []
+          }
+        ]
+      }
+    },
+    "stp": {
+      "id": "stp",
+      "name": "Summarize This Paper",
+      "description": "AI-powered academic paper summarization with structured approaches",
+      "category": "Research",
+      "form": {
+        "fields": [
+          {
+            "name": "content",
+            "type": "textarea",
+            "label": "Paper Content",
+            "required": true
+          },
+          {
+            "name": "file",
+            "type": "file",
+            "label": "Or Upload File",
+            "required": false,
+            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,.jpg,.jpeg,.png,.gif,.webp"
+          },
+          {
+            "name": "prompt_type",
+            "type": "select",
+            "label": "Prompt Template",
+            "options": [
+              {"value": "three_pass", "label": "Three-Pass Summary"},
+              {"value": "problem_idea_evidence", "label": "Problem–Idea–Evidence"}
+            ]
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "options": []
+          }
+        ]
+      }
+    },
+    "sml": {
+      "id": "sml",
+      "name": "Search Medical Literature",
+      "description": "Search medical literature databases and get AI-summarized research papers",
+      "category": "Research",
+      "form": {
+        "fields": [
+          {
+            "name": "query",
+            "type": "text",
+            "label": "Search Query",
+            "required": true,
+            "placeholder": "Enter medical topic or research question..."
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "options": []
+          }
+        ]
+      }
     }
   }
 }
