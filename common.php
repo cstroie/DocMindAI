@@ -691,9 +691,9 @@ function getAvailableModels($api_endpoint, $api_key = '', $filter_regex = '') {
             // For vision models, we'll use a more user-friendly name
             $name = $model['id'];
             if (strpos($name, 'vision') !== false || strpos($name, 'vl') !== false) {
-                $models[$name] = ucfirst(str_replace(':', ' ', $name)) . ' (Vision)';
+                $models[$name] = str_replace(':', ' ', $name) . ' (Vision)';
             } else {
-                $models[$name] = ucfirst(str_replace(':', ' ', $name));
+                $models[$name] = str_replace(':', ' ', $name);
             }
         }
     }
