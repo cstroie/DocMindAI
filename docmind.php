@@ -136,6 +136,44 @@ function handleGetForm() {
 }
 
 /**
+ * Handle get_prompts action
+ */
+function handleGetPrompts() {
+    // Load prompts from files in the prompts directory
+    $prompts = [];
+
+    // Check if prompts directory exists
+    if (is_dir('prompts')) {
+        // Get all files in the prompts directory
+        $files = scandir('prompts');
+
+        foreach ($files as $file) {
+            // Check for .txt, .md, or .xml extensions
+            if (preg_match('/\.(txt|md|xml)$/i', $file)) {
+                $file_path = 'prompts/' . $file;
+
+                // Use filename (without extension) as the key
+                $key = pathinfo($file, PATHINFO_FILENAME);
+
+                // Use filename as label (clean up for display)
+                $label = ucwords(str_replace(['_', '-'], ' ', $key));
+
+                // Read file content as prompt
+                $content = file_get_contents($file_path);
+                if ($content !== false) {
+                    $prompts[$key] = [
+                        'label' => $label,
+                        'prompt' => $content
+                    ];
+                }
+            }
+        }
+    }
+
+    sendJsonResponse(['prompts' => $prompts], true);
+}
+
+/**
  * Handle get_actions action
  */
 function handleGetActions() {
