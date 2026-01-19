@@ -20,8 +20,34 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+/**
+ * Load categories from JSON file
+ */
+async function loadCategories() {
+    try {
+        const response = await fetch('categories.json');
+        const data = await response.json();
+
+        if (data.error) {
+            console.error('Failed to load categories:', data.error);
+            return null;
+        }
+
+        return data.categories;
+    } catch (error) {
+        console.error('Failed to load categories:', error.message);
+        return null;
+    }
+}
+
+// Global variable to store categories
+let categoriesData = null;
+
 // DocMind-specific JavaScript
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // Load categories data
+    categoriesData = await loadCategories();
+
     // Load available profiles
     loadProfiles();
 
@@ -94,6 +120,12 @@ function displayProfiles(profiles) {
 }
 
 function getCategoryIcon(category) {
+    // Use categories data if available
+    if (categoriesData && categoriesData[category]) {
+        return categoriesData[category].icon || '📋';
+    }
+
+    // Fallback to hardcoded icons
     const icons = {
         'Medical': '🏥',
         'General': '📄',
