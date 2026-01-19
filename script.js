@@ -88,9 +88,6 @@ function displayProfiles(profiles) {
     const profileSelect = document.getElementById('profileSelect');
     profilesGrid.innerHTML = '';
 
-    // Populate the select dropdown
-    populateProfileSelect(profiles, profileSelect);
-
     // Add event listener for profile selection
     profileSelect.addEventListener('change', function() {
         if (this.value) {
