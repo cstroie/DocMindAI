@@ -152,7 +152,6 @@ function displayProfiles(profiles) {
  */
 function populateProfileSelect(profiles, profileSelect) {
     // Populate the select dropdown
-    profileSelect.innerHTML = '<option value="">-- Select a profile --</option>';
     // Group profiles by category
     const categories = {};
     profiles.forEach(profile => {
