@@ -66,17 +66,17 @@ async function loadProfiles() {
             return;
         }
 
-        // Extract just the profile metadata (id, name, description, category)
+        // Extract just the profile metadata (id, name, description, category, icon)
         const profiles = [];
         for (const [profile_id, profile_data] of Object.entries(data.profiles)) {
             profiles.push({
                 'id': profile_id,
                 'name': profile_data.name,
                 'description': profile_data.description,
-                'category': profile_data.category
+                'category': profile_data.category,
+                'icon': profile_data.icon
             });
         }
-
         displayProfiles(profiles);
     } catch (error) {
         showError('Failed to load profiles: ' + error.message);
@@ -87,16 +87,6 @@ function displayProfiles(profiles) {
     const profilesGrid = document.getElementById('profilesGrid');
     const profileSelect = document.getElementById('profileSelect');
     profilesGrid.innerHTML = '';
-
-    // Hide the profile select dropdown on main page
-    profileSelect.style.display = 'none';
-
-    // Add event listener for profile selection
-    profileSelect.addEventListener('change', function() {
-        if (this.value) {
-            loadProfileForm(this.value);
-        }
-    });
 
     // Group profiles by category
     const categories = {};
@@ -110,32 +100,28 @@ function displayProfiles(profiles) {
     // Display each category
     for (const [category, categoryProfiles] of Object.entries(categories)) {
         const categoryDiv = document.createElement('section');
-        categoryDiv.className = 'tool-section ' + category;
-
+        categoryDiv.className = 'category-section category-' + category;
         // Get category info from categories.json
         const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
-
         // Create category header
-        const categoryHeader = document.createElement('header');
+        const categoryHeader = document.createElement('hgroup');
         // Add category title with icon
         const categoryTitle = document.createElement('h2');
         categoryTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category);
         categoryHeader.appendChild(categoryTitle);
-
         // Add category description if available
         if (categoryInfo && categoryInfo.description) {
             const categoryDescription = document.createElement('p');
             categoryDescription.textContent = categoryInfo.description;
-            categoryDescription.className = 'category-description';
             categoryHeader.appendChild(categoryDescription);
         }
-
+        // Append header to category div
         categoryDiv.appendChild(categoryHeader);
-
-        const grid = document.createElement('div');
-        grid.className = 'tools-grid';
-
+        // Create grid for profiles
+        const grid = document.createElement('main');
+        // Add profiles to the grid
         categoryProfiles.forEach(profile => {
+            console.log('Adding profile:', profile);
             const profileCard = document.createElement('a');
             profileCard.className = 'tool-card';
             profileCard.href = '#';
@@ -143,16 +129,16 @@ function displayProfiles(profiles) {
                 e.preventDefault();
                 loadProfileForm(profile.id);
             };
-
+            // Add profile icon, name, and description
             profileCard.innerHTML = `
                 <div class="tool-icon">${profile.icon || '📄'}</div>
                 <h3>${profile.name}</h3>
                 <p>${profile.description}</p>
             `;
-
+            // Append profile card to grid
             grid.appendChild(profileCard);
         });
-
+        // Append grid to category div
         categoryDiv.appendChild(grid);
         profilesGrid.appendChild(categoryDiv);
     }
