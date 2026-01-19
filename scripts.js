@@ -491,6 +491,12 @@ async function fetchLanguagesForSelect(selectElement) {
     }
 }
 
+/**
+ * Handle form submission
+ *
+ * @param {Event} event - The form submission event
+ * @returns {Promise<void>}
+ */
 async function handleFormSubmit(event) {
     event.preventDefault();
 
