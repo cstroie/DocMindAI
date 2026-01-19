@@ -50,14 +50,6 @@
             "required": true
           },
           {
-            "name": "schema",
-            "type": "text",
-            "label": "Data Schema (optional)",
-            "help": "Specify a schema for the extracted data. Leave empty for automatic schema detection.",
-            "placeholder": "name:string,age:number,diagnosis:string,treatment:string",
-            "required": false
-          },
-          {
             "name": "file",
             "type": "file",
             "label": "Upload File (optional)",
