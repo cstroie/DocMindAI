@@ -89,13 +89,7 @@ function displayProfiles(profiles) {
     profilesGrid.innerHTML = '';
 
     // Populate the select dropdown
-    profileSelect.innerHTML = '<option value="">-- Select a profile --</option>';
-    profiles.forEach(profile => {
-        const option = document.createElement('option');
-        option.value = profile.id;
-        option.textContent = `${profile.name} (${profile.category})`;
-        profileSelect.appendChild(option);
-    });
+    populateProfileSelect(profiles, profileSelect);
 
     // Add event listener for profile selection
     profileSelect.addEventListener('change', function() {
@@ -157,6 +151,17 @@ function displayProfiles(profiles) {
         categoryDiv.appendChild(grid);
         profilesGrid.appendChild(categoryDiv);
     }
+}
+
+function populateProfileSelect(profiles, profileSelect) {
+    // Populate the select dropdown
+    profileSelect.innerHTML = '<option value="">-- Select a profile --</option>';
+    profiles.forEach(profile => {
+        const option = document.createElement('option');
+        option.value = profile.id;
+        option.textContent = `${profile.name} (${profile.category})`;
+        profileSelect.appendChild(option);
+    });
 }
 
 function getCategoryIcon(category) {
