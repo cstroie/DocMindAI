@@ -109,23 +109,28 @@ function displayProfiles(profiles) {
 
     // Display each category
     for (const [category, categoryProfiles] of Object.entries(categories)) {
-        const categoryDiv = document.createElement('div');
-        categoryDiv.className = 'tool-section';
+        const categoryDiv = document.createElement('section');
+        categoryDiv.className = 'tool-section ' + category;
 
         // Get category info from categories.json
         const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
 
+        // Create category header
+        const categoryHeader = document.createElement('header');
+        // Add category title with icon
         const categoryTitle = document.createElement('h2');
-        categoryTitle.textContent = getCategoryIcon(category) + ' ' + (categoryInfo ? categoryInfo.name : category);
-        categoryDiv.appendChild(categoryTitle);
+        categoryTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category);
+        categoryHeader.appendChild(categoryTitle);
 
         // Add category description if available
         if (categoryInfo && categoryInfo.description) {
             const categoryDescription = document.createElement('p');
             categoryDescription.textContent = categoryInfo.description;
             categoryDescription.className = 'category-description';
-            categoryDiv.appendChild(categoryDescription);
+            categoryHeader.appendChild(categoryDescription);
         }
+
+        categoryDiv.appendChild(categoryHeader);
 
         const grid = document.createElement('div');
         grid.className = 'tools-grid';
@@ -183,21 +188,6 @@ function populateProfileSelect(profiles, profileSelect) {
     }
 }
 
-function getCategoryIcon(category) {
-    // Use categories data if available
-    if (categoriesData && categoriesData[category]) {
-        return categoriesData[category].icon || '📋';
-    }
-
-    // Fallback to hardcoded icons
-    const icons = {
-        'Medical': '🏥',
-        'General': '📄',
-        'Development': '🧪',
-        'Research': '📚'
-    };
-    return icons[category] || '📋';
-}
 
 async function loadProfileForm(profileId) {
     try {

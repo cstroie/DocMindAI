@@ -1,24 +1,24 @@
 {
   "categories": {
-    "Medical": {
+    "medical": {
       "name": "Medical",
       "icon": "🏥",
-      "description": "Medical-related tools and analysis"
+      "description": "Specialized tools for healthcare professionals to process and analyze medical documents."
     },
-    "General": {
+    "general": {
       "name": "General",
       "icon": "📄",
-      "description": "General purpose tools and utilities"
+      "description": "Tools for general document processing and information extraction."
     },
-    "Development": {
-      "name": "Development",
-      "icon": "🧪",
-      "description": "Development and testing tools"
-    },
-    "Research": {
+    "research": {
       "name": "Research",
       "icon": "📚",
-      "description": "Research and analysis tools"
+      "description": "Specialized tools for academic research and literature analysis."
+    },
+    "development": {
+      "name": "Development",
+      "icon": "🧪",
+      "description": "Tools for testing AI models and experimenting with prompts."
     }
   }
 }
