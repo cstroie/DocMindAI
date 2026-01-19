@@ -102,37 +102,86 @@ function handleGetModels() {
 }
 
 /**
+ * Load actions from JSON file
+ */
+function loadActionsFromJson() {
+    $actions_file = 'actions.json';
+
+    // Check if actions file exists
+    if (!file_exists($actions_file)) {
+        return ['error' => 'Actions configuration file not found'];
+    }
+
+    // Read and decode JSON file
+    $json_content = file_get_contents($actions_file);
+    if ($json_content === false) {
+        return ['error' => 'Failed to read actions configuration file'];
+    }
+
+    $actions_data = json_decode($json_content, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ['error' => 'Invalid JSON format in actions configuration: ' . json_last_error_msg()];
+    }
+
+    return $actions_data;
+}
+
+/**
  * Handle get_form action
  */
 function handleGetForm() {
     $action = $_REQUEST['for_action'] ?? '';
     $language = $_REQUEST['language'] ?? 'en';
 
-    // Define form configurations for each action
-    $form_configs = [
-        'rra' => [
-            'title' => 'Radiology Report Analyzer',
-            'description' => 'Analyze radiology reports and extract key medical information',
-            'fields' => [
-                ['name' => 'report_text', 'type' => 'textarea', 'label' => 'Radiology Report', 'required' => true],
-                ['name' => 'model', 'type' => 'select', 'label' => 'AI Model', 'options' => []],
-                ['name' => 'language', 'type' => 'hidden', 'value' => $language]
-            ]
-        ],
-        'sde' => [
-            'title' => 'Structured Data Extractor',
-            'description' => 'Extract structured data from unstructured text',
-            'fields' => [
-                ['name' => 'text', 'type' => 'textarea', 'label' => 'Input Text', 'required' => true],
-                ['name' => 'schema', 'type' => 'text', 'label' => 'Data Schema (optional)', 'required' => false],
-                ['name' => 'model', 'type' => 'select', 'label' => 'AI Model', 'options' => []]
-            ]
-        ],
-        // Add other form configurations here
-    ];
+    // Load actions from JSON
+    $actions_data = loadActionsFromJson();
 
-    $config = $form_configs[$action] ?? ['error' => 'Unknown action'];
-    sendJsonResponse($config, true);
+    if (isset($actions_data['error'])) {
+        sendJsonResponse(['error' => $actions_data['error']], true);
+    }
+
+    // Get form configuration for the requested action
+    if (isset($actions_data['actions'][$action]['form'])) {
+        $form_config = $actions_data['actions'][$action]['form'];
+
+        // Update language field if present
+        if (isset($form_config['fields'])) {
+            foreach ($form_config['fields'] as &$field) {
+                if ($field['name'] === 'language' && $field['type'] === 'hidden') {
+                    $field['value'] = $language;
+                }
+            }
+        }
+
+        sendJsonResponse($form_config, true);
+    } else {
+        sendJsonResponse(['error' => 'Unknown action or no form configuration available'], true);
+    }
+}
+
+/**
+ * Handle get_actions action
+ */
+function handleGetActions() {
+    // Load actions from JSON
+    $actions_data = loadActionsFromJson();
+
+    if (isset($actions_data['error'])) {
+        sendJsonResponse(['error' => $actions_data['error']], true);
+    }
+
+    // Extract just the action metadata (id, name, description, category)
+    $actions = [];
+    foreach ($actions_data['actions'] as $action_id => $action_data) {
+        $actions[] = [
+            'id' => $action_id,
+            'name' => $action_data['name'],
+            'description' => $action_data['description'],
+            'category' => $action_data['category']
+        ];
+    }
+
+    sendJsonResponse(['actions' => $actions], true);
 }
 
 /**
@@ -171,35 +220,6 @@ function handleGetPrompts() {
     }
 
     sendJsonResponse(['prompts' => $prompts], true);
-}
-
-/**
- * Handle get_actions action
- */
-function handleGetActions() {
-    $actions = [
-        [
-            'id' => 'rra',
-            'name' => 'Radiology Report Analyzer',
-            'description' => 'Analyze radiology reports and extract key medical information',
-            'category' => 'Medical'
-        ],
-        [
-            'id' => 'sde',
-            'name' => 'Structured Data Extractor',
-            'description' => 'Extract structured data from unstructured text',
-            'category' => 'General'
-        ],
-        [
-            'id' => 'exp',
-            'name' => 'Experiment Tool',
-            'description' => 'Test AI models with predefined prompts',
-            'category' => 'Development'
-        ],
-        // Add other actions here
-    ];
-
-    sendJsonResponse(['actions' => $actions], true);
 }
 
 /**
