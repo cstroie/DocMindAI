@@ -524,6 +524,23 @@ async function handleFormSubmit(event) {
 
         // Display results
         displayResults(result);
+
+        // Set cookies for selected model and language (30 days)
+        const model = formData.get('model');
+        const language = formData.get('language');
+
+        if (model) {
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 30);
+            document.cookie = `docmind-model=${encodeURIComponent(model)}; expires=${expirationDate.toUTCString()}; path=/`;
+        }
+
+        if (language) {
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 30);
+            document.cookie = `docmind-language=${encodeURIComponent(language)}; expires=${expirationDate.toUTCString()}; path=/`;
+        }
+
     } catch (error) {
         showError('Failed to submit form: ' + error.message);
     } finally {
