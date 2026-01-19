@@ -1,13 +1,10 @@
 {
   "actions": {
     "rra": {
-      "id": "rra",
       "name": "Radiology Report Analyzer",
-      "description": "Analyze radiology reports and extract key medical information",
       "category": "Medical",
       "form": {
         "title": "Radiology Report Analyzer",
-        "description": "Analyze radiology reports and extract key medical information",
         "fields": [
           {
             "name": "report_text",
@@ -30,13 +27,10 @@
       }
     },
     "sde": {
-      "id": "sde",
       "name": "Structured Data Extractor",
-      "description": "Extract structured data from unstructured text",
       "category": "General",
       "form": {
         "title": "Structured Data Extractor",
-        "description": "Extract structured data from unstructured text",
         "fields": [
           {
             "name": "text",
@@ -60,13 +54,10 @@
       }
     },
     "exp": {
-      "id": "exp",
       "name": "Experiment Tool",
-      "description": "Test AI models with predefined prompts",
       "category": "Development",
       "form": {
         "title": "Experiment Tool",
-        "description": "Test AI models with predefined prompts",
         "fields": [
           {
             "name": "prompt",
