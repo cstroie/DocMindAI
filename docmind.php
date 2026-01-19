@@ -269,39 +269,40 @@ function handleProfileAction($profile_id) {
 }
 
 /**
- * Build prompt based on profile type
+ * Build prompt based on profile configuration
  */
 function buildProfilePrompt($profile_id, $form_data) {
-    switch ($profile_id) {
-        case 'rra':
-            // Radiology Report Analyzer
-            $report_text = $form_data['report_text'] ?? '';
-            return "Analyze the following radiology report and extract key medical information:\n\n" .
-                   "Report: " . $report_text . "\n\n" .
-                   "Provide a structured analysis with findings, impressions, and recommendations.";
+    // Load profiles from JSON
+    $profiles_data = loadProfilesFromJson();
 
-        case 'sde':
-            // Structured Data Extractor
-            $text = $form_data['text'] ?? '';
-            $schema = $form_data['schema'] ?? '';
-            $prompt = "Extract structured data from the following text:\n\n" .
-                      "Text: " . $text . "\n\n";
-
-            if (!empty($schema)) {
-                $prompt .= "Use this schema: " . $schema . "\n\n";
-            }
-
-            $prompt .= "Return the extracted data in JSON format.";
-            return $prompt;
-
-        case 'exp':
-            // Experiment Tool
-            $prompt_text = $form_data['prompt'] ?? '';
-            return $prompt_text;
-
-        default:
-            return "Analyze the following input: " . json_encode($form_data);
+    if (isset($profiles_data['error'])) {
+        return "Analyze the following input: " . json_encode($form_data);
     }
+
+    // Get the profile configuration
+    $profile = $profiles_data['profiles'][$profile_id] ?? null;
+
+    if (!$profile || empty($profile['prompt'])) {
+        return "Analyze the following input: " . json_encode($form_data);
+    }
+
+    // Replace placeholders in the prompt with actual form data
+    $prompt = $profile['prompt'];
+
+    // Replace {language_instruction} placeholder if present
+    $language = $form_data['language'] ?? 'en';
+    $language_instruction = getLanguageInstruction($language);
+    $prompt = str_replace('{language_instruction}', $language_instruction, $prompt);
+
+    // Replace other placeholders with form data
+    foreach ($form_data as $key => $value) {
+        $placeholder = '{' . $key . '}';
+        if (strpos($prompt, $placeholder) !== false) {
+            $prompt = str_replace($placeholder, $value, $prompt);
+        }
+    }
+
+    return $prompt;
 }
 
 /**
