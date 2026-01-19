@@ -78,14 +78,7 @@
             "name": "language",
             "type": "select",
             "label": "Response Language",
-            "options": [
-              {"value": "ro", "label": "Română"},
-              {"value": "en", "label": "English"},
-              {"value": "es", "label": "Español"},
-              {"value": "fr", "label": "Français"},
-              {"value": "de", "label": "Deutsch"},
-              {"value": "it", "label": "Italiano"}
-            ]
+            "options": []
           }
         ]
       }
