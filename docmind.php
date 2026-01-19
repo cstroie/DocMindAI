@@ -59,14 +59,8 @@ function handleApiRequest() {
         case 'get_models':
             handleGetModels();
             break;
-        case 'get_form':
-            handleGetForm();
-            break;
         case 'get_prompts':
             handleGetPrompts();
-            break;
-        case 'get_profiles':
-            handleGetProfiles();
             break;
         default:
             // Handle profile-specific actions
@@ -112,64 +106,6 @@ function handleGetModels() {
     sendJsonResponse(['models' => $models], true);
 }
 
-
-/**
- * Handle get_form action
- */
-function handleGetForm() {
-    $profile = $_REQUEST['profile'] ?? '';
-    $language = $_REQUEST['language'] ?? 'en';
-
-    // Load profiles from JSON
-    $profiles_data = loadResourceFromJson('profiles.json');
-
-    if (isset($profiles_data['error'])) {
-        sendJsonResponse(['error' => $profiles_data['error']], true);
-    }
-
-    // Get form configuration for the requested profile
-    if (isset($profiles_data['profiles'][$profile]['form'])) {
-        $form_config = $profiles_data['profiles'][$profile]['form'];
-
-        // Update language field if present
-        if (isset($form_config['fields'])) {
-            foreach ($form_config['fields'] as &$field) {
-                if ($field['name'] === 'language' && $field['type'] === 'hidden') {
-                    $field['value'] = $language;
-                }
-            }
-        }
-
-        sendJsonResponse($form_config, true);
-    } else {
-        sendJsonResponse(['error' => 'Unknown profile or no form configuration available'], true);
-    }
-}
-
-/**
- * Handle get_profiles action
- */
-function handleGetProfiles() {
-    // Load profiles from JSON
-    $profiles_data = loadResourceFromJson('profiles.json');
-
-    if (isset($profiles_data['error'])) {
-        sendJsonResponse(['error' => $profiles_data['error']], true);
-    }
-
-    // Extract just the profile metadata (id, name, description, category)
-    $profiles = [];
-    foreach ($profiles_data['profiles'] as $profile_id => $profile_data) {
-        $profiles[] = [
-            'id' => $profile_id,
-            'name' => $profile_data['name'],
-            'description' => $profile_data['description'],
-            'category' => $profile_data['category']
-        ];
-    }
-
-    sendJsonResponse(['profiles' => $profiles], true);
-}
 
 /**
  * Handle profile-specific actions
