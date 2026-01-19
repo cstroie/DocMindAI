@@ -652,6 +652,14 @@ function formatResults(results) {
     if (typeof results === 'object') {
         return `<pre><code class="json">${JSON.stringify(results, null, 2)}</code></pre>`;
     }
+
+    // Check if the result contains markdown code fences
+    const fenceInfo = extractCodeFenceInfo(results, 'text');
+    if (fenceInfo.type) {
+        // If a code fence was found, format with appropriate language class
+        return `<pre><code class="${fenceInfo.type}">${escapeHtml(fenceInfo.text)}</code></pre>`;
+    }
+
     // Otherwise, escape and return as preformatted text
     return `<pre><code>${escapeHtml(results)}</code></pre>`;
 }
