@@ -1,0 +1,24 @@
+{
+  "categories": {
+    "Medical": {
+      "name": "Medical",
+      "icon": "🏥",
+      "description": "Medical-related tools and analysis"
+    },
+    "General": {
+      "name": "General",
+      "icon": "📄",
+      "description": "General purpose tools and utilities"
+    },
+    "Development": {
+      "name": "Development",
+      "icon": "🧪",
+      "description": "Development and testing tools"
+    },
+    "Research": {
+      "name": "Research",
+      "icon": "📚",
+      "description": "Research and analysis tools"
+    }
+  }
+}
