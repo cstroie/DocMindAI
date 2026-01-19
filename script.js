@@ -174,7 +174,8 @@ function populateProfileSelect(profiles, profileSelect) {
         categoryProfiles.forEach(profile => {
             const option = document.createElement('option');
             option.value = profile.id;
-            option.textContent = profile.name;
+            // Add profile icon before the name
+            option.textContent = `${profile.icon || '📄'} ${profile.name}`;
             optgroup.appendChild(option);
         });
 
