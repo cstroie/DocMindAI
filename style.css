@@ -597,6 +597,36 @@ pre .xml-cdata {
     font-family: 'Roboto', sans-serif;
 }
 
+.profile-select-container {
+    margin-bottom: 20px;
+}
+
+.profile-select-container label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #374151;
+    font-family: 'Roboto', sans-serif;
+}
+
+.profile-select-container select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Roboto', sans-serif;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    max-width: 400px;
+}
+
+.profile-select-container select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
 /* Chat styles */
 .chat-container {
     background-color: white;
