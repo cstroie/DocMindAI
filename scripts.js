@@ -306,16 +306,17 @@ function createFormField(field) {
             input = document.createElement('textarea');
             input.name = field.name;
             input.id = field.name;
+            input.rows = field.rows || 10;
             input.required = field.required || false;
-            input.className = 'markdown-result';
+            if (field.placeholder) {
+                input.placeholder = field.placeholder;
+            }
             break;
         case 'select':
             input = document.createElement('select');
             input.name = field.name;
             input.id = field.name;
             input.required = field.required || false;
-            input.className = 'form-control';
-
             // If options are empty and field name is 'model', fetch models from API
             if ((!field.options || field.options.length === 0) && field.name === 'model') {
                 // Add a loading option
@@ -323,7 +324,6 @@ function createFormField(field) {
                 loadingOption.value = '';
                 loadingOption.textContent = 'Loading models...';
                 input.appendChild(loadingOption);
-
                 // Fetch models from API
                 fetchModelsForSelect(input);
             }
@@ -359,23 +359,21 @@ function createFormField(field) {
             input.name = field.name;
             input.id = field.name;
             input.required = field.required || false;
-            input.className = 'form-control';
-
-            // Add placeholder if available
             if (field.placeholder) {
                 input.placeholder = field.placeholder;
             }
     }
-
-        // Add help text if available
-        if (field.help) {
-            const helpElement = document.createElement('small');
-            helpElement.className = 'form-help';
-            helpElement.textContent = field.help;
-            container.appendChild(helpElement);
-        }
-
+    // Append input to container
     container.appendChild(input);
+
+    // Add help text if available
+    if (field.help) {
+        const helpElement = document.createElement('small');
+        helpElement.textContent = field.help;
+        container.appendChild(helpElement);
+    }
+
+    // Return the container
     return container;
 }
 
