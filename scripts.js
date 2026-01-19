@@ -533,6 +533,12 @@ async function handleFormSubmit(event) {
     }
 }
 
+/**
+ * Display results in the results area
+ *
+ * @param {Object} results - The results object to display
+ * @returns {void}
+ */
 function displayResults(results) {
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
@@ -547,6 +553,12 @@ function displayResults(results) {
     resultsArea.scrollIntoView({ behavior: 'smooth' });
 }
 
+/**
+ * Format results for display
+ *
+ * @param {Object|string} results - The results to format
+ * @returns {string} HTML string for displaying the results
+ */
 function formatResults(results) {
     if (results.error) {
         return `<div class="error">${escapeHtml(results.error)}</div>`;
