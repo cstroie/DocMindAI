@@ -39,6 +39,7 @@
       "description": "Extract structured data from unstructured text",
       "category": "general",
       "icon": "📊",
+      "prompt": "Extract structured data from the following text:\n\nText: {text}\n\n{schema}\n\nReturn the extracted data in {output_format} format.",
       "form": {
         "fields": [
           {
