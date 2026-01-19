@@ -1,7 +1,8 @@
 
-// Global variables to store categories and profiles
+// Global variables to store categories, profiles, and languages
 let categoriesData = null;
 let profilesData = null;
+let languagesData = null;
 
 /**
  * Apply syntax highlighting using highlight.js
@@ -410,15 +411,22 @@ async function fetchModelsForSelect(selectElement) {
 }
 
 /**
+ * Load languages from JSON file
+ *
+ * @returns {Promise<Object|null>} Promise resolving to languages object or null on error
+ */
+async function loadLanguages() {
+    return loadJSONResource('languages.json', 'languages');
+}
+
+/**
  * Fetch languages from JSON and populate select element
  */
 async function fetchLanguagesForSelect(selectElement) {
     try {
-        const response = await fetch('languages.json');
-        const data = await response.json();
-
-        if (data.error) {
-            console.error('Failed to load languages:', data.error);
+        // Use the global languagesData if available
+        if (!languagesData) {
+            console.error('No languages data available');
             // Clear loading option and add error option
             selectElement.innerHTML = '';
             const errorOption = document.createElement('option');
@@ -437,14 +445,12 @@ async function fetchLanguagesForSelect(selectElement) {
         defaultOption.textContent = 'Select a language';
         selectElement.appendChild(defaultOption);
 
-        // Add languages from JSON
-        if (data.languages) {
-            for (const [langCode, langData] of Object.entries(data.languages)) {
-                const option = document.createElement('option');
-                option.value = langCode;
-                option.textContent = (langData.flag ? ' ' + langData.flag : '') + langData.name;
-                selectElement.appendChild(option);
-            }
+        // Add languages from global data
+        for (const [langCode, langData] of Object.entries(languagesData)) {
+            const option = document.createElement('option');
+            option.value = langCode;
+            option.textContent = (langData.flag ? ' ' + langData.flag : '') + langData.name;
+            selectElement.appendChild(option);
         }
     } catch (error) {
         console.error('Failed to load languages:', error.message);
@@ -546,6 +552,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     categoriesData = await loadCategories();
     // Load profiles data
     profilesData = await loadProfiles();
+    // Load languages data
+    languagesData = await loadLanguages();
     // Display profiles in the UI
     displayProfiles();
     // Set up form submission
