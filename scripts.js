@@ -190,7 +190,6 @@ async function loadProfileForm(profileId) {
     try {
         // Clear the page
         document.getElementById('profilesGrid').style.display = 'none';
-
         // Load profiles data directly from JSON file
         const response = await fetch('profiles.json');
         const data = await response.json();
