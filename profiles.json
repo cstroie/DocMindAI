@@ -6,6 +6,7 @@
       "description": "Analyze radiology reports and extract key medical information",
       "category": "medical",
       "icon": "🔍",
+      "prompt": "You are a medical assistant analyzing radiology reports.\n\nTASK: Read the report and extract the main pathological information in JSON format.\n\nCRITICAL INSTRUCTION: {language_instruction}\n\nOUTPUT FORMAT (JSON):\n{\n  \"pathologic\": \"yes/no\",\n  \"severity\": 1-10,\n  \"summary\": \"1-5 words\",\n  \"diagnoses\": [\"diagnosis1\", \"diagnosis2\", \"diagnosis3\"]\n}\n\nRULES:\n- \"pathologic\": \"yes\" if any anomaly exists, otherwise \"no\"\n- \"severity\": 1=minimal, 5=moderate, 10=critical/urgent\n- \"summary\": diagnosis in maximum 5 words (e.g., \"fracture\", \"pneumonia\", \"lung nodule\")\n- \"diagnoses\": exactly 3 specific medical diagnoses based on the report\n- If everything is normal: {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"normal\", \"diagnoses\": [\"normal\", \"no significant findings\", \"within normal limits\"]}\n- Ignore spelling errors\n- Respond ONLY with the JSON, without additional text",
       "form": {
         "fields": [
           {
