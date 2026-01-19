@@ -543,8 +543,25 @@ function displayResults(results) {
     // Get results area elements
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
+
+    // Extract the actual response content from the API response
+    let responseContent = '';
+    if (results.response && results.response.choices && results.response.choices[0] && results.response.choices[0].message && results.response.choices[0].message.content) {
+        responseContent = results.response.choices[0].message.content;
+    } else if (results.error) {
+        responseContent = results.error;
+    } else {
+        responseContent = 'No response content available';
+    }
+
+    // Create a new results object with the extracted content
+    const formattedResults = {
+        ...results,
+        response_content: responseContent
+    };
+
     // Format and display results
-    resultsContent.innerHTML = formatResults(results);
+    resultsContent.innerHTML = formatResults(formattedResults);
     resultsArea.style.display = 'block';
     // Apply syntax highlighting
     applySyntaxHighlighting();
