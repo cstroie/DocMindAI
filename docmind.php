@@ -415,7 +415,7 @@ function displayWebInterface() {
                 <div class="profile-form" id="profileForm" style="display: none;">
                     <h2 id="formTitle">Profile Form</h2>
                     <form id="apiForm">
-                        <input type="hidden" name="profile" id="profileInput">
+                        <input type="hidden" name="action" id="actionInput">
                         <div id="formFields">
                             <!-- Will be populated by JavaScript -->
                         </div>

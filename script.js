@@ -202,9 +202,9 @@ function displayForm(formConfig, profileId, profileName, profileDescription) {
     const profileForm = document.getElementById('profileForm');
     const formTitle = document.getElementById('formTitle');
     const formFields = document.getElementById('formFields');
-    const profileInput = document.getElementById('profileInput');
+    const actionInput = document.getElementById('actionInput');
     formTitle.textContent = profileName;
-    profileInput.value = profileId;
+    actionInput.value = profileId;
     formFields.innerHTML = '';
 
     // Add description if available
