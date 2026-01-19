@@ -102,25 +102,25 @@ function handleGetModels() {
 }
 
 /**
- * Load actions from JSON file
+ * Load profiles from JSON file
  */
 function loadActionsFromJson() {
-    $actions_file = 'actions.json';
+    $actions_file = 'profiles.json';
 
-    // Check if actions file exists
+    // Check if profiles file exists
     if (!file_exists($actions_file)) {
-        return ['error' => 'Actions configuration file not found'];
+        return ['error' => 'Profiles configuration file not found'];
     }
 
     // Read and decode JSON file
     $json_content = file_get_contents($actions_file);
     if ($json_content === false) {
-        return ['error' => 'Failed to read actions configuration file'];
+        return ['error' => 'Failed to read profiles configuration file'];
     }
 
     $actions_data = json_decode($json_content, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
-        return ['error' => 'Invalid JSON format in actions configuration: ' . json_last_error_msg()];
+        return ['error' => 'Invalid JSON format in profiles configuration: ' . json_last_error_msg()];
     }
 
     return $actions_data;
