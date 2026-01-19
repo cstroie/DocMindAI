@@ -45,18 +45,23 @@
             "name": "text",
             "type": "textarea",
             "label": "Input Text",
+            "help": "Enter the text you want to extract structured data from. Maximum 10,000 characters.",
+            "placeholder": "Enter the text data you want to extract structured data from...&#10;&#10;Example: Patient: John Doe, Age: 45, Diagnosis: Type 2 Diabetes, Treatment: Metformin 500mg twice daily",
             "required": true
           },
           {
             "name": "schema",
             "type": "text",
             "label": "Data Schema (optional)",
+            "help": "Specify a schema for the extracted data. Leave empty for automatic schema detection.",
+            "placeholder": "name:string,age:number,diagnosis:string,treatment:string",
             "required": false
           },
           {
             "name": "model",
             "type": "select",
             "label": "AI Model",
+            "help": "Select the AI model to use for data extraction.",
             "options": []
           }
         ]
