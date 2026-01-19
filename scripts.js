@@ -360,7 +360,20 @@ function createFormField(field) {
             input.id = field.name;
             input.required = field.required || false;
             input.className = 'form-control';
+
+            // Add placeholder if available
+            if (field.placeholder) {
+                input.placeholder = field.placeholder;
+            }
     }
+
+        // Add help text if available
+        if (field.help) {
+            const helpElement = document.createElement('small');
+            helpElement.className = 'form-help';
+            helpElement.textContent = field.help;
+            container.appendChild(helpElement);
+        }
 
     container.appendChild(input);
     return container;
