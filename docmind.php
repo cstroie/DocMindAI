@@ -113,6 +113,31 @@ function handleGetModels() {
 }
 
 /**
+ * Load languages from JSON file
+ */
+function loadLanguagesFromJson() {
+    $languages_file = 'languages.json';
+
+    // Check if languages file exists
+    if (!file_exists($languages_file)) {
+        return ['error' => 'Languages configuration file not found'];
+    }
+
+    // Read and decode JSON file
+    $json_content = file_get_contents($languages_file);
+    if ($json_content === false) {
+        return ['error' => 'Failed to read languages configuration file'];
+    }
+
+    $languages_data = json_decode($json_content, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ['error' => 'Invalid JSON format in languages configuration: ' . json_last_error_msg()];
+    }
+
+    return $languages_data;
+}
+
+/**
  * Load profiles from JSON file
  */
 function loadProfilesFromJson() {
