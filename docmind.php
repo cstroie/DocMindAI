@@ -113,53 +113,41 @@ function handleGetModels() {
 }
 
 /**
- * Load languages from JSON file
+ * Load resource from JSON file
  */
-function loadLanguagesFromJson() {
-    $languages_file = 'languages.json';
-
-    // Check if languages file exists
-    if (!file_exists($languages_file)) {
-        return ['error' => 'Languages configuration file not found'];
+function loadResourceFromJson($filename) {
+    // Check if resource file exists
+    if (!file_exists($filename)) {
+        $resource_name = ucfirst(str_replace('.json', '', $filename));
+        return ['error' => $resource_name . ' configuration file not found'];
     }
 
     // Read and decode JSON file
-    $json_content = file_get_contents($languages_file);
+    $json_content = file_get_contents($filename);
     if ($json_content === false) {
-        return ['error' => 'Failed to read languages configuration file'];
+        return ['error' => 'Failed to read ' . $filename . ' configuration file'];
     }
 
-    $languages_data = json_decode($json_content, true);
+    $resource_data = json_decode($json_content, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
-        return ['error' => 'Invalid JSON format in languages configuration: ' . json_last_error_msg()];
+        return ['error' => 'Invalid JSON format in ' . $filename . ' configuration: ' . json_last_error_msg()];
     }
 
-    return $languages_data;
+    return $resource_data;
+}
+
+/**
+ * Load languages from JSON file
+ */
+function loadLanguagesFromJson() {
+    return loadResourceFromJson('languages.json');
 }
 
 /**
  * Load profiles from JSON file
  */
 function loadProfilesFromJson() {
-    $profiles_file = 'profiles.json';
-
-    // Check if profiles file exists
-    if (!file_exists($profiles_file)) {
-        return ['error' => 'Profiles configuration file not found'];
-    }
-
-    // Read and decode JSON file
-    $json_content = file_get_contents($profiles_file);
-    if ($json_content === false) {
-        return ['error' => 'Failed to read profiles configuration file'];
-    }
-
-    $profiles_data = json_decode($json_content, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        return ['error' => 'Invalid JSON format in profiles configuration: ' . json_last_error_msg()];
-    }
-
-    return $profiles_data;
+    return loadResourceFromJson('profiles.json');
 }
 
 /**
