@@ -57,7 +57,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function loadProfiles() {
     try {
-        const response = await fetch('docmind.php?action=get_profiles');
+        // Load profiles data directly from JSON file
+        const response = await fetch('profiles.json');
         const data = await response.json();
 
         if (data.error) {
@@ -65,7 +66,18 @@ async function loadProfiles() {
             return;
         }
 
-        displayProfiles(data.profiles);
+        // Extract just the profile metadata (id, name, description, category)
+        const profiles = [];
+        for (const [profile_id, profile_data] of Object.entries(data.profiles)) {
+            profiles.push({
+                'id': profile_id,
+                'name': profile_data.name,
+                'description': profile_data.description,
+                'category': profile_data.category
+            });
+        }
+
+        displayProfiles(profiles);
     } catch (error) {
         showError('Failed to load profiles: ' + error.message);
     }
@@ -89,9 +101,20 @@ function displayProfiles(profiles) {
         const categoryDiv = document.createElement('div');
         categoryDiv.className = 'tool-section';
 
+        // Get category info from categories.json
+        const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
+
         const categoryTitle = document.createElement('h2');
-        categoryTitle.textContent = getCategoryIcon(category) + ' ' + category;
+        categoryTitle.textContent = getCategoryIcon(category) + ' ' + (categoryInfo ? categoryInfo.name : category);
         categoryDiv.appendChild(categoryTitle);
+
+        // Add category description if available
+        if (categoryInfo && categoryInfo.description) {
+            const categoryDescription = document.createElement('p');
+            categoryDescription.textContent = categoryInfo.description;
+            categoryDescription.className = 'category-description';
+            categoryDiv.appendChild(categoryDescription);
+        }
 
         const grid = document.createElement('div');
         grid.className = 'tools-grid';
