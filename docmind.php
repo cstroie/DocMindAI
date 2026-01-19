@@ -327,6 +327,10 @@ function handleProfileAction($profile_id) {
     $result['api_data'] = $api_data;
     $result['prompt'] = $prompt;
 
+    // Set CORS headers
+    header('Access-Control-Allow-Origin: *');
+    header('Content-Type: application/json');
+
     sendJsonResponse($result, true);
 }
 
