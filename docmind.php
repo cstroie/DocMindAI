@@ -43,7 +43,7 @@ function handleApiRequest() {
     $valid_actions = ['get_models', 'get_form', 'get_prompts', 'get_profiles'];
 
     // Load profiles to get additional valid actions
-    $profiles_data = loadProfilesFromJson();
+    $profiles_data = loadResourceFromJson('profiles.json');
     if (!isset($profiles_data['error']) && isset($profiles_data['profiles'])) {
         foreach ($profiles_data['profiles'] as $profile_id => $profile_data) {
             $valid_actions[] = $profile_id;
@@ -128,26 +128,14 @@ function loadResourceFromJson($filename) {
         return ['error' => 'Failed to read ' . $filename . ' configuration file'];
     }
 
+    // Decode JSON content
     $resource_data = json_decode($json_content, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         return ['error' => 'Invalid JSON format in ' . $filename . ' configuration: ' . json_last_error_msg()];
     }
 
+    // Return the decoded resource data
     return $resource_data;
-}
-
-/**
- * Load languages from JSON file
- */
-function loadLanguagesFromJson() {
-    return loadResourceFromJson('languages.json');
-}
-
-/**
- * Load profiles from JSON file
- */
-function loadProfilesFromJson() {
-    return loadResourceFromJson('profiles.json');
 }
 
 /**
@@ -158,7 +146,7 @@ function handleGetForm() {
     $language = $_REQUEST['language'] ?? 'en';
 
     // Load profiles from JSON
-    $profiles_data = loadProfilesFromJson();
+    $profiles_data = loadResourceFromJson('profiles.json');
 
     if (isset($profiles_data['error'])) {
         sendJsonResponse(['error' => $profiles_data['error']], true);
@@ -188,7 +176,7 @@ function handleGetForm() {
  */
 function handleGetProfiles() {
     // Load profiles from JSON
-    $profiles_data = loadProfilesFromJson();
+    $profiles_data = loadResourceFromJson('profiles.json');
 
     if (isset($profiles_data['error'])) {
         sendJsonResponse(['error' => $profiles_data['error']], true);
@@ -220,7 +208,7 @@ function handleProfileAction($profile_id) {
     }
 
     // Load profile configuration
-    $profiles_data = loadProfilesFromJson();
+    $profiles_data = loadResourceFromJson('profiles.json');
     if (isset($profiles_data['error'])) {
         sendJsonResponse(['error' => $profiles_data['error']], true);
     }
@@ -345,14 +333,14 @@ function handleProfileAction($profile_id) {
  */
 function buildProfilePrompt($profile_id, $form_data) {
     // Load profiles from JSON
-    $profiles_data = loadProfilesFromJson();
+    $profiles_data = loadResourceFromJson('profiles.json');
 
     if (isset($profiles_data['error'])) {
         return "Analyze the following input: " . json_encode($form_data);
     }
 
     // Load languages from JSON
-    $languages_data = loadLanguagesFromJson();
+    $languages_data = loadResourceFromJson('languages.json');
 
     // Get the profile configuration
     $profile = $profiles_data['profiles'][$profile_id] ?? null;
