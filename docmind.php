@@ -341,10 +341,6 @@ function buildProfilePrompt($profile_id, $form_data) {
     // Load languages from JSON
     $languages_data = loadLanguagesFromJson();
 
-    if (isset($languages_data['error'])) {
-        return "Analyze the following input: " . json_encode($form_data);
-    }
-
     // Get the profile configuration
     $profile = $profiles_data['profiles'][$profile_id] ?? null;
 
