@@ -83,6 +83,12 @@ async function loadProfiles() {
     }
 }
 
+/**
+ * Display profiles grouped by category in the UI
+ *
+ * @param {Array} profiles - Array of profile objects containing id, name, description, category, and icon
+ * @returns {void}
+ */
 function displayProfiles(profiles) {
     const profilesGrid = document.getElementById('profilesGrid');
     const profileSelect = document.getElementById('profileSelect');
