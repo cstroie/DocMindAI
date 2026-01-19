@@ -12,18 +12,23 @@
             "name": "report_text",
             "type": "textarea",
             "label": "Radiology Report",
+            "help": "Enter the radiology report you want to analyze. Maximum 10,000 characters.",
+            "placeholder": "Enter the radiology report here...&#10;&#10;Example: Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum.",
             "required": true
           },
           {
             "name": "model",
             "type": "select",
             "label": "AI Model",
+            "help": "Select the AI model to use for analysis.",
             "options": []
           },
           {
             "name": "language",
-            "type": "hidden",
-            "value": "en"
+            "type": "select",
+            "label": "Response Language",
+            "help": "Select the language for the AI response.",
+            "options": []
           }
         ]
       }

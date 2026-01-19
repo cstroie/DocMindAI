@@ -327,14 +327,13 @@ function createFormField(field) {
                 // Fetch models from API
                 fetchModelsForSelect(input);
             }
-            // If options are empty and field name is 'language', use global languagesData
+            // If options are empty and field name is 'language', use the languages object
             else if ((!field.options || field.options.length === 0) && field.name === 'language') {
                 // Add a loading option
                 const loadingOption = document.createElement('option');
                 loadingOption.value = '';
                 loadingOption.textContent = 'Loading languages...';
                 input.appendChild(loadingOption);
-
                 // Use global languagesData
                 if (languagesData) {
                     input.innerHTML = '';
@@ -343,12 +342,11 @@ function createFormField(field) {
                     defaultOption.value = '';
                     defaultOption.textContent = 'Select a language';
                     input.appendChild(defaultOption);
-
                     // Add languages from global data
                     for (const [langCode, langData] of Object.entries(languagesData)) {
                         const option = document.createElement('option');
                         option.value = langCode;
-                        option.textContent = (langData.flag ? ' ' + langData.flag : '') + langData.name;
+                        option.textContent = (langData.flag ? langData.flag + ' ' : '') + langData.name;
                         input.appendChild(option);
                     }
                 } else {
