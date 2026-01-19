@@ -146,7 +146,7 @@ function displayProfiles(profiles) {
             };
 
             profileCard.innerHTML = `
-                <div class="tool-icon">📄</div>
+                <div class="tool-icon">${profile.icon || '📄'}</div>
                 <h3>${profile.name}</h3>
                 <p>${profile.description}</p>
             `;
