@@ -88,6 +88,9 @@ function displayProfiles(profiles) {
     const profileSelect = document.getElementById('profileSelect');
     profilesGrid.innerHTML = '';
 
+    // Hide the profile select dropdown on main page
+    profileSelect.style.display = 'none';
+
     // Add event listener for profile selection
     profileSelect.addEventListener('change', function() {
         if (this.value) {
@@ -199,7 +202,7 @@ async function loadProfileForm(profileId) {
             return;
         }
 
-        // Populate the profile select dropdown with all profiles
+        // Show and populate the profile select dropdown with all profiles
         const profiles = [];
         for (const [id, profileData] of Object.entries(data.profiles)) {
             profiles.push({
@@ -209,6 +212,7 @@ async function loadProfileForm(profileId) {
             });
         }
         const profileSelect = document.getElementById('profileSelect');
+        profileSelect.style.display = 'block';
         populateProfileSelect(profiles, profileSelect);
 
         // Use the form configuration from profiles.json
