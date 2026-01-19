@@ -281,7 +281,19 @@ function createFormField(field) {
 
                 // Fetch models from API
                 fetchModelsForSelect(input);
-            } else if (field.options && field.options.length) {
+            }
+            // If options are empty and field name is 'language', fetch languages from JSON
+            else if ((!field.options || field.options.length === 0) && field.name === 'language') {
+                // Add a loading option
+                const loadingOption = document.createElement('option');
+                loadingOption.value = '';
+                loadingOption.textContent = 'Loading languages...';
+                input.appendChild(loadingOption);
+
+                // Fetch languages from JSON
+                fetchLanguagesForSelect(input);
+            }
+            else if (field.options && field.options.length) {
                 field.options.forEach(option => {
                     const opt = document.createElement('option');
                     opt.value = option.value;
@@ -353,6 +365,54 @@ async function fetchModelsForSelect(selectElement) {
         const errorOption = document.createElement('option');
         errorOption.value = '';
         errorOption.textContent = 'Failed to load models';
+        selectElement.appendChild(errorOption);
+    }
+}
+
+/**
+ * Fetch languages from JSON and populate select element
+ */
+async function fetchLanguagesForSelect(selectElement) {
+    try {
+        const response = await fetch('languages.json');
+        const data = await response.json();
+
+        if (data.error) {
+            console.error('Failed to load languages:', data.error);
+            // Clear loading option and add error option
+            selectElement.innerHTML = '';
+            const errorOption = document.createElement('option');
+            errorOption.value = '';
+            errorOption.textContent = 'Failed to load languages';
+            selectElement.appendChild(errorOption);
+            return;
+        }
+
+        // Clear loading option
+        selectElement.innerHTML = '';
+
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select a language';
+        selectElement.appendChild(defaultOption);
+
+        // Add languages from JSON
+        if (data.languages) {
+            for (const [langCode, langData] of Object.entries(data.languages)) {
+                const option = document.createElement('option');
+                option.value = langCode;
+                option.textContent = langData.name + (langData.flag ? ' ' + langData.flag : '');
+                selectElement.appendChild(option);
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load languages:', error.message);
+        // Clear loading option and add error option
+        selectElement.innerHTML = '';
+        const errorOption = document.createElement('option');
+        errorOption.value = '';
+        errorOption.textContent = 'Failed to load languages';
         selectElement.appendChild(errorOption);
     }
 }
