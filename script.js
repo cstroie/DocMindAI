@@ -402,7 +402,7 @@ async function fetchLanguagesForSelect(selectElement) {
             for (const [langCode, langData] of Object.entries(data.languages)) {
                 const option = document.createElement('option');
                 option.value = langCode;
-                option.textContent = langData.name + (langData.flag ? ' ' + langData.flag : '');
+                option.textContent = (langData.flag ? ' ' + langData.flag : '') + langData.name;
                 selectElement.appendChild(option);
             }
         }
