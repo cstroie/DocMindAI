@@ -160,12 +160,36 @@ function getCategoryIcon(category) {
 
 async function loadProfileForm(profileId) {
     try {
-        const response = await fetch(`docmind.php?action=get_form&profile=${profileId}`);
-        const formConfig = await response.json();
+        // Clear the page
+        document.getElementById('profilesGrid').style.display = 'none';
 
-        if (formConfig.error) {
-            showError(formConfig.error);
+        // Load profiles data directly from JSON file
+        const response = await fetch('profiles.json');
+        const data = await response.json();
+
+        if (data.error) {
+            showError(data.error);
             return;
+        }
+
+        // Get the selected profile
+        const profile = data.profiles[profileId];
+
+        if (!profile) {
+            showError('Profile not found');
+            return;
+        }
+
+        // Use the form configuration from profiles.json
+        const formConfig = profile.form;
+
+        // Update language field if present
+        if (formConfig.fields) {
+            formConfig.fields.forEach(field => {
+                if (field.name === 'language' && field.type === 'hidden') {
+                    field.value = 'en';
+                }
+            });
         }
 
         displayForm(formConfig, profileId, profile.name, profile.description);
