@@ -102,43 +102,63 @@ async function loadProfiles() {
 /**
  * Display profiles grouped by category in the UI
  *
- * @param {Array} profiles - Array of profile objects containing id, name, description, category, and icon
  * @returns {void}
  */
-function displayProfiles(profiles) {
+function displayProfiles() {
     const profilesGrid = document.getElementById('profilesGrid');
     const profileSelect = document.getElementById('profileSelect');
     profilesGrid.innerHTML = '';
+
+    // Check if profilesData is available
+    if (!profilesData || !profilesData.profiles) {
+        showError('No profiles data available');
+        return;
+    }
+
     // Group profiles by category
     const categories = {};
-    profiles.forEach(profile => {
-        if (!categories[profile.category]) {
-            categories[profile.category] = [];
+    for (const [profile_id, profile_data] of Object.entries(profilesData.profiles)) {
+        const category = profile_data.category;
+        if (!categories[category]) {
+            categories[category] = [];
         }
-        categories[profile.category].push(profile);
-    });
+        categories[category].push({
+            'id': profile_id,
+            'name': profile_data.name,
+            'description': profile_data.description,
+            'icon': profile_data.icon
+        });
+    }
+
     // Display each category
     for (const [category, categoryProfiles] of Object.entries(categories)) {
         const categoryDiv = document.createElement('section');
         categoryDiv.className = 'category-section category-' + category;
+
         // Get category info from categories.json
         const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
+
         // Create category header
         const categoryHeader = document.createElement('hgroup');
+
         // Add category title with icon
         const categoryTitle = document.createElement('h2');
         categoryTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category);
         categoryHeader.appendChild(categoryTitle);
+
         // Add category description if available
         if (categoryInfo && categoryInfo.description) {
             const categoryDescription = document.createElement('p');
             categoryDescription.textContent = categoryInfo.description;
             categoryHeader.appendChild(categoryDescription);
         }
+
         // Append header to category div
         categoryDiv.appendChild(categoryHeader);
+
         // Create grid for profiles
         const grid = document.createElement('main');
+
         // Add profiles to the grid
         categoryProfiles.forEach(profile => {
             const profileCard = document.createElement('a');
@@ -148,15 +168,18 @@ function displayProfiles(profiles) {
                 e.preventDefault();
                 loadProfileForm(profile.id);
             };
+
             // Add profile icon, name, and description
             profileCard.innerHTML = `
                 <div class="tool-icon">${profile.icon || '📄'}</div>
                 <h3>${profile.name}</h3>
                 <p>${profile.description}</p>
             `;
+
             // Append profile card to grid
             grid.appendChild(profileCard);
         });
+
         // Append grid to category div
         categoryDiv.appendChild(grid);
         profilesGrid.appendChild(categoryDiv);
