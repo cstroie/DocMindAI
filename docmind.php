@@ -72,9 +72,12 @@ function handleApiRequest() {
  * Handle get_models action
  */
 function handleGetModels() {
-    $api_endpoint = $_REQUEST['api_endpoint'] ?? '';
-    $api_key = $_REQUEST['api_key'] ?? '';
-    $filter = $_REQUEST['filter'] ?? '';
+    global $LLM_API_ENDPOINT, $LLM_API_KEY, $LLM_API_FILTER;
+
+    // Use configured values if not provided in request
+    $api_endpoint = $_REQUEST['api_endpoint'] ?? $LLM_API_ENDPOINT;
+    $api_key = $_REQUEST['api_key'] ?? $LLM_API_KEY;
+    $filter = $_REQUEST['filter'] ?? $LLM_API_FILTER;
 
     // Validate required parameters
     if (empty($api_endpoint)) {
@@ -85,8 +88,15 @@ function handleGetModels() {
 
     // Check if models contain an error
     if (isset($models['error'])) {
-        sendJsonResponse(['error' => $models['error']], true);
+        // If API call fails, use default models
+        $models = [
+            'gemma3:1b' => 'Gemma 3 (1B)',
+            'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)'
+        ];
     }
+
+    // Sort models alphabetically by key (model name)
+    ksort($models);
 
     sendJsonResponse(['models' => $models], true);
 }
