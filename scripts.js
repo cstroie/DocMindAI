@@ -249,6 +249,7 @@ async function loadProfileForm(profileId) {
             });
         }
 
+        // Display the form
         displayForm(formConfig, profileId, profile.name, profile.description);
     } catch (error) {
         showError('Failed to load form: ' + error.message);
@@ -532,6 +533,7 @@ function showError(message) {
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
 
+    // Display error message
     resultsContent.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
     resultsArea.style.display = 'block';
 
