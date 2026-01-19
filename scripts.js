@@ -30,12 +30,11 @@ function escapeHtml(text) {
  *
  * @param {string} text - Text to analyze
  * @param {string} [defaultType='text'] - Default type when no fence is found
- * @returns {Object} Object with 'type', 'function', and 'text' keys
+ * @returns {Object} Object with 'type' and 'text' keys
  */
 function extractCodeFenceInfo(text, defaultType = 'text') {
     const result = {
         type: '',
-        function: '',
         text: text
     };
 
@@ -43,16 +42,16 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
     const fenceRegex = /^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s;
     const matches = text.match(fenceRegex);
 
+    // If a code fence is found, extract type and inner text
     if (matches) {
         result.type = matches[1] ? matches[1].toLowerCase() : '';
         result.text = matches[2];
-        result.function = getHighlightFunction(result.type);
     } else {
         // Set default type if no fence found
         result.type = defaultType;
-        result.function = getHighlightFunction(defaultType);
     }
-
+    
+    // Return the result
     return result;
 }
 
