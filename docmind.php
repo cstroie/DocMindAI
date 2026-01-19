@@ -16,6 +16,9 @@ if (file_exists('config.php')) {
     include 'config.php';
 }
 
+// Create chat endpoint URL
+$LLM_API_ENDPOINT_CHAT = $LLM_API_ENDPOINT . '/chat/completions';
+
 // Determine if this is an API request
 $is_api_request = isset($_GET['action']) || isset($_POST['action']) ||
                  (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
