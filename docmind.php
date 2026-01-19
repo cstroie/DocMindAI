@@ -234,6 +234,11 @@ function displayWebInterface() {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>DocMind AI - Unified Gateway</title>
+        <script src="script.js"></script>
+        <script src="highlight.min.js"></script>
+        <script src="profiles.json"></script>
+        <script src="categories.json"></script>
+        <script src="languages.json"></script>
         <link rel="stylesheet" href="style.css">
         <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A5%3C/text%3E%3C/svg%3E">
     </head>
@@ -274,8 +279,7 @@ function displayWebInterface() {
             </main>
         </div>
 
-        <script src="script.js"></script>
-        <script src="script.js"></script>
+
     </body>
     </html>
     <?php
