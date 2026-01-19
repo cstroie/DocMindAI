@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocMind AI - Unified Gateway</title>
+    <script src="script.js"></script>
+    <script src="highlight.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A5%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+    <div class="container">
+        <hgroup>
+            <h1>🏥 DocMind AI - Unified Gateway</h1>
+            <p>A central hub for all AI document processing tools</p>
+        </hgroup>
+
+        <div class="config-notice">
+            <?php echo checkConfigStatus(); ?>
+        </div>
+
+        <main>
+            <section class="profile-selector">
+                <h2>Available Profiles</h2>
+                <div class="profile-select-container">
+                    <label for="profileSelect">Select a Profile:</label>
+                    <select id="profileSelect" class="form-control">
+                        <option value="">-- Select a profile --</option>
+                        <!-- Will be populated by JavaScript -->
+                    </select>
+                </div>
+                <div class="tools-grid" id="profilesGrid">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <section class="profile-form" id="profileForm" style="display: none;">
+                <h2 id="formTitle">Profile Form</h2>
+                <form id="apiForm">
+                    <input type="hidden" name="action" id="actionInput">
+                    <div id="formFields">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
+                </form>
+            </section>
+
+            <section class="results-area" id="resultsArea" style="display: none;">
+                <h2>Results</h2>
+                <div id="resultsContent"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Error Template -->
+    <template id="errorTemplate">
+        <section role="alert" class="error">
+            <strong>⚠️ Error:</strong>
+            <div class="error-message"></div>
+        </section>
+    </template>
+
+    <!-- Loading Template -->
+    <template id="loadingTemplate">
+        <div class="loading-indicator">
+            <span class="loading"></span>
+            <span class="loading-text">Processing...</span>
+        </div>
+    </template>
+
+    <!-- Profile Card Template -->
+    <template id="profileCardTemplate">
+        <a class="tool-card" href="#">
+            <div class="tool-icon"></div>
+            <h3></h3>
+            <p></p>
+        </a>
+    </template>
+
+    <!-- Form Field Template -->
+    <template id="formFieldTemplate">
+        <div class="form-field">
+            <label></label>
+            <div class="field-input"></div>
+        </div>
+    </template>
+
+    <!-- Result Template -->
+    <template id="resultTemplate">
+        <article>
+            <header>
+                <h2>Results</h2>
+            </header>
+            <div class="result-content"></div>
+        </article>
+    </template>
+
+</body>
+</html>
