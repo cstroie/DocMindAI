@@ -69,7 +69,12 @@ function handleApiRequest() {
             handleGetProfiles();
             break;
         default:
-            sendJsonResponse(['error' => 'Unhandled action'], true);
+            // Handle profile-specific actions
+            if (in_array($action, array_keys($profiles_data['profiles'] ?? []))) {
+                handleProfileAction($action);
+            } else {
+                sendJsonResponse(['error' => 'Unhandled action'], true);
+            }
             break;
     }
 }
@@ -188,6 +193,150 @@ function handleGetProfiles() {
     }
 
     sendJsonResponse(['profiles' => $profiles], true);
+}
+
+/**
+ * Handle profile-specific actions
+ */
+function handleProfileAction($profile_id) {
+    global $LLM_API_ENDPOINT_CHAT, $LLM_API_KEY;
+
+    // Validate required parameters
+    if (empty($LLM_API_ENDPOINT_CHAT)) {
+        sendJsonResponse(['error' => 'API endpoint not configured'], true);
+    }
+
+    // Load profile configuration
+    $profiles_data = loadProfilesFromJson();
+    if (isset($profiles_data['error'])) {
+        sendJsonResponse(['error' => $profiles_data['error']], true);
+    }
+
+    if (!isset($profiles_data['profiles'][$profile_id])) {
+        sendJsonResponse(['error' => 'Invalid profile'], true);
+    }
+
+    $profile = $profiles_data['profiles'][$profile_id];
+
+    // Get form data
+    $form_data = $_POST;
+
+    // Validate required fields
+    $required_fields = [];
+    foreach ($profile['form']['fields'] as $field) {
+        if (isset($field['required']) && $field['required'] && !isset($form_data[$field['name']])) {
+            $required_fields[] = $field['name'];
+        }
+    }
+
+    if (!empty($required_fields)) {
+        sendJsonResponse(['error' => 'Missing required fields: ' . implode(', ', $required_fields)], true);
+    }
+
+    // Build the prompt based on profile type
+    $prompt = buildProfilePrompt($profile_id, $form_data);
+
+    // Prepare API request data
+    $api_data = [
+        'model' => $form_data['model'] ?? '',
+        'messages' => [
+            [
+                'role' => 'user',
+                'content' => $prompt
+            ]
+        ],
+        'stream' => false
+    ];
+
+    // Add language instruction if available
+    $language = $form_data['language'] ?? 'en';
+    $language_instruction = getLanguageInstruction($language);
+    if (!empty($language_instruction)) {
+        $api_data['messages'][0]['content'] = $language_instruction . "\n\n" . $api_data['messages'][0]['content'];
+    }
+
+    // Call LLM API
+    $response = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY);
+
+    if (isset($response['error'])) {
+        sendJsonResponse(['error' => 'API error: ' . $response['error']], true);
+    }
+
+    // Process and return the response
+    $result = processProfileResponse($profile_id, $response);
+
+    sendJsonResponse($result, true);
+}
+
+/**
+ * Build prompt based on profile type
+ */
+function buildProfilePrompt($profile_id, $form_data) {
+    switch ($profile_id) {
+        case 'rra':
+            // Radiology Report Analyzer
+            $report_text = $form_data['report_text'] ?? '';
+            return "Analyze the following radiology report and extract key medical information:\n\n" .
+                   "Report: " . $report_text . "\n\n" .
+                   "Provide a structured analysis with findings, impressions, and recommendations.";
+
+        case 'sde':
+            // Structured Data Extractor
+            $text = $form_data['text'] ?? '';
+            $schema = $form_data['schema'] ?? '';
+            $prompt = "Extract structured data from the following text:\n\n" .
+                      "Text: " . $text . "\n\n";
+
+            if (!empty($schema)) {
+                $prompt .= "Use this schema: " . $schema . "\n\n";
+            }
+
+            $prompt .= "Return the extracted data in JSON format.";
+            return $prompt;
+
+        case 'exp':
+            // Experiment Tool
+            $prompt_text = $form_data['prompt'] ?? '';
+            return $prompt_text;
+
+        default:
+            return "Analyze the following input: " . json_encode($form_data);
+    }
+}
+
+/**
+ * Process profile response
+ */
+function processProfileResponse($profile_id, $api_response) {
+    $result = [
+        'profile' => $profile_id,
+        'response' => $api_response
+    ];
+
+    // Add profile-specific processing if needed
+    switch ($profile_id) {
+        case 'rra':
+            // For radiology reports, try to extract JSON if present
+            $content = $api_response['choices'][0]['message']['content'] ?? '';
+            $json_data = extractJsonFromResponse($content);
+
+            if ($json_data) {
+                $result['structured_data'] = $json_data;
+            }
+            break;
+
+        case 'sde':
+            // For structured data extraction, try to extract JSON
+            $content = $api_response['choices'][0]['message']['content'] ?? '';
+            $json_data = extractJsonFromResponse($content);
+
+            if ($json_data) {
+                $result['extracted_data'] = $json_data;
+            }
+            break;
+    }
+
+    return $result;
 }
 
 /**
