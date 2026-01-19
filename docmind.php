@@ -40,9 +40,9 @@ function handleApiRequest() {
     $method = $_SERVER['REQUEST_METHOD'];
 
     // Validate action
+    // FIXME append the list dynamically from profiles.json
     $valid_actions = [
-        'get_models', 'get_form', 'get_prompts', 'get_actions',
-        'rra', 'sde', 'exp', 'soap', 'rdd', 'dpa', 'pec', 'ocr', 'wpc', 'wps', 'stp', 'sml'
+        'get_models', 'get_form', 'get_prompts', 'get_profiles',
     ];
 
     if (!in_array($action, $valid_actions)) {
@@ -60,11 +60,12 @@ function handleApiRequest() {
         case 'get_prompts':
             handleGetPrompts();
             break;
-        case 'get_actions':
-            handleGetActions();
+        case 'get_profiles':
+            handleGetProfiles();
             break;
         default:
-            handleToolAction($action);
+            sendJsonResponse(['error' => 'Unhandled action'], true);
+            break;
     }
 }
 
@@ -104,45 +105,45 @@ function handleGetModels() {
 /**
  * Load profiles from JSON file
  */
-function loadActionsFromJson() {
-    $actions_file = 'profiles.json';
+function loadProfilesFromJson() {
+    $profiles_file = 'profiles.json';
 
     // Check if profiles file exists
-    if (!file_exists($actions_file)) {
+    if (!file_exists($profiles_file)) {
         return ['error' => 'Profiles configuration file not found'];
     }
 
     // Read and decode JSON file
-    $json_content = file_get_contents($actions_file);
+    $json_content = file_get_contents($profiles_file);
     if ($json_content === false) {
         return ['error' => 'Failed to read profiles configuration file'];
     }
 
-    $actions_data = json_decode($json_content, true);
+    $profiles_data = json_decode($json_content, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         return ['error' => 'Invalid JSON format in profiles configuration: ' . json_last_error_msg()];
     }
 
-    return $actions_data;
+    return $profiles_data;
 }
 
 /**
  * Handle get_form action
  */
 function handleGetForm() {
-    $action = $_REQUEST['for_action'] ?? '';
+    $profile = $_REQUEST['profile'] ?? '';
     $language = $_REQUEST['language'] ?? 'en';
 
-    // Load actions from JSON
-    $actions_data = loadActionsFromJson();
+    // Load profiles from JSON
+    $profiles_data = loadProfilesFromJson();
 
-    if (isset($actions_data['error'])) {
-        sendJsonResponse(['error' => $actions_data['error']], true);
+    if (isset($profiles_data['error'])) {
+        sendJsonResponse(['error' => $profiles_data['error']], true);
     }
 
-    // Get form configuration for the requested action
-    if (isset($actions_data['actions'][$action]['form'])) {
-        $form_config = $actions_data['actions'][$action]['form'];
+    // Get form configuration for the requested profile
+    if (isset($profiles_data['profiles'][$profile]['form'])) {
+        $form_config = $profiles_data['profiles'][$profile]['form'];
 
         // Update language field if present
         if (isset($form_config['fields'])) {
@@ -155,33 +156,33 @@ function handleGetForm() {
 
         sendJsonResponse($form_config, true);
     } else {
-        sendJsonResponse(['error' => 'Unknown action or no form configuration available'], true);
+        sendJsonResponse(['error' => 'Unknown profile or no form configuration available'], true);
     }
 }
 
 /**
- * Handle get_actions action
+ * Handle get_profiles action
  */
-function handleGetActions() {
-    // Load actions from JSON
-    $actions_data = loadActionsFromJson();
+function handleGetProfiles() {
+    // Load profiles from JSON
+    $profiles_data = loadProfilesFromJson();
 
-    if (isset($actions_data['error'])) {
-        sendJsonResponse(['error' => $actions_data['error']], true);
+    if (isset($profiles_data['error'])) {
+        sendJsonResponse(['error' => $profiles_data['error']], true);
     }
 
-    // Extract just the action metadata (id, name, description, category)
-    $actions = [];
-    foreach ($actions_data['actions'] as $action_id => $action_data) {
-        $actions[] = [
-            'id' => $action_id,
-            'name' => $action_data['name'],
-            'description' => $action_data['description'],
-            'category' => $action_data['category']
+    // Extract just the profile metadata (id, name, description, category)
+    $profiles = [];
+    foreach ($profiles_data['profiles'] as $profile_id => $profile_data) {
+        $profiles[] = [
+            'id' => $profile_id,
+            'name' => $profile_data['name'],
+            'description' => $profile_data['description'],
+            'category' => $profile_data['category']
         ];
     }
 
-    sendJsonResponse(['actions' => $actions], true);
+    sendJsonResponse(['profiles' => $profiles], true);
 }
 
 /**
@@ -223,27 +224,6 @@ function handleGetPrompts() {
 }
 
 /**
- * Handle tool actions
- */
-function handleToolAction($action) {
-    // Include the specific tool file
-    $tool_file = "$action.php";
-    if (!file_exists($tool_file)) {
-        sendJsonResponse(['error' => 'Tool not found'], true);
-    }
-
-    include $tool_file;
-
-    // Call the appropriate function based on the action
-    $handler_function = "handle${action}Action";
-    if (function_exists($handler_function)) {
-        $handler_function();
-    } else {
-        sendJsonResponse(['error' => 'No handler for this action'], true);
-    }
-}
-
-/**
  * Display web interface
  */
 function displayWebInterface() {
@@ -269,17 +249,17 @@ function displayWebInterface() {
             </div>
 
             <main>
-                <div class="action-selector">
-                    <h2>Available Actions</h2>
-                    <div class="tools-grid" id="actionsGrid">
+                <div class="profile-selector">
+                    <h2>Available Profiles</h2>
+                    <div class="tools-grid" id="profilesGrid">
                         <!-- Will be populated by JavaScript -->
                     </div>
                 </div>
 
-                <div class="action-form" id="actionForm" style="display: none;">
-                    <h2 id="formTitle">Action Form</h2>
+                <div class="profile-form" id="profileForm" style="display: none;">
+                    <h2 id="formTitle">Profile Form</h2>
                     <form id="apiForm">
-                        <input type="hidden" name="action" id="actionInput">
+                        <input type="hidden" name="profile" id="profileInput">
                         <div id="formFields">
                             <!-- Will be populated by JavaScript -->
                         </div>
@@ -298,16 +278,16 @@ function displayWebInterface() {
         <script>
             // DocMind-specific JavaScript
             document.addEventListener('DOMContentLoaded', function() {
-                // Load available actions
-                loadActions();
+                // Load available profiles
+                loadProfiles();
 
                 // Set up form submission
                 document.getElementById('apiForm')?.addEventListener('submit', handleFormSubmit);
             });
 
-            async function loadActions() {
+            async function loadProfiles() {
                 try {
-                    const response = await fetch('docmind.php?action=get_actions');
+                    const response = await fetch('docmind.php?action=get_profiles');
                     const data = await response.json();
 
                     if (data.error) {
@@ -315,27 +295,27 @@ function displayWebInterface() {
                         return;
                     }
 
-                    displayActions(data.actions);
+                    displayProfiles(data.profiles);
                 } catch (error) {
-                    showError('Failed to load actions: ' + error.message);
+                    showError('Failed to load profiles: ' + error.message);
                 }
             }
 
-            function displayActions(actions) {
-                const actionsGrid = document.getElementById('actionsGrid');
-                actionsGrid.innerHTML = '';
+            function displayProfiles(profiles) {
+                const profilesGrid = document.getElementById('profilesGrid');
+                profilesGrid.innerHTML = '';
 
-                // Group actions by category
+                // Group profiles by category
                 const categories = {};
-                actions.forEach(action => {
-                    if (!categories[action.category]) {
-                        categories[action.category] = [];
+                profiles.forEach(profile => {
+                    if (!categories[profile.category]) {
+                        categories[profile.category] = [];
                     }
-                    categories[action.category].push(action);
+                    categories[profile.category].push(profile);
                 });
 
                 // Display each category
-                for (const [category, categoryActions] of Object.entries(categories)) {
+                for (const [category, categoryProfiles] of Object.entries(categories)) {
                     const categoryDiv = document.createElement('div');
                     categoryDiv.className = 'tool-section';
 
@@ -346,26 +326,26 @@ function displayWebInterface() {
                     const grid = document.createElement('div');
                     grid.className = 'tools-grid';
 
-                    categoryActions.forEach(action => {
-                        const actionCard = document.createElement('a');
-                        actionCard.className = 'tool-card';
-                        actionCard.href = '#';
-                        actionCard.onclick = (e) => {
+                    categoryProfiles.forEach(profile => {
+                        const profileCard = document.createElement('a');
+                        profileCard.className = 'tool-card';
+                        profileCard.href = '#';
+                        profileCard.onclick = (e) => {
                             e.preventDefault();
-                            loadActionForm(action.id);
+                            loadProfileForm(profile.id);
                         };
 
-                        actionCard.innerHTML = `
+                        profileCard.innerHTML = `
                             <div class="tool-icon">📄</div>
-                            <h3>${action.name}</h3>
-                            <p>${action.description}</p>
+                            <h3>${profile.name}</h3>
+                            <p>${profile.description}</p>
                         `;
 
-                        grid.appendChild(actionCard);
+                        grid.appendChild(profileCard);
                     });
 
                     categoryDiv.appendChild(grid);
-                    actionsGrid.appendChild(categoryDiv);
+                    profilesGrid.appendChild(categoryDiv);
                 }
             }
 
@@ -379,9 +359,9 @@ function displayWebInterface() {
                 return icons[category] || '📋';
             }
 
-            async function loadActionForm(actionId) {
+            async function loadProfileForm(profileId) {
                 try {
-                    const response = await fetch(`docmind.php?action=get_form&for_action=${actionId}`);
+                    const response = await fetch(`docmind.php?action=get_form&profile=${profileId}`);
                     const formConfig = await response.json();
 
                     if (formConfig.error) {
@@ -389,27 +369,26 @@ function displayWebInterface() {
                         return;
                     }
 
-                    displayForm(formConfig, actionId, action.name, action.description);
+                    displayForm(formConfig, profileId, profile.name, profile.description);
                 } catch (error) {
                     showError('Failed to load form: ' + error.message);
                 }
             }
 
-            function displayForm(formConfig, actionId, actionName, actionDescription) {
-                const actionForm = document.getElementById('actionForm');
+            function displayForm(formConfig, profileId, profileName, profileDescription) {
+                const profileForm = document.getElementById('profileForm');
                 const formTitle = document.getElementById('formTitle');
                 const formFields = document.getElementById('formFields');
-                const actionInput = document.getElementById('actionInput');
-
-                formTitle.textContent = actionName;
-                actionInput.value = actionId;
+                const profileInput = document.getElementById('profileInput');
+                formTitle.textContent = profileName;
+                profileInput.value = profileId;
                 formFields.innerHTML = '';
 
                 // Add description if available
-                if (actionDescription) {
+                if (profileDescription) {
                     const descriptionElement = document.createElement('p');
                     descriptionElement.className = 'form-description';
-                    descriptionElement.textContent = actionDescription;
+                    descriptionElement.textContent = profileDescription;
                     formFields.insertBefore(descriptionElement, formFields.firstChild);
                 }
 
@@ -418,11 +397,11 @@ function displayWebInterface() {
                     formFields.appendChild(fieldElement);
                 });
 
-                actionForm.style.display = 'block';
+                profileForm.style.display = 'block';
                 document.getElementById('resultsArea').style.display = 'none';
 
                 // Scroll to form
-                actionForm.scrollIntoView({ behavior: 'smooth' });
+                profileForm.scrollIntoView({ behavior: 'smooth' });
             }
 
             function createFormField(field) {
@@ -485,7 +464,7 @@ function displayWebInterface() {
 
                 const form = event.target;
                 const formData = new FormData(form);
-                const action = formData.get('action');
+                const profile = formData.get('profile');
                 const submitBtn = document.getElementById('submitBtn');
 
                 // Show loading state
