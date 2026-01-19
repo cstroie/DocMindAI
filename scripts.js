@@ -30,14 +30,15 @@ function escapeHtml(text) {
  */
 async function loadCategories() {
     try {
+        // Load categories data directly from JSON file
         const response = await fetch('categories.json');
         const data = await response.json();
-
+        // Check for errors
         if (data.error) {
             console.error('Failed to load categories:', data.error);
             return null;
         }
-
+        // Return categories object
         return data.categories;
     } catch (error) {
         console.error('Failed to load categories:', error.message);
