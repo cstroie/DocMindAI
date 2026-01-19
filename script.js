@@ -156,12 +156,30 @@ function displayProfiles(profiles) {
 function populateProfileSelect(profiles, profileSelect) {
     // Populate the select dropdown
     profileSelect.innerHTML = '<option value="">-- Select a profile --</option>';
+
+    // Group profiles by category
+    const categories = {};
     profiles.forEach(profile => {
-        const option = document.createElement('option');
-        option.value = profile.id;
-        option.textContent = `${profile.name} (${profile.category})`;
-        profileSelect.appendChild(option);
+        if (!categories[profile.category]) {
+            categories[profile.category] = [];
+        }
+        categories[profile.category].push(profile);
     });
+
+    // Add optgroups for each category
+    for (const [category, categoryProfiles] of Object.entries(categories)) {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = category;
+
+        categoryProfiles.forEach(profile => {
+            const option = document.createElement('option');
+            option.value = profile.id;
+            option.textContent = profile.name;
+            optgroup.appendChild(option);
+        });
+
+        profileSelect.appendChild(optgroup);
+    }
 }
 
 function getCategoryIcon(category) {
