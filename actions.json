@@ -1,0 +1,100 @@
+{
+  "actions": {
+    "rra": {
+      "id": "rra",
+      "name": "Radiology Report Analyzer",
+      "description": "Analyze radiology reports and extract key medical information",
+      "category": "Medical",
+      "form": {
+        "title": "Radiology Report Analyzer",
+        "description": "Analyze radiology reports and extract key medical information",
+        "fields": [
+          {
+            "name": "report_text",
+            "type": "textarea",
+            "label": "Radiology Report",
+            "required": true
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "hidden",
+            "value": "en"
+          }
+        ]
+      }
+    },
+    "sde": {
+      "id": "sde",
+      "name": "Structured Data Extractor",
+      "description": "Extract structured data from unstructured text",
+      "category": "General",
+      "form": {
+        "title": "Structured Data Extractor",
+        "description": "Extract structured data from unstructured text",
+        "fields": [
+          {
+            "name": "text",
+            "type": "textarea",
+            "label": "Input Text",
+            "required": true
+          },
+          {
+            "name": "schema",
+            "type": "text",
+            "label": "Data Schema (optional)",
+            "required": false
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          }
+        ]
+      }
+    },
+    "exp": {
+      "id": "exp",
+      "name": "Experiment Tool",
+      "description": "Test AI models with predefined prompts",
+      "category": "Development",
+      "form": {
+        "title": "Experiment Tool",
+        "description": "Test AI models with predefined prompts",
+        "fields": [
+          {
+            "name": "prompt",
+            "type": "textarea",
+            "label": "Prompt Text",
+            "required": true
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "options": [
+              {"value": "ro", "label": "Română"},
+              {"value": "en", "label": "English"},
+              {"value": "es", "label": "Español"},
+              {"value": "fr", "label": "Français"},
+              {"value": "de", "label": "Deutsch"},
+              {"value": "it", "label": "Italiano"}
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
