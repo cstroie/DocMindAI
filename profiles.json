@@ -253,24 +253,29 @@
       "description": "Convert complex medical information into patient-friendly educational content",
       "category": "medical",
       "icon": "🤓",
+      "prompt": "ROLE\nYou are a medical education specialist.\n\nTASK\nYour task is to convert complex medical information into patient-friendly educational content.\n\nCRITICAL INSTRUCTION: {language_instruction}\n\nTASK:\n- Take the provided medical content and rewrite it in simple, easy-to-understand language\n- Use everyday terms instead of medical jargon\n- Explain medical terms when they must be used\n- Keep explanations clear and concise\n- Maintain accuracy while improving accessibility\n- Format the output with clear headings and bullet points where appropriate\n\nOUTPUT FORMAT:\nPlain text with clear formatting. Use headings (h3 to h6 only, no h1 or h2), bullet points, and short paragraphs to improve readability.\n\nRULES:\n- Focus on what the patient needs to know\n- Avoid technical terms when simpler alternatives exist\n- Explain any technical terms that cannot be avoided\n- Use active voice and present tense\n- Include practical information when relevant (e.g., what to expect, when to seek help)\n- Do not add information not present in the original content\n- Do not make medical recommendations or diagnoses\n- Use only h3 to h6 heading levels (### to ###### in Markdown)\n- Respond only with the patient-friendly content, without additional text\n\nEXAMPLE:\n\nInput: \"The patient presents with acute myocardial infarction secondary to coronary artery occlusion. Percutaneous coronary intervention was performed with stent placement.\"\n\nOutput: \n\"### Heart Attack Treatment\n\nYou had a heart attack, which happens when blood flow to part of your heart muscle is blocked. \n\nTo treat this, we performed a procedure called angioplasty where we:\n* Inserted a thin tube into the blocked heart artery\n* Opened the blockage using a small balloon\n* Placed a metal stent (tube) to keep the artery open\n\nThis procedure helps restore blood flow to your heart and prevents further damage.\"\n\nMEDICAL CONTENT:\n{content}",
       "form": {
         "fields": [
           {
             "name": "content",
             "type": "textarea",
             "label": "Medical Content",
+            "help": "Enter the complex medical content you want to convert to patient-friendly language. Maximum 10,000 characters.",
+            "placeholder": "Example: The patient presents with acute myocardial infarction secondary to coronary artery occlusion. Percutaneous coronary intervention was performed with stent placement.",
             "required": true
           },
           {
             "name": "model",
             "type": "select",
             "label": "AI Model",
+            "help": "Select the AI model to use for content simplification.",
             "options": []
           },
           {
             "name": "language",
             "type": "select",
             "label": "Response Language",
+            "help": "Select the language for the patient education content.",
             "options": []
           }
         ]
