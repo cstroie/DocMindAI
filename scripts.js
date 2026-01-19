@@ -1,6 +1,7 @@
 
-// Global variable to store categories
+// Global variables to store categories and profiles
 let categoriesData = null;
+let profilesData = null;
 
 /**
  * Apply syntax highlighting using highlight.js
@@ -47,33 +48,52 @@ async function loadCategories() {
 }
 
 /**
- * Load profiles from JSON file and display them in the UI
+ * Load profiles data from JSON file
  *
- * @returns {Promise<void>}
+ * @returns {Promise<Object|null>} Promise resolving to profiles object or null on error
  */
-async function loadProfiles() {
+async function loadProfilesData() {
     try {
         // Load profiles data directly from JSON file
         const response = await fetch('profiles.json');
         const data = await response.json();
         // Check for errors
         if (data.error) {
-            showError(data.error);
-            return;
+            console.error('Failed to load profiles:', data.error);
+            return null;
         }
-        // Extract just the profile metadata (id, name, description, category, icon)
-        const profiles = [];
-        for (const [profile_id, profile_data] of Object.entries(data.profiles)) {
-            profiles.push({
-                'id': profile_id,
-                'name': profile_data.name,
-                'description': profile_data.description,
-                'category': profile_data.category,
-                'icon': profile_data.icon
-            });
+        return data;
+    } catch (error) {
+        console.error('Failed to load profiles:', error.message);
+        return null;
+    }
+}
+
+/**
+ * Load profiles from JSON file and display them in the UI
+ *
+ * @returns {Promise<void>}
+ */
+async function loadProfiles() {
+    try {
+        // Use the global profilesData if available
+        if (profilesData && profilesData.profiles) {
+            // Extract just the profile metadata (id, name, description, category, icon)
+            const profiles = [];
+            for (const [profile_id, profile_data] of Object.entries(profilesData.profiles)) {
+                profiles.push({
+                    'id': profile_id,
+                    'name': profile_data.name,
+                    'description': profile_data.description,
+                    'category': profile_data.category,
+                    'icon': profile_data.icon
+                });
+            }
+            // Display profiles in the UI
+            displayProfiles(profiles);
+        } else {
+            showError('No profiles data available');
         }
-        // Display profiles in the UI
-        displayProfiles(profiles);
     } catch (error) {
         showError('Failed to load profiles: ' + error.message);
     }
@@ -189,17 +209,14 @@ async function loadProfileForm(profileId) {
     try {
         // Clear the page
         document.getElementById('profilesGrid').style.display = 'none';
-        // Load profiles data directly from JSON file
-        const response = await fetch('profiles.json');
-        const data = await response.json();
-
-        if (data.error) {
-            showError(data.error);
+        // Use the global profilesData if available
+        if (!profilesData || !profilesData.profiles) {
+            showError('No profiles data available');
             return;
         }
 
         // Get the selected profile
-        const profile = data.profiles[profileId];
+        const profile = profilesData.profiles[profileId];
 
         if (!profile) {
             showError('Profile not found');
@@ -525,6 +542,8 @@ function showError(message) {
 document.addEventListener('DOMContentLoaded', async function() {
     // Load categories data
     categoriesData = await loadCategories();
+    // Load profiles data
+    profilesData = await loadProfilesData();
     // Load available profiles
     loadProfiles();
     // Set up form submission
