@@ -248,27 +248,26 @@ async function loadProfileForm(profileId) {
  * @returns {void}
  */
 function displayProfileForm(formConfig, profileId, profileName, profileDescription) {
+    // Update top title and description
+    const topTitle = document.getElementById('topTitle');
+    const topDescription = document.getElementById('topDescription');
+    topTitle.textContent = profileName;
+    topDescription.textContent = profileDescription || '';
+
+    // Populate the form fields
     const profileForm = document.getElementById('profileForm');
-    const formTitle = document.getElementById('formTitle');
     const formFields = document.getElementById('formFields');
     const actionInput = document.getElementById('actionInput');
-    formTitle.textContent = profileName;
     actionInput.value = profileId;
     formFields.innerHTML = '';
 
-    // Add description if available
-    if (profileDescription) {
-        const descriptionElement = document.createElement('p');
-        descriptionElement.className = 'form-description';
-        descriptionElement.textContent = profileDescription;
-        formFields.insertBefore(descriptionElement, formFields.firstChild);
-    }
-
+    // Create form fields based on formConfig
     formConfig.fields.forEach(field => {
         const fieldElement = createFormField(field);
         formFields.appendChild(fieldElement);
     });
 
+    // Show the form and hide results area
     profileForm.style.display = 'block';
     document.getElementById('resultsArea').style.display = 'none';
 
