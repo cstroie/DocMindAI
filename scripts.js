@@ -93,7 +93,6 @@ function displayProfiles(profiles) {
     const profilesGrid = document.getElementById('profilesGrid');
     const profileSelect = document.getElementById('profileSelect');
     profilesGrid.innerHTML = '';
-
     // Group profiles by category
     const categories = {};
     profiles.forEach(profile => {
@@ -102,7 +101,6 @@ function displayProfiles(profiles) {
         }
         categories[profile.category].push(profile);
     });
-
     // Display each category
     for (const [category, categoryProfiles] of Object.entries(categories)) {
         const categoryDiv = document.createElement('section');
