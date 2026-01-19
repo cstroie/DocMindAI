@@ -275,6 +275,18 @@ function displayProfileForm(formConfig, profileId, profileName, profileDescripti
     profileForm.scrollIntoView({ behavior: 'smooth' });
 }
 
+/**
+ * Create a form field element based on field configuration
+ *
+ * @param {Object} field - The field configuration object
+ * @param {string} field.name - The name attribute for the field
+ * @param {string} field.type - The type of field (textarea, select, hidden, text, etc.)
+ * @param {string} [field.label] - The label text for the field
+ * @param {boolean} [field.required] - Whether the field is required
+ * @param {Array} [field.options] - Options for select fields
+ * @param {string} [field.value] - Default value for the field
+ * @returns {HTMLElement} The created form field element
+ */
 function createFormField(field) {
     const container = document.createElement('div');
     container.className = 'form-field';
