@@ -121,7 +121,6 @@ function displayProfiles(profiles) {
         const grid = document.createElement('main');
         // Add profiles to the grid
         categoryProfiles.forEach(profile => {
-            console.log('Adding profile:', profile);
             const profileCard = document.createElement('a');
             profileCard.className = 'tool-card';
             profileCard.href = '#';
@@ -208,18 +207,8 @@ async function loadProfileForm(profileId) {
         }
 
         // Show and populate the profile select dropdown with all profiles
-        const profiles = [];
-        for (const [id, profileData] of Object.entries(data.profiles)) {
-            profiles.push({
-                'id': id,
-                'name': profileData.name,
-                'category': profileData.category,
-                'icon': profileData.icon
-            });
-        }
-        const profileSelect = document.getElementById('profileSelect');
         profileSelect.style.display = 'block';
-        populateProfileSelect(profiles, profileSelect);
+        populateProfileSelect(data.profiles, profileSelect);
 
         // Use the form configuration from profiles.json
         const formConfig = profile.form;
