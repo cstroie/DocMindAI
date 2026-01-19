@@ -213,18 +213,17 @@ async function loadProfileForm(profileId) {
             showError('Profile not found');
             return;
         }
+        // Set the profile ID in the profile object
+        profile.id = profileId;
 
         // Show and populate the profile select dropdown with all profiles
         const profileSelect = document.getElementById('profileSelect');
         profileSelect.style.display = 'block';
         populateProfileSelect(profileSelect);
 
-        // Use the form configuration from profiles.json
-        const formConfig = profile.form;
-
         // Update language field if present
-        if (formConfig.fields) {
-            formConfig.fields.forEach(field => {
+        if (profile.form.fields) {
+            profile.form.fields.forEach(field => {
                 if (field.name === 'language' && field.type === 'hidden') {
                     field.value = 'en';
                 }
@@ -232,7 +231,7 @@ async function loadProfileForm(profileId) {
         }
 
         // Display the form
-        displayProfileForm(formConfig, profileId, profile.name, profile.description);
+        displayProfileForm(profile);
     } catch (error) {
         showError('Failed to load form: ' + error.message);
     }
@@ -247,22 +246,22 @@ async function loadProfileForm(profileId) {
  * @param {string} profileDescription - The description of the profile
  * @returns {void}
  */
-function displayProfileForm(formConfig, profileId, profileName, profileDescription) {
+function displayProfileForm(profile) {
     // Update top title and description
     const topTitle = document.getElementById('topTitle');
     const topDescription = document.getElementById('topDescription');
-    topTitle.textContent = profileName;
-    topDescription.textContent = profileDescription || '';
+    topTitle.textContent = profile.icon + ' ' + profile.name;
+    topDescription.textContent = profile.description || '';
 
     // Populate the form fields
     const profileForm = document.getElementById('profileForm');
     const formFields = document.getElementById('formFields');
     const actionInput = document.getElementById('actionInput');
-    actionInput.value = profileId;
+    actionInput.value = profile.id;
     formFields.innerHTML = '';
 
     // Create form fields based on formConfig
-    formConfig.fields.forEach(field => {
+    profile.form.fields.forEach(field => {
         const fieldElement = createFormField(field);
         formFields.appendChild(fieldElement);
     });
@@ -288,9 +287,11 @@ function displayProfileForm(formConfig, profileId, profileName, profileDescripti
  * @returns {HTMLElement} The created form field element
  */
 function createFormField(field) {
+    // Create container div
     const container = document.createElement('div');
     container.className = 'form-field';
 
+    // Create label if not hidden field
     if (field.type !== 'hidden') {
         const label = document.createElement('label');
         label.textContent = field.label || field.name;
@@ -299,6 +300,7 @@ function createFormField(field) {
     }
 
     let input;
+    // Create input element based on field type
     switch (field.type) {
         case 'textarea':
             input = document.createElement('textarea');
