@@ -180,6 +180,12 @@ function populateProfileSelect(profiles, profileSelect) {
 }
 
 
+/**
+ * Load a profile form based on the selected profile ID
+ *
+ * @param {string} profileId - The ID of the profile to load
+ * @returns {Promise<void>}
+ */
 async function loadProfileForm(profileId) {
     try {
         // Clear the page
