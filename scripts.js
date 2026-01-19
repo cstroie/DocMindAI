@@ -567,16 +567,30 @@ async function handleFormSubmit(event) {
             body: formData
         });
 
-        // Parse JSON response
-        const result = await response.json();
-        // Check for errors
-        if (result.error) {
-            showError(result.error);
-            return;
+        // Check if response is OK
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Display results
-        displayResults(result);
+        // Check if response has JSON content type
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            // Parse JSON response
+            const result = await response.json();
+            // Check for errors
+            if (result.error) {
+                showError(result.error);
+                return;
+            }
+
+            // Display results
+            displayResults(result);
+        } else {
+            // Handle non-JSON response
+            const text = await response.text();
+            showError(`Unexpected response format: ${text}`);
+            return;
+        }
 
         // Set cookies for selected model and language (30 days)
         const model = formData.get('model');
