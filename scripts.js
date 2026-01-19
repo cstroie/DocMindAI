@@ -327,7 +327,7 @@ function createFormField(field) {
                 // Fetch models from API
                 fetchModelsForSelect(input);
             }
-            // If options are empty and field name is 'language', fetch languages from JSON
+            // If options are empty and field name is 'language', use global languagesData
             else if ((!field.options || field.options.length === 0) && field.name === 'language') {
                 // Add a loading option
                 const loadingOption = document.createElement('option');
@@ -335,8 +335,30 @@ function createFormField(field) {
                 loadingOption.textContent = 'Loading languages...';
                 input.appendChild(loadingOption);
 
-                // Fetch languages from JSON
-                fetchLanguagesForSelect(input);
+                // Use global languagesData
+                if (languagesData) {
+                    input.innerHTML = '';
+                    // Add default option
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Select a language';
+                    input.appendChild(defaultOption);
+
+                    // Add languages from global data
+                    for (const [langCode, langData] of Object.entries(languagesData)) {
+                        const option = document.createElement('option');
+                        option.value = langCode;
+                        option.textContent = (langData.flag ? ' ' + langData.flag : '') + langData.name;
+                        input.appendChild(option);
+                    }
+                } else {
+                    console.error('No languages data available');
+                    input.innerHTML = '';
+                    const errorOption = document.createElement('option');
+                    errorOption.value = '';
+                    errorOption.textContent = 'Failed to load languages';
+                    input.appendChild(errorOption);
+                }
             }
             else if (field.options && field.options.length) {
                 field.options.forEach(option => {
