@@ -399,6 +399,7 @@ function createFormField(field) {
 
 /**
  * Fetch models from API and populate select element
+ * TODO : This function is currently not used since models are fetched directly in createFormField
  */
 async function fetchModelsForSelect(selectElement) {
     try {
@@ -447,6 +448,7 @@ async function fetchModelsForSelect(selectElement) {
 
 /**
  * Fetch languages from JSON and populate select element
+ * TODO: This function is currently not used since languagesData is loaded globally
  */
 async function fetchLanguagesForSelect(selectElement) {
     try {
