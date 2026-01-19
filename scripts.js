@@ -26,6 +26,37 @@ function escapeHtml(text) {
 }
 
 /**
+ * Extract code fence information from text
+ *
+ * @param {string} text - Text to analyze
+ * @param {string} [defaultType='text'] - Default type when no fence is found
+ * @returns {Object} Object with 'type', 'function', and 'text' keys
+ */
+function extractCodeFenceInfo(text, defaultType = 'text') {
+    const result = {
+        type: '',
+        function: '',
+        text: text
+    };
+
+    // Regular expression to match markdown code fences
+    const fenceRegex = /^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s;
+    const matches = text.match(fenceRegex);
+
+    if (matches) {
+        result.type = matches[1] ? matches[1].toLowerCase() : '';
+        result.text = matches[2];
+        result.function = getHighlightFunction(result.type);
+    } else {
+        // Set default type if no fence found
+        result.type = defaultType;
+        result.function = getHighlightFunction(defaultType);
+    }
+
+    return result;
+}
+
+/**
  * Load JSON resource from file
  *
  * @param {string} filename - The JSON file to load
