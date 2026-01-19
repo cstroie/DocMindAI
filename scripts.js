@@ -554,14 +554,8 @@ function displayResults(results) {
         responseContent = 'No response content available';
     }
 
-    // Create a new results object with the extracted content
-    const formattedResults = {
-        ...results,
-        response_content: responseContent
-    };
-
     // Format and display results
-    resultsContent.innerHTML = formatResults(formattedResults);
+    resultsContent.innerHTML = formatResults(responseContent);
     resultsArea.style.display = 'block';
     // Apply syntax highlighting
     applySyntaxHighlighting();
@@ -589,7 +583,7 @@ function formatResults(results) {
         return `<pre><code class="json">${JSON.stringify(results, null, 2)}</code></pre>`;
     }
     // Otherwise, escape and return as preformatted text
-    return `<pre>${escapeHtml(results)}</pre>`;
+    return `<pre><code>${escapeHtml(results)}</code></pre>`;
 }
 
 /**

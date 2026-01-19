@@ -6,6 +6,7 @@
     <title>DocMind AI</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A5%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="github.min.css">
     <script src="scripts.js"></script>
     <script src="highlight.min.js"></script>
 </head>
@@ -31,6 +32,11 @@
                 </div>
             </section>
 
+            <section class="results-area" id="resultsArea" style="display: none;">
+                <h2>Results</h2>
+                <div id="resultsContent"></div>
+            </section>
+
             <section class="profile-form" id="profileForm" style="display: none;">
                 <form id="apiForm">
                     <input type="hidden" name="action" id="actionInput">
@@ -39,11 +45,6 @@
                     </fieldset>
                     <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
                 </form>
-            </section>
-
-            <section class="results-area" id="resultsArea" style="display: none;">
-                <h2>Results</h2>
-                <div id="resultsContent"></div>
             </section>
         </main>
     </div>

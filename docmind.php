@@ -325,6 +325,7 @@ function handleProfileAction($profile_id) {
     // Add form data and API data to the response
     $result['form_data'] = $form_data;
     $result['api_data'] = $api_data;
+    $result['prompt'] = $prompt;
 
     sendJsonResponse($result, true);
 }
