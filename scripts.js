@@ -163,7 +163,9 @@ function populateProfileSelect(profiles, profileSelect) {
     // Add optgroups for each category
     for (const [category, categoryProfiles] of Object.entries(categories)) {
         const optgroup = document.createElement('optgroup');
-        optgroup.label = category;
+        // Use category name from categories.json if available
+        const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
+        optgroup.label = categoryInfo ? categoryInfo.name : category;
         // Add profiles as options
         categoryProfiles.forEach(profile => {
             const option = document.createElement('option');
