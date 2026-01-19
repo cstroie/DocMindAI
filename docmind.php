@@ -389,21 +389,29 @@ function displayWebInterface() {
                         return;
                     }
 
-                    displayForm(formConfig, actionId);
+                    displayForm(formConfig, actionId, action.name, action.description);
                 } catch (error) {
                     showError('Failed to load form: ' + error.message);
                 }
             }
 
-            function displayForm(formConfig, actionId) {
+            function displayForm(formConfig, actionId, actionName, actionDescription) {
                 const actionForm = document.getElementById('actionForm');
                 const formTitle = document.getElementById('formTitle');
                 const formFields = document.getElementById('formFields');
                 const actionInput = document.getElementById('actionInput');
 
-                formTitle.textContent = formConfig.title;
+                formTitle.textContent = actionName;
                 actionInput.value = actionId;
                 formFields.innerHTML = '';
+
+                // Add description if available
+                if (actionDescription) {
+                    const descriptionElement = document.createElement('p');
+                    descriptionElement.className = 'form-description';
+                    descriptionElement.textContent = actionDescription;
+                    formFields.insertBefore(descriptionElement, formFields.firstChild);
+                }
 
                 formConfig.fields.forEach(field => {
                     const fieldElement = createFormField(field);
