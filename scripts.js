@@ -213,7 +213,8 @@ async function loadProfileForm(profileId) {
             profiles.push({
                 'id': id,
                 'name': profileData.name,
-                'category': profileData.category
+                'category': profileData.category,
+                'icon': profileData.icon
             });
         }
         const profileSelect = document.getElementById('profileSelect');
