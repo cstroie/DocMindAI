@@ -154,7 +154,6 @@ function displayProfiles(profiles) {
 function populateProfileSelect(profiles, profileSelect) {
     // Populate the select dropdown
     profileSelect.innerHTML = '<option value="">-- Select a profile --</option>';
-
     // Group profiles by category
     const categories = {};
     profiles.forEach(profile => {
@@ -163,12 +162,11 @@ function populateProfileSelect(profiles, profileSelect) {
         }
         categories[profile.category].push(profile);
     });
-
     // Add optgroups for each category
     for (const [category, categoryProfiles] of Object.entries(categories)) {
         const optgroup = document.createElement('optgroup');
         optgroup.label = category;
-
+        // Add profiles as options
         categoryProfiles.forEach(profile => {
             const option = document.createElement('option');
             option.value = profile.id;
@@ -176,7 +174,7 @@ function populateProfileSelect(profiles, profileSelect) {
             option.textContent = `${profile.icon || '📄'} ${profile.name}`;
             optgroup.appendChild(option);
         });
-
+        // Append optgroup to select
         profileSelect.appendChild(optgroup);
     }
 }
