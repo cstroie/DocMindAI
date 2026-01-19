@@ -1,0 +1,34 @@
+{
+  "languages": {
+    "ro": {
+      "name": "Română",
+      "instruction": "Respond in Romanian.",
+      "flag": "🇷🇴"
+    },
+    "en": {
+      "name": "English",
+      "instruction": "Respond in English.",
+      "flag": "🇬🇧"
+    },
+    "es": {
+      "name": "Español",
+      "instruction": "Responde en español.",
+      "flag": "🇪🇸"
+    },
+    "fr": {
+      "name": "Français",
+      "instruction": "Répondez en français.",
+      "flag": "🇫🇷"
+    },
+    "de": {
+      "name": "Deutsch",
+      "instruction": "Antworte auf Deutsch.",
+      "flag": "🇩🇪"
+    },
+    "it": {
+      "name": "Italiano",
+      "instruction": "Rispondi in italiano.",
+      "flag": "🇮🇹"
+    }
+  }
+}
