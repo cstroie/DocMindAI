@@ -322,6 +322,10 @@ function handleProfileAction($profile_id) {
     // Process and return the response
     $result = processProfileResponse($profile_id, $response);
 
+    // Add form data and API data to the response
+    $result['form_data'] = $form_data;
+    $result['api_data'] = $api_data;
+
     sendJsonResponse($result, true);
 }
 
