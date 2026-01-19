@@ -159,19 +159,32 @@ function displayProfiles() {
 /**
  * Populate the profile select dropdown with grouped options
  *
- * @param {Array} profiles - Array of profile objects containing id, name, category, and icon
  * @param {HTMLSelectElement} profileSelect - The select element to populate
  * @returns {void}
  */
 function populateProfileSelect(profileSelect) {
+    // Clear existing options
+    profileSelect.innerHTML = '<option value="">-- Select a profile --</option>';
+
+    // Check if profilesData is available
+    if (!profilesData) {
+        console.error('No profiles data available');
+        return;
+    }
+
     // Group profiles by category
     const categories = {};
-    profilesData.forEach(profile => {
-        if (!categories[profile.category]) {
-            categories[profile.category] = [];
+    for (const [profileId, profileData] of Object.entries(profilesData)) {
+        const category = profileData.category;
+        if (!categories[category]) {
+            categories[category] = [];
         }
-        categories[profile.category].push(profile);
-    });
+        categories[category].push({
+            id: profileId,
+            name: profileData.name,
+            icon: profileData.icon
+        });
+    }
 
     // Add optgroups for each category
     for (const [category, categoryProfiles] of Object.entries(categories)) {
