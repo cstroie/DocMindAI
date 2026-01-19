@@ -144,6 +144,13 @@ function displayProfiles(profiles) {
     }
 }
 
+/**
+ * Populate the profile select dropdown with grouped options
+ *
+ * @param {Array} profiles - Array of profile objects containing id, name, category, and icon
+ * @param {HTMLSelectElement} profileSelect - The select element to populate
+ * @returns {void}
+ */
 function populateProfileSelect(profiles, profileSelect) {
     // Populate the select dropdown
     profileSelect.innerHTML = '<option value="">-- Select a profile --</option>';
