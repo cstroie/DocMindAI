@@ -656,6 +656,10 @@ function formatResults(results) {
     // Check if the result contains markdown code fences
     const fenceInfo = extractCodeFenceInfo(results, 'text');
     if (fenceInfo.type) {
+        // If the fence type is 'html', return the text directly without escaping
+        if (fenceInfo.type === 'html') {
+            return fenceInfo.text;
+        }
         // If a code fence was found, format with appropriate language class
         return `<pre><code class="${fenceInfo.type}">${escapeHtml(fenceInfo.text)}</code></pre>`;
     }
