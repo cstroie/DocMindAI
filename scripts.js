@@ -53,24 +53,6 @@ async function loadJSONResource(filename, rootKey) {
 }
 
 /**
- * Load categories from JSON file
- *
- * @returns {Promise<Object|null>} Promise resolving to categories object or null on error
- */
-async function loadCategories() {
-    return loadJSONResource('categories.json', 'categories');
-}
-
-/**
- * Load profiles data from JSON file
- *
- * @returns {Promise<Object|null>} Promise resolving to profiles object or null on error
- */
-async function loadProfiles() {
-    return loadJSONResource('profiles.json', 'profiles');
-}
-
-/**
  * Display profiles grouped by category in the UI
  *
  * @returns {void}
@@ -411,15 +393,6 @@ async function fetchModelsForSelect(selectElement) {
 }
 
 /**
- * Load languages from JSON file
- *
- * @returns {Promise<Object|null>} Promise resolving to languages object or null on error
- */
-async function loadLanguages() {
-    return loadJSONResource('languages.json', 'languages');
-}
-
-/**
  * Fetch languages from JSON and populate select element
  */
 async function fetchLanguagesForSelect(selectElement) {
@@ -549,11 +522,11 @@ function showError(message) {
 // DocMind-specific JavaScript
 document.addEventListener('DOMContentLoaded', async function() {
     // Load categories data
-    categoriesData = await loadCategories();
+    categoriesData = await loadJSONResource('categories.json', 'categories');
     // Load profiles data
-    profilesData = await loadProfiles();
+    profilesData = await loadJSONResource('profiles.json', 'profiles');
     // Load languages data
-    languagesData = await loadLanguages();
+    languagesData = await loadJSONResource('languages.json', 'languages');
     // Display profiles in the UI
     displayProfiles();
     // Set up form submission
