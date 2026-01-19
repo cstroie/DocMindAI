@@ -238,6 +238,15 @@ async function loadProfileForm(profileId) {
     }
 }
 
+/**
+ * Display a profile form with the given configuration
+ *
+ * @param {Object} formConfig - The form configuration object
+ * @param {string} profileId - The ID of the profile
+ * @param {string} profileName - The name of the profile
+ * @param {string} profileDescription - The description of the profile
+ * @returns {void}
+ */
 function displayProfileForm(formConfig, profileId, profileName, profileDescription) {
     const profileForm = document.getElementById('profileForm');
     const formTitle = document.getElementById('formTitle');
