@@ -60,6 +60,17 @@ body {
     font-weight: 400;
 }
 
+.container>header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.container>header nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
 .container>main {
     padding: 30px;
 }
