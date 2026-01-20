@@ -700,8 +700,8 @@ function formatResults(results) {
                 return htmlContent;
             } catch (error) {
                 console.error('Error parsing markdown:', error);
-                // Fallback to preformatted text if markdown parsing fails
-                return `<pre><code>${escapeHtml(results)}</code></pre>`;
+                // Fallback to syntax highlighting if markdown parsing fails
+                return `<pre><code class="${fenceInfo.type}">${escapeHtml(fenceInfo.text)}</code></pre>`;
             }
         }
         // If a code fence was found, format with appropriate language class
