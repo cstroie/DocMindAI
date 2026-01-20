@@ -257,6 +257,14 @@ async function loadProfileForm(profileId) {
         // Populate the profile select dropdown
         populateProfileSelect(profileSelect);
 
+        // Add event listener to handle profile selection
+        profileSelect.addEventListener('change', function() {
+            const selectedProfileId = this.value;
+            if (selectedProfileId) {
+                loadProfileForm(selectedProfileId);
+            }
+        });
+
         // Update language field if present
         if (profile.form.fields) {
             profile.form.fields.forEach(field => {
