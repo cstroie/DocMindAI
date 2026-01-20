@@ -79,6 +79,7 @@ Analyze the following hospital discharge paper and extract the key medical infor
 5. Note any significant changes during hospitalization
 6. Highlight any follow-up requirements
 7. Use markdown formatting for clarity
+9. Language: {language_instructions}
 
 ## Output Format:
 ```markdown
