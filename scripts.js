@@ -246,10 +246,9 @@ async function loadProfileForm(profileId) {
         // Set the profile ID in the profile object
         profile.id = profileId;
 
-        // Show and populate the profile select dropdown with all profiles
+        // Hide the profile select dropdown since we're not showing the profile-select-container section
         const profileSelect = document.getElementById('profileSelect');
-        profileSelect.style.display = 'block';
-        populateProfileSelect(profileSelect);
+        profileSelect.style.display = 'none';
 
         // Update language field if present
         if (profile.form.fields) {
