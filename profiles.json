@@ -107,19 +107,44 @@
             "name": "prompt",
             "type": "textarea",
             "label": "Prompt Text",
+            "help": "Enter the prompt text you want to test with the AI model. You can select from predefined prompts or enter your own. Maximum 10,000 characters.",
+            "placeholder": "Example: Explain quantum computing in simple terms",
             "required": true
+          },
+          {
+            "name": "file",
+            "type": "file",
+            "label": "Optional file upload",
+            "help": "Upload a text document (content will be appended to prompt) or an image (will be sent with prompt).",
+            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,.jpg,.jpeg,.png,.gif,.webp,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
+            "required": false
           },
           {
             "name": "model",
             "type": "select",
             "label": "AI Model",
+            "help": "Select the AI model to use for processing the prompt.",
             "options": []
           },
           {
             "name": "language",
             "type": "select",
             "label": "Response Language",
+            "help": "Select the language for the AI response.",
             "options": []
+          },
+          {
+            "name": "max_image_size",
+            "type": "select",
+            "label": "Maximum Image Size",
+            "help": "Select the maximum dimensions for resizing uploaded images. Choose 'Original' to send the image as-is without processing.",
+            "options": [
+              {"value": "original", "label": "Original"},
+              {"value": "200", "label": "200x200"},
+              {"value": "500", "label": "500x500"},
+              {"value": "800", "label": "800x800"},
+              {"value": "1000", "label": "1000x1000"}
+            ]
           }
         ]
       }
