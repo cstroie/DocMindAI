@@ -18,15 +18,14 @@
         </hgroup>
 
         <main>
+            <nav class="profile-select-container">
+                <label for="profileSelect">Select a Profile:</label>
+                <select id="profileSelect" class="form-control">
+                    <option value="">-- Select a profile --</option>
+                    <!-- Will be populated by JavaScript -->
+                </select>
+            </nav>
             <section class="profile-selector">
-                <h2>Available Profiles</h2>
-                <div class="profile-select-container">
-                    <label for="profileSelect">Select a Profile:</label>
-                    <select id="profileSelect" class="form-control">
-                        <option value="">-- Select a profile --</option>
-                        <!-- Will be populated by JavaScript -->
-                    </select>
-                </div>
                 <div id="profilesGrid">
                     <!-- Will be populated by JavaScript -->
                 </div>
