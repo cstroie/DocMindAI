@@ -256,7 +256,12 @@ function buildProfilePrompt($profile_id, $form_data) {
     // Get the profile configuration
     $profile = $profiles_data['profiles'][$profile_id] ?? null;
 
+    // Check if profile has a prompt field, otherwise look for it in form_data
     if (!$profile || empty($profile['prompt'])) {
+        // If prompt is in form_data, use it
+        if (isset($form_data['prompt']) && !empty($form_data['prompt'])) {
+            return $form_data['prompt'];
+        }
         return "Analyze the following input: " . json_encode($form_data);
     }
 
