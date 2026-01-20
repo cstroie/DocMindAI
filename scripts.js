@@ -688,26 +688,21 @@ function formatResults(results) {
         if (fenceInfo.type === 'html') {
             return fenceInfo.text;
         }
-        if (fenceInfo.type === 'text') {
-            // Use marked.js to convert markdown to HTML
-            try {
-                // Convert markdown to HTML using marked.js
-                const htmlContent = marked.parse(results);
-                // Apply syntax highlighting to any code blocks in the HTML
-                setTimeout(() => {
-                    applySyntaxHighlighting();
-                }, 0);
-                return htmlContent;
-            } catch (error) {
-                console.error('Error parsing markdown:', error);
-                // Fallback to syntax highlighting if markdown parsing fails
-                return `<pre><code class="${fenceInfo.type}">${escapeHtml(fenceInfo.text)}</code></pre>`;
-            }
+        // Use marked.js to convert markdown to HTML
+        try {
+            // Convert markdown to HTML using marked.js
+            const htmlContent = marked.parse(results);
+            // Apply syntax highlighting to any code blocks in the HTML
+            setTimeout(() => {
+                applySyntaxHighlighting();
+            }, 0);
+            return htmlContent;
+        } catch (error) {
+            console.error('Error parsing markdown:', error);
+            // Fallback to syntax highlighting if markdown parsing fails
+            return `<pre><code class="${fenceInfo.type}">${escapeHtml(fenceInfo.text)}</code></pre>`;
         }
-        // If a code fence was found, format with appropriate language class
-        return `<pre><code class="${fenceInfo.type}">${escapeHtml(fenceInfo.text)}</code></pre>`;
     }
-
 }
 
 /**
