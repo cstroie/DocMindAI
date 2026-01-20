@@ -104,8 +104,16 @@
       "form": {
         "fields": [
           {
+            "name": "prompts",
+            "type": "select",
+            "label": "Available Prompts",
+            "help": "Select a predefined prompt type or choose \"Current prompt\" to use the last submitted prompt.",
+            "options": []
+          },
+          {
             "name": "prompt",
             "type": "textarea",
+            "rows": 20,
             "label": "Prompt Text",
             "help": "Enter the prompt text you want to test with the AI model. You can select from predefined prompts or enter your own. Maximum 10,000 characters.",
             "placeholder": "Example: Explain quantum computing in simple terms",
