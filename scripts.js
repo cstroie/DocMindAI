@@ -254,6 +254,9 @@ async function loadProfileForm(profileId) {
             profileSelectContainer.style.display = 'block';
         }
 
+        // Populate the profile select dropdown
+        populateProfileSelect(profileSelect);
+
         // Update language field if present
         if (profile.form.fields) {
             profile.form.fields.forEach(field => {
