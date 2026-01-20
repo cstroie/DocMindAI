@@ -1,8 +1,9 @@
 
-// Global variables to store categories, profiles, and languages
+// Global variables to store categories, profiles, languages, and prompts
 let categoriesData = null;
 let profilesData = null;
 let languagesData = null;
+let promptsData = null;
 
 /**
  * Apply syntax highlighting using highlight.js
@@ -369,8 +370,18 @@ function createFormField(field, cookies = {}) {
             input.name = field.name;
             input.id = field.name;
             input.required = field.required || false;
+            // If options are empty and field name is 'prompts', fetch prompts from API
+            if ((!field.options || field.options.length === 0) && field.name === 'prompts') {
+                // Add a loading option
+                const loadingOption = document.createElement('option');
+                loadingOption.value = '';
+                loadingOption.textContent = 'Loading prompts...';
+                input.appendChild(loadingOption);
+                // Fetch prompts from API
+                fetchPromptsForSelect(input);
+            }
             // If options are empty and field name is 'model', fetch models from API
-            if ((!field.options || field.options.length === 0) && field.name === 'model') {
+            else if ((!field.options || field.options.length === 0) && field.name === 'model') {
                 // Add a loading option
                 const loadingOption = document.createElement('option');
                 loadingOption.value = '';
@@ -554,6 +565,61 @@ async function fetchLanguagesForSelect(selectElement) {
         const errorOption = document.createElement('option');
         errorOption.value = '';
         errorOption.textContent = 'Failed to load languages';
+        selectElement.appendChild(errorOption);
+    }
+}
+
+/**
+ * Fetch prompts from API and populate select element
+ *
+ * @param {HTMLSelectElement} selectElement - The select element to populate
+ * @returns {Promise<void>}
+ */
+async function fetchPromptsForSelect(selectElement) {
+    try {
+        // If promptsData is not loaded, fetch it from API
+        if (!promptsData) {
+            const response = await fetch('docmind.php?action=get_prompts');
+            const data = await response.json();
+
+            if (data.error) {
+                console.error('Failed to load prompts:', data.error);
+                // Clear loading option and add error option
+                selectElement.innerHTML = '';
+                const errorOption = document.createElement('option');
+                errorOption.value = '';
+                errorOption.textContent = 'Failed to load prompts';
+                selectElement.appendChild(errorOption);
+                return;
+            }
+
+            // Store prompts data globally
+            promptsData = data.prompts || {};
+        }
+
+        // Clear loading option
+        selectElement.innerHTML = '';
+
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select a prompt';
+        selectElement.appendChild(defaultOption);
+
+        // Add prompts from API
+        for (const [promptId, promptData] of Object.entries(promptsData)) {
+            const option = document.createElement('option');
+            option.value = promptId;
+            option.textContent = promptData.label || promptId;
+            selectElement.appendChild(option);
+        }
+    } catch (error) {
+        console.error('Failed to load prompts:', error.message);
+        // Clear loading option and add error option
+        selectElement.innerHTML = '';
+        const errorOption = document.createElement('option');
+        errorOption.value = '';
+        errorOption.textContent = 'Failed to load prompts';
         selectElement.appendChild(errorOption);
     }
 }
