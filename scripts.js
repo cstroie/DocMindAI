@@ -246,9 +246,13 @@ async function loadProfileForm(profileId) {
         // Set the profile ID in the profile object
         profile.id = profileId;
 
-        // Hide the profile select dropdown since we're not showing the profile-select-container section
+        // Show the profile select dropdown and enable the profile-select-container nav element
         const profileSelect = document.getElementById('profileSelect');
-        profileSelect.style.display = 'none';
+        profileSelect.style.display = 'block';
+        const profileSelectContainer = document.querySelector('.profile-select-container');
+        if (profileSelectContainer) {
+            profileSelectContainer.style.display = 'block';
+        }
 
         // Update language field if present
         if (profile.form.fields) {
