@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="vs.min.css">
     <script src="scripts.js"></script>
+    <script src="marked.js"></script>
     <script src="highlight.min.js"></script>
 </head>
 <body>
@@ -16,15 +17,15 @@
             <h1 id="topTitle">🏥 DocMind AI</h1>
             <p id="topDescription">A collection of specialized tools designed to process, analyze, and extract key information from various documents using artificial intelligence.</p>
         </hgroup>
-
-        <main>
+        <header>
             <nav class="profile-select-container" style="display: none;">
-                <label for="profileSelect">Select a Profile:</label>
                 <select id="profileSelect" class="form-control">
                     <option value="">-- Select a profile --</option>
                     <!-- Will be populated by JavaScript -->
                 </select>
             </nav>
+        </header>
+        <main>
             <section class="profile-selector">
                 <div id="profilesGrid">
                     <!-- Will be populated by JavaScript -->

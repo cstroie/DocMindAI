@@ -601,7 +601,7 @@ pre .xml-cdata {
 }
 
 .profile-select-container {
-    margin-bottom: 20px;
+    margin-bottom: 0;
 }
 
 .profile-select-container label {

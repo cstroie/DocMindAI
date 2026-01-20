@@ -230,7 +230,6 @@ function populateProfileSelect(profileSelect) {
 async function loadProfileForm(profileId) {
     try {
         // Clear the page
-        document.getElementById('profilesGrid').style.display = 'none';
         document.querySelector('.profile-selector').style.display = 'none';
         // Use the global profilesData if available
         if (!profilesData) {
