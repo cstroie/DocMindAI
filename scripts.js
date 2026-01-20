@@ -613,6 +613,17 @@ async function fetchPromptsForSelect(selectElement) {
             option.textContent = promptData.label || promptId;
             selectElement.appendChild(option);
         }
+
+        // Add event listener to populate prompt textarea when a prompt is selected
+        selectElement.addEventListener('change', function() {
+            const selectedPromptId = this.value;
+            if (selectedPromptId && promptsData[selectedPromptId]) {
+                const promptTextarea = document.getElementById('prompt');
+                if (promptTextarea) {
+                    promptTextarea.value = promptsData[selectedPromptId].prompt || '';
+                }
+            }
+        });
     } catch (error) {
         console.error('Failed to load prompts:', error.message);
         // Clear loading option and add error option
