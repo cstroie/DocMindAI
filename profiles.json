@@ -14,8 +14,12 @@
       "description": "Analyze radiology reports and extract key medical information",
       "category": "medical",
       "icon": "🔍",
+      "title": "Radiology Report Analysis",
+      "description": "Upload or paste radiology reports to extract key medical findings in structured JSON format",
       "prompt": "ROLE\nYou are a medical exper analyzing radiology reports.\n\nTASK\nRead the report and extract the main pathological information in JSON format.\n\nCRITICAL INSTRUCTION: {language_instruction}\n\nOUTPUT FORMAT (JSON):\n```json\n{\n  \"pathologic\": \"yes/no\",\n  \"severity\": 1-10,\n  \"summary\": \"1-5 words\",\n  \"diagnoses\": [\"diagnosis1\", \"diagnosis2\", \"diagnosis3\"]\n}\n```\n\nRULES:\n- \"pathologic\": \"yes\" if any anomaly exists, otherwise \"no\"\n- \"severity\": 1=minimal, 5=moderate, 10=critical/urgent\n- \"summary\": diagnosis in maximum 5 words (e.g., \"fracture\", \"pneumonia\", \"lung nodule\")\n- \"diagnoses\": exactly 3 specific medical diagnoses based on the report\n- If everything is normal: ```json {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"normal\", \"diagnoses\": [\"normal\", \"no significant findings\", \"within normal limits\"]}```\n- Ignore spelling errors\n- Respond ONLY with the JSON, without additional text\n\nRADIOLOGY REPORT:\n{text}",
       "form": {
+        "title": "Radiology Report Analysis Form",
+        "description": "Enter radiology report text and select processing options",
         "fields": [
           {
             "name": "text",
@@ -48,8 +52,12 @@
       "description": "Extract structured data from unstructured text",
       "category": "general",
       "icon": "📊",
+      "title": "Structured Data Extraction",
+      "description": "Convert unstructured text or documents into structured JSON, YAML, XML, HTML, or Markdown formats",
       "prompt": "ROLE\nYou are a data extraction API.\n\nROLE\nExtract structured data from the following. If a file is provided, extract data from the file content as well.\n\nOUTPUT FORMAT:\n{output_format}\n\nTEXT: {text}",
       "form": {
+        "title": "Data Extraction Form",
+        "description": "Upload text or documents and select output format options",
         "fields": [
           {
             "name": "text",
@@ -109,7 +117,11 @@
       "description": "Test AI models with predefined prompts",
       "category": "development",
       "icon": "🧪",
+      "title": "AI Model Experimentation",
+      "description": "Test and experiment with different AI models using custom or predefined prompts",
       "form": {
+        "title": "Experimentation Form",
+        "description": "Configure AI model testing with prompts and optional file uploads",
         "fields": [
           {
             "name": "prompts",
@@ -171,8 +183,12 @@
       "description": "Convert medical transcripts into structured SOAP notes",
       "category": "medical",
       "icon": "📋",
+      "title": "SOAP Note Generation",
+      "description": "Convert medical transcripts into structured SOAP (Subjective, Objective, Assessment, Plan) notes",
       "prompt": "ROLE\nYou are a clinical documentation assistant.\n\nTASK\nYour task is to read medical transcripts (dialogues between clinicians and patients) and convert them into structured clinical notes using the SOAP format.\n\nFollow these rules:\n\n*S - Subjective*:\nInclude all information reported by the patient: symptoms, duration, history, complaints, and any relevant lifestyle or exposure context.\nUse the patient's own words when possible (paraphrased for clarity).\n\n*O - Objective*:\nInclude observable findings such as vital signs, physical exam results, lab tests, imaging results, and clinician observations during the encounter.\n\n*A - Assessment*:\nProvide a brief summary of the clinician's diagnostic impression. Include possible or confirmed diagnoses.\n\n*P - Plan*:\nOutline the next steps recommended by the clinician. This can include prescriptions, tests to be ordered, referrals, follow-up instructions, and lifestyle recommendations.\n\nKeep the format clear and professional. Do not include any parts of the transcript that are irrelevant or non-clinical. Do not invent information not found in the transcript. Always use a bullet point format for each section of the SOAP note.\n\nA comprehensive SOAP note has to take into account all subjective and objective information, and accurately assess it to create the patient-specific assessment and plan.\n\nOUTPUT FORMAT (MARKDOWN):\n### Subjective\n* patient reported symptom 1\n* patient reported symptom 2\n* patient reported history\n\n### Objective\n* clinician observation 1\n* clinician observation 2\n* measurement 1\n\n### Assessment\n* diagnostic impression 1\n* diagnostic impression 2\n\n### Plan\n* next step 1\n* next step 2\n* recommendation 1\n\nRespond ONLY with the MARKDOWN, without additional text. Each section must contain a unordered list, with list item representing a single bullet point.\n\n{language_instruction}\n\nMEDICAL TRANSCRIPT:\n{transcript}",
       "form": {
+        "title": "SOAP Note Generation Form",
+        "description": "Upload or paste medical transcripts to convert to SOAP format",
         "fields": [
           {
             "name": "transcript",
@@ -231,8 +247,12 @@
       "description": "Analyze patient discharge papers and summarize key medical information for radiology use",
       "category": "medical",
       "icon": "📋",
+      "title": "Discharge Paper Analysis",
+      "description": "Analyze patient discharge papers to extract radiology-relevant information",
       "prompt": "ROLE\nYou are a medical assistant analyzing patient discharge papers for radiology relevance.\n\nTASK\nRead the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation. Do not exceed 50 words.\n\nCRITICAL INSTRUCTION: {language_instruction}\n\nOUTPUT FORMAT (JSON):\n```json\n{\n  \"pathologic\": \"yes/no\",\n  \"severity\": 0-10,\n  \"summary\": \"summary paragraph\",\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\"]\n}\n```\n\nRULES:\n- \"pathologic\": \"yes\" if the discharge paper contains any findings relevant to radiology\n- \"severity\": 0=normal, 1=minimal, 5=moderate, 10=critical/urgent\n- \"summary\": maximum 50 words summarizing radiology-relevant information\n- \"keywords\": exactly 3 relevant medical keywords from the discharge paper\n- Focus on findings, conditions, treatments affecting radiology\n- Ignore non-radiology relevant information\n- Respond ONLY with the JSON, without additional text\n\nDISCHARGE PAPER:\n{text}",
       "form": {
+        "title": "Discharge Paper Analysis Form",
+        "description": "Paste discharge paper text for radiology-focused analysis",
         "fields": [
           {
             "name": "text",
@@ -265,8 +285,12 @@
       "description": "Analyze hospital discharge papers and extract comprehensive medical information",
       "category": "medical",
       "icon": "🏥",
+      "title": "Hospital Discharge Analysis",
+      "description": "Comprehensive analysis of hospital discharge papers with structured medical information extraction",
       "prompt": "ROLE\nYou are a medical assistant analyzing hospital discharge papers.\n\nTASK\nAnalyze the hospital discharge paper and extract key medical information in a structured format. Present your findings in markdown format.\n\nCRITICAL INSTRUCTION: {language_instruction}\n\nSTRUCTURE TO EXTRACT:\n\n1. Informații despre Pacient\n- Nume complet\n- Vârstă\n- Gen\n- Data internării\n- Data externării\n- Spital/Departament\n- Medic curant\n\n2. Diagnostic la Internare\n- Diagnostic primar la internare\n- Diagnostice secundare (dacă există)\n- Motivul internării\n\n3. Diagnostic Final\n- Diagnostic primar la externare\n- Diagnostice secundare (dacă există)\n- Orice modificări față de diagnosticul de la internare\n\n4. Informații Subjective (S)\n- Plângeri principale raportate de pacient\n- Istoricul bolii actuale (HPI)\n- Simptomele raportate de pacient\n- Durata și progresia simptomelor\n\n5. Informații Obiective (O)\n- Semne vitale la internare\n- Rezultatele examenului fizic\n- Rezultatele testelor de laborator\n- Rezultatele studiilor de imagistică\n- Alte constatări diagnostice\n\n6. Istoric Medical\n- Istoric medical anterior\n- Istoric chirurgical anterior\n- Alergii\n- Medicamente curente\n- Istoric medical familial\n- Istoric social (fumat, alcool, etc.)\n\n7. Evoluție în Spital\n- Tratament administrat\n- Proceduri efectuate\n- Medicamente administrate în timpul șederii\n- Răspuns la tratament\n- Orice complicații\n\n8. Investigații\n- Teste de laborator efectuate\n- Studii de imagistică efectuate\n- Teste specializate\n- Rapoarte de patologie (dacă există)\n\n9. Informații la Externare\n- Medicamente la externare\n- Instrucțiuni de urmat\n- Trimitere la specialiști\n- Restricții de activitate\n- Recomandări dietetice\n- Semne de avertizare de urmărit\n\n10. Rezumat\n- Scurt rezumat al spitalizării\n- Constatări cheie\n- Rezultate ale tratamentului\n- Recomandări pentru îngrijire continuă\n\nOUTPUT FORMAT (MARKDOWN):\n\n## Rezumat Externare Spital\n\n### Informații despre Pacient\n- **Nume:** [Nume Pacient]\n- **Vârstă:** [Vârstă]\n- **Gen:** [Gen]\n- **Data Internării:** [Data]\n- **Data Externării:** [Data]\n- **Spital/Departament:** [Nume]\n- **Medic Curant:** [Nume]\n\n### Diagnostic la Internare\n- **Primar:** [Diagnostic]\n- **Secundar:** [Diagnostic dacă există]\n\n### Diagnostic Final\n- **Primar:** [Diagnostic]\n- **Secundar:** [Diagnostic dacă există]\n\n### Subiectiv (S)\n- **Plângeri Principale:** [Listă]\n- **Istoricul Bolii Actuale:** [Descriere]\n- **Simptome Raportate:** [Listă]\n\n### Obiectiv (O)\n- **Semne Vitale la Internare:** [Valori]\n- **Examen Fizic:** [Constatări]\n- **Rezultate Laborator:** [Constatări cheie]\n- **Rezultate Imagistică:** [Constatări cheie]\n\n### Istoric Medical\n- **Istoric Medical Anterior:** [Listă]\n- **Istoric Chirurgical Anterior:** [Listă]\n- **Alergii:** [Listă]\n- **Medicamente Curente:** [Listă]\n\n### Evoluție în Spital\n- **Tratamente Administrate:** [Listă]\n- **Proceduri Efectuate:** [Listă]\n- **Răspuns la Tratament:** [Descriere]\n- **Complicații:** [Listă dacă există]\n\n### Investigații\n- **Teste de Laborator:** [Listă]\n- **Studii de Imagistică:** [Listă]\n- **Teste Specializate:** [Listă]\n\n### Informații la Externare\n- **Medicamente:** [Listă cu doze]\n- **Instrucțiuni de Urmat:** [Detalii]\n- **Trimitere la Specialiști:** [Listă]\n- **Restricții de Activitate:** [Detalii]\n- **Recomandări Dietetice:** [Detalii]\n- **Semne de Avertizare:** [Listă]\n\n### Rezumat\n[Scurt rezumat al spitalizării, constatări cheie, rezultate ale tratamentului și recomandări pentru îngrijire continuă]\n\n\nRULES:\n- Extract all relevant information from the discharge paper\n- Organize information under appropriate headings\n- Use bullet points for lists\n- Present numerical data clearly\n- Note any significant changes during hospitalization\n- Highlight any follow-up requirements\n- Use markdown formatting for clarity\n- Include the language instruction at the beginning of the output\n- Respond ONLY with the MARKDOWN, without additional text\n\nDISCHARGE PAPER:\n{text}",
       "form": {
+        "title": "Hospital Discharge Analysis Form",
+        "description": "Paste hospital discharge paper text for comprehensive medical analysis",
         "fields": [
           {
             "name": "text",
@@ -299,8 +323,12 @@
       "description": "Generate differential diagnoses with supporting information from radiology reports",
       "category": "medical",
       "icon": "🩺",
+      "title": "Radiology Differential Diagnosis",
+      "description": "Generate ranked differential diagnoses from radiology reports with supporting evidence",
       "prompt": "ROLE\nYou are a radiology expert specializing in differential diagnosis.\n\nTASK\nYour task is to analyze radiology reports and provide a ranked list of differential diagnoses with supporting information.\n\nCRITICAL INSTRUCTION\n{language_instruction}\n\nOUTPUT FORMAT (JSON)\n```json\n{\n  \"diagnoses\": [\n    {\n      \"condition\": \"medical condition name\",\n      \"probability\": 85,\n      \"description\": \"detailed explanation of the condition\",\n      \"supporting_features\": [\"radiological feature 1\", \"radiological feature 2\", \"clinical correlation\"],\n      \"references\": [\"reference 1\", \"reference 2\"]\n    }\n  ]\n}```\n\nRULES:\n- Provide exactly 3 differential diagnoses, ranked by probability (highest first)\n- \"condition\": Name of the medical condition\n- \"probability\": Likelihood as a percentage (0-100)\n- \"description\": Detailed explanation of the condition (2-3 sentences)\n- \"supporting_features\": 2-4 key radiological findings that support this diagnosis\n- \"references\": 1-2 relevant medical references or resources\n- Focus ONLY on radiological findings in the report\n- Do not include treatments or management recommendations\n- Respond ONLY with the JSON, without additional text\n\nEXAMPLE:\n\nReport: \"Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum.\"\nResponse:\n```json\n{\n  \"diagnoses\": [\n    {\n      \"condition\": \"Bacterial Pneumonia\",\n      \"probability\": 75,\n      \"description\": \"Infection of the lung parenchyma causing consolidation. Common pathogens include Streptococcus pneumoniae and Haemophilus influenzae. Presents with fever, cough, and focal consolidation on imaging.\",\n      \"supporting_features\": [\"Hazy opacity in lung field\", \"Consolidation pattern\", \"No pleural effusion\"],\n      \"references\": [\"Harrison's Principles of Internal Medicine, 21st Edition\", \"Radiology Assistant: Pneumonia Patterns\"]\n    },\n    {\n      \"condition\": \"Viral Pneumonia\",\n      \"probability\": 60,\n      \"description\": \"Viral infection causing interstitial and alveolar inflammation. Common viruses include influenza, RSV, and COVID-19. May present with similar imaging findings to bacterial pneumonia.\",\n      \"supporting_features\": [\"Hazy infiltrate pattern\", \"Single lobe involvement\", \"Absence of cavitation\"],\n      \"references\": [\"Chest Imaging Patterns in Viral Pneumonia, Radiographics\", \"ATS Guidelines on Community-Acquired Pneumonia\"]\n    },\n    {\n      \"condition\": \"Pulmonary Edema\",\n      \"probability\": 40,\n      \"description\": \"Accumulation of fluid in the lung interstitium and alveoli. Can be cardiogenic (heart failure) or non-cardiogenic (ARDS). May present with bilateral hazy opacities.\",\n      \"supporting_features\": [\"Hazy opacity\", \"Single lobe distribution (atypical)\", \"No pleural effusion\"],\n      \"references\": [\"ACR Appropriateness Criteria: Acute Respiratory Illness\", \"Radiology Education: Pulmonary Edema Patterns\"]\n    }\n  ]\n}\n```\n\nRADIOLOGY REPORT\n{report}",
       "form": {
+        "title": "Differential Diagnosis Form",
+        "description": "Enter radiology report text to generate differential diagnoses",
         "fields": [
           {
             "name": "report",
@@ -333,8 +361,12 @@
       "description": "Convert complex medical information into patient-friendly educational content",
       "category": "medical",
       "icon": "🤓",
+      "title": "Patient Education Content",
+      "description": "Convert complex medical information into patient-friendly educational content",
       "prompt": "ROLE: You are a medical education specialist.\n\nTASK: Your task is to convert complex medical information into patient-friendly educational content.\n\nINSTRUCTIONS:\n- Take the provided medical content and rewrite it in simple, easy-to-understand language\n- Use everyday terms instead of medical jargon\n- Explain medical terms when they must be used\n- Keep explanations clear and concise\n- Maintain accuracy while improving accessibility\n- Format the output with clear headings and bullet points where appropriate\n\nRULES:\n- Focus on what the patient needs to know\n- Avoid technical terms when simpler alternatives exist\n- Explain any technical terms that cannot be avoided\n- Use active voice and present tense\n- Include practical information when relevant (e.g., what to expect, when to seek help)\n- Do not add information not present in the original content\n- Do not make medical recommendations or diagnoses\n- Use only heading levels ### to ###### in Markdown\n- Respond only with the patient-friendly content, without additional text\n\nOUTPUT LANGUAGE: {language_instruction}\n\nOUTPUT FORMAT (MARKDOWN): Use headings, bullet points, and short paragraphs to improve readability.\n\nEXAMPLE:\n\nInput: \"The patient presents with acute myocardial infarction secondary to coronary artery occlusion. Percutaneous coronary intervention was performed with stent placement.\"\n\nOutput: \"### Heart Attack Treatment\n\nYou had a heart attack, which happens when blood flow to part of your heart muscle is blocked. \n\nTo treat this, we performed a procedure called angioplasty where we:\n* Inserted a thin tube into the blocked heart artery\n* Opened the blockage using a small balloon\n* Placed a metal stent (tube) to keep the artery open\n\nThis procedure helps restore blood flow to your heart and prevents further damage.\"\n\nMEDICAL CONTENT:\n{content}",
       "form": {
+        "title": "Patient Education Form",
+        "description": "Enter complex medical content to convert to patient-friendly language",
         "fields": [
           {
             "name": "content",
@@ -367,7 +399,11 @@
       "description": "Interact directly with an AI medical assistant for real-time medical queries",
       "category": "medical",
       "icon": "💬",
+      "title": "Medical Chat Assistant",
+      "description": "Interact directly with an AI medical assistant for real-time medical queries",
       "form": {
+        "title": "Medical Chat Form",
+        "description": "Enter your medical query and select AI personality",
         "fields": [
           {
             "name": "message",
@@ -408,7 +444,11 @@
       "description": "Perform OCR on uploaded images and extract text in Markdown format",
       "category": "general",
       "icon": "📷",
+      "title": "Image OCR Tool",
+      "description": "Perform OCR on uploaded images and extract text in Markdown format",
       "form": {
+        "title": "OCR Form",
+        "description": "Upload image files for text extraction",
         "fields": [
           {
             "name": "image",
@@ -438,7 +478,11 @@
       "description": "Scrape web pages and convert them to clean Markdown format using AI processing",
       "category": "general",
       "icon": "🔗",
+      "title": "Web Page Converter",
+      "description": "Scrape web pages and convert them to clean Markdown format using AI processing",
       "form": {
+        "title": "Web Page Conversion Form",
+        "description": "Enter web page URL and select output format",
         "fields": [
           {
             "name": "url",
@@ -477,7 +521,11 @@
       "description": "Scrape web pages and return a structured summary of the most important points",
       "category": "general",
       "icon": "📝",
+      "title": "Web Page Summarizer",
+      "description": "Scrape web pages and return a structured summary of the most important points",
       "form": {
+        "title": "Web Page Summary Form",
+        "description": "Enter web page URL for AI-powered summarization",
         "fields": [
           {
             "name": "url",
@@ -507,7 +555,11 @@
       "description": "AI-powered academic paper summarization with structured approaches",
       "category": "research",
       "icon": "📄",
+      "title": "Academic Paper Summarizer",
+      "description": "AI-powered academic paper summarization with structured approaches",
       "form": {
+        "title": "Paper Summarization Form",
+        "description": "Upload academic papers or enter text for structured summarization",
         "fields": [
           {
             "name": "content",
@@ -552,7 +604,11 @@
       "description": "Search medical literature databases and get AI-summarized research papers",
       "category": "research",
       "icon": "📚",
+      "title": "Medical Literature Search",
+      "description": "Search medical literature databases and get AI-summarized research papers",
       "form": {
+        "title": "Literature Search Form",
+        "description": "Enter medical search queries for literature research",
         "fields": [
           {
             "name": "query",
