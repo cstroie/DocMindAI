@@ -848,7 +848,7 @@
       "description": "AI-powered academic paper summarization with structured approaches",
       "category": "research",
       "icon": "📄",
-      "prompt": {
+      "prompts": {
         "three_pass": {
           "role": "You are an academic paper analyzer. Your task is to analyze research papers using a three-pass approach.",
           "critical_instruction": "{language_instruction}",
@@ -940,13 +940,13 @@
             "required": false
           },
           {
-            "name": "prompt_type",
+            "name": "prompt",
             "type": "select",
             "label": "Prompt Template",
-            "help": "Select a predefined prompt type or choose \"Current prompt\" to use the last submitted prompt.",
+            "help": "Select a predefined prompt template.",
             "options": [
               {"value": "three_pass", "label": "Three-Pass Summary"},
-              {"value": "problem_idea_evidence", "label": "Problem–Idea–Evidence"}
+              {"value": "problem_idea_evidence", "label": "Problem-Idea-Evidence"}
             ]
           },
           {

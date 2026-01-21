@@ -286,36 +286,34 @@ function buildProfilePrompt($profile_id, $form_data) {
     else {
         return "Analyze the following input: " . json_encode($form_data);
     }
-    else {
-        // Handle prompt as string, array, or JSON object
-        $prompt = $profile['prompt'];
 
-        if (is_array($prompt)) {
-            // Check if this is an associative array (JSON object)
-            if (array_keys($prompt) !== range(0, count($prompt) - 1)) {
-                // Convert JSON object to formatted text
-                $prompt_text = '';
-                foreach ($prompt as $key => $value) {
-                    // Replace underscores with spaces in key names
-                    $formatted_key = str_replace('_', ' ', $key);
+    // If prompt is an array (JSON object), convert to formatted text
+    if (is_array($prompt)) {
+        // Check if this is an associative array (JSON object)
+        if (array_keys($prompt) !== range(0, count($prompt) - 1)) {
+            // Convert JSON object to formatted text
+            $prompt_text = '';
+            foreach ($prompt as $key => $value) {
+                // Replace underscores with spaces in key names
+                $formatted_key = str_replace('_', ' ', $key);
 
-                    // Handle array values by concatenating with newlines
-                    if (is_array($value)) {
-                        $value = implode("\n", $value);
-                    }
-
-                    $prompt_text .= strtoupper($formatted_key) . "\n" . $value . "\n\n";
+                // Handle array values by concatenating with newlines
+                if (is_array($value)) {
+                    $value = implode("\n", $value);
                 }
-                $prompt = rtrim($prompt_text, "\n");
-            } else {
-                // If prompt is a sequential array, concatenate items with double newlines
-                $prompt = implode("\n\n", $prompt);
-            }
-        }
 
-        // Ensure prompt is a string
-        $prompt = (string)$prompt;
+                $prompt_text .= strtoupper($formatted_key) . "\n" . $value . "\n\n";
+            }
+            $prompt = rtrim($prompt_text, "\n");
+        } else {
+            // If prompt is a sequential array, concatenate items with newlines
+            $prompt = implode("\n", $prompt);
+        }
     }
+
+    // Ensure prompt is a string
+    $prompt = (string)$prompt;
+    
 
     // Replace {language_instruction} placeholder if present
     $language = $form_data['language'] ?? 'en';
