@@ -833,14 +833,60 @@
       "description": "Scrape web pages and return a structured summary of the most important points",
       "category": "general",
       "icon": "📝",
+      "prompt": {
+        "role": "You are a content summarization assistant.",
+        "task": "Your task is to identify the main content of a web page and create a structured summary of the most important points.",
+        "critical_instruction": "{language_instruction}",
+        "output_format": [
+          "```json",
+          "{",
+          "  \"title\": \"article title\",",
+          "  \"summary\": \"main summary paragraph\",",
+          "  \"key_points\": [\"point 1\", \"point 2\", \"point 3\", \"point 4\", \"point 5\"],",
+          "  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\"]",
+          "}",
+          "```"
+        ],
+        "rules": [
+          "\"title\": Extract or create a concise title for the main article",
+          "\"summary\": Create a 2-3 sentence summary of ONLY the main article content",
+          "\"key_points\": Extract exactly 5 key points from the main article content (as strings)",
+          "\"keywords\": Extract exactly 3 relevant keywords from the main content (as strings)",
+          "Focus ONLY on the primary article content",
+          "IGNORE navigation menus, sidebars, footers, ads, related articles, and other secondary content",
+          "IGNORE links, comments, and social media elements",
+          "Respond ONLY with the JSON, without additional text or markdown formatting"
+        ],
+        "example": [
+          "Input: A web page with a main article about climate change, plus sidebars and navigation",
+          "Response:",
+          "```json",
+          "{",
+          "  \"title\": \"Climate Change: Latest Scientific Findings\",",
+          "  \"summary\": \"Recent studies show global temperatures have risen by 1.2°C since pre-industrial times. The primary driver is greenhouse gas emissions from human activities. Immediate action is needed to limit warming to 1.5°C.\",",
+          "  \"key_points\": [",
+          "    \"Global temperatures have risen 1.2°C since pre-industrial times\",",
+          "    \"Human activities are the primary cause of climate change\",",
+          "    \"Sea levels are rising at an accelerating rate\",",
+          "    \"Extreme weather events are becoming more frequent\",",
+          "    \"Limiting warming to 1.5°C requires immediate action\"",
+          "  ],",
+          "  \"keywords\": [\"climate change\", \"global warming\", \"greenhouse gases\"]",
+          "}",
+          "```"
+        ],
+        "url": "{url}"
+      },
+      "output": "json",
       "form": {
-      "title": "Web Page Summary",
+        "title": "Web Page Summary",
         "description": "Review the AI-generated summary of the web page content. The summary highlights the most important points and key information from the article.",
         "fields": [
           {
             "name": "url",
             "type": "url",
             "label": "Web Page URL",
+            "help": "Enter the full URL of the web page you want to summarize.",
             "required": true,
             "placeholder": "https://example.com/article"
           },
@@ -848,12 +894,14 @@
             "name": "model",
             "type": "select",
             "label": "AI Model",
+            "help": "Select the AI model to use for summarization.",
             "options": []
           },
           {
             "name": "language",
             "type": "select",
             "label": "Response Language",
+            "help": "Select the language for the summary output.",
             "options": []
           }
         ]
