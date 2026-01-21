@@ -589,6 +589,7 @@
         ],
         "radiology_report": "{report}"
       },
+      "output": "json",
       "form": {
         "title": "Differential Diagnosis",
         "description": "Enter radiology report text to generate differential diagnoses",
