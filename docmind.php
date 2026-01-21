@@ -275,7 +275,9 @@ function buildProfilePrompt($profile_id, $form_data) {
                 // Convert JSON object to formatted text
                 $prompt_text = '';
                 foreach ($prompt as $key => $value) {
-                    $prompt_text .= strtoupper($key) . "\n" . $value . "\n\n";
+                    // Replace underscores with spaces in key names
+                    $formatted_key = str_replace('_', ' ', $key);
+                    $prompt_text .= strtoupper($formatted_key) . "\n" . $value . "\n\n";
                 }
                 $prompt = rtrim($prompt_text, "\n");
             } else {
