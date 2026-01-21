@@ -287,59 +287,6 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['url'])) ||
     }
 }
 
-/**
- * Scrape URL content with Chrome browser simulation
- * 
- * @param string $url URL to scrape
- * @return string|false Page content or false on error
- */
-function scrapeUrl($url) {
-    // Create a temporary file to store cookies
-    $cookie_file = tempnam(sys_get_temp_dir(), 'sum_cookies');
-    
-    // Initialize cURL session
-    $ch = curl_init();
-    
-    // Set cURL options
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_file);  // Store cookies
-    curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_file); // Send cookies
-    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language: en-US,en;q=0.5',
-        'Accept-Encoding: gzip, deflate',
-        'Connection: keep-alive',
-        'Upgrade-Insecure-Requests: 1',
-    ]);
-    
-    // Execute request
-    $content = curl_exec($ch);
-    
-    // Check for errors
-    if (curl_errno($ch)) {
-        curl_close($ch);
-        unlink($cookie_file);
-        return false;
-    }
-    
-    // Close cURL session
-    curl_close($ch);
-    
-    // Clean up cookie file
-    unlink($cookie_file);
-    
-    // Handle gzip encoding
-    if (strpos($content, "\x1f\x8b") === 0) {
-        $content = gzdecode($content);
-    }
-    
-    return $content;
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
