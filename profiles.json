@@ -14,14 +14,31 @@
       "description": "Analyze radiology reports and extract key medical information",
       "category": "medical",
       "icon": "🔍",
-      "prompt": [
-        "ROLE\nYou are a medical exper analyzing radiology reports.",
-        "TASK\nRead the report and extract the main pathological information in JSON format.",
-        "CRITICAL INSTRUCTION: {language_instruction}",
-        "OUTPUT FORMAT (JSON):\n```json\n{\n  \"pathologic\": \"yes/no\",\n  \"severity\": 1-10,\n  \"summary\": \"1-5 words\",\n  \"diagnoses\": [\"diagnosis1\", \"diagnosis2\", \"diagnosis3\"]\n}\n```",
-        "RULES:\n- \"pathologic\": \"yes\" if any anomaly exists, otherwise \"no\"\n- \"severity\": 1=minimal, 5=moderate, 10=critical/urgent\n- \"summary\": diagnosis in maximum 5 words (e.g., \"fracture\", \"pneumonia\", \"lung nodule\")\n- \"diagnoses\": exactly 3 specific medical diagnoses based on the report\n- If everything is normal: ```json {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"normal\", \"diagnoses\": [\"normal\", \"no significant findings\", \"within normal limits\"]}```\n- Ignore spelling errors\n- Respond ONLY with the JSON, without additional text",
-        "RADIOLOGY REPORT:\n{text}"
-      ],
+      "prompt": {
+        "role": "You are a medical exper analyzing radiology reports.",
+        "task": "Read the report and extract the main pathological information in JSON format.",
+        "critical_instruction": "{language_instruction}",
+        "output_format": [
+          "```json",
+          "{",
+          "  \"pathologic\": \"yes/no\",",
+          "  \"severity\": 1-10,",
+          "  \"summary\": \"1-5 words\",",
+          "  \"diagnoses\": [\"diagnosis1\", \"diagnosis2\", \"diagnosis3\"]",
+          "}",
+          "```"
+        ],
+        "rules": [
+          "\"pathologic\": \"yes\" if any anomaly exists, otherwise \"no\"",
+          "\"severity\": 1=minimal, 5=moderate, 10=critical/urgent",
+          "\"summary\": diagnosis in maximum 5 words (e.g., \"fracture\", \"pneumonia\", \"lung nodule\")",
+          "\"diagnoses\": exactly 3 specific medical diagnoses based on the report",
+          "If everything is normal: ```json {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"normal\", \"diagnoses\": [\"normal\", \"no significant findings\", \"within normal limits\"]}```",
+          "Ignore spelling errors",
+          "Respond ONLY with the JSON, without additional text"
+        ],
+        "radiology_report": "{text}"
+      },
       "output": "json",
       "form": {
         "title": "Radiology Report Analysis",
