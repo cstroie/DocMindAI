@@ -290,7 +290,17 @@
         "role": "You are a medical assistant analyzing patient discharge papers for radiology relevance.",
         "task": "Read the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation. Do not exceed 50 words.",
         "critical_instruction": "{language_instruction}",
-        "output_format": "OUTPUT FORMAT (JSON):\n```json\n{\n  \"pathologic\": \"yes/no\",\n  \"severity\": 0-10,\n  \"summary\": \"summary paragraph\",\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\"]\n}\n```",
+        "output_format": [
+          "OUTPUT FORMAT (JSON):",
+          "```json",
+          "{",
+          "  \"pathologic\": \"yes/no\",",
+          "  \"severity\": 0-10,",
+          "  \"summary\": \"summary paragraph\",",
+          "  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\"]",
+          "}",
+          "```"
+        ],
         "rules": [
           "\"pathologic\": \"yes\" if the discharge paper contains any findings relevant to radiology",
           "\"severity\": 0=normal, 1=minimal, 5=moderate, 10=critical/urgent",
