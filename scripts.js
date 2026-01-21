@@ -718,6 +718,8 @@ function displayResults(results) {
     // Get results area elements
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
+    const resultsTitle = document.getElementById('resultsTitle');
+    const resultsDescription = document.getElementById('resultsDescription');
 
     // Extract the actual response content from the API response
     let responseContent = '';
@@ -727,6 +729,24 @@ function displayResults(results) {
         responseContent = results.error;
     } else {
         responseContent = 'No response content available';
+    }
+
+    // Get the current profile from the action input
+    const actionInput = document.getElementById('actionInput');
+    const profileId = actionInput.value;
+    const profile = profilesData[profileId];
+
+    // Update results title and description if profile has form.title and form.description
+    if (profile && profile.form && profile.form.title) {
+        resultsTitle.textContent = profile.form.title;
+    } else {
+        resultsTitle.textContent = '📝 Results';
+    }
+
+    if (profile && profile.form && profile.form.description) {
+        resultsDescription.textContent = profile.form.description;
+    } else {
+        resultsDescription.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
     }
 
     // Format and display results
