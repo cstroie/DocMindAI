@@ -286,7 +286,22 @@
       "description": "Analyze patient discharge papers to extract radiology-relevant information",
       "category": "medical",
       "icon": "📋",
-      "prompt": "ROLE\nYou are a medical assistant analyzing patient discharge papers for radiology relevance.\n\nTASK\nRead the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation. Do not exceed 50 words.\n\nCRITICAL INSTRUCTION: {language_instruction}\n\nOUTPUT FORMAT (JSON):\n```json\n{\n  \"pathologic\": \"yes/no\",\n  \"severity\": 0-10,\n  \"summary\": \"summary paragraph\",\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\"]\n}\n```\n\nRULES:\n- \"pathologic\": \"yes\" if the discharge paper contains any findings relevant to radiology\n- \"severity\": 0=normal, 1=minimal, 5=moderate, 10=critical/urgent\n- \"summary\": maximum 50 words summarizing radiology-relevant information\n- \"keywords\": exactly 3 relevant medical keywords from the discharge paper\n- Focus on findings, conditions, treatments affecting radiology\n- Ignore non-radiology relevant information\n- Respond ONLY with the JSON, without additional text\n\nDISCHARGE PAPER:\n{text}",
+      "prompt": {
+        "role": "You are a medical assistant analyzing patient discharge papers for radiology relevance.",
+        "task": "Read the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation. Do not exceed 50 words.",
+        "critical_instruction": "{language_instruction}",
+        "output_format": "OUTPUT FORMAT (JSON):\n```json\n{\n  \"pathologic\": \"yes/no\",\n  \"severity\": 0-10,\n  \"summary\": \"summary paragraph\",\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\"]\n}\n```",
+        "rules": [
+          "\"pathologic\": \"yes\" if the discharge paper contains any findings relevant to radiology",
+          "\"severity\": 0=normal, 1=minimal, 5=moderate, 10=critical/urgent",
+          "\"summary\": maximum 50 words summarizing radiology-relevant information",
+          "\"keywords\": exactly 3 relevant medical keywords from the discharge paper",
+          "Focus on findings, conditions, treatments affecting radiology",
+          "Ignore non-radiology relevant information",
+          "Respond ONLY with the JSON, without additional text"
+        ],
+        "discharge_paper": "{text}"
+      },
       "form": {
         "title": "Discharge Paper Analysis",
         "description": "Paste discharge paper text for radiology-focused analysis",
