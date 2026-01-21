@@ -266,11 +266,22 @@ function buildProfilePrompt($profile_id, $form_data) {
         return "Analyze the following input: " . json_encode($form_data);
     }
     else {
-        // Handle prompt as string or array
+        // Handle prompt as string, array, or JSON object
         $prompt = $profile['prompt'];
+
         if (is_array($prompt)) {
-            // If prompt is an array, concatenate items with double newlines
-            $prompt = implode("\n\n", $prompt);
+            // Check if this is an associative array (JSON object)
+            if (array_keys($prompt) !== range(0, count($prompt) - 1)) {
+                // Convert JSON object to formatted text
+                $prompt_text = '';
+                foreach ($prompt as $key => $value) {
+                    $prompt_text .= strtoupper($key) . "\n" . $value . "\n\n";
+                }
+                $prompt = rtrim($prompt_text, "\n");
+            } else {
+                // If prompt is a sequential array, concatenate items with double newlines
+                $prompt = implode("\n\n", $prompt);
+            }
         }
 
         // Ensure prompt is a string
