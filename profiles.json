@@ -1,4 +1,12 @@
 {
+  "version": "1.0.0",
+  "metadata": {
+    "last_updated": "2026-01-21",
+    "author": "Medical AI Team",
+    "description": "Configuration file for medical AI tool profiles",
+    "license": "MIT",
+    "schema_version": "1.0"
+  },
   "profiles": {
     "rra": {
       "id": "rra",
