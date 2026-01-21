@@ -230,7 +230,6 @@ function handleProfileAction($profile_id) {
     // Add form data and API data to the response
     $result['debug']['form_data'] = $form_data;
     $result['debug']['api_data'] = $api_data;
-    $result['debug']['prompt'] = $prompt;
 
     // Set CORS headers
     header('Access-Control-Allow-Origin: *');
@@ -359,29 +358,7 @@ function processProfileResponse($profile_id, $api_response) {
         }
     }
 
-    // Add profile-specific processing if needed
-    switch ($profile_id) {
-        case 'rra':
-            // For radiology reports, try to extract JSON if present
-            $content = $api_response['choices'][0]['message']['content'] ?? '';
-            $json_data = extractJsonFromResponse($content);
-
-            if ($json_data) {
-                $result['structured_data'] = $json_data;
-            }
-            break;
-
-        case 'sde':
-            // For structured data extraction, try to extract JSON
-            $content = $api_response['choices'][0]['message']['content'] ?? '';
-            $json_data = extractJsonFromResponse($content);
-
-            if ($json_data) {
-                $result['extracted_data'] = $json_data;
-            }
-            break;
-    }
-
+    // Return the processed result
     return $result;
 }
 
