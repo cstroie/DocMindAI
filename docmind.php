@@ -265,8 +265,15 @@ function buildProfilePrompt($profile_id, $form_data) {
         return "Analyze the following input: " . json_encode($form_data);
     }
 
-    // Replace placeholders in the prompt with actual form data
+    // Handle prompt as string or array
     $prompt = $profile['prompt'];
+    if (is_array($prompt)) {
+        // If prompt is an array, concatenate items with double newlines
+        $prompt = implode("\n\n", $prompt);
+    }
+
+    // Replace placeholders in the prompt with actual form data
+    $prompt = (string)$prompt;
 
     // Replace {language_instruction} placeholder if present
     $language = $form_data['language'] ?? 'en';
