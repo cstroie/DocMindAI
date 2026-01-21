@@ -341,6 +341,24 @@ function processProfileResponse($profile_id, $api_response) {
         'response' => $api_response
     ];
 
+    // Load profiles from JSON
+    $profiles_data = loadResourceFromJson('profiles.json');
+
+    if (!isset($profiles_data['error']) && isset($profiles_data['profiles'][$profile_id])) {
+        $profile = $profiles_data['profiles'][$profile_id];
+
+        // Check if profile has 'output' key set to 'json'
+        if (isset($profile['output']) && $profile['output'] === 'json') {
+            // Try to extract JSON if present
+            $content = $api_response['choices'][0]['message']['content'] ?? '';
+            $json_data = extractJsonFromResponse($content);
+
+            if ($json_data) {
+                $result['json'] = $json_data;
+            }
+        }
+    }
+
     // Add profile-specific processing if needed
     switch ($profile_id) {
         case 'rra':
