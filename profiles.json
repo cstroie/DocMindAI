@@ -14,7 +14,15 @@
       "description": "Analyze radiology reports and extract key medical information",
       "category": "medical",
       "icon": "🔍",
-      "prompt": "ROLE\nYou are a medical exper analyzing radiology reports.\n\nTASK\nRead the report and extract the main pathological information in JSON format.\n\nCRITICAL INSTRUCTION: {language_instruction}\n\nOUTPUT FORMAT (JSON):\n```json\n{\n  \"pathologic\": \"yes/no\",\n  \"severity\": 1-10,\n  \"summary\": \"1-5 words\",\n  \"diagnoses\": [\"diagnosis1\", \"diagnosis2\", \"diagnosis3\"]\n}\n```\n\nRULES:\n- \"pathologic\": \"yes\" if any anomaly exists, otherwise \"no\"\n- \"severity\": 1=minimal, 5=moderate, 10=critical/urgent\n- \"summary\": diagnosis in maximum 5 words (e.g., \"fracture\", \"pneumonia\", \"lung nodule\")\n- \"diagnoses\": exactly 3 specific medical diagnoses based on the report\n- If everything is normal: ```json {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"normal\", \"diagnoses\": [\"normal\", \"no significant findings\", \"within normal limits\"]}```\n- Ignore spelling errors\n- Respond ONLY with the JSON, without additional text\n\nRADIOLOGY REPORT:\n{text}",
+      "prompt": [
+        "ROLE\nYou are a medical exper analyzing radiology reports.",
+        "TASK\nRead the report and extract the main pathological information in JSON format.",
+        "CRITICAL INSTRUCTION: {language_instruction}",
+        "OUTPUT FORMAT (JSON):\n```json\n{\n  \"pathologic\": \"yes/no\",\n  \"severity\": 1-10,\n  \"summary\": \"1-5 words\",\n  \"diagnoses\": [\"diagnosis1\", \"diagnosis2\", \"diagnosis3\"]\n}\n```",
+        "RULES:\n- \"pathologic\": \"yes\" if any anomaly exists, otherwise \"no\"\n- \"severity\": 1=minimal, 5=moderate, 10=critical/urgent\n- \"summary\": diagnosis in maximum 5 words (e.g., \"fracture\", \"pneumonia\", \"lung nodule\")\n- \"diagnoses\": exactly 3 specific medical diagnoses based on the report\n- If everything is normal: ```json {\"pathologic\": \"no\", \"severity\": 0, \"summary\": \"normal\", \"diagnoses\": [\"normal\", \"no significant findings\", \"within normal limits\"]}```\n- Ignore spelling errors\n- Respond ONLY with the JSON, without additional text",
+        "RADIOLOGY REPORT:\n{text}"
+      ],
+      "output": "json",
       "form": {
         "title": "Radiology Report Analysis",
         "description": "Enter radiology report text and select processing options",
@@ -50,7 +58,12 @@
       "description": "Convert unstructured text or documents into structured JSON, YAML, XML, HTML, or Markdown formats",
       "category": "general",
       "icon": "📊",
-      "prompt": "ROLE\nYou are a data extraction API.\n\nROLE\nExtract structured data from the following. If a file is provided, extract data from the file content as well.\n\nOUTPUT FORMAT:\n{output_format}\n\nTEXT: {text}",
+      "prompt": {
+        "role": "You are a data extraction API.",
+        "task": "Extract structured data from the following. If a file is provided, extract data from the file content as well.",
+        "output_format": "{output_format}",
+        "text": "{text}"
+      },
       "form": {
         "title": "Structured Data Extraction",
         "description": "",

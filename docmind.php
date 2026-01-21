@@ -190,6 +190,7 @@ function handleProfileAction($profile_id) {
     $prompt = buildProfilePrompt($profile_id, $form_data);
 
     // Prepare API request data
+    // TOOD use a default model if not specified in form_data
     $api_data = [
         'model' => $form_data['model'] ?? '',
         'messages' => [],
@@ -201,7 +202,6 @@ function handleProfileAction($profile_id) {
     if (!empty($file_content)) {
         $user_content .= $file_content;
     }
-
     $api_data['messages'][] = ['role' => 'user', 'content' => $user_content];
 
     // If it's an image, add it as a separate message with image data
@@ -228,14 +228,15 @@ function handleProfileAction($profile_id) {
     $result = processProfileResponse($profile_id, $response);
 
     // Add form data and API data to the response
-    $result['form_data'] = $form_data;
-    $result['api_data'] = $api_data;
-    $result['prompt'] = $prompt;
+    $result['debug']['form_data'] = $form_data;
+    $result['debug']['api_data'] = $api_data;
+    $result['debug']['prompt'] = $prompt;
 
     // Set CORS headers
     header('Access-Control-Allow-Origin: *');
     header('Content-Type: application/json');
 
+    // Send the final JSON response
     sendJsonResponse($result, true);
 }
 
@@ -260,20 +261,21 @@ function buildProfilePrompt($profile_id, $form_data) {
     if (!$profile || empty($profile['prompt'])) {
         // If prompt is in form_data, use it
         if (isset($form_data['prompt']) && !empty($form_data['prompt'])) {
-            return $form_data['prompt'];
+            $prompt =  $form_data['prompt'];
         }
         return "Analyze the following input: " . json_encode($form_data);
     }
+    else {
+        // Handle prompt as string or array
+        $prompt = $profile['prompt'];
+        if (is_array($prompt)) {
+            // If prompt is an array, concatenate items with double newlines
+            $prompt = implode("\n\n", $prompt);
+        }
 
-    // Handle prompt as string or array
-    $prompt = $profile['prompt'];
-    if (is_array($prompt)) {
-        // If prompt is an array, concatenate items with double newlines
-        $prompt = implode("\n\n", $prompt);
+        // Ensure prompt is a string
+        $prompt = (string)$prompt;
     }
-
-    // Replace placeholders in the prompt with actual form data
-    $prompt = (string)$prompt;
 
     // Replace {language_instruction} placeholder if present
     $language = $form_data['language'] ?? 'en';
@@ -288,6 +290,7 @@ function buildProfilePrompt($profile_id, $form_data) {
         }
     }
 
+    // Return the final prompt
     return $prompt;
 }
 
