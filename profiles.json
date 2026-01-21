@@ -291,7 +291,6 @@
         "task": "Read the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation. Do not exceed 50 words.",
         "critical_instruction": "{language_instruction}",
         "output_format": [
-          "OUTPUT FORMAT (JSON):",
           "```json",
           "{",
           "  \"pathologic\": \"yes/no\",",
@@ -312,6 +311,7 @@
         ],
         "discharge_paper": "{text}"
       },
+      "output": "json",
       "form": {
         "title": "Discharge Paper Analysis",
         "description": "Paste discharge paper text for radiology-focused analysis",
