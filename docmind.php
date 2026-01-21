@@ -258,11 +258,32 @@ function buildProfilePrompt($profile_id, $form_data) {
     $profile = $profiles_data['profiles'][$profile_id] ?? null;
 
     // Check if profile has a prompt field, otherwise look for it in form_data
-    if (!$profile || empty($profile['prompt'])) {
-        // If prompt is in form_data, use it
-        if (isset($form_data['prompt']) && !empty($form_data['prompt'])) {
-            $prompt =  $form_data['prompt'];
+    if (!$profile) {
+        return "Analyze the following input: " . json_encode($form_data);
+    }
+
+    // Handle case where profile has 'prompts' key (multiple prompts)
+    if (isset($profile['prompts']) && is_array($profile['prompts'])) {
+        // Get the selected prompt from form data
+        $selected_prompt_key = $form_data['prompt'] ?? '';
+
+        if (!empty($selected_prompt_key) && isset($profile['prompts'][$selected_prompt_key])) {
+            $prompt = $profile['prompts'][$selected_prompt_key];
+        } else {
+            // If no specific prompt selected or invalid, use the first available prompt
+            $first_prompt = reset($profile['prompts']);
+            $prompt = $first_prompt;
         }
+    }
+    // Handle case where profile has a single 'prompt' field
+    elseif (!empty($profile['prompt'])) {
+        $prompt = $profile['prompt'];
+    }
+    // If no prompt found in profile, check form_data
+    elseif (isset($form_data['prompt']) && !empty($form_data['prompt'])) {
+        $prompt = $form_data['prompt'];
+    }
+    else {
         return "Analyze the following input: " . json_encode($form_data);
     }
     else {
