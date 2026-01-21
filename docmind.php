@@ -277,6 +277,12 @@ function buildProfilePrompt($profile_id, $form_data) {
                 foreach ($prompt as $key => $value) {
                     // Replace underscores with spaces in key names
                     $formatted_key = str_replace('_', ' ', $key);
+
+                    // Handle array values by concatenating with newlines
+                    if (is_array($value)) {
+                        $value = implode("\n", $value);
+                    }
+
                     $prompt_text .= strtoupper($formatted_key) . "\n" . $value . "\n\n";
                 }
                 $prompt = rtrim($prompt_text, "\n");
