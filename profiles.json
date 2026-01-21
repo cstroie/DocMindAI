@@ -829,8 +829,10 @@
           "Input HTML might contain a full web page with headers, nav bars, sidebars, etc.",
           "Output should be just the main article content in clean {output_format} format."
         ],
-        "url": "{url}"
+        "page_content": "{content}"
       },
+      "output": "markdown",
+      "tool": "web_scraper",
       "form": {
         "title": "Web Page Conversion",
         "description": "Review the converted web page content in Markdown format. The AI has processed the web page and extracted the main content, removing ads and navigation elements.",
@@ -918,9 +920,10 @@
           "}",
           "```"
         ],
-        "url": "{url}"
+        "page_content": "{content}"
       },
       "output": "json",
+      "tool": "web_scraper",
       "form": {
         "title": "Web Page Summary",
         "description": "Review the AI-generated summary of the web page content. The summary highlights the most important points and key information from the article.",
@@ -1027,6 +1030,7 @@
           "paper_content": "{content}"
         }
       },
+      "output": "json",
       "form": {
         "title": "Academic Paper Summarization",
         "description": "Review the structured summary of the academic paper. The AI has analyzed the paper using the selected approach (three-pass or problem-idea-evidence) and extracted key information.",
