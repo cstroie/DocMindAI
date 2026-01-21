@@ -42,7 +42,7 @@
       "output": "json",
       "form": {
         "title": "Radiology Report Analysis",
-        "description": "Enter radiology report text and select processing options",
+        "description": "Review the extracted medical information from the radiology report. The AI has analyzed the report and provided structured data including pathological status, severity, summary, and specific diagnoses.",
         "fields": [
           {
             "name": "text",
@@ -83,7 +83,7 @@
       },
       "form": {
         "title": "Structured Data Extraction",
-        "description": "",
+        "description": "Review the extracted structured data from your input. The AI has processed the text and converted it into the requested format (JSON, YAML, XML, HTML, or Markdown).",
         "fields": [
           {
             "name": "text",
@@ -145,7 +145,7 @@
       "icon": "🧪",
       "form": {
         "title": "AI Model Experimentation",
-        "description": "Configure AI model testing with prompts and optional file uploads",
+        "description": "Review the AI model's response to your custom prompt. This output shows how the selected model processes your input and generates a response.",
         "fields": [
           {
             "name": "prompts",
@@ -244,7 +244,7 @@
       },
       "form": {
         "title": "SOAP Note",
-        "description": "Upload or paste medical transcripts to convert to SOAP format",
+        "description": "Review the generated SOAP note from your medical transcript. The AI has processed the patient-clinician dialogue and organized it into Subjective, Objective, Assessment, and Plan sections.",
         "fields": [
           {
             "name": "transcript",
@@ -331,7 +331,7 @@
       "output": "json",
       "form": {
         "title": "Discharge Paper Analysis",
-        "description": "Paste discharge paper text for radiology-focused analysis",
+        "description": "Review the radiology-focused analysis of the discharge paper. The AI has extracted key information including pathological status, severity, summary, and relevant keywords.",
         "fields": [
           {
             "name": "text",
@@ -510,7 +510,7 @@
       },
       "form": {
         "title": "Hospital Discharge Analysis",
-        "description": "Paste hospital discharge paper text for comprehensive medical analysis",
+        "description": "Review the comprehensive analysis of the hospital discharge paper. The AI has extracted and organized key medical information including patient details, diagnoses, medical history, treatment, and discharge instructions.",
         "fields": [
           {
             "name": "text",
@@ -609,7 +609,7 @@
       "output": "json",
       "form": {
         "title": "Differential Diagnosis",
-        "description": "Enter radiology report text to generate differential diagnoses",
+        "description": "Review the ranked differential diagnoses generated from the radiology report. The AI has analyzed the report and provided three potential diagnoses with probabilities, descriptions, supporting features, and references.",
         "fields": [
           {
             "name": "report",
@@ -684,7 +684,7 @@
       },
       "form": {
         "title": "Patient Education Content",
-        "description": "Enter complex medical content to convert to patient-friendly language",
+        "description": "Review the patient-friendly educational content generated from your medical text. The AI has simplified complex medical information into clear, accessible language with appropriate formatting.",
         "fields": [
           {
             "name": "content",
@@ -719,7 +719,7 @@
       "icon": "💬",
       "form": {
         "title": "Medical Chat",
-        "description": "Enter your medical query and select AI personality",
+        "description": "Review the AI medical assistant's response to your query. The response is tailored based on the selected personality and provides medical information in the requested language.",
         "fields": [
           {
             "name": "message",
@@ -762,7 +762,7 @@
       "icon": "📷",
       "form": {
         "title": "OCR Form",
-        "description": "Upload image files for text extraction",
+        "description": "Review the extracted text from your uploaded image. The OCR tool has processed the image and converted it to editable text format.",
         "fields": [
           {
             "name": "image",
@@ -794,7 +794,7 @@
       "icon": "🔗",
       "form": {
         "title": "Web Page Conversion",
-        "description": "Enter web page URL and select output format",
+        "description": "Review the converted web page content in Markdown format. The AI has processed the web page and extracted the main content, removing ads and navigation elements.",
         "fields": [
           {
             "name": "url",
@@ -835,7 +835,7 @@
       "icon": "📝",
       "form": {
       "title": "Web Page Summary",
-        "description": "Enter web page URL for AI-powered summarization",
+        "description": "Review the AI-generated summary of the web page content. The summary highlights the most important points and key information from the article.",
         "fields": [
           {
             "name": "url",
@@ -938,7 +938,7 @@
       },
       "form": {
         "title": "Academic Paper Summarization",
-        "description": "Upload academic papers or enter text for structured summarization",
+        "description": "Review the structured summary of the academic paper. The AI has analyzed the paper using the selected approach (three-pass or problem-idea-evidence) and extracted key information.",
         "fields": [
           {
             "name": "content",
@@ -1004,7 +1004,7 @@
       "icon": "📚",
       "form": {
         "title": "Medical Literature Search",
-        "description": "Enter medical search queries for literature research",
+        "description": "Review the search results and AI-summarized research papers related to your medical query. The results include relevant studies with key findings.",
         "fields": [
           {
             "name": "query",
