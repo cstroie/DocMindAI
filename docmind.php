@@ -240,6 +240,40 @@ function handleProfileAction($profile_id) {
 }
 
 /**
+ * Execute a tool based on profile configuration
+ *
+ * @param string $tool_name Name of the tool to execute
+ * @param array $form_data Form data containing tool parameters
+ * @return string|false Tool output or false on error
+ */
+function executeTool($tool_name, $form_data) {
+    switch ($tool_name) {
+        case 'web_scraper':
+            // Check if URL is provided
+            if (empty($form_data['url'])) {
+                return false;
+            }
+
+            // Validate URL format
+            if (!filter_var($form_data['url'], FILTER_VALIDATE_URL)) {
+                return false;
+            }
+
+            // Scrape the URL content
+            $content = scrapeUrl($form_data['url']);
+
+            if ($content === false) {
+                return false;
+            }
+
+            return $content;
+
+        default:
+            return false;
+    }
+}
+
+/**
  * Build prompt based on profile configuration
  */
 function buildProfilePrompt($profile_id, $form_data) {
@@ -259,6 +293,18 @@ function buildProfilePrompt($profile_id, $form_data) {
     // Check if profile has a prompt field, otherwise look for it in form_data
     if (!$profile) {
         return "Analyze the following input: " . json_encode($form_data);
+    }
+
+    // Check if profile has a tool specification
+    $tool_output = '';
+    if (isset($profile['tool']) && !empty($profile['tool'])) {
+        $tool_output = executeTool($profile['tool'], $form_data);
+        if ($tool_output === false) {
+            return "Failed to execute tool: " . $profile['tool'];
+        }
+
+        // Add tool output to form data as 'content' field
+        $form_data['content'] = $tool_output;
     }
 
     // Handle case where profile has 'prompts' key (multiple prompts)
