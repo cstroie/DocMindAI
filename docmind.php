@@ -334,7 +334,6 @@ function buildProfilePrompt($profile_id, $form_data) {
     // Ensure prompt is a string
     $prompt = (string)$prompt;
     
-
     // Replace {language_instruction} placeholder if present
     $language = $form_data['language'] ?? 'en';
     $language_instruction = $languages_data['languages'][$language]['instruction'] ?? 'Respond in English.';
