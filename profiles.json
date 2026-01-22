@@ -439,8 +439,6 @@
           "- Recomandări pentru îngrijire continuă"
         ],
         "output_format": [
-          "## Rezumat Externare Spital",
-          "",
           "### Informații despre Pacient",
           "- **Nume:** [Nume Pacient]",
           "- **Vârstă:** [Vârstă]",
@@ -510,6 +508,7 @@
         ],
         "discharge_paper": "{text}"
       },
+      "display": "html",
       "form": {
         "title": "Hospital Discharge Analysis",
         "description": "Review the comprehensive analysis of the hospital discharge paper. The AI has extracted and organized key medical information including patient details, diagnoses, medical history, treatment, and discharge instructions.",
@@ -552,16 +551,27 @@
         "output_format": [
           "```json",
           "{",
-          "  \"diagnoses\": [",
-          "    {",
-          "      \"condition\": \"medical condition name\",",
-          "      \"probability\": 85,",
-          "      \"description\": \"detailed explanation of the condition\",",
-          "      \"supporting_features\": [\"radiological feature 1\", \"radiological feature 2\", \"clinical correlation\"],",
-          "      \"references\": [\"reference 1\", \"reference 2\"]",
-          "    }",
-          "  ]",
-          "}",
+          "  \"first\": {",
+          "    \"condition\": \"medical condition name\",",
+          "    \"probability\": 85,",
+          "    \"description\": \"detailed explanation of the condition\",",
+          "    \"supporting_features\": [\"radiological feature 1\", \"radiological feature 2\", \"clinical correlation\"],",
+          "    \"references\": [\"reference 1\", \"reference 2\"]",
+          "  },",
+          "  \"second\": {",
+          "    \"condition\": \"medical condition name\",",
+          "    \"probability\": 60,",
+          "    \"description\": \"detailed explanation of the condition\",",
+          "    \"supporting_features\": [\"radiological feature 1\", \"radiological feature 2\", \"clinical correlation\"],",
+          "    \"references\": [\"reference 1\", \"reference 2\"]",
+          "  },",
+          "  \"third\": {",
+          "    \"condition\": \"medical condition name\",",
+          "    \"probability\": 40,",
+          "    \"description\": \"detailed explanation of the condition\",",
+          "    \"supporting_features\": [\"radiological feature 1\", \"radiological feature 2\", \"clinical correlation\"],",
+          "    \"references\": [\"reference 1\", \"reference 2\"]",
+          "  }",
           "```"
         ],
         "rules": [
@@ -580,35 +590,33 @@
           "Response:",
           "```json",
           "{",
-          "  \"diagnoses\": [",
-          "    {",
-          "      \"condition\": \"Bacterial Pneumonia\",",
-          "      \"probability\": 75,",
-          "      \"description\": \"Infection of the lung parenchyma causing consolidation. Common pathogens include Streptococcus pneumoniae and Haemophilus influenzae. Presents with fever, cough, and focal consolidation on imaging.\",",
-          "      \"supporting_features\": [\"Hazy opacity in lung field\", \"Consolidation pattern\", \"No pleural effusion\"],",
-          "      \"references\": [\"Harrison's Principles of Internal Medicine, 21st Edition\", \"Radiology Assistant: Pneumonia Patterns\"]",
+          "  \"first\": {",
+          "    \"condition\": \"Bacterial Pneumonia\",",
+          "    \"probability\": 75,",
+          "    \"description\": \"Infection of the lung parenchyma causing consolidation. Common pathogens include Streptococcus pneumoniae and Haemophilus influenzae. Presents with fever, cough, and focal consolidation on imaging.\",",
+          "    \"supporting_features\": [\"Hazy opacity in lung field\", \"Consolidation pattern\", \"No pleural effusion\"],",
+          "    \"references\": [\"Harrison's Principles of Internal Medicine, 21st Edition\", \"Radiology Assistant: Pneumonia Patterns\"]",
           "    },",
-          "    {",
+          "  \"second\": {",
           "      \"condition\": \"Viral Pneumonia\",",
           "      \"probability\": 60,",
           "      \"description\": \"Viral infection causing interstitial and alveolar inflammation. Common viruses include influenza, RSV, and COVID-19. May present with similar imaging findings to bacterial pneumonia.\",",
           "      \"supporting_features\": [\"Hazy infiltrate pattern\", \"Single lobe involvement\", \"Absence of cavitation\"],",
           "      \"references\": [\"Chest Imaging Patterns in Viral Pneumonia, Radiographics\", \"ATS Guidelines on Community-Acquired Pneumonia\"]",
           "    },",
-          "    {",
+            "  \"third\": {",
           "      \"condition\": \"Pulmonary Edema\",",
           "      \"probability\": 40,",
           "      \"description\": \"Accumulation of fluid in the lung interstitium and alveoli. Can be cardiogenic (heart failure) or non-cardiogenic (ARDS). May present with bilateral hazy opacities.\",",
           "      \"supporting_features\": [\"Hazy opacity\", \"Single lobe distribution (atypical)\", \"No pleural effusion\"],",
           "      \"references\": [\"ACR Appropriateness Criteria: Acute Respiratory Illness\", \"Radiology Education: Pulmonary Edema Patterns\"]",
           "    }",
-          "  ]",
           "}",
           "```"
         ],
         "radiology_report": "{report}"
       },
-      "output": "json",
+      "display": "html",
       "form": {
         "title": "Differential Diagnosis",
         "description": "Review the ranked differential diagnoses generated from the radiology report. The AI has analyzed the report and provided three potential diagnoses with probabilities, descriptions, supporting features, and references.",
@@ -684,6 +692,7 @@
         ],
         "medical_content": "{content}"
       },
+      "display": "html",
       "form": {
         "title": "Patient Education Content",
         "description": "Review the patient-friendly educational content generated from your medical text. The AI has simplified complex medical information into clear, accessible language with appropriate formatting.",
@@ -833,7 +842,7 @@
         ],
         "page_content": "{content}"
       },
-      "output": "markdown",
+      "display": "markdown",
       "tool": "web_scraper",
       "form": {
         "title": "Web Page Conversion",
@@ -924,7 +933,7 @@
         ],
         "page_content": "{content}"
       },
-      "output": "json",
+      "display": "html",
       "tool": "web_scraper",
       "form": {
         "title": "Web Page Summary",
@@ -1032,7 +1041,7 @@
           "paper_content": "{content}"
         }
       },
-      "output": "json",
+      "display": "html",
       "form": {
         "title": "Academic Paper Summarization",
         "description": "Review the structured summary of the academic paper. The AI has analyzed the paper using the selected approach (three-pass or problem-idea-evidence) and extracted key information.",
@@ -1152,7 +1161,7 @@
         ],
         "paper_content": "{content}"
       },
-      "output": "json",
+      "display": "html",
       "tool": "medical_literature_search",
       "form": {
         "title": "Medical Literature Search",
