@@ -1097,6 +1097,60 @@
       "description": "Search medical literature databases and get AI-summarized research papers",
       "category": "research",
       "icon": "📚",
+      "prompt": {
+        "role": "You are a medical research assistant specializing in summarizing scientific literature.",
+        "task": "Analyze research papers and create structured summaries of their key components.",
+        "critical_instruction": "{language_instruction}",
+        "output_format": [
+          "```json",
+          "{",
+          "  \"title\": \"paper title\",",
+          "  \"authors\": [\"author1\", \"author2\", \"author3\"],",
+          "  \"journal\": \"journal name\",",
+          "  \"year\": 2023,",
+          "  \"summary\": \"2-3 sentence overview of the study\",",
+          "  \"key_findings\": [\"finding1\", \"finding2\", \"finding3\"],",
+          "  \"methodology\": \"brief description of research methods\",",
+          "  \"pmid\": \"pubmed id\"",
+          "}",
+          "```"
+        ],
+        "rules": [
+          "\"title\": Extract the full title of the paper",
+          "\"authors\": Extract all authors (up to 5, then \"et al.\")",
+          "\"journal\": Extract the journal name",
+          "\"year\": Extract the publication year",
+          "\"summary\": Create a 2-3 sentence overview focusing on objectives, methods, and main conclusions. If the article directly answers the search query, include that answer prominently.",
+          "\"key_findings\": Extract exactly 3 key findings or results from the study",
+          "\"methodology\": Briefly describe the research methodology (1-2 sentences)",
+          "\"pmid\": Include the PubMed ID if available",
+          "Focus on the most important information",
+          "Be concise but comprehensive",
+          "Respond ONLY with the JSON, without additional text"
+        ],
+        "example": [
+          "Input: Research paper about a new diabetes treatment...",
+          "Response:",
+          "```json",
+          "{",
+          "  \"title\": \"Efficacy of Novel GLP-1 Receptor Agonist in Type 2 Diabetes Management\",",
+          "  \"authors\": [\"Smith J\", \"Johnson K\", \"Brown L\", \"Davis M\", \"Wilson R\"],",
+          "  \"journal\": \"Journal of Clinical Endocrinology & Metabolism\",",
+          "  \"year\": 2023,",
+          "  \"summary\": \"This randomized controlled trial evaluated the efficacy of a novel GLP-1 receptor agonist in 500 patients with type 2 diabetes over 24 weeks. The treatment group showed significantly greater reductions in HbA1c levels compared to placebo. The drug was well-tolerated with minimal side effects.\",",
+          "  \"key_findings\": [",
+          "    \"HbA1c reduced by 1.5% in treatment group vs 0.3% in placebo\",",
+          "    \"Weight loss of 3.2 kg average in treatment group\",",
+          "    \"95% of patients experienced mild gastrointestinal side effects\"",
+          "  ],",
+          "  \"methodology\": \"Double-blind, placebo-controlled, randomized clinical trial with 500 participants over 24 weeks.\",",
+          "  \"pmid\": \"12345678\"",
+          "}",
+          "```"
+        ],
+        "paper_content": "{content}"
+      },
+      "output": "json",
       "form": {
         "title": "Medical Literature Search",
         "description": "Review the search results and AI-summarized research papers related to your medical query. The results include relevant studies with key findings.",
@@ -1104,20 +1158,23 @@
           {
             "name": "query",
             "type": "text",
-            "label": "Search Query",
-            "required": true,
-            "placeholder": "Enter medical topic or research question..."
+            "label": "Search query",
+            "help": "Enter a medical topic, research question, or keywords to search for relevant literature.",
+            "placeholder": "Enter medical topic or research question...",
+            "required": true
           },
           {
             "name": "model",
             "type": "select",
             "label": "AI Model",
+            "help": "Select the AI model to use for summarization.",
             "options": []
           },
           {
             "name": "language",
             "type": "select",
             "label": "Response Language",
+            "help": "Select the language for the summary output.",
             "options": []
           }
         ]
