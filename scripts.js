@@ -6,14 +6,104 @@ let languagesData = null;
 let promptsData = null;
 
 /**
+ * Toggle between light and dark themes
+ *
+ * This function toggles the application theme between light and dark modes
+ * by updating the theme preference cookie and applying the appropriate CSS
+ * classes. It also updates the theme toggle button icon.
+ *
+ * @return {void}
+ *
+ * @note Uses document.cookie to store theme preference
+ * @note Updates the theme-toggle button icon based on current theme
+ * @note Triggers a page reload to apply theme changes
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up theme toggle handler
+ */
+function toggleTheme() {
+    // Get current theme from cookie or use system preference
+    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+        const [name, value] = cookie.trim().split('=');
+        acc[name] = decodeURIComponent(value);
+        return acc;
+    }, {});
+
+    const currentTheme = cookies['docmind-theme'] || 'system';
+    let newTheme;
+
+    // Determine new theme based on current theme
+    if (currentTheme === 'light') {
+        newTheme = 'dark';
+    } else if (currentTheme === 'dark') {
+        newTheme = 'light';
+    } else {
+        // If system preference, check what the system is using
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        newTheme = systemPrefersDark ? 'light' : 'dark';
+    }
+
+    // Set theme cookie (30 days)
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 30);
+    document.cookie = `docmind-theme=${encodeURIComponent(newTheme)}; expires=${expirationDate.toUTCString()}; path=/`;
+
+    // Update theme icon immediately
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+        themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    // Reload page to apply theme
+    window.location.reload();
+}
+
+/**
+ * Apply theme based on user preference
+ *
+ * This function applies the theme based on user preference stored in cookies
+ * or system preference. It updates the theme toggle button icon accordingly.
+ *
+ * @return {void}
+ *
+ * @note Reads theme preference from docmind-theme cookie
+ * @note Falls back to system preference if no cookie is set
+ * @note Updates the theme toggle button icon
+ * @see Document.addEventListener('DOMContentLoaded') - Calls this function on page load
+ */
+function applyTheme() {
+    // Get theme preference from cookie
+    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+        const [name, value] = cookie.trim().split('=');
+        acc[name] = decodeURIComponent(value);
+        return acc;
+    }, {});
+
+    const theme = cookies['docmind-theme'] || 'system';
+
+    // Update theme icon based on current theme
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+        if (theme === 'dark') {
+            themeIcon.textContent = '☀️';
+        } else if (theme === 'light') {
+            themeIcon.textContent = '🌙';
+        } else {
+            // System preference - check what the system is using
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            themeIcon.textContent = systemPrefersDark ? '☀️' : '🌙';
+        }
+    }
+}
+
+
+/**
  * Apply syntax highlighting using highlight.js
- * 
+ *
  * This function applies syntax highlighting to all code blocks on the page
  * using the highlight.js library. It automatically detects the programming
  * language of each code block and applies appropriate styling.
- * 
+ *
  * @return {void}
- * 
+ *
  * @note This function is called after rendering results to enhance code readability
  * @note Requires the highlight.js library to be loaded
  * @note Uses the hljs global object for highlighting
@@ -1252,21 +1342,27 @@ function arrayOfObjectsToTable(arr) {
 
 /**
  * DocMind-specific JavaScript initialization
- * 
+ *
  * This function initializes the DocMind AI application when the DOM is fully loaded.
  * It performs the following tasks:
  * 1. Loads configuration data (categories, profiles, languages)
  * 2. Displays available profiles in the UI
  * 3. Sets up the form submission handler
- * 
+ * 4. Sets up the theme toggle button
+ * 5. Applies the user's theme preference
+ *
  * @note This is the main entry point for the application
  * @note Uses async/await for sequential data loading
  * @note Sets up global variables: categoriesData, profilesData, languagesData
  * @note Calls displayProfiles() to render profile cards
  * @note Attaches form submission handler to the API form
+ * @note Sets up theme toggle button click handler
+ * @note Applies theme preference on page load
  * @see loadJSONResource() - Used to load configuration data
  * @see displayProfiles() - Renders profile cards
  * @see handleFormSubmit() - Handles form submissions
+ * @see toggleTheme() - Handles theme toggling
+ * @see applyTheme() - Applies theme preference
  */
 document.addEventListener('DOMContentLoaded', async function() {
     // Load categories data
@@ -1279,4 +1375,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     displayProfiles();
     // Set up form submission
     document.getElementById('apiForm')?.addEventListener('submit', handleFormSubmit);
+    // Set up theme toggle button
+    document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+    // Apply theme preference
+    applyTheme();
 });
+
