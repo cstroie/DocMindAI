@@ -1151,6 +1151,7 @@
         "paper_content": "{content}"
       },
       "output": "json",
+      "tool": "medical_literature_search",
       "form": {
         "title": "Medical Literature Search",
         "description": "Review the search results and AI-summarized research papers related to your medical query. The results include relevant studies with key findings.",

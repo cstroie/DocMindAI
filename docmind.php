@@ -262,26 +262,23 @@ function executeTool($tool_name, $form_data) {
             // Return scraped content or false on failure
             return $content;
 
-        case 'search_pubmed':
+        case 'medical_literature_search':
             // Check if query is provided
             if (empty($form_data['query'])) {
                 return false;
             }
-
             // Validate query length
             if (strlen($form_data['query']) > 500) {
                 return false;
             }
-
             // Search PubMed for articles
             $articles = searchPubMed($form_data['query'], 5); // Get top 5 results
-
+            // Return false if no articles found
             if ($articles === false) {
                 return false;
             } elseif (empty($articles)) {
                 return false;
             }
-
             // Convert articles to JSON format
             return json_encode($articles, JSON_PRETTY_PRINT);
 
