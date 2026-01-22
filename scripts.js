@@ -640,6 +640,16 @@ async function loadProfileForm(profileId) {
         const profileSelect = document.getElementById('profileSelect');
         const profileSelector = document.querySelector('.profile-selector');
 
+        // Debug: Log which elements are missing
+        console.log('Checking required form elements:');
+        console.log('profileForm:', profileForm);
+        console.log('formFields:', formFields);
+        console.log('actionInput:', actionInput);
+        console.log('topTitle:', topTitle);
+        console.log('topDescription:', topDescription);
+        console.log('profileSelect:', profileSelect);
+        console.log('profileSelector:', profileSelector);
+
         if (!profileForm || !formFields || !actionInput || !topTitle || !topDescription || !profileSelect || !profileSelector) {
             console.error('Required form elements not found');
             // Show error in the main content area as fallback
