@@ -727,6 +727,14 @@ function displayResults(results) {
         responseContent = results.response.choices[0].message.content;
     } else if (results.error) {
         responseContent = results.error;
+    } else if (results.json) {
+        // If results contain json property, convert it to markdown
+        try {
+            responseContent = jsonToMarkdown(results.json);
+        } catch (error) {
+            console.error('Error converting JSON to markdown:', error);
+            responseContent = JSON.stringify(results.json, null, 2);
+        }
     } else {
         responseContent = 'No response content available';
     }
