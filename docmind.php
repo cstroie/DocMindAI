@@ -352,31 +352,42 @@ function buildProfilePrompt($profile_id, $form_data) {
 }
 
 /**
- * Convert prompt array to formatted text
+ * Convert prompt array to formatted text recursively
  *
  * @param array $prompt_array The prompt array to convert
+ * @param int $indent_level Current indentation level (for nested arrays)
  * @return string Formatted text version of the prompt
  */
-function convertPromptArrayToText($prompt_array) {
+function convertPromptArrayToText($prompt_array, $indent_level = 0) {
     // Check if this is an associative array (JSON object)
     if (array_keys($prompt_array) !== range(0, count($prompt_array) - 1)) {
         // Convert JSON object to formatted text
         $prompt_text = '';
+        $indent = str_repeat('  ', $indent_level);
+
         foreach ($prompt_array as $key => $value) {
             // Replace underscores with spaces in key names
             $formatted_key = str_replace('_', ' ', $key);
 
-            // Handle array values by concatenating with newlines
+            // Handle array values recursively
             if (is_array($value)) {
-                $value = implode("\n", $value);
+                $value = convertPromptArrayToText($value, $indent_level + 1);
             }
 
-            $prompt_text .= strtoupper($formatted_key) . "\n" . $value . "\n\n";
+            $prompt_text .= $indent . strtoupper($formatted_key) . "\n" . $indent . $value . "\n\n";
         }
         return rtrim($prompt_text, "\n");
     } else {
-        // If prompt is a sequential array, concatenate items with newlines
-        return implode("\n", $prompt_array);
+        // If prompt is a sequential array, process each item recursively
+        $result = [];
+        foreach ($prompt_array as $item) {
+            if (is_array($item)) {
+                $result[] = convertPromptArrayToText($item, $indent_level);
+            } else {
+                $result[] = $item;
+            }
+        }
+        return implode("\n", $result);
     }
 }
 
