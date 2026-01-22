@@ -660,8 +660,8 @@
         ]
       }
     },
-    "prescription": {
-      "id": "prescription",
+    "pre": {
+      "id": "pre",
       "name": "Prescription Analyzer",
       "description": "Analyze medical prescriptions and extract structured treatment information in YAML format",
       "category": "medical",
@@ -781,11 +781,9 @@
         ],
         "prescription_text": "{text}"
       },
-      "output": "yaml",
-      "display": "html",
       "form": {
         "title": "Prescription Analysis",
-        "description": "Review the structured analysis of the medical prescription. The AI has extracted patient information, doctor details, medications, treatment schema, and other relevant data in YAML format.",
+        "description": "This is the structured analysis of the medical prescription. The AI has extracted patient information, doctor details, medications, treatment schema, and other relevant data in YAML format.",
         "fields": [
           {
             "name": "text",
