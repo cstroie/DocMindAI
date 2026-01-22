@@ -723,18 +723,15 @@ function displayResults(results) {
 
     // Extract the actual response content from the API response
     let responseContent = '';
-    if (results.response && results.response.choices && results.response.choices[0] && results.response.choices[0].message && results.response.choices[0].message.content) {
-        responseContent = results.response.choices[0].message.content;
-    } else if (results.error) {
+    if (results.error) {
+        // If results contain an error, display it
         responseContent = results.error;
     } else if (results.json) {
-        // If results contain json property, convert it to markdown
-        try {
-            responseContent = jsonToMarkdown(results.json);
-        } catch (error) {
-            console.error('Error converting JSON to markdown:', error);
-            responseContent = JSON.stringify(results.json, null, 2);
-        }
+        // If results contain json property, return it as object
+        responseContent = results.json;
+    } else if (results.response && results.response.choices && results.response.choices[0] && results.response.choices[0].message && results.response.choices[0].message.content) {
+        // Extract content from OpenAI chat completion response
+        responseContent = results.response.choices[0].message.content;
     } else {
         responseContent = 'No response content available';
     }
