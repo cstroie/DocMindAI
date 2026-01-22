@@ -29,8 +29,16 @@ $AVAILABLE_LANGUAGES = [
 /**
  * Get language instruction for the AI model
  * 
- * @param string $language Language code
- * @return string Language instruction
+ * This function returns the appropriate language instruction for the AI model
+ * based on the provided language code. It serves as a centralized language
+ * instruction provider for consistent responses across the application.
+ * 
+ * @param string $language Language code (e.g., 'ro', 'en', 'es', 'fr', 'de', 'it')
+ * @return string Language instruction for the AI model
+ * 
+ * @note If the language code is not found, defaults to Romanian ('ro')
+ * @note Instructions are used to guide the AI's response language
+ * @see getPersonalityInstruction() - For personality-specific instructions
  */
 function getLanguageInstruction($language) {
     $language_instructions = [
@@ -48,9 +56,19 @@ function getLanguageInstruction($language) {
 /**
  * Get personality instruction for the AI model
  * 
- * @param string $personality Personality type
- * @param string $language Language code
- * @return string Personality instruction
+ * This function returns personality-specific instructions for the AI model
+ * based on the provided personality type and language. It supports multiple
+ * personality profiles including medical professionals and the fictional
+ * character Skippy from the Expeditionary Force series.
+ * 
+ * @param string $personality Personality type (e.g., 'medical_assistant', 'general_practitioner', 'specialist', 'medical_researcher', 'skippy')
+ * @param string $language Language code (e.g., 'ro', 'en', 'es', 'fr', 'de', 'it')
+ * @return string Personality instruction for the AI model
+ * 
+ * @note If the personality/language combination is not found, defaults to English medical assistant
+ * @note Instructions are used to guide the AI's behavior, tone, and expertise level
+ * @see getLanguageInstruction() - For language-specific instructions
+ * @note The 'skippy' personality provides a humorous, arrogant tone for entertainment
  */
 function getPersonalityInstruction($personality, $language) {
     $personality_instructions = [
@@ -109,8 +127,20 @@ function getPersonalityInstruction($personality, $language) {
 /**
  * Get the color associated with a severity level
  * 
- * @param int $severity Severity level (0-10)
- * @return string Hex color code
+ * This function returns a color code based on the severity level of a medical
+ * condition or alert. The color scale progresses from green (normal) to red
+ * (critical) based on the severity value.
+ * 
+ * @param int $severity Severity level (0-10), where:
+ *        0 = Normal (green)
+ *        1-3 = Minor (blue)
+ *        4-6 = Moderate (orange)
+ *        7-10 = Severe/Critical (red)
+ * @return string Hex color code for the severity level
+ * 
+ * @note Uses a traffic light color scheme for intuitive understanding
+ * @note Color codes are in hexadecimal format (e.g., '#10b981')
+ * @see getSeverityLabel() - For text labels corresponding to severity levels
  */
 function getSeverityColor($severity) {
     if ($severity == 0) return '#10b981'; // green
@@ -122,8 +152,21 @@ function getSeverityColor($severity) {
 /**
  * Get the label associated with a severity level
  * 
- * @param int $severity Severity level (0-10)
+ * This function returns a human-readable label for a severity level,
+ * providing a textual description of the severity of a medical condition
+ * or alert.
+ * 
+ * @param int $severity Severity level (0-10), where:
+ *        0 = Normal
+ *        1-3 = Minor
+ *        4-6 = Moderate
+ *        7-8 = Severe
+ *        9-10 = Critical
  * @return string Severity label
+ * 
+ * @note Labels are designed to be clear and concise for medical contexts
+ * @note The scale is designed to be intuitive for healthcare professionals
+ * @see getSeverityColor() - For color codes corresponding to severity levels
  */
 function getSeverityLabel($severity) {
     if ($severity == 0) return 'Normal';
@@ -136,8 +179,17 @@ function getSeverityLabel($severity) {
 /**
  * Format file size in human readable format
  * 
+ * This function converts a file size in bytes to a human-readable format
+ * with appropriate units (B, KB, MB, GB). It automatically selects the
+ * most appropriate unit based on the magnitude of the file size.
+ * 
  * @param int $bytes File size in bytes
- * @return string Human readable file size
+ * @return string Human readable file size with unit (e.g., "1.5 MB")
+ * 
+ * @note Uses binary units (1024-based) for file sizes
+ * @note Rounds to 2 decimal places for precision
+ * @note Handles edge cases like zero or negative values
+ * @see processUploadedImage() - Uses this for displaying file sizes
  */
 function formatFileSize($bytes) {
     $units = ['B', 'KB', 'MB', 'GB'];
@@ -150,10 +202,22 @@ function formatFileSize($bytes) {
 
 /**
  * Resize an image while maintaining aspect ratio
- *
- * @param resource $image GD image resource
- * @param int $max_size Maximum dimension (width or height)
+ * 
+ * This function resizes an image to fit within a maximum dimension while
+ * preserving the original aspect ratio. It handles transparency appropriately
+ * for different image types and returns the resized image resource along with
+ * its new dimensions.
+ * 
+ * @param resource $image GD image resource to resize
+ * @param int $max_size Maximum dimension (width or height) in pixels
  * @return array|false Array with resized image resource and new dimensions, or false on error
+ * 
+ * @note If the image is smaller than max_size, it returns the original dimensions
+ * @note Uses bicubic resampling for high-quality resizing
+ * @note Preserves transparency for PNG/GIF, uses white background for JPEG
+ * @note The returned array contains: ['image' => resource, 'width' => int, 'height' => int]
+ * @see processUploadedImage() - Uses this for image processing
+ * @see preprocessImageForOCR() - Uses this for OCR preprocessing
  */
 function resizeImage($image, $max_size = 1000) {
     $width = imagesx($image);
@@ -201,10 +265,24 @@ function resizeImage($image, $max_size = 1000) {
 
 /**
  * Process uploaded image file
- *
+ * 
+ * This function handles the complete image processing pipeline for uploaded
+ * images. It validates the file, detects the actual image type, optionally
+ * resizes the image, and returns the processed image data ready for API
+ * transmission or storage.
+ * 
  * @param array $file Uploaded file array from $_FILES
- * @param string $max_size Maximum dimension for resizing ('original' or numeric)
+ * @param string $max_size Maximum dimension for resizing ('original' or numeric string)
  * @return array|false Array with image data and MIME type, or false on error
+ * 
+ * @note Validates file size against MAX_FILE_SIZE constant
+ * @note Supports JPEG, PNG, GIF, and WebP formats
+ * @note If max_size is 'original', returns unprocessed image data
+ * @note Otherwise, resizes to fit within max_size and converts to JPEG
+ * @note Returns array with keys: 'image_data' (binary), 'mime_type' (string)
+ * @see resizeImage() - Used for resizing the image
+ * @see MAX_FILE_SIZE - Maximum allowed file size constant
+ * @note Used in handleProfileAction() for image uploads
  */
 function processUploadedImage($file, $max_size = '500') {
     // Validate file size
@@ -298,12 +376,23 @@ function processUploadedImage($file, $max_size = '500') {
 
 /**
  * Preprocess image for better OCR results
- * Enhances contrast, applies threshold, and resizes image
- *
+ * 
+ * This function applies various image processing techniques to optimize an
+ * image for Optical Character Recognition (OCR). It includes resizing,
+ * grayscale conversion, thresholding, and dilation to improve text
+ * recognition accuracy.
+ * 
  * @param string $image_path Path to the original image
- * @param bool $apply_threshold Whether to apply threshold (default: false)
- * @param bool $apply_dilation Whether to apply dilation (default: false)
+ * @param bool $apply_threshold Whether to apply Otsu's thresholding (default: false)
+ * @param bool $apply_dilation Whether to apply morphological dilation (default: false)
  * @return string|false Path to preprocessed image or false on error
+ * 
+ * @note Uses Otsu's method for automatic threshold calculation
+ * @note Dilation helps connect broken text characters
+ * @note Output is always PNG format for lossless quality
+ * @note Temporary file must be cleaned up by caller
+ * @see resizeImage() - Used for initial image resizing
+ * @note Used for OCR preprocessing of document images
  */
 function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dilation = false) {
     // Create temporary file path
@@ -465,9 +554,20 @@ function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dil
 /**
  * Extract text from various document formats
  * 
- * @param string $file_path Path to the file
+ * This function extracts text content from various document formats using
+ * appropriate external tools. It supports Microsoft Word documents (DOC/DOCX),
+ * PDF files, OpenDocument Text files (ODT), and plain text files.
+ * 
+ * @param string $file_path Path to the document file
  * @param string $mime_type MIME type of the file
  * @return string|false Extracted text or false on error
+ * 
+ * @note Uses external tools: antiword, catdoc, docx2txt, pdftotext, odt2txt, pandoc
+ * @note Falls back to pandoc if specific tools are not available or fail
+ * @note Cleans up error messages and stderr output from tool execution
+ * @note Requires appropriate tools to be installed on the system
+ * @see handleProfileAction() - Uses this for document processing
+ * @note Used for processing uploaded documents in profile actions
  */
 function extractTextFromDocument($file_path, $mime_type) {
     // Try specific tools based on file type
@@ -529,8 +629,20 @@ function extractTextFromDocument($file_path, $mime_type) {
 /**
  * Scrape URL content with Chrome browser simulation
  * 
+ * This function fetches web page content by simulating a Chrome browser
+ * request. It handles cookies, redirects, gzip encoding, and includes
+ * appropriate headers to bypass basic bot detection.
+ * 
  * @param string $url URL to scrape
  * @return string|false Page content or false on error
+ * 
+ * @note Uses cURL with Chrome user agent and browser-like headers
+ * @note Handles gzip compression automatically
+ * @note Stores cookies in temporary file for session management
+ * @note Follows up to 5 redirects with 30-second timeout
+ * @note Cleans up temporary cookie file after request
+ * @see executeTool() - Uses this for web scraping tool
+ * @note Used for the 'web_scraper' tool in profile actions
  */
 function scrapeUrl($url) {
     // Create a temporary file to store cookies
@@ -583,8 +695,19 @@ function scrapeUrl($url) {
 /**
  * Extract images from PDF file
  * 
+ * This function extracts images from a PDF file using either the Imagick or
+ * Gmagick PHP extensions. It processes the first page of the PDF and returns
+ * the image data in PNG format for further processing (e.g., OCR).
+ * 
  * @param string $pdf_path Path to the PDF file
  * @return array|false Array of image data or false on error
+ * 
+ * @note Uses Imagick extension if available, falls back to Gmagick
+ * @note Extracts only the first page for OCR processing
+ * @note Sets resolution to 200 DPI for better quality
+ * @note Returns image data in PNG format
+ * @note Returns array of image data blobs (currently only first page)
+ * @note Used for PDF document processing in profile actions
  */
 function extractImagesFromPDF($pdf_path) {
     // Try Imagick first
@@ -671,8 +794,16 @@ function extractImagesFromPDF($pdf_path) {
 /**
  * Get human-readable explanation for HTTP error codes
  * 
+ * This function provides user-friendly explanations for common HTTP error
+ * codes, making API error messages more understandable for end users.
+ * 
  * @param int $http_code HTTP status code
  * @return string Explanation of the error
+ * 
+ * @note Covers common HTTP error codes from 400 to 504
+ * @note Returns generic message for unknown error codes
+ * @see getAvailableModels() - Uses this for API error reporting
+ * @see callLLMApi() - Uses this for API error reporting
  */
 function getHttpErrorExplanation($http_code) {
     $explanations = [
@@ -694,10 +825,23 @@ function getHttpErrorExplanation($http_code) {
 /**
  * Fetch available models from the LLM server API
  * 
+ * This function queries the LLM API endpoint to retrieve a list of available
+ * AI models. It handles authentication, error handling, and optional filtering
+ * of model names. Vision models are automatically detected and labeled.
+ * 
  * @param string $api_endpoint The API endpoint URL
  * @param string $api_key The API key (if required)
  * @param string $filter_regex Regular expression to filter models (optional)
- * @return array List of available models
+ * @return array List of available models or error array
+ * 
+ * @note Makes GET request to /models endpoint
+ * @note Uses Bearer token authentication
+ * @note Filters models by regex pattern if provided
+ * @note Automatically detects and labels vision models
+ * @note Returns models sorted alphabetically by name
+ * @note Returns ['error' => message] on failure
+ * @see handleGetModels() - Uses this to fetch models
+ * @see getHttpErrorExplanation() - Used for error messages
  */
 function getAvailableModels($api_endpoint, $api_key = '', $filter_regex = '') {
     $models_url = $api_endpoint . '/models';
@@ -761,10 +905,22 @@ function getAvailableModels($api_endpoint, $api_key = '', $filter_regex = '') {
 /**
  * Make API call to LLM server
  * 
+ * This function makes a POST request to the LLM chat completion API endpoint.
+ * It handles authentication, request formatting, error handling, and response
+ * parsing. The function supports long-running requests with a 5-minute timeout.
+ * 
  * @param string $api_endpoint_chat The chat API endpoint URL
- * @param array $data The request data
+ * @param array $data The request data (messages, model, etc.)
  * @param string $api_key The API key (if required)
- * @return array|false API response data or false on error
+ * @return array|false API response data or error array
+ * 
+ * @note Uses POST method with JSON payload
+ * @note Uses Bearer token authentication
+ * @note Has 5-minute timeout for long-running requests
+ * @note Follows up to 3 redirects
+ * @note Returns ['error' => message] on failure
+ * @see handleProfileAction() - Uses this for profile processing
+ * @see getHttpErrorExplanation() - Used for error messages
  */
 function callLLMApi($api_endpoint_chat, $data, $api_key = '') {
     // Make API request
@@ -807,9 +963,19 @@ function callLLMApi($api_endpoint_chat, $data, $api_key = '') {
 /**
  * Handle common request processing for AI applications
  * 
+ * This function validates and sanitizes input data for AI processing.
+ * It checks for length constraints and ensures the input is not empty
+ * after trimming whitespace.
+ * 
  * @param string $input The input data (report, content, etc.)
- * @param int $max_length Maximum allowed length
+ * @param int $max_length Maximum allowed length (default: 10000)
  * @return array Processing result with validation status
+ * 
+ * @note Trims whitespace from input
+ * @note Validates length against max_length
+ * @note Ensures input is not empty after trimming
+ * @note Returns array with 'valid', 'error', and 'data' keys
+ * @note Used for validating user input before AI processing
  */
 function processInput($input, $max_length = 10000) {
     $result = [
@@ -840,8 +1006,19 @@ function processInput($input, $max_length = 10000) {
 /**
  * Handle common URL validation and processing
  * 
+ * This function validates and sanitizes URL input for web scraping or
+ * other URL-based operations. It ensures the URL is properly formatted
+ * and includes a protocol (http:// or https://).
+ * 
  * @param string $url The URL to validate
  * @return array Processing result with validation status
+ * 
+ * @note Trims whitespace from URL
+ * @note Validates URL format using filter_var()
+ * @note Requires http:// or https:// protocol
+ * @note Returns array with 'valid', 'error', and 'data' keys
+ * @note Used for validating URLs before web scraping
+ * @see scrapeUrl() - Uses validated URLs for web scraping
  */
 function processUrl($url) {
     $result = [
@@ -867,8 +1044,17 @@ function processUrl($url) {
 /**
  * Set common cookies for AI applications
  * 
- * @param array $cookies Cookie data to set
- * @param int $expire_time Cookie expiration time
+ * This function sets multiple cookies with a consistent expiration time
+ * and path. It's designed for setting application-wide cookies that
+ * persist across sessions.
+ * 
+ * @param array $cookies Associative array of cookie names and values
+ * @param int $expire_time Cookie expiration time in seconds (default: 30 days)
+ * 
+ * @note Sets cookies with path '/' for application-wide access
+ * @note Default expiration is 30 days (2592000 seconds)
+ * @note Cookies are set before any output is sent to the browser
+ * @note Used for storing user preferences or session data
  */
 function setCommonCookies($cookies, $expire_time = 2592000) { // 30 days default
     foreach ($cookies as $name => $value) {
@@ -879,8 +1065,20 @@ function setCommonCookies($cookies, $expire_time = 2592000) { // 30 days default
 /**
  * Send JSON response and exit
  * 
- * @param array $data Response data
- * @param bool $is_api_request Whether this is an API request
+ * This function sends a JSON response with appropriate headers and
+ * terminates script execution. It's designed for API endpoints that
+ * need to return JSON data to clients.
+ * 
+ * @param array $data Response data to encode as JSON
+ * @param bool $is_api_request Whether this is an API request (default: false)
+ * 
+ * @note Sets CORS header to allow cross-origin requests
+ * @note Sets Content-Type to application/json
+ * @note Uses json_encode() to convert data to JSON
+ * @note Calls exit() to terminate script execution
+ * @note Only sends response if $is_api_request is true
+ * @see handleApiRequest() - Uses this for API responses
+ * @see handleProfileAction() - Uses this for profile responses
  */
 function sendJsonResponse($data, $is_api_request = false) {
     if ($is_api_request) {
@@ -894,9 +1092,21 @@ function sendJsonResponse($data, $is_api_request = false) {
 /**
  * Search PubMed for articles matching the query
  * 
- * @param string $query Search query
- * @param int $max_results Maximum number of results to return
+ * This function searches the PubMed database for medical literature
+ * matching a given query. It uses the NCBI E-utilities API to perform
+ * the search and retrieves article IDs, then fetches detailed information
+ * for each article.
+ * 
+ * @param string $query Search query (e.g., "diabetes treatment")
+ * @param int $max_results Maximum number of results to return (default: 5)
  * @return array|false Array of articles or false on error
+ * 
+ * @note Uses NCBI E-utilities API (esearch.fcgi)
+ * @note Returns articles sorted by relevance
+ * @note Fetches detailed information for each article
+ * @note Returns false on API errors or no results
+ * @see fetchArticleDetails() - Used to get article details
+ * @see executeTool() - Uses this for 'medical_literature_search' tool
  */
 function searchPubMed($query, $max_results = 5) {
     // PubMed API endpoint
@@ -952,8 +1162,21 @@ function searchPubMed($query, $max_results = 5) {
 /**
  * Fetch detailed information for PubMed articles
  * 
- * @param array $ids PubMed IDs
+ * This function retrieves detailed metadata for PubMed articles using their
+ * PubMed IDs. It queries the NCBI E-utilities API and parses the XML response
+ * to extract article information including title, authors, journal, year,
+ * and abstract.
+ * 
+ * @param array $ids Array of PubMed IDs
  * @return array|false Array of article details or false on error
+ * 
+ * @note Uses NCBI E-utilities API (efetch.fcgi)
+ * @note Returns XML response and parses with SimpleXML
+ * @note Limits authors to first 5 + "et al." if more
+ * @note Extracts PMID, title, authors, journal, year, abstract
+ * @note Returns false on API errors or parsing failures
+ * @see searchPubMed() - Uses this to get article details
+ * @note Used for the 'medical_literature_search' tool
  */
 function fetchArticleDetails($ids) {
     // PubMed API endpoint for fetching details
@@ -1042,8 +1265,20 @@ function fetchArticleDetails($ids) {
 /**
  * Extract JSON from AI response content
  * 
+ * This function attempts to extract JSON data from AI response content.
+ * It looks for JSON between code fences (```json ... ```) or any JSON
+ * object in the content. If the JSON is malformed, it attempts to fix
+ * common issues like trailing commas and unquoted keys.
+ * 
  * @param string $content AI response content
- * @return array|null Extracted JSON data or null if not found
+ * @return array|null Extracted JSON data or null if not found/invalid
+ * 
+ * @note First tries to find JSON between code fences
+ * @note Then tries to find any JSON object in the content
+ * @note Attempts to fix common JSON formatting issues
+ * @note Returns null if no valid JSON is found
+ * @see processProfileResponse() - Uses this for JSON output profiles
+ * @note Used for extracting structured data from AI responses
  */
 function extractJsonFromResponse($content) {
     // Try to find JSON between code fences
@@ -1078,9 +1313,19 @@ function extractJsonFromResponse($content) {
 
 /**
  * Convert array to YAML format
- *
+ * 
+ * This function converts a PHP array to YAML format. It handles both
+ * sequential and associative arrays, with proper indentation and formatting.
+ * 
  * @param array $array Array to convert
  * @return string YAML formatted string
+ * 
+ * @note Uses recursive processing for nested arrays
+ * @note Sequential arrays use "- " prefix
+ * @note Associative arrays use "key: value" format
+ * @note Strings are quoted for proper YAML formatting
+ * @note Uses 2-space indentation for nested levels
+ * @note Used for generating YAML output in some profiles
  */
 function yaml_encode($array) {
     $yaml = '';
@@ -1114,8 +1359,16 @@ function yaml_encode($array) {
 
 /**
  * Check if config.php is available and show configuration instructions if needed
- *
+ * 
+ * This function checks for the existence of the configuration file and
+ * returns an HTML message with instructions if the file is missing.
+ * 
  * @return string HTML message about configuration status
+ * 
+ * @note Returns empty string if config.php exists
+ * @note Returns error message with instructions if config.php is missing
+ * @note Instructions include copying example file and editing settings
+ * @note Used for displaying configuration status in web interface
  */
 function checkConfigStatus() {
     if (file_exists('config.php')) {
@@ -1133,6 +1386,20 @@ function checkConfigStatus() {
     }
 }
 
+/**
+ * Remove markdown code fences from text
+ * 
+ * This function removes markdown code fences (```) from the beginning
+ * and end of a text string, extracting the actual content.
+ * 
+ * @param string $text Text with markdown code fences
+ * @return string Text without code fences
+ * 
+ * @note Removes opening fence (``` or ```lang)
+ * @note Removes closing fence (```)
+ * @note Trims whitespace from result
+ * @note Used for extracting content from code blocks
+ */
 function removeMarkdownFence(string $text): string
 {
     // Remove opening fence (``` or ```lang)
@@ -1147,8 +1414,21 @@ function removeMarkdownFence(string $text): string
 /**
  * Convert basic markdown to HTML
  * 
+ * This function converts basic markdown syntax to HTML. It supports
+ * headers, lists, blockquotes, code blocks, horizontal rules, and
+ * inline formatting (bold, italic, code, links, images).
+ * 
  * @param string $markdown Markdown text to convert
  * @return string HTML output
+ * 
+ * @note Supports headers (1-6 levels)
+ * @note Supports ordered and unordered lists
+ * @note Supports blockquotes
+ * @note Supports code blocks (```)
+ * @note Supports horizontal rules
+ * @note Supports inline formatting (bold, italic, code, links, images)
+ * @note Escapes HTML entities for security
+ * @note Used for rendering markdown content in responses
  */
 function markdownToHtml($markdown) {
     // Remove markdown code fences if present
@@ -1286,6 +1566,22 @@ function markdownToHtml($markdown) {
     return implode("\n", $html);
 }
 
+/**
+ * Process inline markdown formatting
+ * 
+ * This function converts inline markdown formatting to HTML. It handles
+ * bold, italic, inline code, links, and images.
+ * 
+ * @param string $text Text with inline markdown
+ * @return string HTML formatted text
+ * 
+ * @note Supports **bold** and __bold__
+ * @note Supports *italic* and _italic_
+ * @note Supports `inline code`
+ * @note Supports [links](url)
+ * @note Supports ![images](url)
+ * @note Used by markdownToHtml() for inline formatting
+ */
 function processInlineMarkdown($text) {
     // Bold (**text** or __text__)
     $text = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $text);
@@ -1310,8 +1606,19 @@ function processInlineMarkdown($text) {
 /**
  * Get the color associated with a probability level
  * 
+ * This function returns a color code based on a probability percentage.
+ * The color scale progresses from green (low probability) to red (high
+ * probability), providing visual feedback for confidence levels.
+ * 
  * @param int $probability Probability percentage (0-100)
- * @return string Hex color code
+ * @return string Hex color code for the probability level
+ * 
+ * @note Uses a traffic light color scheme for intuitive understanding
+ * @note Color codes are in hexadecimal format (e.g., '#ef4444')
+ * @note 0-39% = Green (low probability)
+ * @note 40-59% = Blue (medium-low probability)
+ * @note 60-79% = Orange (medium-high probability)
+ * @note 80-100% = Red (high probability)
  */
 function getProbabilityColor($probability) {
     if ($probability >= 80) return '#ef4444'; // red
@@ -1322,6 +1629,21 @@ function getProbabilityColor($probability) {
 
 /**
  * Load resource from JSON file
+ * 
+ * This function loads and parses a JSON configuration file. It handles
+ * file existence checks, reading errors, and JSON parsing errors,
+ * returning appropriate error messages for each case.
+ * 
+ * @param string $filename Path to the JSON file
+ * @return array Decoded JSON data or error array
+ * 
+ * @note Checks if file exists before attempting to read
+ * @note Handles file read errors gracefully
+ * @note Validates JSON format and reports parsing errors
+ * @note Returns ['error' => message] on failure
+ * @note Used for loading profiles.json, languages.json, etc.
+ * @see handleApiRequest() - Uses this for loading profiles
+ * @see buildProfilePrompt() - Uses this for loading profiles and languages
  */
 function loadResourceFromJson($filename) {
     // Check if resource file exists
@@ -1349,8 +1671,17 @@ function loadResourceFromJson($filename) {
 /**
  * Get syntax highlighting function for a given language
  * 
- * @param string $language Language code
+ * This function maps programming languages to their corresponding
+ * JavaScript syntax highlighting functions. It's used to determine
+ * which highlighting function to call for different code types.
+ * 
+ * @param string $language Language code or file extension
  * @return string JavaScript function name or empty string if not available
+ * 
+ * @note Supports JSON, YAML, Markdown, and XML
+ * @note Language codes are case-insensitive
+ * @note Returns empty string for unsupported languages
+ * @see extractCodeFenceInfo() - Uses this to get highlighting function
  */
 function getHighlightFunction($language) {
     $highlight_functions = [
@@ -1369,9 +1700,20 @@ function getHighlightFunction($language) {
 /**
  * Extract code fence information from text
  * 
+ * This function analyzes text to detect markdown code fences and extract
+ * the language type and content. It determines which syntax highlighting
+ * function should be used for the code block.
+ * 
  * @param string $text Text to analyze
  * @param string $default Default type when no fence is found (default: 'text')
  * @return array Array with 'type', 'function', and 'text' keys
+ * 
+ * @note Detects ```language code fences
+ * @note Extracts language type from fence (e.g., ```json)
+ * @note Returns empty type if no fence found
+ * @note Uses default type when no fence is detected
+ * @note Returns highlighting function name for the language
+ * @see getHighlightFunction() - Used to get function name
  */
 function extractCodeFenceInfo($text, $default = 'text') {
     $result = [
