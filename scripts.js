@@ -631,6 +631,29 @@ async function loadProfileForm(profileId) {
         // Set the profile ID in the profile object
         profile.id = profileId;
 
+        // Check if required form elements exist
+        const profileForm = document.getElementById('profileForm');
+        const formFields = document.getElementById('formFields');
+        const actionInput = document.getElementById('actionInput');
+        const topTitle = document.getElementById('topTitle');
+        const topDescription = document.getElementById('topDescription');
+
+        if (!profileForm || !formFields || !actionInput || !topTitle || !topDescription) {
+            console.error('Required form elements not found');
+            // Show error in the main content area as fallback
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                const errorElement = document.createElement('div');
+                errorElement.className = 'error';
+                errorElement.innerHTML = `
+                    <strong>Error:</strong> Required form elements not found
+                `;
+                mainContent.innerHTML = '';
+                mainContent.appendChild(errorElement);
+            }
+            return;
+        }
+
         // Show the profile select dropdown and enable the profile-select-container nav element
         const profileSelect = document.getElementById('profileSelect');
         profileSelect.style.display = 'block';
@@ -1390,12 +1413,18 @@ function showError(message) {
         // Fallback to direct HTML if template not found
         resultsArea.innerHTML = `<div class="error-message">${escapeHtml(message)}</div>`;
     }
-    // Show results area
-    resultsArea.style.display = 'block';
-    // Switch to results view
-    switchView('results');
-    // Scroll to error
-    resultsArea.scrollIntoView({ behavior: 'smooth' });
+
+    // Check if resultsArea.style exists before trying to access it
+    if (resultsArea.style) {
+        // Show results area
+        resultsArea.style.display = 'block';
+        // Switch to results view
+        switchView('results');
+        // Scroll to error
+        resultsArea.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        console.error('Results area style property not available');
+    }
 }
 
 /**
