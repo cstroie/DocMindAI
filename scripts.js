@@ -715,7 +715,7 @@ async function handleFormSubmit(event) {
  * @returns {void}
  */
 function displayResults(results) {
-    // Get results area elements
+    // Get results area and title elements
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
     const resultsTitle = document.getElementById('resultsTitle');
@@ -725,102 +725,90 @@ function displayResults(results) {
     let responseContent = '';
     if (results.error) {
         // If results contain an error, display it
-        responseContent = results.error;
-    } else if (results.json) {
-        // If results contain json property, return it as object
-        responseContent = results.json;
+        showError(results.error);
+        return;
+    //} else if (results.json) {
+    //    // If results contain 'json' key, return it as object
+    //    // TODO Do we need it?
+    //    responseContent = results.json;
+    } else if (results.html) {
+        // If results contain HTML, return it directly
+        // TODO Do we need it?
+        responseContent = results.html;
     } else if (results.response && results.response.choices && results.response.choices[0] && results.response.choices[0].message && results.response.choices[0].message.content) {
         // Extract content from OpenAI chat completion response
         responseContent = results.response.choices[0].message.content;
     } else {
-        responseContent = 'No response content available';
+        showError('No response content available');
+        return;
     }
 
-    // Get the current profile from the action input
-    const actionInput = document.getElementById('actionInput');
-    const profileId = actionInput.value;
-    const profile = profilesData[profileId];
-
+    // Get the current profile from results.profile
+    const profileId = results.profile || '';
+    const profile = profilesData[profileId] || null;
     // Update results title and description if profile has form.title and form.description
     if (profile && profile.form && profile.form.title) {
         resultsTitle.textContent = profile.form.title;
     } else {
         resultsTitle.textContent = '📝 Results';
     }
-
     if (profile && profile.form && profile.form.description) {
         resultsDescription.textContent = profile.form.description;
     } else {
         resultsDescription.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
     }
 
-    // Format and display results
-    resultsContent.innerHTML = formatResults(responseContent);
-    resultsArea.style.display = 'block';
-    // Apply syntax highlighting
-    applySyntaxHighlighting();
+    // Check if the result contains markdown code fences
+    const resultsInfo = extractCodeFenceInfo(responseContent, 'markdown');
+    // Check the desired display format from profile
+    const displayFormat = profile && profile.display ? profile.display.toLowerCase() : '';
+    // Check if the response need conversion based on resultsInfo format and display format
+    if (resultsInfo.type === 'json') {
+        // If the result is JSON, parse it
+        try {
+            const jsonData = JSON.parse(resultsInfo.text);
+            // JSON can be converted to markdown, html, or displayed as JSON (with syntax highlighting)
+            if (displayFormat === 'markdown') {
+                // Convert JSON to markdown
+                const markdownContent = jsonToMarkdown(jsonData);
+                resultsContent.innerHTML = `<pre><code class="${displayFormat}">${marked.parse(markdownContent)}</code></pre>`;
+            } else if (displayFormat === 'html') {
+                // Convert JSON to HTML via markdown
+                const markdownContent = jsonToMarkdown(jsonData);
+                resultsContent.innerHTML = marked.parse(markdownContent);
+            } else {
+                // Convert JSON to pretty JSON string
+                const prettyJson = JSON.stringify(jsonData, null, 2);
+                resultsContent.innerHTML = `<pre><code class="json">${prettyJson}</code></pre>`;
+            }
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+            resultsContent.innerHTML = `<pre><code>${resultsInfo.text}</code></pre>`;
+        }
+    } else if (resultsInfo.type === 'markdown') {
+        // If the result is markdown, convert it to HTML
+        if (displayFormat === 'html') {
+            // Convert JSON to HTML via markdown
+            resultsContent.innerHTML = marked.parse(resultsInfo.text);
+        } else {
+            // Keep as markdown with syntax highlighting
+            resultsContent.innerHTML = `<pre><code class="markdown">${escapeHtml(resultsInfo.text)}</code></pre>`;
+        }
+    } else {
+        // For other types, use the original response content, with syntax highlighting
+        resultsContent.innerHTML = `<pre><code class="${resultsInfo.type}">${escapeHtml(resultsInfo.text)}</code></pre>`;
+    }
+
+    // Check if resultsContent is not empty
+    if (resultsContent.innerHTML.trim() !== '') {
+        // Show results area
+        resultsArea.style.display = 'block';
+        // Apply syntax highlighting
+        applySyntaxHighlighting();
+    }
+
     // Scroll to results
     resultsArea.scrollIntoView({ behavior: 'smooth' });
-}
-
-/**
- * Format results for display
- *
- * @param {Object|string} results - The results to format
- * @returns {string} HTML string for displaying the results
- */
-function formatResults(results) {
-    // Check for error in results
-    if (results.error) {
-        return `<div class="error">${escapeHtml(results.error)}</div>`;
-    }
-    // If results contain HTML, return it directly
-    if (results.html) {
-        return results.html;
-    }
-
-    // If results is an object, convert to markdown for better readability
-    if (typeof results === 'object') {
-        try {
-            const markdown = jsonToMarkdown(results);
-            const htmlContent = marked.parse(markdown);
-            // Apply syntax highlighting to any code blocks in the HTML
-            setTimeout(() => {
-                applySyntaxHighlighting();
-            }, 0);
-            return htmlContent;
-        } catch (error) {
-            console.error('Error converting JSON to markdown:', error);
-            // Fallback to JSON stringify if conversion fails
-            return `<pre><code class="json">${JSON.stringify(results, null, 2)}</code></pre>`;
-        }
-    }
-
-    // Check if the result contains markdown code fences
-    const fenceInfo = extractCodeFenceInfo(results, 'text');
-    if (fenceInfo.type) {
-        // If the fence type is 'html', return the text directly without escaping
-        if (fenceInfo.type === 'html') {
-            return fenceInfo.text;
-        }
-        // Use marked.js to convert markdown to HTML
-        try {
-            // Convert markdown to HTML using marked.js
-            const htmlContent = marked.parse(results);
-            // Apply syntax highlighting to any code blocks in the HTML
-            setTimeout(() => {
-                applySyntaxHighlighting();
-            }, 0);
-            return htmlContent;
-        } catch (error) {
-            console.error('Error parsing markdown:', error);
-            // Fallback to syntax highlighting if markdown parsing fails
-            return `<pre><code class="${fenceInfo.type}">${escapeHtml(fenceInfo.text)}</code></pre>`;
-        }
-    }
-
-    // For simple strings, just return them
-    return escapeHtml(results);
 }
 
 /**
@@ -831,8 +819,6 @@ function formatResults(results) {
  */
 function showError(message) {
     const resultsArea = document.getElementById('resultsArea');
-    const resultsContent = document.getElementById('resultsContent');
-
     // Get the error template
     const errorTemplate = document.getElementById('errorTemplate');
     if (errorTemplate) {
@@ -846,15 +832,14 @@ function showError(message) {
         }
 
         // Display error message
-        resultsContent.innerHTML = '';
-        resultsContent.appendChild(errorElement);
+        resultsArea.innerHTML = '';
+        resultsArea.appendChild(errorElement);
     } else {
         // Fallback to direct HTML if template not found
-        resultsContent.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
+        resultsArea.innerHTML = `<div class="error-message">${escapeHtml(message)}</div>`;
     }
-
+    // Show results area
     resultsArea.style.display = 'block';
-
     // Scroll to error
     resultsArea.scrollIntoView({ behavior: 'smooth' });
 }

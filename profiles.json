@@ -40,6 +40,7 @@
         "radiology_report": "{text}"
       },
       "output": "json",
+      "display": "markdown",
       "form": {
         "title": "Radiology Report Analysis",
         "description": "Review the extracted medical information from the radiology report. The AI has analyzed the report and provided structured data including pathological status, severity, summary, and specific diagnoses.",
@@ -329,6 +330,7 @@
         "discharge_paper": "{text}"
       },
       "output": "json",
+      "display": "html",
       "form": {
         "title": "Discharge Paper Analysis",
         "description": "Review the radiology-focused analysis of the discharge paper. The AI has extracted key information including pathological status, severity, summary, and relevant keywords.",
