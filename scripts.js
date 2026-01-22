@@ -607,7 +607,14 @@ async function loadProfileForm(profileId) {
         // Get the selected profile
         const profile = profilesData[profileId];
         if (!profile) {
-            showError('Profile not found');
+            console.error('Profile not found:', profileId);
+            // Check if resultsArea exists before showing error
+            const resultsArea = document.getElementById('resultsArea');
+            if (resultsArea) {
+                showError('Profile not found');
+            } else {
+                console.error('Profile not found and results area not available');
+            }
             return;
         }
         // Set the profile ID in the profile object
