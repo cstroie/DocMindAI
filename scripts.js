@@ -774,6 +774,23 @@ function formatResults(results) {
         return results.html;
     }
 
+    // If results is an object, convert to markdown for better readability
+    if (typeof results === 'object') {
+        try {
+            const markdown = jsonToMarkdown(results);
+            const htmlContent = marked.parse(markdown);
+            // Apply syntax highlighting to any code blocks in the HTML
+            setTimeout(() => {
+                applySyntaxHighlighting();
+            }, 0);
+            return htmlContent;
+        } catch (error) {
+            console.error('Error converting JSON to markdown:', error);
+            // Fallback to JSON stringify if conversion fails
+            return `<pre><code class="json">${JSON.stringify(results, null, 2)}</code></pre>`;
+        }
+    }
+
     // Check if the result contains markdown code fences
     const fenceInfo = extractCodeFenceInfo(results, 'text');
     if (fenceInfo.type) {
@@ -794,23 +811,6 @@ function formatResults(results) {
             console.error('Error parsing markdown:', error);
             // Fallback to syntax highlighting if markdown parsing fails
             return `<pre><code class="${fenceInfo.type}">${escapeHtml(fenceInfo.text)}</code></pre>`;
-        }
-    }
-
-    // If results is an object, convert to markdown for better readability
-    if (typeof results === 'object') {
-        try {
-            const markdown = jsonToMarkdown(results);
-            const htmlContent = marked.parse(markdown);
-            // Apply syntax highlighting to any code blocks in the HTML
-            setTimeout(() => {
-                applySyntaxHighlighting();
-            }, 0);
-            return htmlContent;
-        } catch (error) {
-            console.error('Error converting JSON to markdown:', error);
-            // Fallback to JSON stringify if conversion fails
-            return `<pre><code class="json">${JSON.stringify(results, null, 2)}</code></pre>`;
         }
     }
 
@@ -871,10 +871,10 @@ function jsonToMarkdown(data) {
  * Convert an object to markdown headings and paragraphs
  *
  * @param {Object} obj - The object to convert
- * @param {number} [level=1] - The heading level to start with
+ * @param {number} [level=3] - The heading level to start with
  * @returns {string} Markdown representation
  */
-function objectToMarkdown(obj, level = 1) {
+function objectToMarkdown(obj, level = 3) {
     let markdown = '';
 
     for (const [key, value] of Object.entries(obj)) {
