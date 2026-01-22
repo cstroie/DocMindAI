@@ -7,6 +7,17 @@ let promptsData = null;
 
 /**
  * Apply syntax highlighting using highlight.js
+ * 
+ * This function applies syntax highlighting to all code blocks on the page
+ * using the highlight.js library. It automatically detects the programming
+ * language of each code block and applies appropriate styling.
+ * 
+ * @return {void}
+ * 
+ * @note This function is called after rendering results to enhance code readability
+ * @note Requires the highlight.js library to be loaded
+ * @note Uses the hljs global object for highlighting
+ * @see displayResults() - Calls this function after rendering content
  */
 function applySyntaxHighlighting() {
     // Initialize highlight.js
@@ -19,6 +30,18 @@ function applySyntaxHighlighting() {
 
 /**
  * Escape HTML special characters
+ * 
+ * This function safely escapes HTML special characters to prevent XSS attacks
+ * and ensure proper rendering of text content. It converts characters like
+ * <, >, &, and " into their HTML entity equivalents.
+ * 
+ * @param {string} text - The text to escape
+ * @return {string} The escaped HTML-safe text
+ * 
+ * @note Uses the DOM API for reliable escaping
+ * @note Prevents script injection and HTML injection attacks
+ * @note Used for displaying user-generated or API-generated content safely
+ * @see displayResults() - Uses this for rendering code blocks
  */
 function escapeHtml(text) {
     const div = document.createElement('div');
@@ -28,10 +51,23 @@ function escapeHtml(text) {
 
 /**
  * Extract code fence information from text
- *
+ * 
+ * This function analyzes text to detect markdown code fences and extract
+ * the programming language type and the actual code content. It's used to
+ * determine how to display and highlight code blocks in the UI.
+ * 
  * @param {string} text - Text to analyze
  * @param {string} [defaultType='text'] - Default type when no fence is found
  * @returns {Object} Object with 'type' and 'text' keys
+ * 
+ * @note Supports markdown code fences in format ```language
+ * @note Returns empty type if no language is specified in the fence
+ * @note If no fence is found, uses the default type
+ * @note The returned object contains:
+ *       - type: The detected language type (e.g., 'json', 'markdown', 'text')
+ *       - text: The content inside the code fences (or original text if no fence)
+ * @see displayResults() - Uses this to determine how to render response content
+ * @see jsonToMarkdown() - Uses this for JSON content processing
  */
 function extractCodeFenceInfo(text, defaultType = 'text') {
     const result = {
@@ -58,10 +94,23 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
 
 /**
  * Load JSON resource from file
- *
- * @param {string} filename - The JSON file to load
- * @param {string} rootKey - The root key to extract from the JSON data
+ * 
+ * This function fetches and parses a JSON configuration file from the server.
+ * It handles errors gracefully and can extract a specific root key from the
+ * JSON data if provided.
+ * 
+ * @param {string} filename - The JSON file to load (e.g., 'profiles.json')
+ * @param {string} rootKey - The root key to extract from the JSON data (e.g., 'profiles')
  * @returns {Promise<Object|null>} Promise resolving to the extracted data or null on error
+ * 
+ * @note Uses the Fetch API to retrieve the JSON file
+ * @note Handles network errors and JSON parsing errors
+ * @note If rootKey is provided, returns data[rootKey] if it exists, otherwise returns entire data
+ * @note Logs errors to console for debugging
+ * @note Used for loading profiles, languages, categories, and prompts
+ * @see displayProfiles() - Uses this to load profiles data
+ * @see populateProfileSelect() - Uses this to load profiles data
+ * @see Document.addEventListener('DOMContentLoaded') - Calls this for initial data loading
  */
 async function loadJSONResource(filename, rootKey) {
     try {
@@ -85,8 +134,22 @@ async function loadJSONResource(filename, rootKey) {
 
 /**
  * Display profiles grouped by category in the UI
- *
- * @returns {void}
+ * 
+ * This function renders all available profiles in the main interface,
+ * organizing them by category. Each profile is displayed as a clickable
+ * card that loads the corresponding form when clicked.
+ * 
+ * @return {void}
+ * 
+ * @note Profiles are grouped by their 'category' property
+ * @note Each category section includes a header with icon and description
+ * @note Profile cards display the profile icon, name, and description
+ * @note Clicking a profile card calls loadProfileForm() with the profile ID
+ * @note Uses the global profilesData and categoriesData variables
+ * @note Displays an error if profilesData is not available
+ * @see loadProfileForm() - Called when a profile card is clicked
+ * @see showError() - Used to display error messages
+ * @see Document.addEventListener('DOMContentLoaded') - Calls this function on page load
  */
 function displayProfiles() {
     const profilesGrid = document.getElementById('profilesGrid');
@@ -171,9 +234,21 @@ function displayProfiles() {
 
 /**
  * Populate the profile select dropdown with grouped options
- *
+ * 
+ * This function populates the profile selection dropdown with all available
+ * profiles, organized by category. It creates optgroups for each category
+ * and adds profile options with icons and names.
+ * 
  * @param {HTMLSelectElement} profileSelect - The select element to populate
- * @returns {void}
+ * @return {void}
+ * 
+ * @note Profiles are grouped by their 'category' property
+ * @note Each category becomes an optgroup in the dropdown
+ * @note Profile icons are displayed before the profile name
+ * @note Uses the global profilesData and categoriesData variables
+ * @note Logs an error to console if profilesData is not available
+ * @see loadProfileForm() - Uses this to populate the dropdown after loading a profile
+ * @see populateProfileSelect() - Called by loadProfileForm()
  */
 function populateProfileSelect(profileSelect) {
     // Clear existing options
@@ -224,9 +299,28 @@ function populateProfileSelect(profileSelect) {
 
 /**
  * Load a profile form based on the selected profile ID
- *
+ * 
+ * This function loads and displays the form for a specific profile. It:
+ * 1. Hides the profile selector grid
+ * 2. Retrieves the profile data from profilesData
+ * 3. Shows the profile selection dropdown
+ * 4. Populates the dropdown with all profiles
+ * 5. Sets up event listeners for profile selection
+ * 6. Updates hidden language fields if present
+ * 7. Displays the profile form
+ * 
  * @param {string} profileId - The ID of the profile to load
- * @returns {Promise<void>}
+ * @return {Promise<void>}
+ * 
+ * @note Uses the global profilesData variable
+ * @note Shows an error if profile is not found or profilesData is unavailable
+ * @note Automatically sets hidden language fields to 'en' if present
+ * @note Sets up a change event listener on the profileSelect dropdown
+ * @note Calls displayProfileForm() to render the form
+ * @see displayProfileForm() - Called to render the form
+ * @see showError() - Used to display error messages
+ * @see populateProfileSelect() - Called to populate the dropdown
+ * @see displayProfiles() - Called when user clicks a profile card
  */
 async function loadProfileForm(profileId) {
     try {
@@ -284,12 +378,24 @@ async function loadProfileForm(profileId) {
 
 /**
  * Display a profile form with the given configuration
- *
- * @param {Object} formConfig - The form configuration object
- * @param {string} profileId - The ID of the profile
- * @param {string} profileName - The name of the profile
- * @param {string} profileDescription - The description of the profile
- * @returns {void}
+ * 
+ * This function renders the form for a specific profile. It:
+ * 1. Updates the top title and description with profile information
+ * 2. Sets up the form action input with the profile ID
+ * 3. Retrieves saved preferences from cookies
+ * 4. Creates form fields based on the profile configuration
+ * 5. Shows the form and hides the results area
+ * 6. Scrolls to the form for better UX
+ * 
+ * @param {Object} profile - The profile configuration object
+ * @return {void}
+ * 
+ * @note Uses the profile's form.fields array to create input elements
+ * @note Retrieves saved model and language preferences from cookies
+ * @note Hides the results area when displaying a new form
+ * @note Uses smooth scrolling to bring the form into view
+ * @see createFormField() - Called to create each form field
+ * @see loadProfileForm() - Calls this function after loading profile data
  */
 function displayProfileForm(profile) {
     // Update top title and description
@@ -328,7 +434,12 @@ function displayProfileForm(profile) {
 
 /**
  * Create a form field element based on field configuration
- *
+ * 
+ * This function creates a form field element based on the provided field
+ * configuration. It supports various field types including text, textarea,
+ * select, hidden, and file inputs. For select fields, it can fetch options
+ * dynamically from the API (for models and prompts) or use predefined options.
+ * 
  * @param {Object} field - The field configuration object
  * @param {string} field.name - The name attribute for the field
  * @param {string} field.type - The type of field (textarea, select, hidden, text, etc.)
@@ -338,6 +449,15 @@ function displayProfileForm(profile) {
  * @param {string} [field.value] - Default value for the field
  * @param {Object} cookies - Object containing cookie values
  * @returns {HTMLElement} The created form field element
+ * 
+ * @note Supports dynamic fetching of models and prompts from API
+ * @note Uses global languagesData for language selection
+ * @note Applies saved preferences from cookies (docmind-model, docmind-language)
+ * @note Creates appropriate HTML elements based on field type
+ * @note Adds help text if provided in field configuration
+ * @see fetchModelsForSelect() - Called for dynamic model loading
+ * @see fetchPromptsForSelect() - Called for dynamic prompt loading
+ * @see displayProfileForm() - Calls this function for each field
  */
 function createFormField(field, cookies = {}) {
     // Create container div
@@ -470,10 +590,21 @@ function createFormField(field, cookies = {}) {
 
 /**
  * Fetch models from API and populate select element
- *
+ * 
+ * This function fetches available AI models from the server API and populates
+ * a select element with the retrieved models. It handles loading states,
+ * errors, and applies saved preferences from cookies.
+ * 
  * @param {HTMLSelectElement} selectElement - The select element to populate
  * @param {Object} cookies - Object containing cookie values
- * @returns {Promise<void>}
+ * @return {Promise<void>}
+ * 
+ * @note Makes API call to docmind.php?action=get_models
+ * @note Shows loading state while fetching
+ * @note Applies saved model preference from docmind-model cookie
+ * @note Handles network errors and API errors gracefully
+ * @note Clears loading option and adds error option on failure
+ * @see createFormField() - Calls this function for dynamic model loading
  */
 async function fetchModelsForSelect(selectElement, cookies = {}) {
     try {
@@ -526,7 +657,18 @@ async function fetchModelsForSelect(selectElement, cookies = {}) {
 
 /**
  * Fetch languages from JSON and populate select element
- * TODO: This function is currently not used since languagesData is loaded globally
+ * 
+ * This function populates a select element with available languages from the
+ * global languagesData variable. It's currently not used since languagesData
+ * is loaded globally and used directly in createFormField().
+ * 
+ * @param {HTMLSelectElement} selectElement - The select element to populate
+ * @return {Promise<void>}
+ * 
+ * @note This function is currently not used in the codebase
+ * @note Languages are loaded globally and used directly in createFormField()
+ * @note Kept for potential future use or refactoring
+ * @see createFormField() - Uses global languagesData directly
  */
 async function fetchLanguagesForSelect(selectElement) {
     try {
@@ -571,9 +713,21 @@ async function fetchLanguagesForSelect(selectElement) {
 
 /**
  * Fetch prompts from API and populate select element
- *
+ * 
+ * This function fetches available prompt templates from the server API and
+ * populates a select element with the retrieved prompts. It also sets up an
+ * event listener to automatically populate the prompt textarea when a prompt
+ * is selected.
+ * 
  * @param {HTMLSelectElement} selectElement - The select element to populate
- * @returns {Promise<void>}
+ * @return {Promise<void>}
+ * 
+ * @note Makes API call to docmind.php?action=get_prompts
+ * @note Caches prompts data globally in promptsData variable
+ * @note Shows loading state while fetching
+ * @note Handles network errors and API errors gracefully
+ * @note Sets up change event listener to auto-fill prompt textarea
+ * @see createFormField() - Calls this function for dynamic prompt loading
  */
 async function fetchPromptsForSelect(selectElement) {
     try {
@@ -637,9 +791,28 @@ async function fetchPromptsForSelect(selectElement) {
 
 /**
  * Handle form submission
- *
+ * 
+ * This function handles the form submission event. It:
+ * 1. Prevents the default form submission
+ * 2. Collects form data
+ * 3. Shows a loading state on the submit button
+ * 4. Sends the form data to the server API
+ * 5. Processes the response
+ * 6. Saves user preferences as cookies
+ * 7. Restores the button state
+ * 
  * @param {Event} event - The form submission event
- * @returns {Promise<void>}
+ * @return {Promise<void>}
+ * 
+ * @note Uses the FormData API to collect form data
+ * @note Makes POST request to docmind.php
+ * @note Expects JSON response from the server
+ * @note Saves model and language preferences as cookies (30-day expiration)
+ * @note Handles network errors and API errors gracefully
+ * @note Shows loading state during processing
+ * @see displayResults() - Called to render successful responses
+ * @see showError() - Called to display error messages
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up this handler
  */
 async function handleFormSubmit(event) {
     event.preventDefault();
@@ -710,9 +883,27 @@ async function handleFormSubmit(event) {
 
 /**
  * Display results in the results area
- *
- * @param {Object} results - The results object to display
- * @returns {void}
+ * 
+ * This function renders the API response in the results area. It:
+ * 1. Extracts the response content from the API response
+ * 2. Updates the results title and description based on the profile
+ * 3. Detects the content type (JSON, markdown, or other)
+ * 4. Converts the content to the appropriate display format
+ * 5. Renders the content with syntax highlighting
+ * 6. Shows the results area and applies syntax highlighting
+ * 7. Scrolls to the results
+ * 
+ * @param {Object} results - The results object from the API
+ * @return {void}
+ * 
+ * @note Handles JSON, markdown, and plain text content
+ * @note Supports profile-specific display formats (markdown, html, json)
+ * @note Uses marked.js for markdown to HTML conversion
+ * @note Uses highlight.js for syntax highlighting
+ * @note Calls jsonToMarkdown() for JSON content conversion
+ * @see handleFormSubmit() - Calls this function on successful form submission
+ * @see applySyntaxHighlighting() - Called to highlight code blocks
+ * @see showError() - Called if no valid response content is found
  */
 function displayResults(results) {
     // Get results area and title elements
@@ -833,9 +1024,20 @@ function displayResults(results) {
 
 /**
  * Display an error message in the results area
- *
+ * 
+ * This function displays an error message in the results area. It uses the
+ * error template if available, or falls back to direct HTML rendering.
+ * 
  * @param {string} message - The error message to display
- * @returns {void}
+ * @return {void}
+ * 
+ * @note Uses the error template (#errorTemplate) if available
+ * @note Falls back to direct HTML rendering if template is not found
+ * @note Shows the results area and scrolls to it
+ * @note Escapes the message for security
+ * @see handleFormSubmit() - Calls this function on form submission errors
+ * @see loadProfileForm() - Calls this function if profile loading fails
+ * @see displayProfiles() - Calls this function if profiles data is unavailable
  */
 function showError(message) {
     const resultsArea = document.getElementById('resultsArea');
@@ -866,9 +1068,25 @@ function showError(message) {
 
 /**
  * Convert structured JSON objects to markdown for better human readability
- *
+ * 
+ * This function converts JSON data structures into human-readable markdown
+ * format. It handles strings, arrays, and objects differently:
+ * - Strings: Returned as-is
+ * - Arrays of objects: Converted to markdown tables
+ * - Arrays of primitives: Converted to markdown lists
+ * - Objects: Converted to markdown headings and paragraphs
+ * 
  * @param {Object|Array|string} data - The JSON data to convert
- * @returns {string} Markdown representation of the data
+ * @return {string} Markdown representation of the data
+ * 
+ * @note Uses arrayOfObjectsToTable() for arrays of objects
+ * @note Uses arrayToList() for arrays of primitives
+ * @note Uses objectToMarkdown() for objects
+ * @note Falls back to String() for other types
+ * @see displayResults() - Calls this function for JSON content conversion
+ * @see arrayOfObjectsToTable() - Called for table conversion
+ * @see arrayToList() - Called for list conversion
+ * @see objectToMarkdown() - Called for object conversion
  */
 function jsonToMarkdown(data) {
     // If data is already a string, return it as-is (could be markdown or HTML)
@@ -897,10 +1115,22 @@ function jsonToMarkdown(data) {
 
 /**
  * Convert an object to markdown headings and paragraphs
- *
+ * 
+ * This function converts a JavaScript object into markdown format with
+ * headings and paragraphs. Each key becomes a heading, and each value
+ * becomes content. Nested objects and arrays are handled recursively.
+ * 
  * @param {Object} obj - The object to convert
- * @param {number} [level=3] - The heading level to start with
- * @returns {string} Markdown representation
+ * @param {number} [level=3] - The heading level to start with (1-6)
+ * @return {string} Markdown representation
+ * 
+ * @note Skips null and undefined values
+ * @note Capitalizes the first letter of each key
+ * @note Uses markdown headings (#) based on the level parameter
+ * @note Handles nested objects recursively with increasing heading level
+ * @note Handles arrays by calling jsonToMarkdown() recursively
+ * @note Converts numbers and booleans to strings
+ * @see jsonToMarkdown() - Calls this function for object conversion
  */
 function objectToMarkdown(obj, level = 3) {
     let markdown = '';
@@ -937,9 +1167,20 @@ function objectToMarkdown(obj, level = 3) {
 
 /**
  * Convert an array to a markdown list
- *
+ * 
+ * This function converts a JavaScript array into a markdown list format.
+ * Each array item becomes a list item. Nested arrays and objects are
+ * handled recursively.
+ * 
  * @param {Array} arr - The array to convert
- * @returns {string} Markdown list representation
+ * @return {string} Markdown list representation
+ * 
+ * @note Skips null and undefined values
+ * @note Handles nested arrays recursively
+ * @note Handles objects by calling objectToMarkdown() recursively
+ * @note Converts simple values (strings, numbers, booleans) to strings
+ * @note Each item is prefixed with "- " for markdown list format
+ * @see jsonToMarkdown() - Calls this function for array conversion
  */
 function arrayToList(arr) {
     let markdown = '';
@@ -966,9 +1207,22 @@ function arrayToList(arr) {
 
 /**
  * Convert an array of objects to a markdown table
- *
+ * 
+ * This function converts an array of objects into a markdown table format.
+ * Each object represents a row, and each key represents a column. The
+ * function automatically detects all unique keys across all objects.
+ * 
  * @param {Array<Object>} arr - The array of objects to convert
- * @returns {string} Markdown table representation
+ * @return {string} Markdown table representation
+ * 
+ * @note Returns empty string if array is empty
+ * @note Automatically detects all unique keys from all objects
+ * @note Creates a header row with column names
+ * @note Creates a separator row with markdown table syntax
+ * @note Creates data rows for each object
+ * @note Handles null/undefined values as empty cells
+ * @note Converts nested objects to JSON strings
+ * @see jsonToMarkdown() - Calls this function for arrays of objects
  */
 function arrayOfObjectsToTable(arr) {
     if (arr.length === 0) return '';
@@ -996,7 +1250,24 @@ function arrayOfObjectsToTable(arr) {
     return markdown.trim();
 }
 
-// DocMind-specific JavaScript
+/**
+ * DocMind-specific JavaScript initialization
+ * 
+ * This function initializes the DocMind AI application when the DOM is fully loaded.
+ * It performs the following tasks:
+ * 1. Loads configuration data (categories, profiles, languages)
+ * 2. Displays available profiles in the UI
+ * 3. Sets up the form submission handler
+ * 
+ * @note This is the main entry point for the application
+ * @note Uses async/await for sequential data loading
+ * @note Sets up global variables: categoriesData, profilesData, languagesData
+ * @note Calls displayProfiles() to render profile cards
+ * @note Attaches form submission handler to the API form
+ * @see loadJSONResource() - Used to load configuration data
+ * @see displayProfiles() - Renders profile cards
+ * @see handleFormSubmit() - Handles form submissions
+ */
 document.addEventListener('DOMContentLoaded', async function() {
     // Load categories data
     categoriesData = await loadJSONResource('categories.json', 'categories');
