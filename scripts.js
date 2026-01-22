@@ -614,6 +614,17 @@ async function loadProfileForm(profileId) {
                 showError('Profile not found');
             } else {
                 console.error('Profile not found and results area not available');
+                // Show error in the main content area as fallback
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    const errorElement = document.createElement('div');
+                    errorElement.className = 'error';
+                    errorElement.innerHTML = `
+                        <strong>Error:</strong> Profile not found
+                    `;
+                    mainContent.innerHTML = '';
+                    mainContent.appendChild(errorElement);
+                }
             }
             return;
         }
@@ -1346,7 +1357,17 @@ function showError(message) {
     // Check if resultsArea exists
     if (!resultsArea) {
         console.error('Results area not found:', message);
-        // Show error in console and return
+        // Try to show error in main content as fallback
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            const errorElement = document.createElement('div');
+            errorElement.className = 'error';
+            errorElement.innerHTML = `
+                <strong>Error:</strong> ${escapeHtml(message)}
+            `;
+            mainContent.innerHTML = '';
+            mainContent.appendChild(errorElement);
+        }
         return;
     }
 
