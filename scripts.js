@@ -721,14 +721,11 @@ function displayResults(results) {
     const resultsTitle = document.getElementById('resultsTitle');
     const resultsDescription = document.getElementById('resultsDescription');
 
-    // Log the entire results object for debugging
-    console.log('displayResults - Full results object:', results);
-
     // Extract the actual response content from the API response
     let responseContent = '';
     if (results.error) {
         // If results contain an error, display it
-        console.log('displayResults - Error found:', results.error);
+        console.error('Error found:\n', results.error);
         showError(results.error);
         return;
     //} else if (results.json) {
@@ -738,14 +735,14 @@ function displayResults(results) {
     } else if (results.html) {
         // If results contain HTML, return it directly
         // TODO Do we need it?
-        console.log('displayResults - HTML content found:', results.html);
+        console.log('HTML content found:\n', results.html);
         responseContent = results.html;
     } else if (results.response && results.response.choices && results.response.choices[0] && results.response.choices[0].message && results.response.choices[0].message.content) {
         // Extract content from OpenAI chat completion response
-        console.log('displayResults - OpenAI response found:', results.response.choices[0].message.content);
+        console.log('OpenAI response found:\n', results.response.choices[0].message.content);
         responseContent = results.response.choices[0].message.content;
     } else {
-        console.log('displayResults - No valid response content found');
+        console.error('No valid response content found');
         showError('No response content available');
         return;
     }
@@ -753,7 +750,6 @@ function displayResults(results) {
     // Get the current profile from results.profile
     const profileId = results.profile || '';
     const profile = profilesData[profileId] || null;
-    console.log('displayResults - Profile ID:', profileId, 'Profile:', profile);
 
     // Update results title and description if profile has form.title and form.description
     if (profile && profile.form && profile.form.title) {
@@ -769,36 +765,34 @@ function displayResults(results) {
 
     // Check if the result contains markdown code fences
     const resultsInfo = extractCodeFenceInfo(responseContent, 'markdown');
-    console.log('displayResults - Code fence info:', resultsInfo);
+    console.log('Code fence info:\n', resultsInfo);
 
     // Check the desired display format from profile
     const displayFormat = profile && profile.display ? profile.display.toLowerCase() : '';
-    console.log('displayResults - Display format:', displayFormat);
+    console.log('Display format requested: ', displayFormat);
 
     // Check if the response need conversion based on resultsInfo format and display format
     if (resultsInfo.type === 'json') {
         // If the result is JSON, parse it
         try {
-            console.log('displayResults - Parsing JSON content:', resultsInfo.text);
             const jsonData = JSON.parse(resultsInfo.text);
-            console.log('displayResults - Parsed JSON data:', jsonData);
+            console.log('Parsed JSON data:\n', jsonData);
 
             // JSON can be converted to markdown, html, or displayed as JSON (with syntax highlighting)
             if (displayFormat === 'markdown') {
                 // Convert JSON to markdown
-                console.log('displayResults - Converting JSON to markdown');
                 const markdownContent = jsonToMarkdown(jsonData);
-                console.log('displayResults - Markdown content:', markdownContent);
-                resultsContent.innerHTML = `<pre><code class="${displayFormat}">${marked.parse(markdownContent)}</code></pre>`;
+                console.log('JSON to Markdown conversion:\n', markdownContent);
+                resultsContent.innerHTML = `<pre><code class="${displayFormat}">${markdownContent}</code></pre>`;
             } else if (displayFormat === 'html') {
                 // Convert JSON to HTML via markdown
-                console.log('displayResults - Converting JSON to HTML');
                 const markdownContent = jsonToMarkdown(jsonData);
+                console.log('JSON to Markdown conversion for HTML:\n', markdownContent);
                 resultsContent.innerHTML = marked.parse(markdownContent);
             } else {
                 // Convert JSON to pretty JSON string
-                console.log('displayResults - Displaying as pretty JSON');
                 const prettyJson = JSON.stringify(jsonData, null, 2);
+                console.log('Displaying as pretty JSON:\n', prettyJson);
                 resultsContent.innerHTML = `<pre><code class="json">${prettyJson}</code></pre>`;
             }
         } catch (error) {
@@ -807,19 +801,19 @@ function displayResults(results) {
         }
     } else if (resultsInfo.type === 'markdown') {
         // If the result is markdown, convert it to HTML
-        console.log('displayResults - Processing markdown content');
+        console.log('Processing markdown content');
         if (displayFormat === 'html') {
             // Convert JSON to HTML via markdown
-            console.log('displayResults - Converting markdown to HTML');
+            console.log('Converting markdown to HTML');
             resultsContent.innerHTML = marked.parse(resultsInfo.text);
         } else {
             // Keep as markdown with syntax highlighting
-            console.log('displayResults - Displaying as markdown with syntax highlighting');
+            console.log('Displaying as markdown with syntax highlighting');
             resultsContent.innerHTML = `<pre><code class="markdown">${escapeHtml(resultsInfo.text)}</code></pre>`;
         }
     } else {
         // For other types, use the original response content, with syntax highlighting
-        console.log('displayResults - Displaying as other type:', resultsInfo.type);
+        console.log(`Displaying as ${resultsInfo.type} type\n`, resultsInfo.text);
         resultsContent.innerHTML = `<pre><code class="${resultsInfo.type}">${escapeHtml(resultsInfo.text)}</code></pre>`;
     }
 
@@ -830,12 +824,11 @@ function displayResults(results) {
         // Apply syntax highlighting
         applySyntaxHighlighting();
     } else {
-        console.log('displayResults - Results content is empty');
+        console.error('Results content is empty');
     }
 
     // Scroll to results
     resultsArea.scrollIntoView({ behavior: 'smooth' });
-    console.log('displayResults - Finished processing');
 }
 
 /**
@@ -917,7 +910,7 @@ function objectToMarkdown(obj, level = 3) {
         if (value === null || value === undefined) continue;
 
         // Create heading based on level
-        const heading = '#'.repeat(Math.min(level, 6)) + ' ' + key + '\n\n';
+        const heading = '\n' + '#'.repeat(Math.min(level, 6)) + ' ' + key + '\n\n';
 
         // Process value based on its type
         if (typeof value === 'string') {
