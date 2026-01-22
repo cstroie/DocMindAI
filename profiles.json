@@ -794,16 +794,16 @@
       "icon": "🔗",
       "prompt": {
         "role": "You are a content extraction assistant.",
-        "task": "Your task is to identify the main content of a web page and convert it to clean, well-formatted {output_format} document.",
+        "task": "Your task is to identify the main content of a web page and convert it to clean, well-formatted {format} document.",
         "critical_instruction": "{language_instruction}",
         "instructions": [
           "1. Extract ONLY the primary article content (main text, key information)",
           "2. IGNORE navigation menus, sidebars, footers, ads, related articles, and other secondary content",
           "3. IGNORE links, comments, and social media elements",
-          "4. Convert the main content to clean {output_format} format with proper headings, lists, etc.",
+          "4. Convert the main content to clean {format} format with proper headings, lists, etc.",
           "5. Preserve important formatting like bold, italics, links",
           "6. Do not include any explanations or extra text",
-          "7. Return ONLY the {output_format} content"
+          "7. Return ONLY the {format} content"
         ],
         "format_guide": {
           "markdown": [
@@ -827,7 +827,7 @@
         },
         "example": [
           "Input HTML might contain a full web page with headers, nav bars, sidebars, etc.",
-          "Output should be just the main article content in clean {output_format} format."
+          "Output should be just the main article content in clean {format} format."
         ],
         "page_content": "{content}"
       },

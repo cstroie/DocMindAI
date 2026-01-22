@@ -221,7 +221,7 @@ function handleProfileAction($profile_id) {
     $response = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY);
 
     if (isset($response['error'])) {
-        sendJsonResponse(['error' => 'API error: ' . $response['error']], true);
+        sendJsonResponse(['error' => $response['error']], true);
     }
 
     // Process and return the response
@@ -253,53 +253,13 @@ function executeTool($tool_name, $form_data) {
             if (empty($form_data['url'])) {
                 return false;
             }
-
             // Validate URL format
             if (!filter_var($form_data['url'], FILTER_VALIDATE_URL)) {
                 return false;
             }
-
             // Scrape the URL content
             $content = scrapeUrl($form_data['url']);
-
-            if ($content === false) {
-                return false;
-            }
-
-            return $content;
-
-        default:
-            return false;
-    }
-}
-
-/**
- * Execute a tool based on profile configuration
- *
- * @param string $tool_name Name of the tool to execute
- * @param array $form_data Form data containing tool parameters
- * @return string|false Tool output or false on error
- */
-function executeTool($tool_name, $form_data) {
-    switch ($tool_name) {
-        case 'web_scraper':
-            // Check if URL is provided
-            if (empty($form_data['url'])) {
-                return false;
-            }
-
-            // Validate URL format
-            if (!filter_var($form_data['url'], FILTER_VALIDATE_URL)) {
-                return false;
-            }
-
-            // Scrape the URL content
-            $content = scrapeUrl($form_data['url']);
-
-            if ($content === false) {
-                return false;
-            }
-
+            // Return scraped content or false on failure
             return $content;
 
         default:
@@ -330,25 +290,11 @@ function buildProfilePrompt($profile_id, $form_data) {
     }
 
     // Check if profile has a tool specification
-    $tool_output = '';
     if (isset($profile['tool']) && !empty($profile['tool'])) {
         $tool_output = executeTool($profile['tool'], $form_data);
         if ($tool_output === false) {
             return "Failed to execute tool: " . $profile['tool'];
         }
-
-        // Add tool output to form data as 'content' field
-        $form_data['content'] = $tool_output;
-    }
-
-    // Check if profile has a tool specification
-    $tool_output = '';
-    if (isset($profile['tool']) && !empty($profile['tool'])) {
-        $tool_output = executeTool($profile['tool'], $form_data);
-        if ($tool_output === false) {
-            return "Failed to execute tool: " . $profile['tool'];
-        }
-
         // Add tool output to form data as 'content' field
         $form_data['content'] = $tool_output;
     }
