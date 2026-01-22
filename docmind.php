@@ -16,10 +16,11 @@ if (file_exists('config.php')) {
     include 'config.php';
 }
 
-// Create chat endpoint URL
+// Create chat endpoint URL by appending the chat completions path
 $LLM_API_ENDPOINT_CHAT = $LLM_API_ENDPOINT . '/chat/completions';
 
 // Determine if this is an API request
+// Check for: 1) action parameter in GET/POST, 2) JSON Accept header
 $is_api_request = isset($_GET['action']) || isset($_POST['action']) ||
                  (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
 
@@ -33,9 +34,24 @@ if ($is_api_request) {
 displayWebInterface();
 
 /**
- * Handle API requests
+ * Handle incoming API requests by validating and routing to appropriate handlers
+ * 
+ * This function acts as the main API router. It:
+ * 1. Determines the requested action from GET/POST parameters
+ * 2. Validates the action against a whitelist of available actions
+ * 3. Dynamically loads valid actions from profiles.json
+ * 4. Routes to the appropriate handler function based on the action
+ * 
+ * @return void Terminates script execution after sending response
+ * 
+ * @see handleGetModels() - Handles 'get_models' action
+ * @see handleGetPrompts() - Handles 'get_prompts' action  
+ * @see handleProfileAction() - Handles profile-specific actions
+ * @see sendJsonResponse() - Sends JSON responses
+ * @see loadResourceFromJson() - Loads profile configuration
  */
 function handleApiRequest() {
+    // Extract action from request parameters, default to 'list_actions'
     $action = $_REQUEST['action'] ?? 'list_actions';
     $method = $_SERVER['REQUEST_METHOD'];
 
@@ -43,6 +59,7 @@ function handleApiRequest() {
     $valid_actions = ['get_models', 'get_form', 'get_prompts', 'get_profiles'];
 
     // Load profiles to get additional valid actions
+    // This allows new profiles to be added without modifying this code
     $profiles_data = loadResourceFromJson('profiles.json');
     if (!isset($profiles_data['error']) && isset($profiles_data['profiles'])) {
         foreach ($profiles_data['profiles'] as $profile_id => $profile_data) {
@@ -50,20 +67,24 @@ function handleApiRequest() {
         }
     }
 
+    // Reject invalid actions with error response
     if (!in_array($action, $valid_actions)) {
         sendJsonResponse(['error' => 'Invalid action'], true);
     }
 
-    // Route to appropriate handler
+    // Route to appropriate handler based on action
     switch ($action) {
         case 'get_models':
+            // Handle request for available AI models
             handleGetModels();
             break;
         case 'get_prompts':
+            // Handle request for available prompts
             handleGetPrompts();
             break;
         default:
             // Handle profile-specific actions
+            // Check if action corresponds to a valid profile
             if (in_array($action, array_keys($profiles_data['profiles'] ?? []))) {
                 handleProfileAction($action);
             } else {
@@ -74,7 +95,22 @@ function handleApiRequest() {
 }
 
 /**
- * Handle get_models action
+ * Handle the 'get_models' API action - retrieve available AI models
+ * 
+ * This function fetches the list of available AI models from the configured
+ * LLM API endpoint. It uses server-side configuration values and provides
+ * fallback defaults if the API call fails.
+ * 
+ * @global string $LLM_API_ENDPOINT The base API endpoint URL
+ * @global string $LLM_API_KEY The API authentication key
+ * @global string $LLM_API_FILTER Optional regex filter for model names
+ * 
+ * @return void Sends JSON response with models list or error
+ * 
+ * @see getAvailableModels() - Fetches models from API
+ * @see sendJsonResponse() - Sends the final response
+ * 
+ * @note If API call fails, returns default models for fallback functionality
  */
 function handleGetModels() {
     global $LLM_API_ENDPOINT, $LLM_API_KEY, $LLM_API_FILTER;
@@ -89,26 +125,54 @@ function handleGetModels() {
         sendJsonResponse(['error' => 'API endpoint not configured'], true);
     }
 
+    // Fetch available models from the API
     $models = getAvailableModels($api_endpoint, $api_key, $filter);
 
     // Check if models contain an error
     if (isset($models['error'])) {
-        // If API call fails, use default models
+        // If API call fails, use default models as fallback
+        // This ensures the application remains functional even if API is unavailable
         $models = [
             'gemma3:1b' => 'Gemma 3 (1B)',
             'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)'
         ];
     }
 
-    // Sort models alphabetically by key (model name)
+    // Sort models alphabetically by key (model name) for consistent UI display
     ksort($models);
 
+    // Send the models list as JSON response
     sendJsonResponse(['models' => $models], true);
 }
 
 
 /**
- * Handle profile-specific actions
+ * Handle profile-specific API actions - main processing pipeline
+ * 
+ * This function implements the complete processing pipeline for profile-specific actions:
+ * 1. Validates API configuration and profile existence
+ * 2. Processes form data and file uploads (images and documents)
+ * 3. Builds prompts based on profile configuration
+ * 4. Prepares and sends API request to LLM
+ * 5. Processes and returns the response
+ * 
+ * @param string $profile_id The identifier of the profile to process
+ * @global string $LLM_API_ENDPOINT_CHAT The chat completion API endpoint
+ * @global string $LLM_API_KEY The API authentication key
+ * 
+ * @return void Sends JSON response with processed results or errors
+ * 
+ * @see loadResourceFromJson() - Loads profile configuration
+ * @see processUploadedImage() - Handles image uploads
+ * @see extractTextFromDocument() - Extracts text from documents
+ * @see buildProfilePrompt() - Constructs the prompt
+ * @see callLLMApi() - Calls the LLM API
+ * @see processProfileResponse() - Processes the API response
+ * @see sendJsonResponse() - Sends final response
+ * 
+ * @note Supports both text documents and images
+ * @note Includes debug information in response
+ * @note Sets CORS headers for cross-origin requests
  */
 function handleProfileAction($profile_id) {
     global $LLM_API_ENDPOINT_CHAT, $LLM_API_KEY;
@@ -190,7 +254,7 @@ function handleProfileAction($profile_id) {
     $prompt = buildProfilePrompt($profile_id, $form_data);
 
     // Prepare API request data
-    // TOOD use a default model if not specified in form_data
+    // TODO: use a default model if not specified in form_data
     $api_data = [
         'model' => $form_data['model'] ?? '',
         'messages' => [],
@@ -241,10 +305,22 @@ function handleProfileAction($profile_id) {
 
 /**
  * Execute a tool based on profile configuration
- *
- * @param string $tool_name Name of the tool to execute
- * @param array $form_data Form data containing tool parameters
- * @return string|false Tool output or false on error
+ * 
+ * This function acts as a tool dispatcher, executing different tools based on the
+ * profile's tool specification. It validates input parameters and returns tool
+ * output or false on error.
+ * 
+ * @param string $tool_name Name of the tool to execute (e.g., 'web_scraper', 'medical_literature_search')
+ * @param array $form_data Form data containing tool parameters (URL, query, etc.)
+ * @return string|false Tool output as string, or false on error/invalid parameters
+ * 
+ * @see scrapeUrl() - Web scraping tool
+ * @see searchPubMed() - Medical literature search tool
+ * 
+ * @note Currently supports:
+ *       - 'web_scraper': Scrapes content from a URL
+ *       - 'medical_literature_search': Searches PubMed for medical articles
+ * @note All tools validate their required parameters before execution
  */
 function executeTool($tool_name, $form_data) {
     switch ($tool_name) {
@@ -288,7 +364,27 @@ function executeTool($tool_name, $form_data) {
 }
 
 /**
- * Build prompt based on profile configuration
+ * Build prompt based on profile configuration with placeholder replacement
+ * 
+ * This function constructs the final prompt by:
+ * 1. Loading profile and language configurations
+ * 2. Executing tools if specified by the profile
+ * 3. Selecting the appropriate prompt template
+ * 4. Converting array-based prompts to text format
+ * 5. Replacing placeholders with actual form data
+ * 6. Handling language-specific instructions
+ * 
+ * @param string $profile_id The profile identifier
+ * @param array $form_data User-submitted form data containing values for placeholders
+ * @return string The constructed prompt ready for LLM processing
+ * 
+ * @see loadResourceFromJson() - Loads configuration files
+ * @see executeTool() - Executes profile tools
+ * @see convertPromptArrayToText() - Converts array prompts to text
+ * 
+ * @note Supported placeholders: {language_instruction}, {language}, and any form field name
+ * @note If profile has 'tool' specification, tool output is added to form_data['content']
+ * @note Falls back to generic analysis prompt if no valid prompt found
  */
 function buildProfilePrompt($profile_id, $form_data) {
     // Load profiles from JSON
@@ -373,10 +469,26 @@ function buildProfilePrompt($profile_id, $form_data) {
 
 /**
  * Convert prompt array to formatted text recursively
- *
+ * 
+ * This function handles two types of array structures:
+ * 1. Associative arrays (JSON objects): Converted to uppercase headers with content
+ * 2. Sequential arrays: Converted to newline-separated text
+ * 
  * @param array $prompt_array The prompt array to convert
  * @param int $indent_level Current indentation level (for nested arrays)
  * @return string Formatted text version of the prompt
+ * 
+ * @note Example associative array:
+ *       ['role' => 'You are a helpful assistant', 'rules' => ['rule1', 'rule2']]
+ *       becomes:
+ *       ROLE
+ *       You are a helpful assistant
+ *       
+ *       RULES
+ *       rule1
+ *       rule2
+ * @note Example sequential array:
+ *       ['line1', 'line2', 'line3'] becomes "line1\nline2\nline3"
  */
 function convertPromptArrayToText($prompt_array, $indent_level = 0) {
     // Check if this is an associative array (JSON object)
@@ -413,7 +525,21 @@ function convertPromptArrayToText($prompt_array, $indent_level = 0) {
 }
 
 /**
- * Process profile response
+ * Process profile response and extract JSON if required
+ * 
+ * This function processes the LLM API response based on profile configuration.
+ * It can optionally extract JSON data from the response content if the profile
+ * specifies JSON output format.
+ * 
+ * @param string $profile_id The profile identifier
+ * @param array $api_response The raw API response from the LLM
+ * @return array Processed result containing profile info, response, and optional JSON data
+ * 
+ * @see loadResourceFromJson() - Loads profile configuration
+ * @see extractJsonFromResponse() - Extracts JSON from response content
+ * 
+ * @note If profile has 'output' => 'json', attempts to extract JSON from response
+ * @note Returns array with keys: 'profile', 'response', and optionally 'json'
  */
 function processProfileResponse($profile_id, $api_response) {
     $result = [
@@ -444,7 +570,19 @@ function processProfileResponse($profile_id, $api_response) {
 }
 
 /**
- * Handle get_prompts action
+ * Handle the 'get_prompts' API action - retrieve available prompt templates
+ * 
+ * This function scans the 'prompts' directory for prompt template files and
+ * returns them as a structured list. It supports multiple file formats and
+ * provides clean labels for display.
+ * 
+ * @return void Sends JSON response with prompts list
+ * 
+ * @see sendJsonResponse() - Sends the final response
+ * 
+ * @note Supported file extensions: .txt, .md, .xml
+ * @note Prompts are loaded from the 'prompts' subdirectory
+ * @note File names are converted to readable labels (e.g., 'medical_report' -> 'Medical Report')
  */
 function handleGetPrompts() {
     // Load prompts from files in the prompts directory
@@ -483,6 +621,14 @@ function handleGetPrompts() {
 
 /**
  * Display web interface
+ * 
+ * This function serves the main web interface by including the index.html file.
+ * It acts as a simple wrapper for the web interface presentation layer.
+ * 
+ * @return void Includes and executes index.html content
+ * 
+ * @note The index.html file should contain the complete web interface markup
+ * @note This function is called when the request is not an API request
  */
 function displayWebInterface() {
     include 'index.html';
