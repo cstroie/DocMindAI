@@ -57,6 +57,29 @@ function toggleTheme() {
 }
 
 /**
+ * Toggle sidebar menu for mobile devices
+ *
+ * This function toggles the visibility of the sidebar menu on mobile devices.
+ * It adds/removes the 'active' class to show/hide the sidebar.
+ *
+ * @return {void}
+ *
+ * @note Toggles the 'active' class on the sidebar element
+ * @note Updates the menu toggle button icon
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up menu toggle handler
+ */
+function toggleMenu() {
+    const sidebar = document.querySelector('.sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+
+    if (sidebar && menuToggle) {
+        sidebar.classList.toggle('active');
+        // Update menu icon based on sidebar state
+        menuToggle.innerHTML = sidebar.classList.contains('active') ? '✕' : '☰';
+    }
+}
+
+/**
  * Apply theme based on user preference
  *
  * This function applies the theme based on user preference stored in cookies
@@ -90,6 +113,66 @@ function applyTheme() {
             // System preference - check what the system is using
             const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             themeIcon.textContent = systemPrefersDark ? '☀️' : '🌙';
+        }
+    }
+}
+
+/**
+ * Switch between different views in the application
+ *
+ * This function handles view switching by hiding all views and showing
+ * the selected view. It also updates the active state of navigation buttons.
+ *
+ * @param {string} viewName - The name of the view to show (e.g., 'home', 'tools', 'history', 'settings')
+ * @return {void}
+ *
+ * @note Hides all views and shows only the selected one
+ * @note Updates active state of sidebar navigation buttons
+ * @note Updates the page title based on the view
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up view switching handlers
+ */
+function switchView(viewName) {
+    // Hide all views
+    const views = document.querySelectorAll('.view');
+    views.forEach(view => {
+        view.classList.remove('active-view');
+        view.style.display = 'none';
+    });
+
+    // Show the selected view
+    const selectedView = document.querySelector(`.${viewName}-view`);
+    if (selectedView) {
+        selectedView.classList.add('active-view');
+        selectedView.style.display = 'block';
+    }
+
+    // Update active state of navigation buttons
+    const navButtons = document.querySelectorAll('.nav-item');
+    navButtons.forEach(button => {
+        button.classList.remove('active');
+        if (button.dataset.view === viewName) {
+            button.classList.add('active');
+        }
+    });
+
+    // Update page title
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) {
+        switch (viewName) {
+            case 'home':
+                pageTitle.textContent = 'Welcome to DocMind AI';
+                break;
+            case 'tools':
+                pageTitle.textContent = 'AI Tools';
+                break;
+            case 'history':
+                pageTitle.textContent = 'Analysis History';
+                break;
+            case 'settings':
+                pageTitle.textContent = 'Application Settings';
+                break;
+            default:
+                pageTitle.textContent = 'DocMind AI';
         }
     }
 }
@@ -1349,7 +1432,8 @@ function arrayOfObjectsToTable(arr) {
  * 2. Displays available profiles in the UI
  * 3. Sets up the form submission handler
  * 4. Sets up the theme toggle button
- * 5. Applies the user's theme preference
+ * 5. Sets up view switching for sidebar navigation
+ * 6. Applies the user's theme preference
  *
  * @note This is the main entry point for the application
  * @note Uses async/await for sequential data loading
@@ -1357,11 +1441,13 @@ function arrayOfObjectsToTable(arr) {
  * @note Calls displayProfiles() to render profile cards
  * @note Attaches form submission handler to the API form
  * @note Sets up theme toggle button click handler
+ * @note Sets up sidebar navigation click handlers
  * @note Applies theme preference on page load
  * @see loadJSONResource() - Used to load configuration data
  * @see displayProfiles() - Renders profile cards
  * @see handleFormSubmit() - Handles form submissions
  * @see toggleTheme() - Handles theme toggling
+ * @see switchView() - Handles view switching
  * @see applyTheme() - Applies theme preference
  */
 document.addEventListener('DOMContentLoaded', async function() {
@@ -1377,6 +1463,27 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('apiForm')?.addEventListener('submit', handleFormSubmit);
     // Set up theme toggle button
     document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+    // Set up menu toggle button
+    document.getElementById('menuToggle')?.addEventListener('click', toggleMenu);
+    // Set up view switching for sidebar navigation
+    const navButtons = document.querySelectorAll('.nav-item');
+    navButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const viewName = this.dataset.view;
+            if (viewName) {
+                switchView(viewName);
+                // Close sidebar on mobile after selecting a view
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar && window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                    const menuToggle = document.getElementById('menuToggle');
+                    if (menuToggle) {
+                        menuToggle.innerHTML = '☰';
+                    }
+                }
+            }
+        });
+    });
     // Apply theme preference
     applyTheme();
 });
