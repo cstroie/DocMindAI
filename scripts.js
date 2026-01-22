@@ -601,6 +601,17 @@ function displayProfileForm(profile) {
     profileForm.style.display = 'block';
     document.getElementById('resultsArea').style.display = 'none';
 
+    // Set up cancel button to go back to tools view
+    const cancelBtn = document.getElementById('cancelBtn');
+    if (cancelBtn) {
+        cancelBtn.onclick = function() {
+            switchView('tools');
+        };
+    }
+
+    // Switch to form view
+    switchView('form');
+
     // Scroll to form
     profileForm.scrollIntoView({ behavior: 'smooth' });
 }
@@ -1185,10 +1196,20 @@ function displayResults(results) {
     if (resultsContent.innerHTML.trim() !== '') {
         // Show results area
         resultsArea.style.display = 'block';
+        // Switch to results view
+        switchView('results');
         // Apply syntax highlighting
         applySyntaxHighlighting();
     } else {
         console.error('Results content is empty');
+    }
+
+    // Set up new analysis button to go back to tools view
+    const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+    if (newAnalysisBtn) {
+        newAnalysisBtn.onclick = function() {
+            switchView('tools');
+        };
     }
 
     // Scroll to results
@@ -1235,6 +1256,8 @@ function showError(message) {
     }
     // Show results area
     resultsArea.style.display = 'block';
+    // Switch to results view
+    switchView('results');
     // Scroll to error
     resultsArea.scrollIntoView({ behavior: 'smooth' });
 }
