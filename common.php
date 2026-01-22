@@ -892,6 +892,154 @@ function sendJsonResponse($data, $is_api_request = false) {
 }
 
 /**
+ * Search PubMed for articles matching the query
+ * 
+ * @param string $query Search query
+ * @param int $max_results Maximum number of results to return
+ * @return array|false Array of articles or false on error
+ */
+function searchPubMed($query, $max_results = 5) {
+    // PubMed API endpoint
+    $pubmed_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi';
+
+    // Prepare search parameters
+    $params = [
+        'db' => 'pubmed',
+        'term' => $query,
+        'retmax' => $max_results,
+        'retmode' => 'json',
+        'sort' => 'relevance'
+    ];
+
+    // Build URL with parameters
+    $url = $pubmed_url . '?' . http_build_query($params);
+
+    // Make API request
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'MedicalLiteratureSearch/1.0 (costinstroie@eridu.eu.org)');
+
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if (curl_errno($ch) || $http_code !== 200) {
+        curl_close($ch);
+        return false;
+    }
+
+    curl_close($ch);
+
+    $response_data = json_decode($response, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE || !isset($response_data['esearchresult']['idlist'])) {
+        return false;
+    }
+
+    $ids = $response_data['esearchresult']['idlist'];
+
+    if (empty($ids)) {
+        return [];
+    }
+
+    // Fetch details for each article
+    return fetchArticleDetails($ids);
+}
+
+/**
+ * Fetch detailed information for PubMed articles
+ * 
+ * @param array $ids PubMed IDs
+ * @return array|false Array of article details or false on error
+ */
+function fetchArticleDetails($ids) {
+    // PubMed API endpoint for fetching details
+    $pubmed_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi';
+
+    // Prepare fetch parameters
+    $params = [
+        'db' => 'pubmed',
+        'id' => implode(',', $ids),
+        'retmode' => 'xml'
+    ];
+
+    // Build URL with parameters
+    $url = $pubmed_url . '?' . http_build_query($params);
+
+    // Make API request
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'MedicalLiteratureSearch/1.0 (costinstroie@eridu.eu.org)');
+
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if (curl_errno($ch) || $http_code !== 200) {
+        curl_close($ch);
+        return false;
+    }
+
+    curl_close($ch);
+
+    // Parse XML response
+    $xml = simplexml_load_string($response);
+
+    if ($xml === false) {
+        return false;
+    }
+
+    $articles = [];
+
+    // Process each article
+    foreach ($xml->PubmedArticle as $article) {
+        $parsed_article = [];
+
+        // Extract PMID
+        $parsed_article['pmid'] = (string)$article->MedlineCitation->PMID;
+
+        // Extract title
+        $parsed_article['title'] = (string)$article->MedlineCitation->Article->ArticleTitle;
+
+        // Extract authors
+        $authors = [];
+        foreach ($article->MedlineCitation->Article->AuthorList->Author as $author) {
+            $author_name = (string)$author->LastName;
+            if (!empty($author->Initials)) {
+                $author_name .= ' ' . (string)$author->Initials;
+            }
+            $authors[] = $author_name;
+        }
+        $parsed_article['authors'] = array_slice($authors, 0, 5);
+        if (count($authors) > 5) {
+            $parsed_article['authors'][] = 'et al.';
+        }
+
+        // Extract journal
+        $parsed_article['journal'] = (string)$article->MedlineCitation->Article->Journal->Title;
+
+        // Extract year
+        $parsed_article['year'] = (string)$article->MedlineCitation->Article->Journal->JournalIssue->PubDate->Year;
+        if (empty($parsed_article['year'])) {
+            $parsed_article['year'] = (string)$article->MedlineCitation->Article->Journal->JournalIssue->PubDate->MedlineDate;
+        }
+
+        // Extract abstract
+        $parsed_article['abstract'] = (string)$article->MedlineCitation->Article->Abstract->AbstractText;
+
+        $articles[] = $parsed_article;
+    }
+
+    return $articles;
+}
+
+/**
  * Extract JSON from AI response content
  * 
  * @param string $content AI response content
