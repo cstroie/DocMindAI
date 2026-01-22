@@ -637,8 +637,10 @@ async function loadProfileForm(profileId) {
         const actionInput = document.getElementById('actionInput');
         const topTitle = document.getElementById('topTitle');
         const topDescription = document.getElementById('topDescription');
+        const profileSelect = document.getElementById('profileSelect');
+        const profileSelector = document.querySelector('.profile-selector');
 
-        if (!profileForm || !formFields || !actionInput || !topTitle || !topDescription) {
+        if (!profileForm || !formFields || !actionInput || !topTitle || !topDescription || !profileSelect || !profileSelector) {
             console.error('Required form elements not found');
             // Show error in the main content area as fallback
             const mainContent = document.querySelector('.main-content');
@@ -652,6 +654,13 @@ async function loadProfileForm(profileId) {
                 mainContent.appendChild(errorElement);
             }
             return;
+        }
+
+        // Clear the page and show profile selector
+        try {
+            profileSelector.style.display = 'none';
+        } catch (error) {
+            console.error('Failed to hide profile selector:', error);
         }
 
         // Show the profile select dropdown and enable the profile-select-container nav element
@@ -714,13 +723,19 @@ function displayProfileForm(profile) {
     // Update top title and description
     const topTitle = document.getElementById('topTitle');
     const topDescription = document.getElementById('topDescription');
-    topTitle.textContent = profile.icon + ' ' + profile.name;
-    topDescription.textContent = profile.description || '';
+    if (topTitle) topTitle.textContent = profile.icon + ' ' + profile.name;
+    if (topDescription) topDescription.textContent = profile.description || '';
 
     // Populate the form fields
     const profileForm = document.getElementById('profileForm');
     const formFields = document.getElementById('formFields');
     const actionInput = document.getElementById('actionInput');
+
+    if (!profileForm || !formFields || !actionInput) {
+        console.error('Required form elements not found in displayProfileForm');
+        return;
+    }
+
     actionInput.value = profile.id;
     formFields.innerHTML = '';
 
@@ -732,14 +747,21 @@ function displayProfileForm(profile) {
     }, {});
 
     // Create form fields based on formConfig
-    profile.form.fields.forEach(field => {
-        const fieldElement = createFormField(field, cookies);
-        formFields.appendChild(fieldElement);
-    });
+    if (profile.form && profile.form.fields) {
+        profile.form.fields.forEach(field => {
+            const fieldElement = createFormField(field, cookies);
+            formFields.appendChild(fieldElement);
+        });
+    }
 
     // Show the form and hide results area
-    profileForm.style.display = 'block';
-    document.getElementById('resultsArea').style.display = 'none';
+    try {
+        if (profileForm.style) profileForm.style.display = 'block';
+        const resultsArea = document.getElementById('resultsArea');
+        if (resultsArea && resultsArea.style) resultsArea.style.display = 'none';
+    } catch (error) {
+        console.error('Failed to update form visibility:', error);
+    }
 
     // Set up cancel button to go back to tools view
     const cancelBtn = document.getElementById('cancelBtn');
@@ -753,7 +775,9 @@ function displayProfileForm(profile) {
     switchView('form');
 
     // Scroll to form
-    profileForm.scrollIntoView({ behavior: 'smooth' });
+    if (profileForm.scrollIntoView) {
+        profileForm.scrollIntoView({ behavior: 'smooth' });
+    }
 }
 
 /**
