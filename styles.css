@@ -97,6 +97,15 @@ body {
     padding: 1rem 0;
 }
 
+.nav-separator {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
 .nav-item {
     display: flex;
     align-items: center;

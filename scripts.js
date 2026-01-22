@@ -307,13 +307,13 @@ async function loadJSONResource(filename, rootKey) {
 
 /**
  * Display profiles grouped by category in the UI
- * 
+ *
  * This function renders all available profiles in the main interface,
  * organizing them by category. Each profile is displayed as a clickable
  * card that loads the corresponding form when clicked.
- * 
+ *
  * @return {void}
- * 
+ *
  * @note Profiles are grouped by their 'category' property
  * @note Each category section includes a header with icon and description
  * @note Profile cards display the profile icon, name, and description
@@ -402,6 +402,105 @@ function displayProfiles() {
         // Append grid to category div
         categoryDiv.appendChild(grid);
         profilesGrid.appendChild(categoryDiv);
+    }
+}
+
+/**
+ * Display profiles for a specific category
+ *
+ * This function displays only the profiles belonging to a specific category.
+ * It filters the profiles by category and renders them in the main interface.
+ *
+ * @param {string} category - The category to display
+ * @return {void}
+ *
+ * @note Shows only profiles from the specified category
+ * @note Updates the page title to show the category name
+ * @note Uses the global profilesData and categoriesData variables
+ * @note Displays an error if profilesData is not available
+ * @see switchView() - Calls this function when a category is selected
+ * @see loadProfileForm() - Called when a profile card is clicked
+ */
+function displayProfilesByCategory(category) {
+    const profilesGrid = document.getElementById('profilesGrid');
+    profilesGrid.innerHTML = '';
+
+    // Check if profilesData is available
+    if (!profilesData) {
+        showError('No profiles data available');
+        return;
+    }
+
+    // Filter profiles by category
+    const categoryProfiles = [];
+    for (const [profile_id, profile_data] of Object.entries(profilesData)) {
+        if (profile_data.category === category) {
+            categoryProfiles.push({
+                'id': profile_id,
+                'name': profile_data.name,
+                'description': profile_data.description,
+                'icon': profile_data.icon
+            });
+        }
+    }
+
+    // Get category info from categories.json
+    const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
+
+    // Create category section
+    const categoryDiv = document.createElement('section');
+    categoryDiv.className = 'category-section category-' + category;
+
+    // Create category header
+    const categoryHeader = document.createElement('hgroup');
+
+    // Add category title with icon
+    const categoryTitle = document.createElement('h2');
+    categoryTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category);
+    categoryHeader.appendChild(categoryTitle);
+
+    // Add category description if available
+    if (categoryInfo && categoryInfo.description) {
+        const categoryDescription = document.createElement('p');
+        categoryDescription.textContent = categoryInfo.description;
+        categoryHeader.appendChild(categoryDescription);
+    }
+
+    // Append header to category div
+    categoryDiv.appendChild(categoryHeader);
+
+    // Create grid for profiles
+    const grid = document.createElement('main');
+
+    // Add profiles to the grid
+    categoryProfiles.forEach(profile => {
+        const profileCard = document.createElement('a');
+        profileCard.className = 'tool-card';
+        profileCard.href = '#';
+        profileCard.onclick = (e) => {
+            e.preventDefault();
+            loadProfileForm(profile.id);
+        };
+
+        // Add profile icon, name, and description
+        profileCard.innerHTML = `
+            <div class="tool-icon">${profile.icon || '📄'}</div>
+            <h3>${profile.name}</h3>
+            <p>${profile.description}</p>
+        `;
+
+        // Append profile card to grid
+        grid.appendChild(profileCard);
+    });
+
+    // Append grid to category div
+    categoryDiv.appendChild(grid);
+    profilesGrid.appendChild(categoryDiv);
+
+    // Update page title
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) {
+        pageTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category) + ' Tools';
     }
 }
 
@@ -1456,7 +1555,8 @@ function arrayOfObjectsToTable(arr) {
  * 3. Sets up the form submission handler
  * 4. Sets up the theme toggle button
  * 5. Sets up view switching for sidebar navigation
- * 6. Applies the user's theme preference
+ * 6. Sets up category buttons in the sidebar
+ * 7. Applies the user's theme preference
  *
  * @note This is the main entry point for the application
  * @note Uses async/await for sequential data loading
@@ -1465,6 +1565,7 @@ function arrayOfObjectsToTable(arr) {
  * @note Attaches form submission handler to the API form
  * @note Sets up theme toggle button click handler
  * @note Sets up sidebar navigation click handlers
+ * @note Sets up category button click handlers
  * @note Applies theme preference on page load
  * @see loadJSONResource() - Used to load configuration data
  * @see displayProfiles() - Renders profile cards
@@ -1480,6 +1581,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     profilesData = await loadJSONResource('profiles.json', 'profiles');
     // Load languages data
     languagesData = await loadJSONResource('languages.json', 'languages');
+
+    // Add category buttons to sidebar after loading data
+    if (categoriesData) {
+        addCategoryButtonsToSidebar(categoriesData);
+    }
+
     // Display profiles in the UI
     displayProfiles();
     // Set up form submission
@@ -1510,4 +1617,84 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Apply theme preference
     applyTheme();
 });
+
+/**
+ * Add category buttons to the sidebar
+ *
+ * This function dynamically adds category buttons to the sidebar navigation
+ * based on the categories data. Each button represents a category and when
+ * clicked, it displays the tools/profiles belonging to that category.
+ *
+ * @param {Object} categories - The categories data object
+ * @return {void}
+ *
+ * @note Creates a button for each category in the categories object
+ * @note Inserts buttons after the Home button in the sidebar
+ * @note Sets up click handlers to display profiles by category
+ * @note Updates active state of navigation buttons
+ * @see displayProfilesByCategory() - Called when a category button is clicked
+ * @see switchView() - Called to switch to tools view
+ */
+function addCategoryButtonsToSidebar(categories) {
+    const sidebarNav = document.querySelector('.sidebar-nav');
+    const homeButton = document.querySelector('.nav-item[data-view="home"]');
+
+    // Create a separator for categories
+    const categorySeparator = document.createElement('div');
+    categorySeparator.className = 'nav-separator';
+    categorySeparator.textContent = 'Categories';
+    categorySeparator.style.padding = '0.5rem 1.5rem';
+    categorySeparator.style.fontSize = '0.75rem';
+    categorySeparator.style.fontWeight = '600';
+    categorySeparator.style.color = 'var(--text-secondary)';
+    categorySeparator.style.textTransform = 'uppercase';
+    categorySeparator.style.letterSpacing = '0.05em';
+
+    // Insert separator after Home button
+    if (homeButton && homeButton.nextSibling) {
+        sidebarNav.insertBefore(categorySeparator, homeButton.nextSibling);
+    }
+
+    // Add category buttons
+    for (const [categoryId, categoryData] of Object.entries(categories)) {
+        const categoryButton = document.createElement('button');
+        categoryButton.className = 'nav-item';
+        categoryButton.dataset.category = categoryId;
+        categoryButton.innerHTML = `
+            <span class="nav-icon">${categoryData.icon || '📄'}</span>
+            <span class="nav-text">${categoryData.name}</span>
+        `;
+
+        // Insert category button after the separator
+        if (categorySeparator.nextSibling) {
+            sidebarNav.insertBefore(categoryButton, categorySeparator.nextSibling);
+        } else {
+            sidebarNav.appendChild(categoryButton);
+        }
+
+        // Set up click handler
+        categoryButton.addEventListener('click', function() {
+            // Update active state of navigation buttons
+            const navButtons = document.querySelectorAll('.nav-item');
+            navButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            this.classList.add('active');
+
+            // Switch to tools view and display profiles by category
+            switchView('tools');
+            displayProfilesByCategory(categoryId);
+
+            // Close sidebar on mobile
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar && window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                const menuToggle = document.getElementById('menuToggle');
+                if (menuToggle) {
+                    menuToggle.innerHTML = '☰';
+                }
+            }
+        });
+    }
+}
 
