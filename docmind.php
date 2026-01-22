@@ -363,8 +363,7 @@ function convertPromptArrayToText($prompt_array, $indent_level = 0) {
     if (array_keys($prompt_array) !== range(0, count($prompt_array) - 1)) {
         // Convert JSON object to formatted text
         $prompt_text = '';
-        $indent = str_repeat('  ', $indent_level);
-
+        // Process each key-value pair
         foreach ($prompt_array as $key => $value) {
             // Replace underscores with spaces in key names
             $formatted_key = str_replace('_', ' ', $key);
@@ -373,9 +372,10 @@ function convertPromptArrayToText($prompt_array, $indent_level = 0) {
             if (is_array($value)) {
                 $value = convertPromptArrayToText($value, $indent_level + 1);
             }
-
-            $prompt_text .= $indent . strtoupper($formatted_key) . "\n" . $indent . $value . "\n\n";
+            // Append to prompt text with formatting
+            $prompt_text .= strtoupper($formatted_key) . "\n" . $value . "\n\n";
         }
+        // Trim trailing newlines and return
         return rtrim($prompt_text, "\n");
     } else {
         // If prompt is a sequential array, process each item recursively
@@ -387,6 +387,7 @@ function convertPromptArrayToText($prompt_array, $indent_level = 0) {
                 $result[] = $item;
             }
         }
+        // Join items with newlines and return
         return implode("\n", $result);
     }
 }
