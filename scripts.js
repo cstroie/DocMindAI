@@ -664,7 +664,6 @@ async function loadProfileForm(profileId) {
         }
 
         // Show the profile select dropdown and enable the profile-select-container nav element
-        const profileSelect = document.getElementById('profileSelect');
         profileSelect.style.display = 'block';
         const profileSelectContainer = document.querySelector('.profile-select-container');
         if (profileSelectContainer) {
