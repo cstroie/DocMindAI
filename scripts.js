@@ -1340,7 +1340,16 @@ function displayResults(results) {
  * @see displayProfiles() - Calls this function if profiles data is unavailable
  */
 function showError(message) {
+    // Get the results area element
     const resultsArea = document.getElementById('resultsArea');
+
+    // Check if resultsArea exists
+    if (!resultsArea) {
+        console.error('Results area not found:', message);
+        // Show error in console and return
+        return;
+    }
+
     // Get the error template
     const errorTemplate = document.getElementById('errorTemplate');
     if (errorTemplate) {
