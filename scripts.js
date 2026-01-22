@@ -260,7 +260,7 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
         // Set default type if no fence found
         result.type = defaultType;
     }
-    
+
     // Return the result
     return result;
 }
