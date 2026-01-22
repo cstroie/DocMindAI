@@ -243,6 +243,7 @@
         "language_instruction": "{language_instruction}",
         "medical_transcript": "{transcript}"
       },
+      "display": "html",
       "form": {
         "title": "SOAP Note",
         "description": "Review the generated SOAP note from your medical transcript. The AI has processed the patient-clinician dialogue and organized it into Subjective, Objective, Assessment, and Plan sections.",
