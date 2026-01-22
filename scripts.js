@@ -833,8 +833,26 @@ function showError(message) {
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
 
-    // Display error message
-    resultsContent.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
+    // Get the error template
+    const errorTemplate = document.getElementById('errorTemplate');
+    if (errorTemplate) {
+        // Clone the template content
+        const errorElement = errorTemplate.content.cloneNode(true);
+
+        // Set the error message
+        const errorMessageElement = errorElement.querySelector('.error-message');
+        if (errorMessageElement) {
+            errorMessageElement.textContent = message;
+        }
+
+        // Display error message
+        resultsContent.innerHTML = '';
+        resultsContent.appendChild(errorElement);
+    } else {
+        // Fallback to direct HTML if template not found
+        resultsContent.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
+    }
+
     resultsArea.style.display = 'block';
 
     // Scroll to error
