@@ -773,10 +773,6 @@ function formatResults(results) {
     if (results.html) {
         return results.html;
     }
-    // If results is an object, stringify it with indentation
-    if (typeof results === 'object') {
-        return `<pre><code class="json">${JSON.stringify(results, null, 2)}</code></pre>`;
-    }
 
     // Check if the result contains markdown code fences
     const fenceInfo = extractCodeFenceInfo(results, 'text');
@@ -800,6 +796,26 @@ function formatResults(results) {
             return `<pre><code class="${fenceInfo.type}">${escapeHtml(fenceInfo.text)}</code></pre>`;
         }
     }
+
+    // If results is an object, convert to markdown for better readability
+    if (typeof results === 'object') {
+        try {
+            const markdown = jsonToMarkdown(results);
+            const htmlContent = marked.parse(markdown);
+            // Apply syntax highlighting to any code blocks in the HTML
+            setTimeout(() => {
+                applySyntaxHighlighting();
+            }, 0);
+            return htmlContent;
+        } catch (error) {
+            console.error('Error converting JSON to markdown:', error);
+            // Fallback to JSON stringify if conversion fails
+            return `<pre><code class="json">${JSON.stringify(results, null, 2)}</code></pre>`;
+        }
+    }
+
+    // For simple strings, just return them
+    return escapeHtml(results);
 }
 
 /**
@@ -818,6 +834,135 @@ function showError(message) {
 
     // Scroll to error
     resultsArea.scrollIntoView({ behavior: 'smooth' });
+}
+
+/**
+ * Convert structured JSON objects to markdown for better human readability
+ *
+ * @param {Object|Array|string} data - The JSON data to convert
+ * @returns {string} Markdown representation of the data
+ */
+function jsonToMarkdown(data) {
+    // If data is already a string, return it as-is (could be markdown or HTML)
+    if (typeof data === 'string') {
+        return data;
+    }
+
+    // If data is an array, process it as a list or table
+    if (Array.isArray(data)) {
+        // Check if array contains objects (convert to table)
+        if (data.length > 0 && typeof data[0] === 'object' && !Array.isArray(data[0])) {
+            return arrayOfObjectsToTable(data);
+        }
+        // Otherwise convert to list
+        return arrayToList(data);
+    }
+
+    // If data is an object, process it as headings and paragraphs
+    if (typeof data === 'object') {
+        return objectToMarkdown(data);
+    }
+
+    // Fallback for other types
+    return String(data);
+}
+
+/**
+ * Convert an object to markdown headings and paragraphs
+ *
+ * @param {Object} obj - The object to convert
+ * @param {number} [level=1] - The heading level to start with
+ * @returns {string} Markdown representation
+ */
+function objectToMarkdown(obj, level = 1) {
+    let markdown = '';
+
+    for (const [key, value] of Object.entries(obj)) {
+        // Skip null/undefined values
+        if (value === null || value === undefined) continue;
+
+        // Create heading based on level
+        const heading = '#'.repeat(Math.min(level, 6)) + ' ' + key + '\n\n';
+
+        // Process value based on its type
+        if (typeof value === 'string') {
+            // String values become paragraphs
+            markdown += heading + value + '\n\n';
+        } else if (typeof value === 'object') {
+            // Nested objects get deeper headings
+            if (Array.isArray(value)) {
+                markdown += heading + jsonToMarkdown(value) + '\n\n';
+            } else {
+                markdown += heading + objectToMarkdown(value, level + 1);
+            }
+        } else {
+            // Other types (numbers, booleans) become paragraphs
+            markdown += heading + String(value) + '\n\n';
+        }
+    }
+
+    return markdown.trim();
+}
+
+/**
+ * Convert an array to a markdown list
+ *
+ * @param {Array} arr - The array to convert
+ * @returns {string} Markdown list representation
+ */
+function arrayToList(arr) {
+    let markdown = '';
+
+    arr.forEach(item => {
+        if (item === null || item === undefined) return;
+
+        // Handle nested arrays
+        if (Array.isArray(item)) {
+            markdown += '- ' + jsonToMarkdown(item) + '\n';
+        }
+        // Handle objects (convert to nested list)
+        else if (typeof item === 'object') {
+            markdown += '- ' + objectToMarkdown(item, 1) + '\n';
+        }
+        // Handle simple values
+        else {
+            markdown += '- ' + String(item) + '\n';
+        }
+    });
+
+    return markdown.trim();
+}
+
+/**
+ * Convert an array of objects to a markdown table
+ *
+ * @param {Array<Object>} arr - The array of objects to convert
+ * @returns {string} Markdown table representation
+ */
+function arrayOfObjectsToTable(arr) {
+    if (arr.length === 0) return '';
+
+    // Get all unique keys from all objects
+    const keys = [...new Set(arr.flatMap(obj => Object.keys(obj)))];
+
+    // Create header row
+    let markdown = '| ' + keys.join(' | ') + ' |\n';
+
+    // Create separator row
+    markdown += '| ' + keys.map(() => '---').join(' | ') + ' |\n';
+
+    // Create data rows
+    arr.forEach(obj => {
+        const row = keys.map(key => {
+            const value = obj[key];
+            if (value === null || value === undefined) return '';
+            if (typeof value === 'object') return JSON.stringify(value);
+            return String(value);
+        });
+        markdown += '| ' + row.join(' | ') + ' |\n';
+    });
+
+    return markdown.trim();
 }
 
 // DocMind-specific JavaScript
