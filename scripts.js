@@ -909,8 +909,11 @@ function objectToMarkdown(obj, level = 3) {
         // Skip null/undefined values
         if (value === null || value === undefined) continue;
 
+        // Capitalize first letter of key
+        const formattedKey = key.charAt(0).toUpperCase() + key.slice(1);
+
         // Create heading based on level
-        const heading = '\n' + '#'.repeat(Math.min(level, 6)) + ' ' + key + '\n\n';
+        const heading = '\n' + '#'.repeat(Math.min(level, 6)) + ' ' + formattedKey + '\n\n';
 
         // Process value based on its type
         if (typeof value === 'string') {
