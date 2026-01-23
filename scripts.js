@@ -41,10 +41,8 @@ function toggleTheme() {
         newTheme = systemPrefersDark ? 'light' : 'dark';
     }
 
-    // Set theme cookie (30 days)
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 30);
-    document.cookie = `docmind-theme=${encodeURIComponent(newTheme)}; expires=${expirationDate.toUTCString()}; path=/`;
+    // Save theme preference as cookie (30 days)
+    saveCookie('docmind-theme', newTheme, 30);
 
     // Update theme icon immediately
     const themeIcon = document.getElementById('themeIcon');
@@ -980,18 +978,14 @@ async function handleFormSubmit(event) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="loading"></span> Processing...';
 
-    // Set cookies for selected model and language (30 days)
+    // Save selected model and language as cookies (30 days)
     const model = formData.get('model');
     if (model) {
-        const expirationDate = new Date();
-        expirationDate.setDate(expirationDate.getDate() + 30);
-        document.cookie = `docmind-model=${encodeURIComponent(model)}; expires=${expirationDate.toUTCString()}; path=/`;
+        saveCookie('docmind-model', model, 30);
     }
     const language = formData.get('language');
     if (language) {
-        const expirationDate = new Date();
-        expirationDate.setDate(expirationDate.getDate() + 30);
-        document.cookie = `docmind-language=${encodeURIComponent(language)}; expires=${expirationDate.toUTCString()}; path=/`;
+        saveCookie('docmind-language', language, 30);
     }
 
     try {
@@ -1507,6 +1501,34 @@ function switchView(viewName) {
             }
         }
     }
+}
+
+/**
+ * Save a cookie with the given name, value, and expiration days
+ *
+ * This helper function creates and saves a cookie with the specified parameters.
+ * It handles URL encoding of the value and sets the expiration date.
+ *
+ * @param {string} name - The name of the cookie
+ * @param {string} value - The value to store in the cookie
+ * @param {number} [days=30] - Number of days until the cookie expires
+ * @param {string} [path='/'] - The path for which the cookie is valid
+ * @return {void}
+ *
+ * @note URL-encodes the cookie value for security
+ * @note Sets expiration date based on current date + days parameter
+ * @note Defaults to 30 days expiration if not specified
+ * @note Sets cookie path to '/' by default
+ * @see handleFormSubmit() - Uses this function to save user preferences
+ * @see toggleTheme() - Uses this function to save theme preference
+ */
+function saveCookie(name, value, days = 30, path = '/') {
+    // Set expiration date
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + days);
+
+    // Create and save the cookie
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expirationDate.toUTCString()}; path=${path}`;
 }
 
 /**
