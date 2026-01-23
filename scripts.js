@@ -143,7 +143,6 @@ function applyTheme() {
  * @see Document.addEventListener('DOMContentLoaded') - Sets up view switching handlers
  */
 function switchView(viewName) {
-    console.log('Switching to view:', viewName);
     // Hide all views
     const views = document.querySelectorAll('.view');
     views.forEach(view => {
@@ -171,29 +170,31 @@ function switchView(viewName) {
     });
 
     // Update page title
+    // TODO: Improve title handling for dynamic category views
     const pageTitle = document.getElementById('pageTitle');
     if (pageTitle) {
-        switch (viewName) {
-            case 'home':
-                pageTitle.textContent = 'Welcome to DocMind AI';
-                break;
-            case 'tools':
-                pageTitle.textContent = 'AI Tools';
-                break;
-            case 'history':
-                pageTitle.textContent = 'Analysis History';
-                break;
-            case 'settings':
-                pageTitle.textContent = 'Application Settings';
-                break;
-            case viewName.startsWith('category-'):
-                // For category views, get the category name from categoriesData
-                const categoryId = viewName.replace('category-', '');
-                const categoryInfo = categoriesData && categoriesData[categoryId] ? categoriesData[categoryId] : null;
-                pageTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : categoryId) + ' Tools';
-                break;
-            default:
-                pageTitle.textContent = 'DocMind AI';
+        if (viewName.startsWith('tools-')) {
+            // For category views, get the category name from categoriesData
+            const categoryId = viewName.replace('tools-', '');
+            const categoryInfo = categoriesData && categoriesData[categoryId] ? categoriesData[categoryId] : null;
+            pageTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : categoryId) + ' Tools';
+        } else {
+            switch (viewName) {
+                case 'home':
+                    pageTitle.textContent = 'Welcome to DocMind AI';
+                    break;
+                case 'tools':
+                    pageTitle.textContent = 'AI Tools';
+                    break;
+                case 'history':
+                    pageTitle.textContent = 'Analysis History';
+                    break;
+                case 'settings':
+                    pageTitle.textContent = 'Application Settings';
+                    break;
+                default:
+                    pageTitle.textContent = 'DocMind AI';
+            }
         }
     }
 }
