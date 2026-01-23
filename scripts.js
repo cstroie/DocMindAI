@@ -143,6 +143,7 @@ function applyTheme() {
  * @see Document.addEventListener('DOMContentLoaded') - Sets up view switching handlers
  */
 function switchView(viewName) {
+    console.log('Switching to view:', viewName);
     // Hide all views
     const views = document.querySelectorAll('.view');
     views.forEach(view => {
@@ -376,6 +377,62 @@ function addCategoryButtonsToSidebar(categories) {
 }
 
 /**
+ * Create category views dynamically using the tools view template
+ *
+ * This function creates view sections for each category in the categories data.
+ * Each category view will display tools belonging to that category.
+ *
+ * @param {Object} categories - The categories data object
+ * @return {void}
+ *
+ * @note Creates a view section for each category
+ * @note Uses the toolsViewTemplate to create consistent category views
+ * @note Each view has the class 'view' and 'category-view'
+ * @note View ID is 'category-{categoryId}-view'
+ * @note View data-view attribute is 'category-{categoryId}'
+ * @note Each view contains a tools grid that will be populated with category tools
+ * @see addCategoryButtonsToSidebar() - Creates sidebar buttons for categories
+ * @see displayToolsByCategory() - Populates category views with tools
+ * @see Document.addEventListener('DOMContentLoaded') - Calls this function after loading categories
+ */
+function createCategoryViews(categories) {
+    const viewContainer = document.querySelector('.view-container');
+    const toolsViewTemplate = document.getElementById('toolsViewTemplate');
+
+    // Create a view for each category
+    for (const [categoryId, categoryData] of Object.entries(categories)) {
+        // Clone the template content
+        const templateContent = toolsViewTemplate.content.cloneNode(true);
+        const categoryView = templateContent.querySelector('.tools-view');
+
+        // Update the view properties
+        //categoryView.classList.add('category-view');
+        categoryView.classList.add(`tools-${categoryId}-view`);
+        categoryView.dataset.view = `tools-${categoryId}`;
+        categoryView.style.display = 'none';
+
+        // Update the title and description
+        const titleElement = categoryView.querySelector('.tools-title');
+        const descriptionElement = categoryView.querySelector('.tools-subtitle');
+        if (titleElement) {
+            titleElement.textContent = `${categoryData.icon || '📄'} ${categoryData.name}`;
+        }
+        if (descriptionElement) {
+            descriptionElement.textContent = categoryData.description || '';
+        }
+
+        // Update the tools grid ID
+        const toolsGrid = categoryView.querySelector('.tools-grid');
+        if (toolsGrid) {
+            toolsGrid.id = `${categoryId}ToolsGrid`;
+        }
+
+        // Append the category view to the container
+        viewContainer.appendChild(categoryView);
+    }
+}
+
+/**
  * Display tools grouped by category in the UI
  *
  * This function renders all available tools in the main interface,
@@ -501,7 +558,7 @@ function displayTools() {
  */
 function displayToolsByCategory(category) {
     // Get the category tools grid
-    const toolsGrid = document.getElementById(`category-${category}-toolsGrid`);
+    const toolsGrid = document.getElementById(`${category}ToolsGrid`);
     if (!toolsGrid) {
         showError(`Category tools grid not found for category: ${category}`);
         return;
@@ -1712,70 +1769,6 @@ function arrayOfObjectsToTable(arr) {
 }
 
 /**
- * Create category views dynamically using the tools view template
- *
- * This function creates view sections for each category in the categories data.
- * Each category view will display tools belonging to that category.
- *
- * @param {Object} categories - The categories data object
- * @return {void}
- *
- * @note Creates a view section for each category
- * @note Uses the toolsViewTemplate to create consistent category views
- * @note Each view has the class 'view' and 'category-view'
- * @note View ID is 'category-{categoryId}-view'
- * @note View data-view attribute is 'category-{categoryId}'
- * @note Each view contains a tools grid that will be populated with category tools
- * @see addCategoryButtonsToSidebar() - Creates sidebar buttons for categories
- * @see displayToolsByCategory() - Populates category views with tools
- * @see Document.addEventListener('DOMContentLoaded') - Calls this function after loading categories
- */
-function createCategoryViews(categories) {
-    const viewContainer = document.querySelector('.view-container');
-    const toolsViewTemplate = document.getElementById('toolsViewTemplate');
-
-    // Create a container for category views
-    const categoryViewsContainer = document.createElement('div');
-    categoryViewsContainer.id = 'categoryViewsContainer';
-
-    // Create a view for each category
-    for (const [categoryId, categoryData] of Object.entries(categories)) {
-        // Clone the template content
-        const templateContent = toolsViewTemplate.content.cloneNode(true);
-        const categoryView = templateContent.querySelector('.tools-view');
-
-        // Update the view properties
-        categoryView.classList.add('category-view');
-        categoryView.id = `category-${categoryId}-view`;
-        categoryView.dataset.view = `category-${categoryId}`;
-        categoryView.style.display = 'none';
-
-        // Update the title and description
-        const titleElement = categoryView.querySelector('.tools-title');
-        const descriptionElement = categoryView.querySelector('.tools-subtitle');
-
-        if (titleElement) {
-            titleElement.textContent = `${categoryData.icon || '📄'} ${categoryData.name}`;
-        }
-
-        if (descriptionElement) {
-            descriptionElement.textContent = categoryData.description || '';
-        }
-
-        // Update the tools grid ID
-        const toolsGrid = categoryView.querySelector('.tools-grid');
-        if (toolsGrid) {
-            toolsGrid.id = `category-${categoryId}-toolsGrid`;
-        }
-
-        categoryViewsContainer.appendChild(categoryView);
-    }
-
-    // Append category views container to the view container
-    viewContainer.appendChild(categoryViewsContainer);
-}
-
-/**
  * DocMind-specific JavaScript initialization
  *
  * This function initializes the DocMind AI application when the DOM is fully loaded.
@@ -1817,13 +1810,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load languages data
     languagesData = await loadJSONResource('languages.json', 'languages');
 
-    // Create category views after loading data
+    // Create category views and buttons after loading data
     if (categoriesData) {
         createCategoryViews(categoriesData);
-    }
-
-    // Add category buttons to sidebar after loading data
-    if (categoriesData) {
         addCategoryButtonsToSidebar(categoriesData);
     }
 
