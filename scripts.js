@@ -391,6 +391,7 @@ function addCategoryButtonsToSidebar(categories) {
  * @note View ID is 'category-{categoryId}-view'
  * @note View data-view attribute is 'category-{categoryId}'
  * @note Each view contains a tools grid that will be populated with category tools
+ * @note Calls displayToolsByCategory to populate each category view with tools
  * @see addCategoryButtonsToSidebar() - Creates sidebar buttons for categories
  * @see displayToolsByCategory() - Populates category views with tools
  * @see Document.addEventListener('DOMContentLoaded') - Calls this function after loading categories
@@ -429,6 +430,9 @@ function createCategoryViews(categories) {
 
         // Append the category view to the container
         viewContainer.appendChild(categoryView);
+
+        // Populate the category view with tools
+        displayToolsByCategory(categoryId);
     }
 }
 
