@@ -182,6 +182,12 @@ function switchView(viewName) {
             case 'settings':
                 pageTitle.textContent = 'Application Settings';
                 break;
+            case viewName.startsWith('category-'):
+                // For category views, get the category name from categoriesData
+                const categoryId = viewName.replace('category-', '');
+                const categoryInfo = categoriesData && categoriesData[categoryId] ? categoriesData[categoryId] : null;
+                pageTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : categoryId) + ' Tools';
+                break;
             default:
                 pageTitle.textContent = 'DocMind AI';
         }
@@ -373,9 +379,8 @@ function addCategoryButtonsToSidebar(categories) {
             });
             this.classList.add('active');
 
-            // Switch to tools view and display tools by category
-            switchView('tools');
-            displayToolsByCategory(categoryId);
+            // Switch to the category view
+            switchView(`category-${categoryId}`);
 
             // Close sidebar on mobile
             const sidebar = document.querySelector('.sidebar');
@@ -502,20 +507,26 @@ function displayTools() {
  * Display tools for a specific category
  *
  * This function displays only the tools belonging to a specific category.
- * It filters the tools by category and renders them in the main interface.
+ * It filters the tools by category and renders them in the category view.
  *
  * @param {string} category - The category to display
  * @return {void}
  *
  * @note Shows only tools from the specified category
- * @note Updates the page title to show the category name
+ * @note Updates the category view title and description
  * @note Uses the global toolsData and categoriesData variables
  * @note Displays an error if toolsData is not available
  * @see switchView() - Calls this function when a category is selected
  * @see loadToolForm() - Called when a tool card is clicked
  */
 function displayToolsByCategory(category) {
-    const toolsGrid = document.getElementById('toolsGrid');
+    // Get the category tools grid
+    const toolsGrid = document.getElementById(`category-${category}-toolsGrid`);
+    if (!toolsGrid) {
+        showError(`Category tools grid not found for category: ${category}`);
+        return;
+    }
+
     toolsGrid.innerHTML = '';
 
     // Check if toolsData is available
@@ -540,12 +551,9 @@ function displayToolsByCategory(category) {
     // Get category info from categories.json
     const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
 
-    // Create category section
-    const categoryDiv = document.createElement('section');
-    categoryDiv.className = 'category-section category-' + category;
-
     // Create grid for tools
     const grid = document.createElement('main');
+    grid.className = 'tools-grid';
 
     // Add tools to the grid
     categoryTools.forEach(tool => {
@@ -568,23 +576,18 @@ function displayToolsByCategory(category) {
         grid.appendChild(toolCard);
     });
 
-    // Append grid to category div
-    categoryDiv.appendChild(grid);
-    toolsGrid.appendChild(categoryDiv);
+    // Append grid to tools grid
+    toolsGrid.appendChild(grid);
 
-    // Update page title
-    const pageTitle = document.getElementById('pageTitle');
-    if (pageTitle) {
-        pageTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category) + ' Tools';
+    // Update category view title and description
+    const categoryTitle = document.getElementById('categoryTitle');
+    const categoryDescription = document.getElementById('categoryDescription');
+
+    if (categoryTitle) {
+        categoryTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category);
     }
-    // Update top title and description
-    const topTitle = document.getElementById('topTitle');
-    if (topTitle) {
-        topTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category) + ' Tools';
-    }
-    const topDescription = document.getElementById('topDescription');
-    if (topDescription) {
-        topDescription.textContent = categoryInfo && categoryInfo.description ? categoryInfo.description : '';
+    if (categoryDescription) {
+        categoryDescription.textContent = categoryInfo && categoryInfo.description ? categoryInfo.description : '';
     }
 }
 
@@ -1729,21 +1732,73 @@ function arrayOfObjectsToTable(arr) {
 }
 
 /**
+ * Create category views dynamically
+ *
+ * This function creates view sections for each category in the categories data.
+ * Each category view will display tools belonging to that category.
+ *
+ * @param {Object} categories - The categories data object
+ * @return {void}
+ *
+ * @note Creates a view section for each category
+ * @note Each view has the class 'view' and 'category-view'
+ * @note View ID is 'category-{categoryId}-view'
+ * @note View data-view attribute is 'category-{categoryId}'
+ * @note Each view contains a tools grid that will be populated with category tools
+ * @see addCategoryButtonsToSidebar() - Creates sidebar buttons for categories
+ * @see displayToolsByCategory() - Populates category views with tools
+ * @see Document.addEventListener('DOMContentLoaded') - Calls this function after loading categories
+ */
+function createCategoryViews(categories) {
+    const viewContainer = document.querySelector('.view-container');
+
+    // Create a container for category views
+    const categoryViewsContainer = document.createElement('div');
+    categoryViewsContainer.id = 'categoryViewsContainer';
+
+    // Create a view for each category
+    for (const [categoryId, categoryData] of Object.entries(categories)) {
+        const categoryView = document.createElement('section');
+        categoryView.className = 'view category-view';
+        categoryView.id = `category-${categoryId}-view`;
+        categoryView.dataset.view = `category-${categoryId}`;
+        categoryView.style.display = 'none';
+
+        categoryView.innerHTML = `
+            <hgroup class="tools-header">
+                <h2 class="tools-title" id="categoryTitle">${categoryData.icon || '📄'} ${categoryData.name}</h2>
+                <p class="tools-subtitle" id="categoryDescription">${categoryData.description || ''}</p>
+            </hgroup>
+            <div class="tools-grid" id="category-${categoryId}-toolsGrid">
+                <!-- Will be populated with tools for this category -->
+            </div>
+        `;
+
+        categoryViewsContainer.appendChild(categoryView);
+    }
+
+    // Append category views container to the view container
+    viewContainer.appendChild(categoryViewsContainer);
+}
+
+/**
  * DocMind-specific JavaScript initialization
  *
  * This function initializes the DocMind AI application when the DOM is fully loaded.
  * It performs the following tasks:
  * 1. Loads configuration data (categories, tools, languages)
- * 2. Displays available tools in the UI
- * 3. Sets up the form submission handler
- * 4. Sets up the theme toggle button
- * 5. Sets up view switching for sidebar navigation
- * 6. Sets up category buttons in the sidebar
- * 7. Applies the user's theme preference
+ * 2. Creates category views
+ * 3. Displays available tools in the UI
+ * 4. Sets up the form submission handler
+ * 5. Sets up the theme toggle button
+ * 6. Sets up view switching for sidebar navigation
+ * 7. Sets up category buttons in the sidebar
+ * 8. Applies the user's theme preference
  *
  * @note This is the main entry point for the application
  * @note Uses async/await for sequential data loading
  * @note Sets up global variables: categoriesData, toolsData, languagesData
+ * @note Calls createCategoryViews() to create category view sections
  * @note Calls displayTools() to render tool cards
  * @note Attaches form submission handler to the API form
  * @note Sets up theme toggle button click handler
@@ -1751,6 +1806,7 @@ function arrayOfObjectsToTable(arr) {
  * @note Sets up category button click handlers
  * @note Applies theme preference on page load
  * @see loadJSONResource() - Used to load configuration data
+ * @see createCategoryViews() - Creates category view sections
  * @see displayTools() - Renders tool cards
  * @see handleFormSubmit() - Handles form submissions
  * @see toggleTheme() - Handles theme toggling
@@ -1766,6 +1822,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     toolsData = await loadJSONResource('tools.json', 'tools');
     // Load languages data
     languagesData = await loadJSONResource('languages.json', 'languages');
+
+    // Create category views after loading data
+    if (categoriesData) {
+        createCategoryViews(categoriesData);
+    }
 
     // Add category buttons to sidebar after loading data
     if (categoriesData) {
