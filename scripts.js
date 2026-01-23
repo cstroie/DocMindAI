@@ -1712,7 +1712,7 @@ function arrayOfObjectsToTable(arr) {
 }
 
 /**
- * Create category views dynamically
+ * Create category views dynamically using the tools view template
  *
  * This function creates view sections for each category in the categories data.
  * Each category view will display tools belonging to that category.
@@ -1721,6 +1721,7 @@ function arrayOfObjectsToTable(arr) {
  * @return {void}
  *
  * @note Creates a view section for each category
+ * @note Uses the toolsViewTemplate to create consistent category views
  * @note Each view has the class 'view' and 'category-view'
  * @note View ID is 'category-{categoryId}-view'
  * @note View data-view attribute is 'category-{categoryId}'
@@ -1731,6 +1732,7 @@ function arrayOfObjectsToTable(arr) {
  */
 function createCategoryViews(categories) {
     const viewContainer = document.querySelector('.view-container');
+    const toolsViewTemplate = document.getElementById('toolsViewTemplate');
 
     // Create a container for category views
     const categoryViewsContainer = document.createElement('div');
@@ -1738,21 +1740,33 @@ function createCategoryViews(categories) {
 
     // Create a view for each category
     for (const [categoryId, categoryData] of Object.entries(categories)) {
-        const categoryView = document.createElement('section');
-        categoryView.className = 'view category-view';
+        // Clone the template content
+        const templateContent = toolsViewTemplate.content.cloneNode(true);
+        const categoryView = templateContent.querySelector('.tools-view');
+
+        // Update the view properties
+        categoryView.classList.add('category-view');
         categoryView.id = `category-${categoryId}-view`;
         categoryView.dataset.view = `category-${categoryId}`;
         categoryView.style.display = 'none';
 
-        categoryView.innerHTML = `
-            <hgroup class="tools-header">
-                <h2 class="tools-title" id="categoryTitle">${categoryData.icon || '📄'} ${categoryData.name}</h2>
-                <p class="tools-subtitle" id="categoryDescription">${categoryData.description || ''}</p>
-            </hgroup>
-            <div class="tools-grid" id="category-${categoryId}-toolsGrid">
-                <!-- Will be populated with tools for this category -->
-            </div>
-        `;
+        // Update the title and description
+        const titleElement = categoryView.querySelector('.tools-title');
+        const descriptionElement = categoryView.querySelector('.tools-subtitle');
+
+        if (titleElement) {
+            titleElement.textContent = `${categoryData.icon || '📄'} ${categoryData.name}`;
+        }
+
+        if (descriptionElement) {
+            descriptionElement.textContent = categoryData.description || '';
+        }
+
+        // Update the tools grid ID
+        const toolsGrid = categoryView.querySelector('.tools-grid');
+        if (toolsGrid) {
+            toolsGrid.id = `category-${categoryId}-toolsGrid`;
+        }
 
         categoryViewsContainer.appendChild(categoryView);
     }
