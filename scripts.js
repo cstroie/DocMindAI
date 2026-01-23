@@ -351,16 +351,6 @@ function loadToolsCategories(categories) {
     const sidebarNav = document.querySelector('.sidebar-nav');
     const homeButton = document.querySelector('.nav-item[data-view="home"]');
 
-    // Create a separator for categories
-    const categorySeparator = document.createElement('div');
-    categorySeparator.className = 'nav-separator';
-    categorySeparator.textContent = 'Categories';
-
-    // Insert separator after Home button
-    if (homeButton && homeButton.nextSibling) {
-        sidebarNav.insertBefore(categorySeparator, homeButton.nextSibling);
-    }
-
     // Create a view for each category (in reverse order)
     const categoryEntries = Object.entries(categories);
     for (let i = categoryEntries.length - 1; i >= 0; i--) {
@@ -406,13 +396,12 @@ function loadToolsCategories(categories) {
             <span class="nav-text">${categoryData.name}</span>
         `;
 
-        // Insert category button after the separator
-        if (categorySeparator.nextSibling) {
-            sidebarNav.insertBefore(categoryButton, categorySeparator.nextSibling);
+        // Insert category button after the home button
+        if (homeButton && homeButton.nextSibling) {
+            sidebarNav.insertBefore(categoryButton, homeButton.nextSibling);
         } else {
             sidebarNav.appendChild(categoryButton);
         }
-
     }
 }
 
