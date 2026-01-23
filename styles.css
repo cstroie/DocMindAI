@@ -572,10 +572,13 @@ body {
     border-radius: var(--radius-md);
     padding: 1.5rem;
     border: 1px solid var(--border-color);
-    font-family: 'Fira Code', 'Courier New', Courier, monospace;
     font-size: 0.875rem;
     line-height: 1.6;
     overflow-x: auto;
+}
+
+.results-content pre {
+    font-family: 'Fira Code', 'Courier New', Courier, monospace;
 }
 
 .history-container {
@@ -1031,6 +1034,133 @@ small {
     margin-bottom: 1rem;
 }
 
+/*!
+  Theme: StackOverflow Light
+  Description: Light theme as used on stackoverflow.com
+  Author: stackoverflow.com
+  Maintainer: @Hirse
+  Website: https://github.com/StackExchange/Stacks
+  License: MIT
+  Updated: 2021-05-15
+
+  Updated for @stackoverflow/stacks v0.64.0
+  Code Blocks: /blob/v0.64.0/lib/css/components/_stacks-code-blocks.less
+  Colors: /blob/v0.64.0/lib/css/exports/_stacks-constants-colors.less
+*/
+
+.hljs {
+  /* var(--highlight-color) */
+  color: #2f3337;
+  /* var(--highlight-bg) */
+  background: inherit;
+}
+
+.hljs-subst {
+  /* var(--highlight-color) */
+  color: #2f3337;
+}
+
+.hljs-comment {
+  /* var(--highlight-comment) */
+  color: #656e77;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-meta .hljs-keyword,
+.hljs-doctag,
+.hljs-section {
+  /* var(--highlight-keyword) */
+  color: #015692;
+}
+
+.hljs-attr {
+  /* var(--highlight-attribute); */
+  color: #015692;
+}
+
+.hljs-attribute {
+  /* var(--highlight-symbol) */
+  color: #803378;
+}
+
+.hljs-name,
+.hljs-type,
+.hljs-number,
+.hljs-selector-id,
+.hljs-quote,
+.hljs-template-tag {
+  /* var(--highlight-namespace) */
+  color: #b75501;
+}
+
+.hljs-selector-class {
+  /* var(--highlight-keyword) */
+  color: #015692;
+}
+
+.hljs-string,
+.hljs-regexp,
+.hljs-symbol,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-link,
+.hljs-selector-attr {
+  /* var(--highlight-variable) */
+  color: #54790d;
+}
+
+.hljs-meta,
+.hljs-selector-pseudo {
+  /* var(--highlight-keyword) */
+  color: #015692;
+}
+
+.hljs-built_in,
+.hljs-title,
+.hljs-literal {
+  /* var(--highlight-literal) */
+  color: #b75501;
+}
+
+.hljs-bullet,
+.hljs-code {
+  /* var(--highlight-punctuation) */
+  color: #535a60;
+}
+
+.hljs-meta .hljs-string {
+  /* var(--highlight-variable) */
+  color: #54790d;
+}
+
+.hljs-deletion {
+  /* var(--highlight-deletion) */
+  color: #c02d2e;
+}
+
+.hljs-addition {
+  /* var(--highlight-addition) */
+  color: #2f6f44;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-formula,
+.hljs-operator,
+.hljs-params,
+.hljs-property,
+.hljs-punctuation,
+.hljs-tag {
+  /* purposely ignored */
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
     .sidebar {
@@ -1145,4 +1275,131 @@ small {
 [data-theme="dark"] select:focus,
 [data-theme="dark"] textarea:focus {
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+}
+
+/*!
+  Theme: StackOverflow Dark
+  Description: Dark theme as used on stackoverflow.com
+  Author: stackoverflow.com
+  Maintainer: @Hirse
+  Website: https://github.com/StackExchange/Stacks
+  License: MIT
+  Updated: 2021-05-15
+
+  Updated for @stackoverflow/stacks v0.64.0
+  Code Blocks: /blob/v0.64.0/lib/css/components/_stacks-code-blocks.less
+  Colors: /blob/v0.64.0/lib/css/exports/_stacks-constants-colors.less
+*/
+
+[data-theme="dark"] .hljs {
+  /* var(--highlight-color) */
+  color: #ffffff;
+  /* var(--highlight-bg) */
+  background: inherit;
+}
+
+[data-theme="dark"] .hljs-subst {
+  /* var(--highlight-color) */
+  color: #ffffff;
+}
+
+[data-theme="dark"] .hljs-comment {
+  /* var(--highlight-comment) */
+  color: #999999;
+}
+
+[data-theme="dark"] .hljs-keyword,
+[data-theme="dark"] .hljs-selector-tag,
+[data-theme="dark"] .hljs-meta .hljs-keyword,
+[data-theme="dark"] .hljs-doctag,
+[data-theme="dark"] .hljs-section {
+  /* var(--highlight-keyword) */
+  color: #88aece;
+}
+
+[data-theme="dark"] .hljs-attr {
+  /* var(--highlight-attribute); */
+  color: #88aece;
+}
+
+[data-theme="dark"] .hljs-attribute {
+  /* var(--highlight-symbol) */
+  color: #c59bc1;
+}
+
+[data-theme="dark"] .hljs-name,
+[data-theme="dark"] .hljs-type,
+[data-theme="dark"] .hljs-number,
+[data-theme="dark"] .hljs-selector-id,
+[data-theme="dark"] .hljs-quote,
+[data-theme="dark"] .hljs-template-tag {
+  /* var(--highlight-namespace) */
+  color: #f08d49;
+}
+
+[data-theme="dark"] .hljs-selector-class {
+  /* var(--highlight-keyword) */
+  color: #88aece;
+}
+
+[data-theme="dark"] .hljs-string,
+[data-theme="dark"] .hljs-regexp,
+[data-theme="dark"] .hljs-symbol,
+[data-theme="dark"] .hljs-variable,
+[data-theme="dark"] .hljs-template-variable,
+[data-theme="dark"] .hljs-link,
+[data-theme="dark"] .hljs-selector-attr {
+  /* var(--highlight-variable) */
+  color: #b5bd68;
+}
+
+[data-theme="dark"] .hljs-meta,
+[data-theme="dark"] .hljs-selector-pseudo {
+  /* var(--highlight-keyword) */
+  color: #88aece;
+}
+
+[data-theme="dark"] .hljs-built_in,
+[data-theme="dark"] .hljs-title,
+[data-theme="dark"] .hljs-literal {
+  /* var(--highlight-literal) */
+  color: #f08d49;
+}
+
+[data-theme="dark"] .hljs-bullet,
+[data-theme="dark"] .hljs-code {
+  /* var(--highlight-punctuation) */
+  color: #cccccc;
+}
+
+[data-theme="dark"] .hljs-meta .hljs-string {
+  /* var(--highlight-variable) */
+  color: #b5bd68;
+}
+
+[data-theme="dark"] .hljs-deletion {
+  /* var(--highlight-deletion) */
+  color: #de7176;
+}
+
+[data-theme="dark"] .hljs-addition {
+  /* var(--highlight-addition) */
+  color: #76c490;
+}
+
+[data-theme="dark"] .hljs-emphasis {
+  font-style: italic;
+}
+
+[data-theme="dark"] .hljs-strong {
+  font-weight: bold;
+}
+
+[data-theme="dark"] .hljs-formula,
+[data-theme="dark"] .hljs-operator,
+[data-theme="dark"] .hljs-params,
+[data-theme="dark"] .hljs-property,
+[data-theme="dark"] .hljs-punctuation,
+[data-theme="dark"] .hljs-tag {
+  /* purposely ignored */
 }
