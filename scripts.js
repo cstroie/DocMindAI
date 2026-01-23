@@ -129,78 +129,6 @@ function applyTheme() {
 }
 
 /**
- * Switch between different views in the application
- *
- * This function handles view switching by hiding all views and showing
- * the selected view. It also updates the active state of navigation buttons.
- *
- * @param {string} viewName - The name of the view to show (e.g., 'home', 'tools', 'history', 'settings')
- * @return {void}
- *
- * @note Hides all views and shows only the selected one
- * @note Updates active state of sidebar navigation buttons
- * @note Updates the page title based on the view
- * @see Document.addEventListener('DOMContentLoaded') - Sets up view switching handlers
- */
-function switchView(viewName) {
-    // Hide all views
-    const views = document.querySelectorAll('.view');
-    views.forEach(view => {
-        view.classList.remove('active-view');
-        view.style.display = 'none';
-    });
-
-    // Show the selected view
-    const selectedView = document.querySelector(`.${viewName}-view`);
-    if (selectedView) {
-        selectedView.classList.add('active-view');
-        selectedView.style.display = 'block';
-    }
-    else {
-        console.error(`View not found: ${viewName}`);
-    }
-
-    // Update active state of navigation buttons
-    const navButtons = document.querySelectorAll('.nav-item');
-    navButtons.forEach(button => {
-        button.classList.remove('active');
-        if (button.dataset.view === viewName) {
-            button.classList.add('active');
-        }
-    });
-
-    // Update page title
-    // TODO: Improve title handling for dynamic category views
-    const pageTitle = document.getElementById('pageTitle');
-    if (pageTitle) {
-        if (viewName.startsWith('tools-')) {
-            // For category views, get the category name from categoriesData
-            const categoryId = viewName.replace('tools-', '');
-            const categoryInfo = categoriesData && categoriesData[categoryId] ? categoriesData[categoryId] : null;
-            pageTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : categoryId) + ' Tools';
-        } else {
-            switch (viewName) {
-                case 'home':
-                    pageTitle.textContent = 'Welcome to DocMind AI';
-                    break;
-                case 'tools':
-                    pageTitle.textContent = 'AI Tools';
-                    break;
-                case 'history':
-                    pageTitle.textContent = 'Analysis History';
-                    break;
-                case 'settings':
-                    pageTitle.textContent = 'Application Settings';
-                    break;
-                default:
-                    pageTitle.textContent = 'DocMind AI';
-            }
-        }
-    }
-}
-
-
-/**
  * Apply syntax highlighting using highlight.js
  *
  * This function applies syntax highlighting to all code blocks on the page
@@ -346,7 +274,7 @@ async function loadJSONResource(filename, rootKey) {
  * @see displayToolsByCategory() - Populates category views with tools
  * @see Document.addEventListener('DOMContentLoaded') - Calls this function after loading categories
  */
-function loadToolsCategories(categories) {
+function createCategoriesViews(categories) {
     const viewContainer = document.querySelector('.view-container');
     const toolsViewTemplate = document.getElementById('toolsViewTemplate');
     const sidebarNav = document.querySelector('.sidebar-nav');
@@ -386,7 +314,7 @@ function loadToolsCategories(categories) {
         viewContainer.appendChild(categoryView);
 
         // Populate the category view with tools
-        loadTools(categoryId);
+        loadToolsInCategory(categoryId);
 
         // Create category button for sidebar
         const categoryButton = document.createElement('button');
@@ -420,9 +348,9 @@ function loadToolsCategories(categories) {
  * @note Uses the global toolsData and categoriesData variables
  * @note Displays an error if toolsData is not available
  * @see switchView() - Calls this function when a category is selected
- * @see loadToolForm() - Called when a tool card is clicked
+ * @see displayToolForm() - Called when a tool card is clicked
  */
-function loadTools(category) {
+function loadToolsInCategory(category) {
     // Get the category tools grid
     const toolsGrid = document.getElementById(`${category}ToolsGrid`);
     if (!toolsGrid) {
@@ -465,7 +393,7 @@ function loadTools(category) {
         toolCard.href = '#';
         toolCard.onclick = (e) => {
             e.preventDefault();
-            loadToolForm(tool.id);
+            displayToolForm(tool.id);
         };
 
         // Add tool icon, name, and description
@@ -485,7 +413,6 @@ function loadTools(category) {
     // Update category view title and description
     const categoryTitle = document.getElementById('categoryTitle');
     const categoryDescription = document.getElementById('categoryDescription');
-
     if (categoryTitle) {
         categoryTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category);
     }
@@ -509,8 +436,6 @@ function loadTools(category) {
  * @note Tool icons are displayed before the tool name
  * @note Uses the global toolsData and categoriesData variables
  * @note Logs an error to console if toolsData is not available
- * @see loadToolForm() - Uses this to populate the dropdown after loading a tool
- * @see populateToolSelect() - Called by loadToolForm()
  */
 function populateToolSelect(toolSelect) {
     // Clear existing options
@@ -558,145 +483,6 @@ function populateToolSelect(toolSelect) {
     }
 }
 
-
-/**
- * Load a tool form based on the selected tool ID
- * 
- * This function loads and displays the form for a specific tool. It:
- * 1. Hides the tool selector grid
- * 2. Retrieves the tool data from toolsData
- * 3. Shows the tool selection dropdown
- * 4. Populates the dropdown with all tools
- * 5. Sets up event listeners for tool selection
- * 6. Updates hidden language fields if present
- * 7. Displays the tool form
- * 
- * @param {string} toolId - The ID of the tool to load
- * @return {Promise<void>}
- * 
- * @note Uses the global toolsData variable
- * @note Shows an error if tool is not found or toolsData is unavailable
- * @note Automatically sets hidden language fields to 'en' if present
- * @note Sets up a change event listener on the toolSelect dropdown
- * @note Calls displayToolForm() to render the form
- * @see displayToolForm() - Called to render the form
- * @see showError() - Used to display error messages
- * @see populateToolSelect() - Called to populate the dropdown
- * @see displayTools() - Called when user clicks a tool card
- */
-async function loadToolForm(toolId) {
-    try {
-        // Clear the page
-        document.querySelector('.tool-selector').style.display = 'none';
-        // Use the global toolsData if available
-        if (!toolsData) {
-            showError('No tools data available');
-            return;
-        }
-
-        // Get the selected tool
-        const tool = toolsData[toolId];
-        if (!tool) {
-            console.error('Tool not found:', toolId);
-            // Check if resultsArea exists before showing error
-            const resultsArea = document.getElementById('resultsArea');
-            if (resultsArea) {
-                showError('Tool not found');
-            } else {
-                console.error('Tool not found and results area not available');
-                // Show error in the main content area as fallback
-                const mainContent = document.querySelector('.main-content');
-                if (mainContent) {
-                    const errorElement = document.createElement('div');
-                    errorElement.className = 'error';
-                    errorElement.innerHTML = `
-                        <strong>Error:</strong> Tool not found
-                    `;
-                    mainContent.innerHTML = '';
-                    mainContent.appendChild(errorElement);
-                }
-            }
-            return;
-        }
-        // Set the tool ID in the tool object
-        tool.id = toolId;
-
-        // Check if required form elements exist
-        const toolForm = document.getElementById('toolForm');
-        const formFields = document.getElementById('formFields');
-        const actionInput = document.getElementById('actionInput');
-        const topTitle = document.getElementById('topTitle');
-        const topDescription = document.getElementById('topDescription');
-        const toolSelect = document.getElementById('toolSelect');
-        const toolSelector = document.querySelector('.tool-selector');
-
-        // Debug: Log which elements are missing
-        console.log('Checking required form elements:');
-        console.log('toolForm:', toolForm);
-        console.log('formFields:', formFields);
-        console.log('actionInput:', actionInput);
-        console.log('topTitle:', topTitle);
-        console.log('topDescription:', topDescription);
-        console.log('toolSelect:', toolSelect);
-        console.log('toolSelector:', toolSelector);
-
-        if (!toolForm || !formFields || !actionInput || !topTitle || !topDescription || !toolSelect || !toolSelector) {
-            console.error('Required form elements not found');
-            // Show error in the main content area as fallback
-            const mainContent = document.querySelector('.main-content');
-            if (mainContent) {
-                const errorElement = document.createElement('div');
-                errorElement.className = 'error';
-                errorElement.innerHTML = `
-                    <strong>Error:</strong> Required form elements not found
-                `;
-                mainContent.innerHTML = '';
-                mainContent.appendChild(errorElement);
-            }
-            return;
-        }
-
-        // Clear the page and show tool selector
-        try {
-            toolSelector.style.display = 'none';
-        } catch (error) {
-            console.error('Failed to hide tool selector:', error);
-        }
-
-        // Show the tool select dropdown and enable the tool-select-container nav element
-        toolSelect.style.display = 'block';
-        const toolSelectContainer = document.querySelector('.tool-select-container');
-        if (toolSelectContainer) {
-            toolSelectContainer.style.display = 'block';
-        }
-
-        // Populate the tool select dropdown
-        populateToolSelect(toolSelect);
-
-        // Add event listener to handle tool selection
-        toolSelect.addEventListener('change', function() {
-            const selectedToolId = this.value;
-            if (selectedToolId) {
-                loadToolForm(selectedToolId);
-            }
-        });
-
-        // Update language field if present
-        if (tool.form.fields) {
-            tool.form.fields.forEach(field => {
-                if (field.name === 'language' && field.type === 'hidden') {
-                    field.value = 'en';
-                }
-            });
-        }
-
-        // Display the form
-        displayToolForm(tool);
-    } catch (error) {
-        showError('Failed to load form: ' + error.message);
-    }
-}
-
 /**
  * Display a tool form with the given configuration
  * 
@@ -716,9 +502,35 @@ async function loadToolForm(toolId) {
  * @note Hides the results area when displaying a new form
  * @note Uses smooth scrolling to bring the form into view
  * @see createFormField() - Called to create each form field
- * @see loadToolForm() - Calls this function after loading tool data
  */
-function displayToolForm(tool) {
+function displayToolForm(toolId) {
+    // Clear the page
+    document.querySelector('.tool-selector').style.display = 'none';
+    // Use the global toolsData if available
+    if (!toolsData) {
+        showError('No tools data available');
+        return;
+    }
+
+    // Get the selected tool
+    const tool = toolsData[toolId];
+    if (!tool) {
+        showError(`Tool ${toolId} not found`);
+        return;
+    }
+
+    // Set the tool ID in the tool object
+    tool.id = toolId;
+
+    // Update language field if present and hidden
+    if (tool.form.fields) {
+        tool.form.fields.forEach(field => {
+            if (field.name === 'language' && field.type === 'hidden') {
+                field.value = 'en';
+            }
+        });
+    }
+
     // Update top title and description
     const topTitle = document.getElementById('topTitle');
     const topDescription = document.getElementById('topDescription');
@@ -1393,7 +1205,6 @@ function displayResults(results) {
  * @note Shows the results area and scrolls to it
  * @note Escapes the message for security
  * @see handleFormSubmit() - Calls this function on form submission errors
- * @see loadToolForm() - Calls this function if tool loading fails
  * @see displayTools() - Calls this function if tools data is unavailable
  */
 function showError(message) {
@@ -1635,6 +1446,77 @@ function arrayOfObjectsToTable(arr) {
 }
 
 /**
+ * Switch between different views in the application
+ *
+ * This function handles view switching by hiding all views and showing
+ * the selected view. It also updates the active state of navigation buttons.
+ *
+ * @param {string} viewName - The name of the view to show (e.g., 'home', 'tools', 'history', 'settings')
+ * @return {void}
+ *
+ * @note Hides all views and shows only the selected one
+ * @note Updates active state of sidebar navigation buttons
+ * @note Updates the page title based on the view
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up view switching handlers
+ */
+function switchView(viewName) {
+    // Hide all views
+    const views = document.querySelectorAll('.view');
+    views.forEach(view => {
+        view.classList.remove('active-view');
+        view.style.display = 'none';
+    });
+
+    // Show the selected view
+    const selectedView = document.querySelector(`.${viewName}-view`);
+    if (selectedView) {
+        selectedView.classList.add('active-view');
+        selectedView.style.display = 'block';
+    }
+    else {
+        console.error(`View not found: ${viewName}`);
+    }
+
+    // Update active state of navigation buttons
+    const navButtons = document.querySelectorAll('.nav-item');
+    navButtons.forEach(button => {
+        button.classList.remove('active');
+        if (button.dataset.view === viewName) {
+            button.classList.add('active');
+        }
+    });
+
+    // Update page title
+    // TODO: Improve title handling for dynamic category views
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) {
+        if (viewName.startsWith('tools-')) {
+            // For category views, get the category name from categoriesData
+            const categoryId = viewName.replace('tools-', '');
+            const categoryInfo = categoriesData && categoriesData[categoryId] ? categoriesData[categoryId] : null;
+            pageTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : categoryId) + ' Tools';
+        } else {
+            switch (viewName) {
+                case 'home':
+                    pageTitle.textContent = 'Welcome to DocMind AI';
+                    break;
+                case 'tools':
+                    pageTitle.textContent = 'AI Tools';
+                    break;
+                case 'history':
+                    pageTitle.textContent = 'Analysis History';
+                    break;
+                case 'settings':
+                    pageTitle.textContent = 'Application Settings';
+                    break;
+                default:
+                    pageTitle.textContent = 'DocMind AI';
+            }
+        }
+    }
+}
+
+/**
  * DocMind-specific JavaScript initialization
  *
  * This function initializes the DocMind AI application when the DOM is fully loaded.
@@ -1678,7 +1560,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Create category views and buttons after loading data
     if (categoriesData) {
-        loadToolsCategories(categoriesData);
+        createCategoriesViews(categoriesData);
     }
 
     // Set up form submission
