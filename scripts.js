@@ -993,7 +993,7 @@ async function handleFormSubmit(event) {
             method: 'POST',
             body: formData,
             headers: {
-                'HTTP_ACCEPT': 'application/json'
+                'Accept': 'application/json'
             }
         });
 

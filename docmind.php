@@ -35,24 +35,24 @@ displayWebInterface();
 
 /**
  * Handle incoming API requests by validating and routing to appropriate handlers
- * 
+ *
  * This function acts as the main API router. It:
  * 1. Determines the requested action from GET/POST parameters
  * 2. Validates the action against a whitelist of available actions
  * 3. Dynamically loads valid actions from tools.json
  * 4. Routes to the appropriate handler function based on the action
- * 
+ *
  * @return void Terminates script execution after sending response
- * 
+ *
  * @see handleGetModels() - Handles 'get_models' action
- * @see handleGetPrompts() - Handles 'get_prompts' action  
+ * @see handleGetPrompts() - Handles 'get_prompts' action
  * @see handleToolAction() - Handles tool-specific actions
  * @see sendJsonResponse() - Sends JSON responses
  * @see loadResourceFromJson() - Loads tool configuration
  */
 function handleApiRequest() {
-    // Extract action from request parameters, default to 'list_actions'
-    $action = $_REQUEST['action'] ?? 'list_actions';
+    // Extract action from request parameters
+    $action = $_REQUEST['action'] ?? null;
     $method = $_SERVER['REQUEST_METHOD'];
 
     // Validate action - load valid actions dynamically from tools.json
@@ -64,6 +64,17 @@ function handleApiRequest() {
     if (!isset($tools_data['error']) && isset($tools_data['tools'])) {
         foreach ($tools_data['tools'] as $tool_id => $tool_data) {
             $valid_actions[] = $tool_id;
+        }
+    }
+
+    // Check if action is specified
+    if ($action === null) {
+        // If no action specified, check for 'tool' parameter
+        $tool_id = $_REQUEST['tool'] ?? null;
+        if ($tool_id && isset($tools_data['tools'][$tool_id])) {
+            $action = $tool_id;
+        } else {
+            sendJsonResponse(['error' => 'No action or tool specified'], true);
         }
     }
 
