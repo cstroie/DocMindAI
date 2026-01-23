@@ -538,9 +538,9 @@ function displayToolForm(toolId) {
     // Populate the form fields
     const toolForm = document.getElementById('toolForm');
     const formFields = document.getElementById('formFields');
-    const actionInput = document.getElementById('actionInput');
+    const toolIdInput = document.getElementById('toolId');
 
-    actionInput.value = tool.id;
+    toolIdInput.value = tool.id;
     formFields.innerHTML = '';
 
     // Get cookies for model and language
