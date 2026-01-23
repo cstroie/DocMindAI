@@ -991,7 +991,10 @@ async function handleFormSubmit(event) {
     try {
         const response = await fetch('docmind.php', {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'HTTP_ACCEPT': 'application/json'
+            }
         });
 
         // Check if response is OK
