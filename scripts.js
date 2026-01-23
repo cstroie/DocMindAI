@@ -327,56 +327,6 @@ async function loadJSONResource(filename, rootKey) {
 }
 
 /**
- * Add category buttons to the sidebar
- *
- * This function dynamically adds category buttons to the sidebar navigation
- * based on the categories data. Each button represents a category and when
- * clicked, it displays the tools/tools belonging to that category.
- *
- * @param {Object} categories - The categories data object
- * @return {void}
- *
- * @note Creates a button for each category in the categories object
- * @note Inserts buttons after the Home button in the sidebar
- * @note Sets up click handlers to display tools by category
- * @note Updates active state of navigation buttons
- * @see displayToolsByCategory() - Called when a category button is clicked
- * @see switchView() - Called to switch to tools view
- */
-function addCategoryButtonsToSidebar(categories) {
-    const sidebarNav = document.querySelector('.sidebar-nav');
-    const homeButton = document.querySelector('.nav-item[data-view="home"]');
-
-    // Create a separator for categories
-    const categorySeparator = document.createElement('div');
-    categorySeparator.className = 'nav-separator';
-    categorySeparator.textContent = 'Categories';
-
-    // Insert separator after Home button
-    if (homeButton && homeButton.nextSibling) {
-        sidebarNav.insertBefore(categorySeparator, homeButton.nextSibling);
-    }
-
-    // Add category buttons
-    for (const [categoryId, categoryData] of Object.entries(categories)) {
-        const categoryButton = document.createElement('button');
-        categoryButton.className = 'nav-item';
-        categoryButton.dataset.view = 'tools-' + categoryId;
-        categoryButton.innerHTML = `
-            <span class="nav-icon">${categoryData.icon || '📄'}</span>
-            <span class="nav-text">${categoryData.name}</span>
-        `;
-
-        // Insert category button after the separator
-        if (categorySeparator.nextSibling) {
-            sidebarNav.insertBefore(categoryButton, categorySeparator.nextSibling);
-        } else {
-            sidebarNav.appendChild(categoryButton);
-        }
-    }
-}
-
-/**
  * Create category views dynamically using the tools view template
  *
  * This function creates view sections for each category in the categories data.
@@ -392,13 +342,24 @@ function addCategoryButtonsToSidebar(categories) {
  * @note View data-view attribute is 'category-{categoryId}'
  * @note Each view contains a tools grid that will be populated with category tools
  * @note Calls displayToolsByCategory to populate each category view with tools
- * @see addCategoryButtonsToSidebar() - Creates sidebar buttons for categories
  * @see displayToolsByCategory() - Populates category views with tools
  * @see Document.addEventListener('DOMContentLoaded') - Calls this function after loading categories
  */
-function createCategoryViews(categories) {
+function loadToolsCategories(categories) {
     const viewContainer = document.querySelector('.view-container');
     const toolsViewTemplate = document.getElementById('toolsViewTemplate');
+    const sidebarNav = document.querySelector('.sidebar-nav');
+    const homeButton = document.querySelector('.nav-item[data-view="home"]');
+
+    // Create a separator for categories
+    const categorySeparator = document.createElement('div');
+    categorySeparator.className = 'nav-separator';
+    categorySeparator.textContent = 'Categories';
+
+    // Insert separator after Home button
+    if (homeButton && homeButton.nextSibling) {
+        sidebarNav.insertBefore(categorySeparator, homeButton.nextSibling);
+    }
 
     // Create a view for each category
     for (const [categoryId, categoryData] of Object.entries(categories)) {
@@ -432,115 +393,24 @@ function createCategoryViews(categories) {
         viewContainer.appendChild(categoryView);
 
         // Populate the category view with tools
-        displayToolsByCategory(categoryId);
-    }
-}
+        loadTools(categoryId);
 
-/**
- * Display tools grouped by category in the UI
- *
- * This function renders all available tools in the main interface,
- * organizing them by category. Each tool is displayed as a clickable
- * card that loads the corresponding form when clicked.
- *
- * @return {void}
- *
- * @note Tools are grouped by their 'category' property
- * @note Each category section includes a header with icon and description
- * @note Tool cards display the tool icon, name, and description
- * @note Clicking a tool card calls loadToolForm() with the tool ID
- * @note Uses the global toolsData and categoriesData variables
- * @note Displays an error if toolsData is not available
- * @note Categories are displayed in the order defined in categories.json
- * @see loadToolForm() - Called when a tool card is clicked
- * @see showError() - Used to display error messages
- * @see Document.addEventListener('DOMContentLoaded') - Calls this function on page load
- */
-function displayTools() {
-    const toolsGrid = document.getElementById('toolsGrid');
-    toolsGrid.innerHTML = '';
+        // Create category button for sidebar
+        const categoryButton = document.createElement('button');
+        categoryButton.className = 'nav-item';
+        categoryButton.dataset.view = 'tools-' + categoryId;
+        categoryButton.innerHTML = `
+            <span class="nav-icon">${categoryData.icon || '📄'}</span>
+            <span class="nav-text">${categoryData.name}</span>
+        `;
 
-    // Check if toolsData is available
-    if (!toolsData) {
-        showError('No tools data available');
-        return;
-    }
-
-    // Group tools by category
-    const categories = {};
-    for (const [tool_id, tool_data] of Object.entries(toolsData)) {
-        const category = tool_data.category;
-        if (!categories[category]) {
-            categories[category] = [];
+        // Insert category button after the separator
+        if (categorySeparator.nextSibling) {
+            sidebarNav.insertBefore(categoryButton, categorySeparator.nextSibling);
+        } else {
+            sidebarNav.appendChild(categoryButton);
         }
-        categories[category].push({
-            'id': tool_id,
-            'name': tool_data.name,
-            'description': tool_data.description,
-            'icon': tool_data.icon
-        });
-    }
 
-    // Display categories in the order defined in categories.json
-    if (categoriesData) {
-        for (const [categoryId, categoryInfo] of Object.entries(categoriesData)) {
-            // Only display categories that have tools
-            if (categories[categoryId] && categories[categoryId].length > 0) {
-                const categoryTools = categories[categoryId];
-                const categoryDiv = document.createElement('section');
-                categoryDiv.className = 'category-section category-' + categoryId;
-
-                // Create category header
-                const categoryHeader = document.createElement('hgroup');
-
-                // Add category title with icon
-                const categoryTitle = document.createElement('h2');
-                categoryTitle.textContent = (categoryInfo.icon ? categoryInfo.icon + ' ' : '') + categoryInfo.name;
-                categoryHeader.appendChild(categoryTitle);
-
-                // Add category description if available
-                if (categoryInfo.description) {
-                    const categoryDescription = document.createElement('p');
-                    categoryDescription.textContent = categoryInfo.description;
-                    categoryHeader.appendChild(categoryDescription);
-                }
-
-                // Append header to category div
-                categoryDiv.appendChild(categoryHeader);
-
-                // Create grid for tools
-                const grid = document.createElement('main');
-
-                // Add tools to the grid
-                categoryTools.forEach(tool => {
-                    const toolCard = document.createElement('a');
-                    toolCard.className = 'tool-card';
-                    toolCard.href = '#';
-                    toolCard.onclick = (e) => {
-                        e.preventDefault();
-                        loadToolForm(tool.id);
-                    };
-
-                    // Add tool icon, name, and description
-                    toolCard.innerHTML = `
-                        <div class="tool-icon">${tool.icon || '📄'}</div>
-                        <h3>${tool.name}</h3>
-                        <p>${tool.description}</p>
-                    `;
-
-                    // Append tool card to grid
-                    grid.appendChild(toolCard);
-                });
-
-                // Append grid to category div
-                categoryDiv.appendChild(grid);
-                toolsGrid.appendChild(categoryDiv);
-            }
-        }
-    } else {
-        // Display error if categoriesData is not available
-        showError('Categories data not available');
-        return;
     }
 }
 
@@ -560,7 +430,7 @@ function displayTools() {
  * @see switchView() - Calls this function when a category is selected
  * @see loadToolForm() - Called when a tool card is clicked
  */
-function displayToolsByCategory(category) {
+function loadTools(category) {
     // Get the category tools grid
     const toolsGrid = document.getElementById(`${category}ToolsGrid`);
     if (!toolsGrid) {
@@ -1816,12 +1686,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Create category views and buttons after loading data
     if (categoriesData) {
-        createCategoryViews(categoriesData);
-        addCategoryButtonsToSidebar(categoriesData);
+        loadToolsCategories(categoriesData);
     }
 
-    // Display tools in the UI
-    displayTools();
     // Set up form submission
     document.getElementById('apiForm')?.addEventListener('submit', handleFormSubmit);
     // Set up theme toggle button

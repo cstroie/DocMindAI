@@ -1,13 +1,13 @@
 {
-  "version": "1.0.0",
+  "version": "1.1",
   "metadata": {
-    "last_updated": "2026-01-21",
+    "last_updated": "2026-01-23",
     "author": "Costin Stroie",
     "description": "Configuration file for DocMindAI tool profiles",
     "license": "GPLv3",
     "schema_version": "1.0"
   },
-  "profiles": {
+  "tools": {
     "rra": {
       "id": "rra",
       "name": "Radiology Report Analyzer",

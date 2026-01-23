@@ -121,50 +121,6 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                     </div>
                 </section>
 
-                <!-- Tools View Template -->
-                <template id="toolsViewTemplate">
-                    <section class="view tools-view">
-                        <hgroup class="tools-header">
-                            <h2 class="tools-title" id="topTitle">🔧 AI Tools</h2>
-                            <p class="tools-subtitle" id="topDescription">Select a tool to process your documents</p>
-                        </hgroup>
-
-                        <!-- Tool Selector -->
-                        <div class="tool-selector-container" style="display: none;">
-                            <select id="toolSelect" class="form-select">
-                                <option value="">-- Select a tool --</option>
-                            </select>
-                        </div>
-                        <div class="tool-selector" style="display: none;"></div>
-
-                        <!-- Tools Grid -->
-                        <div class="tools-grid" id="toolsGrid">
-                            <!-- Will be populated by JavaScript -->
-                        </div>
-                    </section>
-                </template>
-
-                <!-- Tools View -->
-                <section class="view tools-view">
-                    <hgroup class="tools-header">
-                        <h2 class="tools-title" id="topTitle">🔧 AI Tools</h2>
-                        <p class="tools-subtitle" id="topDescription">Select a tool to process your documents</p>
-                    </hgroup>
-
-                    <!-- Tool Selector -->
-                    <div class="tool-selector-container" style="display: none;">
-                        <select id="toolSelect" class="form-select">
-                            <option value="">-- Select a tool --</option>
-                        </select>
-                    </div>
-                    <div class="tool-selector" style="display: none;"></div>
-
-                    <!-- Tools Grid -->
-                    <div class="tools-grid" id="toolsGrid">
-                        <!-- Will be populated by JavaScript -->
-                    </div>
-                </section>
-
                 <!-- Form View -->
                 <section class="view form-view" style="display: none;">
                     <div class="form-container" id="toolForm">
@@ -289,6 +245,29 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                 <div class="loading-text">Processing your request...</div>
             </div>
         </div>
+    </template>
+
+    <!-- Tools View Template -->
+    <template id="toolsViewTemplate">
+        <section class="view tools-view">
+            <hgroup class="tools-header">
+                <h2 class="tools-title" id="topTitle">🔧 AI Tools</h2>
+                <p class="tools-subtitle" id="topDescription">Select a tool to process your documents</p>
+            </hgroup>
+
+            <!-- Tool Selector -->
+            <div class="tool-selector-container" style="display: none;">
+                <select id="toolSelect" class="form-select">
+                    <option value="">-- Select a tool --</option>
+                </select>
+            </div>
+            <div class="tool-selector" style="display: none;"></div>
+
+            <!-- Tools Grid -->
+            <div class="tools-grid" id="toolsGrid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </section>
     </template>
 
     <template id="toolCardTemplate">
