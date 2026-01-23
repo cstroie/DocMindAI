@@ -361,8 +361,10 @@ function loadToolsCategories(categories) {
         sidebarNav.insertBefore(categorySeparator, homeButton.nextSibling);
     }
 
-    // Create a view for each category
-    for (const [categoryId, categoryData] of Object.entries(categories)) {
+    // Create a view for each category (in reverse order)
+    const categoryEntries = Object.entries(categories);
+    for (let i = categoryEntries.length - 1; i >= 0; i--) {
+        const [categoryId, categoryData] = categoryEntries[i];
         // Clone the template content
         const templateContent = toolsViewTemplate.content.cloneNode(true);
         const categoryView = templateContent.querySelector('.tools-view');
