@@ -405,6 +405,7 @@ function addCategoryButtonsToSidebar(categories) {
  * @note Clicking a tool card calls loadToolForm() with the tool ID
  * @note Uses the global toolsData and categoriesData variables
  * @note Displays an error if toolsData is not available
+ * @note Categories are displayed in the order defined in categories.json
  * @see loadToolForm() - Called when a tool card is clicked
  * @see showError() - Used to display error messages
  * @see Document.addEventListener('DOMContentLoaded') - Calls this function on page load
@@ -434,59 +435,117 @@ function displayTools() {
         });
     }
 
-    // Display each category
-    for (const [category, categoryTools] of Object.entries(categories)) {
-        const categoryDiv = document.createElement('section');
-        categoryDiv.className = 'category-section category-' + category;
+    // Display categories in the order defined in categories.json
+    if (categoriesData) {
+        for (const [categoryId, categoryInfo] of Object.entries(categoriesData)) {
+            // Only display categories that have tools
+            if (categories[categoryId] && categories[categoryId].length > 0) {
+                const categoryTools = categories[categoryId];
+                const categoryDiv = document.createElement('section');
+                categoryDiv.className = 'category-section category-' + categoryId;
 
-        // Get category info from categories.json
-        const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
+                // Create category header
+                const categoryHeader = document.createElement('hgroup');
 
-        // Create category header
-        const categoryHeader = document.createElement('hgroup');
+                // Add category title with icon
+                const categoryTitle = document.createElement('h2');
+                categoryTitle.textContent = (categoryInfo.icon ? categoryInfo.icon + ' ' : '') + categoryInfo.name;
+                categoryHeader.appendChild(categoryTitle);
 
-        // Add category title with icon
-        const categoryTitle = document.createElement('h2');
-        categoryTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category);
-        categoryHeader.appendChild(categoryTitle);
+                // Add category description if available
+                if (categoryInfo.description) {
+                    const categoryDescription = document.createElement('p');
+                    categoryDescription.textContent = categoryInfo.description;
+                    categoryHeader.appendChild(categoryDescription);
+                }
 
-        // Add category description if available
-        if (categoryInfo && categoryInfo.description) {
-            const categoryDescription = document.createElement('p');
-            categoryDescription.textContent = categoryInfo.description;
-            categoryHeader.appendChild(categoryDescription);
+                // Append header to category div
+                categoryDiv.appendChild(categoryHeader);
+
+                // Create grid for tools
+                const grid = document.createElement('main');
+
+                // Add tools to the grid
+                categoryTools.forEach(tool => {
+                    const toolCard = document.createElement('a');
+                    toolCard.className = 'tool-card';
+                    toolCard.href = '#';
+                    toolCard.onclick = (e) => {
+                        e.preventDefault();
+                        loadToolForm(tool.id);
+                    };
+
+                    // Add tool icon, name, and description
+                    toolCard.innerHTML = `
+                        <div class="tool-icon">${tool.icon || '📄'}</div>
+                        <h3>${tool.name}</h3>
+                        <p>${tool.description}</p>
+                    `;
+
+                    // Append tool card to grid
+                    grid.appendChild(toolCard);
+                });
+
+                // Append grid to category div
+                categoryDiv.appendChild(grid);
+                toolsGrid.appendChild(categoryDiv);
+            }
         }
+    } else {
+        // Fallback to original behavior if categoriesData is not available
+        for (const [category, categoryTools] of Object.entries(categories)) {
+            const categoryDiv = document.createElement('section');
+            categoryDiv.className = 'category-section category-' + category;
 
-        // Append header to category div
-        categoryDiv.appendChild(categoryHeader);
+            // Get category info from categories.json
+            const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
 
-        // Create grid for tools
-        const grid = document.createElement('main');
+            // Create category header
+            const categoryHeader = document.createElement('hgroup');
 
-        // Add tools to the grid
-        categoryTools.forEach(tool => {
-            const toolCard = document.createElement('a');
-            toolCard.className = 'tool-card';
-            toolCard.href = '#';
-            toolCard.onclick = (e) => {
-                e.preventDefault();
-                loadToolForm(tool.id);
-            };
+            // Add category title with icon
+            const categoryTitle = document.createElement('h2');
+            categoryTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category);
+            categoryHeader.appendChild(categoryTitle);
 
-            // Add tool icon, name, and description
-            toolCard.innerHTML = `
-                <div class="tool-icon">${tool.icon || '📄'}</div>
-                <h3>${tool.name}</h3>
-                <p>${tool.description}</p>
-            `;
+            // Add category description if available
+            if (categoryInfo && categoryInfo.description) {
+                const categoryDescription = document.createElement('p');
+                categoryDescription.textContent = categoryInfo.description;
+                categoryHeader.appendChild(categoryDescription);
+            }
 
-            // Append tool card to grid
-            grid.appendChild(toolCard);
-        });
+            // Append header to category div
+            categoryDiv.appendChild(categoryHeader);
 
-        // Append grid to category div
-        categoryDiv.appendChild(grid);
-        toolsGrid.appendChild(categoryDiv);
+            // Create grid for tools
+            const grid = document.createElement('main');
+
+            // Add tools to the grid
+            categoryTools.forEach(tool => {
+                const toolCard = document.createElement('a');
+                toolCard.className = 'tool-card';
+                toolCard.href = '#';
+                toolCard.onclick = (e) => {
+                    e.preventDefault();
+                    loadToolForm(tool.id);
+                };
+
+                // Add tool icon, name, and description
+                toolCard.innerHTML = `
+                    <div class="tool-icon">${tool.icon || '📄'}</div>
+                    <h3>${tool.name}</h3>
+                    <p>${tool.description}</p>
+                `;
+
+                // Append tool card to grid
+                grid.appendChild(toolCard);
+            });
+
+            // Append grid to category div
+            categoryDiv.appendChild(grid);
+            toolsGrid.appendChild(categoryDiv);
+        }
     }
 }
 
