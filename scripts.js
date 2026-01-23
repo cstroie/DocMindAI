@@ -531,21 +531,16 @@ function displayToolForm(toolId) {
         });
     }
 
-    // Update top title and description
-    const topTitle = document.getElementById('topTitle');
-    const topDescription = document.getElementById('topDescription');
-    if (topTitle) topTitle.textContent = tool.icon + ' ' + tool.name;
-    if (topDescription) topDescription.textContent = tool.description || '';
+    // Update form title and description
+    const formTitle = document.getElementById('formTitle');
+    const formDescription = document.getElementById('formDescription');
+    if (formTitle) formTitle.textContent = tool.icon + ' ' + tool.name;
+    if (formDescription) formDescription.textContent = tool.description || '';
 
     // Populate the form fields
     const toolForm = document.getElementById('toolForm');
     const formFields = document.getElementById('formFields');
     const actionInput = document.getElementById('actionInput');
-
-    if (!toolForm || !formFields || !actionInput) {
-        console.error('Required form elements not found in displayToolForm');
-        return;
-    }
 
     actionInput.value = tool.id;
     formFields.innerHTML = '';
@@ -614,8 +609,8 @@ function displayToolForm(toolId) {
  * @note Applies saved preferences from cookies (docmind-model, docmind-language)
  * @note Creates appropriate HTML elements based on field type
  * @note Adds help text if provided in field configuration
- * @see fetchModelsForSelect() - Called for dynamic model loading
- * @see fetchPromptsForSelect() - Called for dynamic prompt loading
+ * @see fetchModels() - Called for dynamic model loading
+ * @see fetchExpPrompts() - Called for dynamic prompt loading
  * @see displayToolForm() - Calls this function for each field
  */
 function createFormField(field, cookies = {}) {
@@ -657,7 +652,7 @@ function createFormField(field, cookies = {}) {
                 loadingOption.textContent = 'Loading prompts...';
                 input.appendChild(loadingOption);
                 // Fetch prompts from API
-                fetchPromptsForSelect(input);
+                fetchExpPrompts(input);
             }
             // If options are empty and field name is 'model', fetch models from API
             else if ((!field.options || field.options.length === 0) && field.name === 'model') {
@@ -667,7 +662,7 @@ function createFormField(field, cookies = {}) {
                 loadingOption.textContent = 'Loading models...';
                 input.appendChild(loadingOption);
                 // Fetch models from API
-                fetchModelsForSelect(input, cookies);
+                fetchModels(input, cookies);
             }
             // If options are empty and field name is 'language', use the languages object
             else if ((!field.options || field.options.length === 0) && field.name === 'language') {
@@ -765,7 +760,7 @@ function createFormField(field, cookies = {}) {
  * @note Clears loading option and adds error option on failure
  * @see createFormField() - Calls this function for dynamic model loading
  */
-async function fetchModelsForSelect(selectElement, cookies = {}) {
+async function fetchModels(selectElement, cookies = {}) {
     try {
         const response = await fetch('docmind.php?action=get_models');
         const data = await response.json();
@@ -829,7 +824,7 @@ async function fetchModelsForSelect(selectElement, cookies = {}) {
  * @note Kept for potential future use or refactoring
  * @see createFormField() - Uses global languagesData directly
  */
-async function fetchLanguagesForSelect(selectElement) {
+async function fetchLanguages(selectElement) {
     try {
         // Use the global languagesData if available
         if (!languagesData) {
@@ -888,7 +883,7 @@ async function fetchLanguagesForSelect(selectElement) {
  * @note Sets up change event listener to auto-fill prompt textarea
  * @see createFormField() - Calls this function for dynamic prompt loading
  */
-async function fetchPromptsForSelect(selectElement) {
+async function fetchExpPrompts(selectElement) {
     try {
         // If promptsData is not loaded, fetch it from API
         if (!promptsData) {
@@ -974,6 +969,7 @@ async function fetchPromptsForSelect(selectElement) {
  * @see Document.addEventListener('DOMContentLoaded') - Sets up this handler
  */
 async function handleFormSubmit(event) {
+    // Prevent default form submission
     event.preventDefault();
     // Get form data
     const form = event.target;
@@ -983,6 +979,20 @@ async function handleFormSubmit(event) {
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+
+    // Set cookies for selected model and language (30 days)
+    const model = formData.get('model');
+    if (model) {
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 30);
+        document.cookie = `docmind-model=${encodeURIComponent(model)}; expires=${expirationDate.toUTCString()}; path=/`;
+    }
+    const language = formData.get('language');
+    if (language) {
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 30);
+        document.cookie = `docmind-language=${encodeURIComponent(language)}; expires=${expirationDate.toUTCString()}; path=/`;
+    }
 
     try {
         const response = await fetch('docmind.php', {
@@ -1005,7 +1015,6 @@ async function handleFormSubmit(event) {
                 showError(result.error);
                 return;
             }
-
             // Display results
             displayResults(result);
         } else {
@@ -1013,22 +1022,6 @@ async function handleFormSubmit(event) {
             const text = await response.text();
             showError(`Unexpected response format: ${text}`);
             return;
-        }
-
-        // Set cookies for selected model and language (30 days)
-        const model = formData.get('model');
-        const language = formData.get('language');
-
-        if (model) {
-            const expirationDate = new Date();
-            expirationDate.setDate(expirationDate.getDate() + 30);
-            document.cookie = `docmind-model=${encodeURIComponent(model)}; expires=${expirationDate.toUTCString()}; path=/`;
-        }
-
-        if (language) {
-            const expirationDate = new Date();
-            expirationDate.setDate(expirationDate.getDate() + 30);
-            document.cookie = `docmind-language=${encodeURIComponent(language)}; expires=${expirationDate.toUTCString()}; path=/`;
         }
 
     } catch (error) {
