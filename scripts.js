@@ -341,12 +341,6 @@ function addCategoryButtonsToSidebar(categories) {
     const categorySeparator = document.createElement('div');
     categorySeparator.className = 'nav-separator';
     categorySeparator.textContent = 'Categories';
-    categorySeparator.style.padding = '0.5rem 1.5rem';
-    categorySeparator.style.fontSize = '0.75rem';
-    categorySeparator.style.fontWeight = '600';
-    categorySeparator.style.color = 'var(--text-secondary)';
-    categorySeparator.style.textTransform = 'uppercase';
-    categorySeparator.style.letterSpacing = '0.05em';
 
     // Insert separator after Home button
     if (homeButton && homeButton.nextSibling) {
