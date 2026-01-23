@@ -317,6 +317,86 @@ async function loadJSONResource(filename, rootKey) {
 }
 
 /**
+ * Add category buttons to the sidebar
+ *
+ * This function dynamically adds category buttons to the sidebar navigation
+ * based on the categories data. Each button represents a category and when
+ * clicked, it displays the tools/tools belonging to that category.
+ *
+ * @param {Object} categories - The categories data object
+ * @return {void}
+ *
+ * @note Creates a button for each category in the categories object
+ * @note Inserts buttons after the Home button in the sidebar
+ * @note Sets up click handlers to display tools by category
+ * @note Updates active state of navigation buttons
+ * @see displayToolsByCategory() - Called when a category button is clicked
+ * @see switchView() - Called to switch to tools view
+ */
+function addCategoryButtonsToSidebar(categories) {
+    const sidebarNav = document.querySelector('.sidebar-nav');
+    const homeButton = document.querySelector('.nav-item[data-view="home"]');
+
+    // Create a separator for categories
+    const categorySeparator = document.createElement('div');
+    categorySeparator.className = 'nav-separator';
+    categorySeparator.textContent = 'Categories';
+    categorySeparator.style.padding = '0.5rem 1.5rem';
+    categorySeparator.style.fontSize = '0.75rem';
+    categorySeparator.style.fontWeight = '600';
+    categorySeparator.style.color = 'var(--text-secondary)';
+    categorySeparator.style.textTransform = 'uppercase';
+    categorySeparator.style.letterSpacing = '0.05em';
+
+    // Insert separator after Home button
+    if (homeButton && homeButton.nextSibling) {
+        sidebarNav.insertBefore(categorySeparator, homeButton.nextSibling);
+    }
+
+    // Add category buttons
+    for (const [categoryId, categoryData] of Object.entries(categories)) {
+        const categoryButton = document.createElement('button');
+        categoryButton.className = 'nav-item';
+        categoryButton.dataset.category = categoryId;
+        categoryButton.innerHTML = `
+            <span class="nav-icon">${categoryData.icon || '📄'}</span>
+            <span class="nav-text">${categoryData.name}</span>
+        `;
+
+        // Insert category button after the separator
+        if (categorySeparator.nextSibling) {
+            sidebarNav.insertBefore(categoryButton, categorySeparator.nextSibling);
+        } else {
+            sidebarNav.appendChild(categoryButton);
+        }
+
+        // Set up click handler
+        categoryButton.addEventListener('click', function() {
+            // Update active state of navigation buttons
+            const navButtons = document.querySelectorAll('.nav-item');
+            navButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            this.classList.add('active');
+
+            // Switch to tools view and display tools by category
+            switchView('tools');
+            displayToolsByCategory(categoryId);
+
+            // Close sidebar on mobile
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar && window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                const menuToggle = document.getElementById('menuToggle');
+                if (menuToggle) {
+                    menuToggle.innerHTML = '☰';
+                }
+            }
+        });
+    }
+}
+
+/**
  * Display tools grouped by category in the UI
  *
  * This function renders all available tools in the main interface,
@@ -1685,6 +1765,8 @@ function arrayOfObjectsToTable(arr) {
  * @see applyTheme() - Applies theme preference
  */
 document.addEventListener('DOMContentLoaded', async function() {
+    // Apply theme preference
+    applyTheme();
     // Load categories data
     categoriesData = await loadJSONResource('categories.json', 'categories');
     // Load tools data
@@ -1724,87 +1806,4 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     });
-    // Apply theme preference
-    applyTheme();
 });
-
-/**
- * Add category buttons to the sidebar
- *
- * This function dynamically adds category buttons to the sidebar navigation
- * based on the categories data. Each button represents a category and when
- * clicked, it displays the tools/tools belonging to that category.
- *
- * @param {Object} categories - The categories data object
- * @return {void}
- *
- * @note Creates a button for each category in the categories object
- * @note Inserts buttons after the Home button in the sidebar
- * @note Sets up click handlers to display tools by category
- * @note Updates active state of navigation buttons
- * @see displayToolsByCategory() - Called when a category button is clicked
- * @see switchView() - Called to switch to tools view
- */
-function addCategoryButtonsToSidebar(categories) {
-    const sidebarNav = document.querySelector('.sidebar-nav');
-    const homeButton = document.querySelector('.nav-item[data-view="home"]');
-
-    // Create a separator for categories
-    const categorySeparator = document.createElement('div');
-    categorySeparator.className = 'nav-separator';
-    categorySeparator.textContent = 'Categories';
-    categorySeparator.style.padding = '0.5rem 1.5rem';
-    categorySeparator.style.fontSize = '0.75rem';
-    categorySeparator.style.fontWeight = '600';
-    categorySeparator.style.color = 'var(--text-secondary)';
-    categorySeparator.style.textTransform = 'uppercase';
-    categorySeparator.style.letterSpacing = '0.05em';
-
-    // Insert separator after Home button
-    if (homeButton && homeButton.nextSibling) {
-        sidebarNav.insertBefore(categorySeparator, homeButton.nextSibling);
-    }
-
-    // Add category buttons
-    for (const [categoryId, categoryData] of Object.entries(categories)) {
-        const categoryButton = document.createElement('button');
-        categoryButton.className = 'nav-item';
-        categoryButton.dataset.category = categoryId;
-        categoryButton.innerHTML = `
-            <span class="nav-icon">${categoryData.icon || '📄'}</span>
-            <span class="nav-text">${categoryData.name}</span>
-        `;
-
-        // Insert category button after the separator
-        if (categorySeparator.nextSibling) {
-            sidebarNav.insertBefore(categoryButton, categorySeparator.nextSibling);
-        } else {
-            sidebarNav.appendChild(categoryButton);
-        }
-
-        // Set up click handler
-        categoryButton.addEventListener('click', function() {
-            // Update active state of navigation buttons
-            const navButtons = document.querySelectorAll('.nav-item');
-            navButtons.forEach(button => {
-                button.classList.remove('active');
-            });
-            this.classList.add('active');
-
-            // Switch to tools view and display tools by category
-            switchView('tools');
-            displayToolsByCategory(categoryId);
-
-            // Close sidebar on mobile
-            const sidebar = document.querySelector('.sidebar');
-            if (sidebar && window.innerWidth <= 768) {
-                sidebar.classList.remove('active');
-                const menuToggle = document.getElementById('menuToggle');
-                if (menuToggle) {
-                    menuToggle.innerHTML = '☰';
-                }
-            }
-        });
-    }
-}
-
