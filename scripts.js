@@ -16,7 +16,7 @@ let promptsData = null;
  *
  * @note Uses document.cookie to store theme preference
  * @note Updates the theme-toggle button icon based on current theme
- * @note Triggers a page reload to apply theme changes
+ * @note Updates the data-theme attribute on HTML element to apply theme changes
  * @see Document.addEventListener('DOMContentLoaded') - Sets up theme toggle handler
  */
 function toggleTheme() {
@@ -52,8 +52,8 @@ function toggleTheme() {
         themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
     }
 
-    // Reload page to apply theme
-    window.location.reload();
+    // Apply theme by setting data-theme attribute on HTML element
+    document.documentElement.setAttribute('data-theme', newTheme);
 }
 
 /**
@@ -83,13 +83,15 @@ function toggleMenu() {
  * Apply theme based on user preference
  *
  * This function applies the theme based on user preference stored in cookies
- * or system preference. It updates the theme toggle button icon accordingly.
+ * or system preference. It updates the theme toggle button icon accordingly
+ * and sets the data-theme attribute on the HTML element.
  *
  * @return {void}
  *
  * @note Reads theme preference from docmind-theme cookie
  * @note Falls back to system preference if no cookie is set
  * @note Updates the theme toggle button icon
+ * @note Sets data-theme attribute on HTML element
  * @see Document.addEventListener('DOMContentLoaded') - Calls this function on page load
  */
 function applyTheme() {
@@ -114,6 +116,15 @@ function applyTheme() {
             const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             themeIcon.textContent = systemPrefersDark ? '☀️' : '🌙';
         }
+    }
+
+    // Apply theme by setting data-theme attribute on HTML element
+    if (theme === 'system') {
+        // For system theme, check system preference
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', systemPrefersDark ? 'dark' : 'light');
+    } else {
+        document.documentElement.setAttribute('data-theme', theme);
     }
 }
 
