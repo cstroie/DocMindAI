@@ -156,6 +156,9 @@ function switchView(viewName) {
         selectedView.classList.add('active-view');
         selectedView.style.display = 'block';
     }
+    else {
+        console.error(`View not found: ${viewName}`);
+    }
 
     // Update active state of navigation buttons
     const navButtons = document.querySelectorAll('.nav-item');
@@ -357,7 +360,7 @@ function addCategoryButtonsToSidebar(categories) {
     for (const [categoryId, categoryData] of Object.entries(categories)) {
         const categoryButton = document.createElement('button');
         categoryButton.className = 'nav-item';
-        categoryButton.dataset.category = categoryId;
+        categoryButton.dataset.view = 'tools-' + categoryId;
         categoryButton.innerHTML = `
             <span class="nav-icon">${categoryData.icon || '📄'}</span>
             <span class="nav-text">${categoryData.name}</span>
@@ -369,29 +372,6 @@ function addCategoryButtonsToSidebar(categories) {
         } else {
             sidebarNav.appendChild(categoryButton);
         }
-
-        // Set up click handler
-        categoryButton.addEventListener('click', function() {
-            // Update active state of navigation buttons
-            const navButtons = document.querySelectorAll('.nav-item');
-            navButtons.forEach(button => {
-                button.classList.remove('active');
-            });
-            this.classList.add('active');
-
-            // Switch to the category view
-            switchView(`category-${categoryId}`);
-
-            // Close sidebar on mobile
-            const sidebar = document.querySelector('.sidebar');
-            if (sidebar && window.innerWidth <= 768) {
-                sidebar.classList.remove('active');
-                const menuToggle = document.getElementById('menuToggle');
-                if (menuToggle) {
-                    menuToggle.innerHTML = '☰';
-                }
-            }
-        });
     }
 }
 
