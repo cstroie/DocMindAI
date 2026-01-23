@@ -304,26 +304,26 @@ function handleProfileAction($profile_id) {
 }
 
 /**
- * Execute a tool based on profile configuration
+ * Execute a helper based on profile configuration
  * 
- * This function acts as a tool dispatcher, executing different tools based on the
- * profile's tool specification. It validates input parameters and returns tool
+ * This function acts as a helper dispatcher, executing different helpers based on the
+ * profile's helper specification. It validates input parameters and returns helper
  * output or false on error.
  * 
- * @param string $tool_name Name of the tool to execute (e.g., 'web_scraper', 'medical_literature_search')
- * @param array $form_data Form data containing tool parameters (URL, query, etc.)
- * @return string|false Tool output as string, or false on error/invalid parameters
+ * @param string $helper_name Name of the helper to execute (e.g., 'web_scraper', 'medical_literature_search')
+ * @param array $form_data Form data containing helper parameters (URL, query, etc.)
+ * @return string|false Helper output as string, or false on error/invalid parameters
  * 
- * @see scrapeUrl() - Web scraping tool
- * @see searchPubMed() - Medical literature search tool
+ * @see scrapeUrl() - Web scraping helper
+ * @see searchPubMed() - Medical literature search helper
  * 
  * @note Currently supports:
  *       - 'web_scraper': Scrapes content from a URL
  *       - 'medical_literature_search': Searches PubMed for medical articles
- * @note All tools validate their required parameters before execution
+ * @note All helpers validate their required parameters before execution
  */
-function executeTool($tool_name, $form_data) {
-    switch ($tool_name) {
+function executeHelper($helper_name, $form_data) {
+    switch ($helper_name) {
         case 'web_scraper':
             // Check if URL is provided
             if (empty($form_data['url'])) {
@@ -368,7 +368,7 @@ function executeTool($tool_name, $form_data) {
  * 
  * This function constructs the final prompt by:
  * 1. Loading profile and language configurations
- * 2. Executing tools if specified by the profile
+ * 2. Executing helpers if specified by the profile
  * 3. Selecting the appropriate prompt template
  * 4. Converting array-based prompts to text format
  * 5. Replacing placeholders with actual form data
@@ -379,11 +379,11 @@ function executeTool($tool_name, $form_data) {
  * @return string The constructed prompt ready for LLM processing
  * 
  * @see loadResourceFromJson() - Loads configuration files
- * @see executeTool() - Executes profile tools
+ * @see executeHelper() - Executes profile helpers
  * @see convertPromptArrayToText() - Converts array prompts to text
  * 
  * @note Supported placeholders: {language_instruction}, {language}, and any form field name
- * @note If profile has 'tool' specification, tool output is added to form_data['content']
+ * @note If profile has 'helper' specification, helper output is added to form_data['content']
  * @note Falls back to generic analysis prompt if no valid prompt found
  */
 function buildProfilePrompt($profile_id, $form_data) {
@@ -405,14 +405,14 @@ function buildProfilePrompt($profile_id, $form_data) {
         return "Analyze the following input: " . json_encode($form_data);
     }
 
-    // Check if profile has a tool specification
-    if (isset($profile['tool']) && !empty($profile['tool'])) {
-        $tool_output = executeTool($profile['tool'], $form_data);
-        if ($tool_output === false) {
-            return "Failed to execute tool: " . $profile['tool'];
+    // Check if profile has a helper specification
+    if (isset($profile['helper']) && !empty($profile['helper'])) {
+        $helper_output = executeHelper($profile['helper'], $form_data);
+        if ($helper_output === false) {
+            return "Failed to execute helper: " . $profile['helper'];
         }
-        // Add tool output to form data as 'content' field
-        $form_data['content'] = $tool_output;
+        // Add helper output to form data as 'content' field
+        $form_data['content'] = $helper_output;
     }
 
     // Handle case where profile has 'prompts' key (multiple prompts)

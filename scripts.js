@@ -1,7 +1,7 @@
 
-// Global variables to store categories, profiles, languages, and prompts
+// Global variables to store categories, tools, languages, and prompts
 let categoriesData = null;
-let profilesData = null;
+let toolsData = null;
 let languagesData = null;
 let promptsData = null;
 
@@ -272,17 +272,17 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
  * It handles errors gracefully and can extract a specific root key from the
  * JSON data if provided.
  * 
- * @param {string} filename - The JSON file to load (e.g., 'profiles.json')
- * @param {string} rootKey - The root key to extract from the JSON data (e.g., 'profiles')
+ * @param {string} filename - The JSON file to load (e.g., 'tools.json')
+ * @param {string} rootKey - The root key to extract from the JSON data (e.g., 'tools')
  * @returns {Promise<Object|null>} Promise resolving to the extracted data or null on error
  * 
  * @note Uses the Fetch API to retrieve the JSON file
  * @note Handles network errors and JSON parsing errors
  * @note If rootKey is provided, returns data[rootKey] if it exists, otherwise returns entire data
  * @note Logs errors to console for debugging
- * @note Used for loading profiles, languages, categories, and prompts
- * @see displayProfiles() - Uses this to load profiles data
- * @see populateProfileSelect() - Uses this to load profiles data
+ * @note Used for loading tools, languages, categories, and prompts
+ * @see displayTools() - Uses this to load tools data
+ * @see populateToolSelect() - Uses this to load tools data
  * @see Document.addEventListener('DOMContentLoaded') - Calls this for initial data loading
  */
 async function loadJSONResource(filename, rootKey) {
@@ -306,51 +306,51 @@ async function loadJSONResource(filename, rootKey) {
 }
 
 /**
- * Display profiles grouped by category in the UI
+ * Display tools grouped by category in the UI
  *
- * This function renders all available profiles in the main interface,
- * organizing them by category. Each profile is displayed as a clickable
+ * This function renders all available tools in the main interface,
+ * organizing them by category. Each tool is displayed as a clickable
  * card that loads the corresponding form when clicked.
  *
  * @return {void}
  *
- * @note Profiles are grouped by their 'category' property
+ * @note Tools are grouped by their 'category' property
  * @note Each category section includes a header with icon and description
- * @note Profile cards display the profile icon, name, and description
- * @note Clicking a profile card calls loadProfileForm() with the profile ID
- * @note Uses the global profilesData and categoriesData variables
- * @note Displays an error if profilesData is not available
- * @see loadProfileForm() - Called when a profile card is clicked
+ * @note Tool cards display the tool icon, name, and description
+ * @note Clicking a tool card calls loadToolForm() with the tool ID
+ * @note Uses the global toolsData and categoriesData variables
+ * @note Displays an error if toolsData is not available
+ * @see loadToolForm() - Called when a tool card is clicked
  * @see showError() - Used to display error messages
  * @see Document.addEventListener('DOMContentLoaded') - Calls this function on page load
  */
-function displayProfiles() {
-    const profilesGrid = document.getElementById('profilesGrid');
-    profilesGrid.innerHTML = '';
+function displayTools() {
+    const toolsGrid = document.getElementById('toolsGrid');
+    toolsGrid.innerHTML = '';
 
-    // Check if profilesData is available
-    if (!profilesData) {
-        showError('No profiles data available');
+    // Check if toolsData is available
+    if (!toolsData) {
+        showError('No tools data available');
         return;
     }
 
-    // Group profiles by category
+    // Group tools by category
     const categories = {};
-    for (const [profile_id, profile_data] of Object.entries(profilesData)) {
-        const category = profile_data.category;
+    for (const [tool_id, tool_data] of Object.entries(toolsData)) {
+        const category = tool_data.category;
         if (!categories[category]) {
             categories[category] = [];
         }
         categories[category].push({
-            'id': profile_id,
-            'name': profile_data.name,
-            'description': profile_data.description,
-            'icon': profile_data.icon
+            'id': tool_id,
+            'name': tool_data.name,
+            'description': tool_data.description,
+            'icon': tool_data.icon
         });
     }
 
     // Display each category
-    for (const [category, categoryProfiles] of Object.entries(categories)) {
+    for (const [category, categoryTools] of Object.entries(categories)) {
         const categoryDiv = document.createElement('section');
         categoryDiv.className = 'category-section category-' + category;
 
@@ -375,71 +375,71 @@ function displayProfiles() {
         // Append header to category div
         categoryDiv.appendChild(categoryHeader);
 
-        // Create grid for profiles
+        // Create grid for tools
         const grid = document.createElement('main');
 
-        // Add profiles to the grid
-        categoryProfiles.forEach(profile => {
-            const profileCard = document.createElement('a');
-            profileCard.className = 'tool-card';
-            profileCard.href = '#';
-            profileCard.onclick = (e) => {
+        // Add tools to the grid
+        categoryTools.forEach(tool => {
+            const toolCard = document.createElement('a');
+            toolCard.className = 'tool-card';
+            toolCard.href = '#';
+            toolCard.onclick = (e) => {
                 e.preventDefault();
-                loadProfileForm(profile.id);
+                loadToolForm(tool.id);
             };
 
-            // Add profile icon, name, and description
-            profileCard.innerHTML = `
-                <div class="tool-icon">${profile.icon || '📄'}</div>
-                <h3>${profile.name}</h3>
-                <p>${profile.description}</p>
+            // Add tool icon, name, and description
+            toolCard.innerHTML = `
+                <div class="tool-icon">${tool.icon || '📄'}</div>
+                <h3>${tool.name}</h3>
+                <p>${tool.description}</p>
             `;
 
-            // Append profile card to grid
-            grid.appendChild(profileCard);
+            // Append tool card to grid
+            grid.appendChild(toolCard);
         });
 
         // Append grid to category div
         categoryDiv.appendChild(grid);
-        profilesGrid.appendChild(categoryDiv);
+        toolsGrid.appendChild(categoryDiv);
     }
 }
 
 /**
- * Display profiles for a specific category
+ * Display tools for a specific category
  *
- * This function displays only the profiles belonging to a specific category.
- * It filters the profiles by category and renders them in the main interface.
+ * This function displays only the tools belonging to a specific category.
+ * It filters the tools by category and renders them in the main interface.
  *
  * @param {string} category - The category to display
  * @return {void}
  *
- * @note Shows only profiles from the specified category
+ * @note Shows only tools from the specified category
  * @note Updates the page title to show the category name
- * @note Uses the global profilesData and categoriesData variables
- * @note Displays an error if profilesData is not available
+ * @note Uses the global toolsData and categoriesData variables
+ * @note Displays an error if toolsData is not available
  * @see switchView() - Calls this function when a category is selected
- * @see loadProfileForm() - Called when a profile card is clicked
+ * @see loadToolForm() - Called when a tool card is clicked
  */
-function displayProfilesByCategory(category) {
-    const profilesGrid = document.getElementById('profilesGrid');
-    profilesGrid.innerHTML = '';
+function displayToolsByCategory(category) {
+    const toolsGrid = document.getElementById('toolsGrid');
+    toolsGrid.innerHTML = '';
 
-    // Check if profilesData is available
-    if (!profilesData) {
-        showError('No profiles data available');
+    // Check if toolsData is available
+    if (!toolsData) {
+        showError('No tools data available');
         return;
     }
 
-    // Filter profiles by category
-    const categoryProfiles = [];
-    for (const [profile_id, profile_data] of Object.entries(profilesData)) {
-        if (profile_data.category === category) {
-            categoryProfiles.push({
-                'id': profile_id,
-                'name': profile_data.name,
-                'description': profile_data.description,
-                'icon': profile_data.icon
+    // Filter tools by category
+    const categoryTools = [];
+    for (const [tool_id, tool_data] of Object.entries(toolsData)) {
+        if (tool_data.category === category) {
+            categoryTools.push({
+                'id': tool_id,
+                'name': tool_data.name,
+                'description': tool_data.description,
+                'icon': tool_data.icon
             });
         }
     }
@@ -469,33 +469,33 @@ function displayProfilesByCategory(category) {
     // Append header to category div
     categoryDiv.appendChild(categoryHeader);
 
-    // Create grid for profiles
+    // Create grid for tools
     const grid = document.createElement('main');
 
-    // Add profiles to the grid
-    categoryProfiles.forEach(profile => {
-        const profileCard = document.createElement('a');
-        profileCard.className = 'tool-card';
-        profileCard.href = '#';
-        profileCard.onclick = (e) => {
+    // Add tools to the grid
+    categoryTools.forEach(tool => {
+        const toolCard = document.createElement('a');
+        toolCard.className = 'tool-card';
+        toolCard.href = '#';
+        toolCard.onclick = (e) => {
             e.preventDefault();
-            loadProfileForm(profile.id);
+            loadToolForm(tool.id);
         };
 
-        // Add profile icon, name, and description
-        profileCard.innerHTML = `
-            <div class="tool-icon">${profile.icon || '📄'}</div>
-            <h3>${profile.name}</h3>
-            <p>${profile.description}</p>
+        // Add tool icon, name, and description
+        toolCard.innerHTML = `
+            <div class="tool-icon">${tool.icon || '📄'}</div>
+            <h3>${tool.name}</h3>
+            <p>${tool.description}</p>
         `;
 
-        // Append profile card to grid
-        grid.appendChild(profileCard);
+        // Append tool card to grid
+        grid.appendChild(toolCard);
     });
 
     // Append grid to category div
     categoryDiv.appendChild(grid);
-    profilesGrid.appendChild(categoryDiv);
+    toolsGrid.appendChild(categoryDiv);
 
     // Update page title
     const pageTitle = document.getElementById('pageTitle');
@@ -505,122 +505,122 @@ function displayProfilesByCategory(category) {
 }
 
 /**
- * Populate the profile select dropdown with grouped options
+ * Populate the tool select dropdown with grouped options
  * 
- * This function populates the profile selection dropdown with all available
- * profiles, organized by category. It creates optgroups for each category
- * and adds profile options with icons and names.
+ * This function populates the tool selection dropdown with all available
+ * tools, organized by category. It creates optgroups for each category
+ * and adds tool options with icons and names.
  * 
- * @param {HTMLSelectElement} profileSelect - The select element to populate
+ * @param {HTMLSelectElement} toolSelect - The select element to populate
  * @return {void}
  * 
- * @note Profiles are grouped by their 'category' property
+ * @note Tools are grouped by their 'category' property
  * @note Each category becomes an optgroup in the dropdown
- * @note Profile icons are displayed before the profile name
- * @note Uses the global profilesData and categoriesData variables
- * @note Logs an error to console if profilesData is not available
- * @see loadProfileForm() - Uses this to populate the dropdown after loading a profile
- * @see populateProfileSelect() - Called by loadProfileForm()
+ * @note Tool icons are displayed before the tool name
+ * @note Uses the global toolsData and categoriesData variables
+ * @note Logs an error to console if toolsData is not available
+ * @see loadToolForm() - Uses this to populate the dropdown after loading a tool
+ * @see populateToolSelect() - Called by loadToolForm()
  */
-function populateProfileSelect(profileSelect) {
+function populateToolSelect(toolSelect) {
     // Clear existing options
-    profileSelect.innerHTML = '<option value="">-- Select a profile --</option>';
+    toolSelect.innerHTML = '<option value="">-- Select a tool --</option>';
 
-    // Check if profilesData is available
-    if (!profilesData) {
-        console.error('No profiles data available');
+    // Check if toolsData is available
+    if (!toolsData) {
+        console.error('No tools data available');
         return;
     }
 
-    // Group profiles by category
+    // Group tools by category
     const categories = {};
-    for (const [profileId, profileData] of Object.entries(profilesData)) {
-        const category = profileData.category;
+    for (const [toolId, toolData] of Object.entries(toolsData)) {
+        const category = toolData.category;
         if (!categories[category]) {
             categories[category] = [];
         }
         categories[category].push({
-            id: profileId,
-            name: profileData.name,
-            icon: profileData.icon
+            id: toolId,
+            name: toolData.name,
+            icon: toolData.icon
         });
     }
 
     // Add optgroups for each category
-    for (const [category, categoryProfiles] of Object.entries(categories)) {
+    for (const [category, categoryTools] of Object.entries(categories)) {
         const optgroup = document.createElement('optgroup');
 
         // Use category name from categories.json if available
         const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
         optgroup.label = categoryInfo ? categoryInfo.name : category;
 
-        // Add profiles as options
-        categoryProfiles.forEach(profile => {
+        // Add tools as options
+        categoryTools.forEach(tool => {
             const option = document.createElement('option');
-            option.value = profile.id;
-            // Add profile icon before the name
-            option.textContent = `${profile.icon || '📄'} ${profile.name}`;
+            option.value = tool.id;
+            // Add tool icon before the name
+            option.textContent = `${tool.icon || '📄'} ${tool.name}`;
             optgroup.appendChild(option);
         });
 
         // Append optgroup to select
-        profileSelect.appendChild(optgroup);
+        toolSelect.appendChild(optgroup);
     }
 }
 
 
 /**
- * Load a profile form based on the selected profile ID
+ * Load a tool form based on the selected tool ID
  * 
- * This function loads and displays the form for a specific profile. It:
- * 1. Hides the profile selector grid
- * 2. Retrieves the profile data from profilesData
- * 3. Shows the profile selection dropdown
- * 4. Populates the dropdown with all profiles
- * 5. Sets up event listeners for profile selection
+ * This function loads and displays the form for a specific tool. It:
+ * 1. Hides the tool selector grid
+ * 2. Retrieves the tool data from toolsData
+ * 3. Shows the tool selection dropdown
+ * 4. Populates the dropdown with all tools
+ * 5. Sets up event listeners for tool selection
  * 6. Updates hidden language fields if present
- * 7. Displays the profile form
+ * 7. Displays the tool form
  * 
- * @param {string} profileId - The ID of the profile to load
+ * @param {string} toolId - The ID of the tool to load
  * @return {Promise<void>}
  * 
- * @note Uses the global profilesData variable
- * @note Shows an error if profile is not found or profilesData is unavailable
+ * @note Uses the global toolsData variable
+ * @note Shows an error if tool is not found or toolsData is unavailable
  * @note Automatically sets hidden language fields to 'en' if present
- * @note Sets up a change event listener on the profileSelect dropdown
- * @note Calls displayProfileForm() to render the form
- * @see displayProfileForm() - Called to render the form
+ * @note Sets up a change event listener on the toolSelect dropdown
+ * @note Calls displayToolForm() to render the form
+ * @see displayToolForm() - Called to render the form
  * @see showError() - Used to display error messages
- * @see populateProfileSelect() - Called to populate the dropdown
- * @see displayProfiles() - Called when user clicks a profile card
+ * @see populateToolSelect() - Called to populate the dropdown
+ * @see displayTools() - Called when user clicks a tool card
  */
-async function loadProfileForm(profileId) {
+async function loadToolForm(toolId) {
     try {
         // Clear the page
-        document.querySelector('.profile-selector').style.display = 'none';
-        // Use the global profilesData if available
-        if (!profilesData) {
-            showError('No profiles data available');
+        document.querySelector('.tool-selector').style.display = 'none';
+        // Use the global toolsData if available
+        if (!toolsData) {
+            showError('No tools data available');
             return;
         }
 
-        // Get the selected profile
-        const profile = profilesData[profileId];
-        if (!profile) {
-            console.error('Profile not found:', profileId);
+        // Get the selected tool
+        const tool = toolsData[toolId];
+        if (!tool) {
+            console.error('Tool not found:', toolId);
             // Check if resultsArea exists before showing error
             const resultsArea = document.getElementById('resultsArea');
             if (resultsArea) {
-                showError('Profile not found');
+                showError('Tool not found');
             } else {
-                console.error('Profile not found and results area not available');
+                console.error('Tool not found and results area not available');
                 // Show error in the main content area as fallback
                 const mainContent = document.querySelector('.main-content');
                 if (mainContent) {
                     const errorElement = document.createElement('div');
                     errorElement.className = 'error';
                     errorElement.innerHTML = `
-                        <strong>Error:</strong> Profile not found
+                        <strong>Error:</strong> Tool not found
                     `;
                     mainContent.innerHTML = '';
                     mainContent.appendChild(errorElement);
@@ -628,29 +628,29 @@ async function loadProfileForm(profileId) {
             }
             return;
         }
-        // Set the profile ID in the profile object
-        profile.id = profileId;
+        // Set the tool ID in the tool object
+        tool.id = toolId;
 
         // Check if required form elements exist
-        const profileForm = document.getElementById('profileForm');
+        const toolForm = document.getElementById('toolForm');
         const formFields = document.getElementById('formFields');
         const actionInput = document.getElementById('actionInput');
         const topTitle = document.getElementById('topTitle');
         const topDescription = document.getElementById('topDescription');
-        const profileSelect = document.getElementById('profileSelect');
-        const profileSelector = document.querySelector('.profile-selector');
+        const toolSelect = document.getElementById('toolSelect');
+        const toolSelector = document.querySelector('.tool-selector');
 
         // Debug: Log which elements are missing
         console.log('Checking required form elements:');
-        console.log('profileForm:', profileForm);
+        console.log('toolForm:', toolForm);
         console.log('formFields:', formFields);
         console.log('actionInput:', actionInput);
         console.log('topTitle:', topTitle);
         console.log('topDescription:', topDescription);
-        console.log('profileSelect:', profileSelect);
-        console.log('profileSelector:', profileSelector);
+        console.log('toolSelect:', toolSelect);
+        console.log('toolSelector:', toolSelector);
 
-        if (!profileForm || !formFields || !actionInput || !topTitle || !topDescription || !profileSelect || !profileSelector) {
+        if (!toolForm || !formFields || !actionInput || !topTitle || !topDescription || !toolSelect || !toolSelector) {
             console.error('Required form elements not found');
             // Show error in the main content area as fallback
             const mainContent = document.querySelector('.main-content');
@@ -666,34 +666,34 @@ async function loadProfileForm(profileId) {
             return;
         }
 
-        // Clear the page and show profile selector
+        // Clear the page and show tool selector
         try {
-            profileSelector.style.display = 'none';
+            toolSelector.style.display = 'none';
         } catch (error) {
-            console.error('Failed to hide profile selector:', error);
+            console.error('Failed to hide tool selector:', error);
         }
 
-        // Show the profile select dropdown and enable the profile-select-container nav element
-        profileSelect.style.display = 'block';
-        const profileSelectContainer = document.querySelector('.profile-select-container');
-        if (profileSelectContainer) {
-            profileSelectContainer.style.display = 'block';
+        // Show the tool select dropdown and enable the tool-select-container nav element
+        toolSelect.style.display = 'block';
+        const toolSelectContainer = document.querySelector('.tool-select-container');
+        if (toolSelectContainer) {
+            toolSelectContainer.style.display = 'block';
         }
 
-        // Populate the profile select dropdown
-        populateProfileSelect(profileSelect);
+        // Populate the tool select dropdown
+        populateToolSelect(toolSelect);
 
-        // Add event listener to handle profile selection
-        profileSelect.addEventListener('change', function() {
-            const selectedProfileId = this.value;
-            if (selectedProfileId) {
-                loadProfileForm(selectedProfileId);
+        // Add event listener to handle tool selection
+        toolSelect.addEventListener('change', function() {
+            const selectedToolId = this.value;
+            if (selectedToolId) {
+                loadToolForm(selectedToolId);
             }
         });
 
         // Update language field if present
-        if (profile.form.fields) {
-            profile.form.fields.forEach(field => {
+        if (tool.form.fields) {
+            tool.form.fields.forEach(field => {
                 if (field.name === 'language' && field.type === 'hidden') {
                     field.value = 'en';
                 }
@@ -701,51 +701,51 @@ async function loadProfileForm(profileId) {
         }
 
         // Display the form
-        displayProfileForm(profile);
+        displayToolForm(tool);
     } catch (error) {
         showError('Failed to load form: ' + error.message);
     }
 }
 
 /**
- * Display a profile form with the given configuration
+ * Display a tool form with the given configuration
  * 
- * This function renders the form for a specific profile. It:
- * 1. Updates the top title and description with profile information
- * 2. Sets up the form action input with the profile ID
+ * This function renders the form for a specific tool. It:
+ * 1. Updates the top title and description with tool information
+ * 2. Sets up the form action input with the tool ID
  * 3. Retrieves saved preferences from cookies
- * 4. Creates form fields based on the profile configuration
+ * 4. Creates form fields based on the tool configuration
  * 5. Shows the form and hides the results area
  * 6. Scrolls to the form for better UX
  * 
- * @param {Object} profile - The profile configuration object
+ * @param {Object} tool - The tool configuration object
  * @return {void}
  * 
- * @note Uses the profile's form.fields array to create input elements
+ * @note Uses the tool's form.fields array to create input elements
  * @note Retrieves saved model and language preferences from cookies
  * @note Hides the results area when displaying a new form
  * @note Uses smooth scrolling to bring the form into view
  * @see createFormField() - Called to create each form field
- * @see loadProfileForm() - Calls this function after loading profile data
+ * @see loadToolForm() - Calls this function after loading tool data
  */
-function displayProfileForm(profile) {
+function displayToolForm(tool) {
     // Update top title and description
     const topTitle = document.getElementById('topTitle');
     const topDescription = document.getElementById('topDescription');
-    if (topTitle) topTitle.textContent = profile.icon + ' ' + profile.name;
-    if (topDescription) topDescription.textContent = profile.description || '';
+    if (topTitle) topTitle.textContent = tool.icon + ' ' + tool.name;
+    if (topDescription) topDescription.textContent = tool.description || '';
 
     // Populate the form fields
-    const profileForm = document.getElementById('profileForm');
+    const toolForm = document.getElementById('toolForm');
     const formFields = document.getElementById('formFields');
     const actionInput = document.getElementById('actionInput');
 
-    if (!profileForm || !formFields || !actionInput) {
-        console.error('Required form elements not found in displayProfileForm');
+    if (!toolForm || !formFields || !actionInput) {
+        console.error('Required form elements not found in displayToolForm');
         return;
     }
 
-    actionInput.value = profile.id;
+    actionInput.value = tool.id;
     formFields.innerHTML = '';
 
     // Get cookies for model and language
@@ -756,8 +756,8 @@ function displayProfileForm(profile) {
     }, {});
 
     // Create form fields based on formConfig
-    if (profile.form && profile.form.fields) {
-        profile.form.fields.forEach(field => {
+    if (tool.form && tool.form.fields) {
+        tool.form.fields.forEach(field => {
             const fieldElement = createFormField(field, cookies);
             formFields.appendChild(fieldElement);
         });
@@ -765,7 +765,7 @@ function displayProfileForm(profile) {
 
     // Show the form and hide results area
     try {
-        if (profileForm.style) profileForm.style.display = 'block';
+        if (toolForm.style) toolForm.style.display = 'block';
         const resultsArea = document.getElementById('resultsArea');
         if (resultsArea && resultsArea.style) resultsArea.style.display = 'none';
     } catch (error) {
@@ -784,8 +784,8 @@ function displayProfileForm(profile) {
     switchView('form');
 
     // Scroll to form
-    if (profileForm.scrollIntoView) {
-        profileForm.scrollIntoView({ behavior: 'smooth' });
+    if (toolForm.scrollIntoView) {
+        toolForm.scrollIntoView({ behavior: 'smooth' });
     }
 }
 
@@ -814,7 +814,7 @@ function displayProfileForm(profile) {
  * @note Adds help text if provided in field configuration
  * @see fetchModelsForSelect() - Called for dynamic model loading
  * @see fetchPromptsForSelect() - Called for dynamic prompt loading
- * @see displayProfileForm() - Calls this function for each field
+ * @see displayToolForm() - Calls this function for each field
  */
 function createFormField(field, cookies = {}) {
     // Create container div
@@ -1243,7 +1243,7 @@ async function handleFormSubmit(event) {
  * 
  * This function renders the API response in the results area. It:
  * 1. Extracts the response content from the API response
- * 2. Updates the results title and description based on the profile
+ * 2. Updates the results title and description based on the tool
  * 3. Detects the content type (JSON, markdown, or other)
  * 4. Converts the content to the appropriate display format
  * 5. Renders the content with syntax highlighting
@@ -1254,7 +1254,7 @@ async function handleFormSubmit(event) {
  * @return {void}
  * 
  * @note Handles JSON, markdown, and plain text content
- * @note Supports profile-specific display formats (markdown, html, json)
+ * @note Supports tool-specific display formats (markdown, html, json)
  * @note Uses marked.js for markdown to HTML conversion
  * @note Uses highlight.js for syntax highlighting
  * @note Calls jsonToMarkdown() for JSON content conversion
@@ -1295,18 +1295,18 @@ function displayResults(results) {
         return;
     }
 
-    // Get the current profile from results.profile
-    const profileId = results.profile || '';
-    const profile = profilesData[profileId] || null;
+    // Get the current tool from results.tool
+    const toolId = results.tool || '';
+    const tool = toolsData[toolId] || null;
 
-    // Update results title and description if profile has form.title and form.description
-    if (profile && profile.form && profile.form.title) {
-        resultsTitle.textContent = profile.form.title;
+    // Update results title and description if tool has form.title and form.description
+    if (tool && tool.form && tool.form.title) {
+        resultsTitle.textContent = tool.form.title;
     } else {
         resultsTitle.textContent = '📝 Results';
     }
-    if (profile && profile.form && profile.form.description) {
-        resultsDescription.textContent = profile.form.description;
+    if (tool && tool.form && tool.form.description) {
+        resultsDescription.textContent = tool.form.description;
     } else {
         resultsDescription.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
     }
@@ -1315,8 +1315,8 @@ function displayResults(results) {
     const resultsInfo = extractCodeFenceInfo(responseContent, 'markdown');
     console.log('Code fence info:\n', resultsInfo);
 
-    // Check the desired display format from profile
-    const displayFormat = profile && profile.display ? profile.display.toLowerCase() : '';
+    // Check the desired display format from tool
+    const displayFormat = tool && tool.display ? tool.display.toLowerCase() : '';
     console.log('Display format requested: ', displayFormat);
 
     // Check if the response need conversion based on resultsInfo format and display format
@@ -1403,8 +1403,8 @@ function displayResults(results) {
  * @note Shows the results area and scrolls to it
  * @note Escapes the message for security
  * @see handleFormSubmit() - Calls this function on form submission errors
- * @see loadProfileForm() - Calls this function if profile loading fails
- * @see displayProfiles() - Calls this function if profiles data is unavailable
+ * @see loadToolForm() - Calls this function if tool loading fails
+ * @see displayTools() - Calls this function if tools data is unavailable
  */
 function showError(message) {
     // Get the results area element
@@ -1649,8 +1649,8 @@ function arrayOfObjectsToTable(arr) {
  *
  * This function initializes the DocMind AI application when the DOM is fully loaded.
  * It performs the following tasks:
- * 1. Loads configuration data (categories, profiles, languages)
- * 2. Displays available profiles in the UI
+ * 1. Loads configuration data (categories, tools, languages)
+ * 2. Displays available tools in the UI
  * 3. Sets up the form submission handler
  * 4. Sets up the theme toggle button
  * 5. Sets up view switching for sidebar navigation
@@ -1659,15 +1659,15 @@ function arrayOfObjectsToTable(arr) {
  *
  * @note This is the main entry point for the application
  * @note Uses async/await for sequential data loading
- * @note Sets up global variables: categoriesData, profilesData, languagesData
- * @note Calls displayProfiles() to render profile cards
+ * @note Sets up global variables: categoriesData, toolsData, languagesData
+ * @note Calls displayTools() to render tool cards
  * @note Attaches form submission handler to the API form
  * @note Sets up theme toggle button click handler
  * @note Sets up sidebar navigation click handlers
  * @note Sets up category button click handlers
  * @note Applies theme preference on page load
  * @see loadJSONResource() - Used to load configuration data
- * @see displayProfiles() - Renders profile cards
+ * @see displayTools() - Renders tool cards
  * @see handleFormSubmit() - Handles form submissions
  * @see toggleTheme() - Handles theme toggling
  * @see switchView() - Handles view switching
@@ -1676,8 +1676,8 @@ function arrayOfObjectsToTable(arr) {
 document.addEventListener('DOMContentLoaded', async function() {
     // Load categories data
     categoriesData = await loadJSONResource('categories.json', 'categories');
-    // Load profiles data
-    profilesData = await loadJSONResource('profiles.json', 'profiles');
+    // Load tools data
+    toolsData = await loadJSONResource('tools.json', 'tools');
     // Load languages data
     languagesData = await loadJSONResource('languages.json', 'languages');
 
@@ -1686,8 +1686,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         addCategoryButtonsToSidebar(categoriesData);
     }
 
-    // Display profiles in the UI
-    displayProfiles();
+    // Display tools in the UI
+    displayTools();
     // Set up form submission
     document.getElementById('apiForm')?.addEventListener('submit', handleFormSubmit);
     // Set up theme toggle button
@@ -1722,16 +1722,16 @@ document.addEventListener('DOMContentLoaded', async function() {
  *
  * This function dynamically adds category buttons to the sidebar navigation
  * based on the categories data. Each button represents a category and when
- * clicked, it displays the tools/profiles belonging to that category.
+ * clicked, it displays the tools/tools belonging to that category.
  *
  * @param {Object} categories - The categories data object
  * @return {void}
  *
  * @note Creates a button for each category in the categories object
  * @note Inserts buttons after the Home button in the sidebar
- * @note Sets up click handlers to display profiles by category
+ * @note Sets up click handlers to display tools by category
  * @note Updates active state of navigation buttons
- * @see displayProfilesByCategory() - Called when a category button is clicked
+ * @see displayToolsByCategory() - Called when a category button is clicked
  * @see switchView() - Called to switch to tools view
  */
 function addCategoryButtonsToSidebar(categories) {
@@ -1780,9 +1780,9 @@ function addCategoryButtonsToSidebar(categories) {
             });
             this.classList.add('active');
 
-            // Switch to tools view and display profiles by category
+            // Switch to tools view and display tools by category
             switchView('tools');
-            displayProfilesByCategory(categoryId);
+            displayToolsByCategory(categoryId);
 
             // Close sidebar on mobile
             const sidebar = document.querySelector('.sidebar');

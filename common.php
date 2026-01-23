@@ -641,8 +641,8 @@ function extractTextFromDocument($file_path, $mime_type) {
  * @note Stores cookies in temporary file for session management
  * @note Follows up to 5 redirects with 30-second timeout
  * @note Cleans up temporary cookie file after request
- * @see executeTool() - Uses this for web scraping tool
- * @note Used for the 'web_scraper' tool in profile actions
+ * @see executeHelper() - Uses this for web scraping helper
+ * @note Used for the 'web_scraper' helper in profile actions
  */
 function scrapeUrl($url) {
     // Create a temporary file to store cookies
@@ -1106,7 +1106,7 @@ function sendJsonResponse($data, $is_api_request = false) {
  * @note Fetches detailed information for each article
  * @note Returns false on API errors or no results
  * @see fetchArticleDetails() - Used to get article details
- * @see executeTool() - Uses this for 'medical_literature_search' tool
+ * @see executeHelper() - Uses this for 'medical_literature_search' helper
  */
 function searchPubMed($query, $max_results = 5) {
     // PubMed API endpoint
@@ -1176,7 +1176,7 @@ function searchPubMed($query, $max_results = 5) {
  * @note Extracts PMID, title, authors, journal, year, abstract
  * @note Returns false on API errors or parsing failures
  * @see searchPubMed() - Uses this to get article details
- * @note Used for the 'medical_literature_search' tool
+ * @note Used for the 'medical_literature_search' helper
  */
 function fetchArticleDetails($ids) {
     // PubMed API endpoint for fetching details

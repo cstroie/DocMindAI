@@ -1028,7 +1028,7 @@
         "page_content": "{content}"
       },
       "display": "markdown",
-      "tool": "web_scraper",
+      "helper": "web_scraper",
       "form": {
         "title": "Web Page Conversion",
         "description": "Review the converted web page content in Markdown format. The AI has processed the web page and extracted the main content, removing ads and navigation elements.",
@@ -1119,7 +1119,7 @@
         "page_content": "{content}"
       },
       "display": "html",
-      "tool": "web_scraper",
+      "helper": "web_scraper",
       "form": {
         "title": "Web Page Summary",
         "description": "Review the AI-generated summary of the web page content. The summary highlights the most important points and key information from the article.",
@@ -1347,7 +1347,7 @@
         "paper_content": "{content}"
       },
       "display": "html",
-      "tool": "medical_literature_search",
+      "helper": "medical_literature_search",
       "form": {
         "title": "Medical Literature Search",
         "description": "Review the search results and AI-summarized research papers related to your medical query. The results include relevant studies with key findings.",

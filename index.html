@@ -128,23 +128,23 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                         <p class="tools-subtitle" id="topDescription">Select a tool to process your documents</p>
                     </div>
 
-                    <!-- Profile Selector -->
-                    <div class="profile-selector-container" style="display: none;">
-                        <select id="profileSelect" class="form-select">
+                    <!-- Tool Selector -->
+                    <div class="tool-selector-container" style="display: none;">
+                        <select id="toolSelect" class="form-select">
                             <option value="">-- Select a tool --</option>
                         </select>
                     </div>
-                    <div class="profile-selector" style="display: none;"></div>
+                    <div class="tool-selector" style="display: none;"></div>
 
                     <!-- Tools Grid -->
-                    <div class="tools-grid" id="profilesGrid">
+                    <div class="tools-grid" id="toolsGrid">
                         <!-- Will be populated by JavaScript -->
                     </div>
                 </section>
 
                 <!-- Form View -->
                 <section class="view form-view" style="display: none;">
-                    <div class="form-container" id="profileForm">
+                    <div class="form-container" id="toolForm">
                         <div class="form-header">
                             <h2 class="form-title" id="formTitle">Tool Configuration</h2>
                             <p class="form-subtitle" id="formSubtitle">Configure the tool parameters</p>
@@ -268,7 +268,7 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
         </div>
     </template>
 
-    <template id="profileCardTemplate">
+    <template id="toolCardTemplate">
         <div class="tool-card">
             <div class="tool-card-header">
                 <div class="tool-icon"></div>
