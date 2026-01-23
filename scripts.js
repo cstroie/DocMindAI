@@ -544,24 +544,6 @@ function displayToolsByCategory(category) {
     const categoryDiv = document.createElement('section');
     categoryDiv.className = 'category-section category-' + category;
 
-    // Create category header
-    const categoryHeader = document.createElement('hgroup');
-
-    // Add category title with icon
-    const categoryTitle = document.createElement('h2');
-    categoryTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category);
-    categoryHeader.appendChild(categoryTitle);
-
-    // Add category description if available
-    if (categoryInfo && categoryInfo.description) {
-        const categoryDescription = document.createElement('p');
-        categoryDescription.textContent = categoryInfo.description;
-        categoryHeader.appendChild(categoryDescription);
-    }
-
-    // Append header to category div
-    categoryDiv.appendChild(categoryHeader);
-
     // Create grid for tools
     const grid = document.createElement('main');
 
@@ -594,6 +576,15 @@ function displayToolsByCategory(category) {
     const pageTitle = document.getElementById('pageTitle');
     if (pageTitle) {
         pageTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category) + ' Tools';
+    }
+    // Update top title and description
+    const topTitle = document.getElementById('topTitle');
+    if (topTitle) {
+        topTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category) + ' Tools';
+    }
+    const topDescription = document.getElementById('topDescription');
+    if (topDescription) {
+        topDescription.textContent = categoryInfo && categoryInfo.description ? categoryInfo.description : '';
     }
 }
 
