@@ -1587,6 +1587,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
     // Set up menu toggle button
     document.getElementById('menuToggle')?.addEventListener('click', toggleMenu);
+    // Set up copy results button
+    document.getElementById('copyResultsBtn')?.addEventListener('click', copyResultsToClipboard);
     // Set up view switching for sidebar navigation
     const navButtons = document.querySelectorAll('.nav-item');
     navButtons.forEach(button => {

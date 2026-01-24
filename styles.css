@@ -907,6 +907,21 @@ body {
     border-left: 4px solid #ef4444;
 }
 
+.success-notification {
+    background: #f0fdf4;
+    border-left: 4px solid #10b981;
+}
+
+.info-notification {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+}
+
+.warning-notification {
+    background: #fef9c3;
+    border-left: 4px solid #f59e0b;
+}
+
 .notification-icon {
     font-size: 1.25rem;
 }
@@ -921,6 +936,10 @@ body {
     cursor: pointer;
     color: var(--text-secondary);
     font-size: 1.25rem;
+}
+
+.notification-close:hover {
+    color: var(--text-primary);
 }
 
 .loading-overlay {
