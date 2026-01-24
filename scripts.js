@@ -1108,7 +1108,7 @@ function displayResults(results) {
     console.log('Code fence info:\n', resultsInfo);
 
     // Check the desired display format from tool
-    const displayFormat = tool && tool.display ? tool.display.toLowerCase() : '';
+    const displayFormat = tool && tool.display ? tool.display.toLowerCase() : 'html';
     console.log('Display format requested: ', displayFormat);
 
     // Check if the response need conversion based on resultsInfo format and display format
@@ -1128,7 +1128,7 @@ function displayResults(results) {
                 // Convert JSON to HTML via markdown
                 const markdownContent = jsonToMarkdown(jsonData);
                 console.log('JSON to Markdown conversion for HTML:\n', markdownContent);
-                resultsContent.innerHTML = marked.parse(markdownContent);
+                resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
             } else {
                 // Convert JSON to pretty JSON string
                 const prettyJson = JSON.stringify(jsonData, null, 2);
@@ -1145,7 +1145,7 @@ function displayResults(results) {
         if (displayFormat === 'html') {
             // Convert JSON to HTML via markdown
             console.log('Converting markdown to HTML');
-            resultsContent.innerHTML = marked.parse(resultsInfo.text);
+            resultsContent.innerHTML = `<div class="article">${marked.parse(resultsInfo.text)}</div>`;
         } else {
             // Keep as markdown with syntax highlighting
             console.log('Displaying as markdown with syntax highlighting');
