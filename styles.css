@@ -590,10 +590,19 @@ body {
 
 .article h1, .article h2, .article h3, .article h4, .article h5, .article h6 {
     font-weight: 600;
-    margin-top: 1.5em;
+    margin-top: 0;
     margin-bottom: 0.75em;
     line-height: 1.3;
     color: var(--text-primary);
+}
+
+.article h1:not(:first-child),
+.article h2:not(:first-child),
+.article h3:not(:first-child),
+.article h4:not(:first-child),
+.article h5:not(:first-child),
+.article h6:not(:first-child) {
+    margin-top: 1.5em;
 }
 
 .article h1 { font-size: 2rem; }
@@ -607,6 +616,10 @@ body {
     margin-top: 0;
     margin-bottom: 1.25em;
     font-size: 1rem;
+}
+
+.article p:not(:first-child) {
+    margin-top: 1.25em;
 }
 
 .article a {
@@ -640,7 +653,7 @@ body {
     padding-left: 1.5rem;
     margin-left: 0;
     margin-right: 0;
-    margin-top: 1.5em;
+    margin-top: 0;
     margin-bottom: 1.5em;
     font-style: italic;
     color: var(--text-secondary);
@@ -649,10 +662,19 @@ body {
     border-radius: 0.25rem;
 }
 
+.article blockquote:not(:first-child) {
+    margin-top: 1.5em;
+}
+
 .article ul, .article ol {
-    margin-top: 1em;
+    margin-top: 0;
     margin-bottom: 1.5em;
     padding-left: 2rem;
+}
+
+.article ul:not(:first-child),
+.article ol:not(:first-child) {
+    margin-top: 1em;
 }
 
 .article li {
@@ -662,7 +684,13 @@ body {
 .article hr {
     border: 0;
     border-top: 1px solid var(--border-color);
-    margin: 2em 0;
+    margin: 0;
+    margin-top: 2em;
+    margin-bottom: 2em;
+}
+
+.article hr:not(:first-child) {
+    margin-top: 2em;
 }
 
 .article code {
@@ -679,8 +707,13 @@ body {
     padding: 1rem;
     border-radius: 0.5rem;
     overflow-x: auto;
-    margin: 1.5em 0;
+    margin-top: 0;
+    margin-bottom: 1.5em;
     border: 1px solid var(--border-color);
+}
+
+.article pre:not(:first-child) {
+    margin-top: 1.5em;
 }
 
 .article pre code {
@@ -692,7 +725,12 @@ body {
 .article table {
     width: 100%;
     border-collapse: collapse;
-    margin: 1.5em 0;
+    margin-top: 0;
+    margin-bottom: 1.5em;
+}
+
+.article table:not(:first-child) {
+    margin-top: 1.5em;
 }
 
 .article th, .article td {
@@ -715,7 +753,12 @@ body {
     max-width: 100%;
     height: auto;
     border-radius: 0.25rem;
-    margin: 1.5em 0;
+    margin-top: 0;
+    margin-bottom: 1.5em;
+}
+
+.article img:not(:first-child) {
+    margin-top: 1.5em;
 }
 
 .history-container {
