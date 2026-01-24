@@ -477,7 +477,11 @@ function extractTextFromDocument($file_path, $mime_type) {
         case 'application/msword': // .doc
             if (file_exists('/usr/bin/antiword')) {
                 $text = shell_exec('antiword ' . escapeshellarg($file_path) . ' 2>&1');
+            } elseif (file_exists('/usr/local/bin/antiword')) {
+                $text = shell_exec('antiword ' . escapeshellarg($file_path) . ' 2>&1');
             } elseif (file_exists('/usr/bin/catdoc')) {
+                $text = shell_exec('catdoc ' . escapeshellarg($file_path) . ' 2>&1');
+            } elseif (file_exists('/usr/local/bin/catdoc')) {
                 $text = shell_exec('catdoc ' . escapeshellarg($file_path) . ' 2>&1');
             }
             break;
@@ -485,7 +489,11 @@ function extractTextFromDocument($file_path, $mime_type) {
         case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': // .docx
             if (file_exists('/usr/bin/docx2txt')) {
                 $text = shell_exec('docx2txt ' . escapeshellarg($file_path) . ' 2>&1');
+            } elseif (file_exists('/usr/local/bin/docx2txt')) {
+                $text = shell_exec('docx2txt ' . escapeshellarg($file_path) . ' 2>&1');
             } elseif (file_exists('/usr/bin/catdoc')) {
+                $text = shell_exec('catdoc ' . escapeshellarg($file_path) . ' 2>&1');
+            } elseif (file_exists('/usr/local/bin/catdoc')) {
                 $text = shell_exec('catdoc ' . escapeshellarg($file_path) . ' 2>&1');
             }
             break;
@@ -493,11 +501,15 @@ function extractTextFromDocument($file_path, $mime_type) {
         case 'application/pdf': // .pdf
             if (file_exists('/usr/bin/pdftotext')) {
                 $text = shell_exec('pdftotext ' . escapeshellarg($file_path) . ' - 2>&1');
+            } elseif (file_exists('/usr/local/bin/pdftotext')) {
+                $text = shell_exec('pdftotext ' . escapeshellarg($file_path) . ' - 2>&1');
             }
             break;
 
         case 'application/vnd.oasis.opendocument.text': // .odt
             if (file_exists('/usr/bin/odt2txt')) {
+                $text = shell_exec('odt2txt ' . escapeshellarg($file_path) . ' 2>&1');
+            } elseif (file_exists('/usr/local/bin/odt2txt')) {
                 $text = shell_exec('odt2txt ' . escapeshellarg($file_path) . ' 2>&1');
             }
             break;
@@ -510,6 +522,8 @@ function extractTextFromDocument($file_path, $mime_type) {
 
     // Fallback to pandoc if specific tools failed
     if (empty($text) && file_exists('/usr/bin/pandoc')) {
+        $text = shell_exec('pandoc -t plain ' . escapeshellarg($file_path) . ' 2>&1');
+    } elseif (empty($text) && file_exists('/usr/local/bin/pandoc')) {
         $text = shell_exec('pandoc -t plain ' . escapeshellarg($file_path) . ' 2>&1');
     }
 
