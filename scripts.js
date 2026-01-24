@@ -1240,16 +1240,64 @@ function displayResults(results) {
         console.error('Results content is empty');
     }
 
-    // Set up new analysis button to go back to tools view
-    const newAnalysisBtn = document.getElementById('newAnalysisBtn');
-    if (newAnalysisBtn) {
-        newAnalysisBtn.onclick = function() {
-            switchView('tools');
-        };
-    }
-
     // Scroll to results
     resultsArea.scrollIntoView({ behavior: 'smooth' });
+}
+
+/**
+ * Show a notification message
+ *
+ * This function displays a notification message to the user. It supports
+ * different types of notifications (success, info, warning, error).
+ *
+ * @param {string} message - The notification message to display
+ * @param {string} type - The type of notification (success, info, warning, error)
+ * @return {void}
+ *
+ * @note Creates a notification element and adds it to the notification container
+ * @note Automatically removes the notification after 5 seconds
+ * @note Uses different colors and icons based on notification type
+ * @see copyResultsToClipboard() - Calls this function on successful copy
+ */
+function showNotification(message, type = 'info') {
+    const notificationContainer = document.getElementById('notificationContainer');
+    if (!notificationContainer) {
+        console.error('Notification container not found');
+        return;
+    }
+
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}-notification`;
+
+    // Set notification icon based on type
+    let icon = 'ℹ️';
+    if (type === 'success') icon = '✅';
+    else if (type === 'warning') icon = '⚠️';
+    else if (type === 'error') icon = '❌';
+
+    // Set notification content
+    notification.innerHTML = `
+        <div class="notification-icon">${icon}</div>
+        <div class="notification-content">${message}</div>
+        <button class="notification-close">×</button>
+    `;
+
+    // Add close button functionality
+    const closeButton = notification.querySelector('.notification-close');
+    closeButton.addEventListener('click', () => {
+        notification.remove();
+    });
+
+    // Add notification to container
+    notificationContainer.appendChild(notification);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification && notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
 }
 
 /**
