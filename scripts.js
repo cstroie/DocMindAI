@@ -127,6 +127,77 @@ function applyTheme() {
 }
 
 /**
+ * Copy results content to clipboard
+ *
+ * This function copies the content from the results area to the clipboard.
+ * It handles both text content and HTML content, and shows a notification
+ * to indicate success or failure.
+ *
+ * @return {Promise<void>}
+ *
+ * @note Uses the Clipboard API for modern browsers
+ * @note Falls back to document.execCommand for older browsers
+ * @note Shows success/error notifications using showNotification()
+ * @note Handles cases where clipboard access is denied
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up this handler
+ */
+async function copyResultsToClipboard() {
+    const resultsContent = document.getElementById('resultsContent');
+
+    if (!resultsContent) {
+        showError('Results content not found');
+        return;
+    }
+
+    try {
+        // Get the text content to copy
+        let textToCopy;
+
+        // Check if the content is in a code block (pre > code)
+        const codeBlock = resultsContent.querySelector('pre code');
+        if (codeBlock) {
+            // For code blocks, get the text content
+            textToCopy = codeBlock.textContent;
+        } else {
+            // For regular content, get the text content
+            textToCopy = resultsContent.textContent;
+        }
+
+        // Use the Clipboard API if available
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(textToCopy);
+            showNotification('Results copied to clipboard!', 'success');
+        }
+        // Fallback for older browsers
+        else {
+            // Create a temporary textarea element
+            const textarea = document.createElement('textarea');
+            textarea.value = textToCopy;
+            textarea.style.position = 'fixed';  // Avoid scrolling to bottom
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                // Execute the copy command
+                const success = document.execCommand('copy');
+                if (success) {
+                    showNotification('Results copied to clipboard!', 'success');
+                } else {
+                    showError('Failed to copy results to clipboard');
+                }
+            } catch (err) {
+                showError('Failed to copy results: ' + err.message);
+            } finally {
+                // Remove the temporary textarea
+                document.body.removeChild(textarea);
+            }
+        }
+    } catch (error) {
+        showError('Failed to copy results: ' + error.message);
+    }
+}
+
+/**
  * Apply syntax highlighting using highlight.js
  *
  * This function applies syntax highlighting to all code blocks on the page
