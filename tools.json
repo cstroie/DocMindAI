@@ -487,6 +487,7 @@
           "- **Proceduri Efectuate:** [Listă]",
           "- **Răspuns la Tratament:** [Descriere]",
           "- **Complicații:** [Listă dacă există]",
+          "- **Proceduri Chirurgicale:** [Listă dacă există]",
           "",
           "### Investigații",
           "- **Teste de Laborator:** [Listă]",
