@@ -78,6 +78,9 @@ body {
 .sidebar-header {
     padding: 1.5rem;
     border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .logo {
@@ -311,6 +314,12 @@ body {
     border-radius: var(--radius-sm);
     cursor: pointer;
     color: var(--text-secondary);
+    transition: var(--transition);
+}
+
+.theme-toggle:hover {
+    background-color: rgba(37, 99, 235, 0.1);
+    color: var(--primary-color);
 }
 
 .theme-icon {
