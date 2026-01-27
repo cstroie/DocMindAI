@@ -393,9 +393,11 @@ function createCategoriesViews(categories) {
         categoryButton.className = 'nav-item';
         categoryButton.dataset.view = 'tools-' + categoryId;
         categoryButton.innerHTML = `
-            <span class="nav-icon">${categoryData.icon || '📄'}</span>
-            <span class="nav-text">${categoryData.name}</span>
-            <span class="nav-arrow">▼</span>
+            <div class="nav-main-content">
+                <span class="nav-icon">${categoryData.icon || '📄'}</span>
+                <span class="nav-text">${categoryData.name}</span>
+                <span class="nav-arrow">▼</span>
+            </div>
             <div class="nav-submenu"></div>
         `;
 
