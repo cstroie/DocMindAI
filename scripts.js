@@ -395,7 +395,24 @@ function createCategoriesViews(categories) {
         categoryButton.innerHTML = `
             <span class="nav-icon">${categoryData.icon || '📄'}</span>
             <span class="nav-text">${categoryData.name}</span>
+            <span class="nav-arrow">▼</span>
+            <div class="nav-submenu"></div>
         `;
+
+        // Add tools as submenu items
+        const submenu = categoryButton.querySelector('.nav-submenu');
+        for (const [toolId, toolData] of Object.entries(toolsData)) {
+            if (toolData.category === categoryId) {
+                const toolButton = document.createElement('button');
+                toolButton.className = 'sub-nav-item';
+                toolButton.dataset.toolId = toolId;
+                toolButton.innerHTML = `
+                    <span class="sub-nav-icon">${toolData.icon || '📄'}</span>
+                    <span class="sub-nav-text">${toolData.name}</span>
+                `;
+                submenu.appendChild(toolButton);
+            }
+        }
 
         // Insert category button after the home button
         if (homeButton && homeButton.nextSibling) {
@@ -1732,6 +1749,27 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (viewName) {
                 switchView(viewName);
                 // Close sidebar on mobile after selecting a view
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar && window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                    const menuToggle = document.getElementById('menuToggle');
+                    if (menuToggle) {
+                        menuToggle.innerHTML = '☰';
+                    }
+                }
+            }
+        });
+    });
+
+    // Handle tool selection from submenus
+    const subNavButtons = document.querySelectorAll('.sub-nav-item');
+    subNavButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const toolId = this.dataset.toolId;
+            if (toolId) {
+                displayToolForm(toolId);
+                // Close sidebar on mobile after selecting a tool
                 const sidebar = document.querySelector('.sidebar');
                 if (sidebar && window.innerWidth <= 768) {
                     sidebar.classList.remove('active');
