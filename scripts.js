@@ -1277,6 +1277,9 @@ function displayResults(results) {
 
     // Scroll to results
     resultsArea.scrollIntoView({ behavior: 'smooth' });
+
+    // Save result to history
+    saveResultToHistory(results);
 }
 
 /**
@@ -1619,6 +1622,7 @@ function switchView(viewName) {
     }
     else {
         console.error(`View not found: ${viewName}`);
+        return;
     }
 
     // Update active state of navigation buttons
@@ -1643,6 +1647,8 @@ function switchView(viewName) {
             case 'history':
                 pageTitle.textContent = '🕒 History';
                 pageSubtitle.textContent = 'View your previous analysis sessions and results';
+                // Load and display history when switching to history view
+                displayHistory();
                 break;
             case 'settings':
                 pageTitle.textContent = '⚙️ Settings';
@@ -1681,6 +1687,211 @@ function saveCookie(name, value, days = 30, path = '/') {
 
     // Create and save the cookie
     document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expirationDate.toUTCString()}; path=${path}`;
+}
+
+/**
+ * Save result to localStorage
+ *
+ * This function saves a result to localStorage with a timestamp.
+ * It maintains a maximum of 10 results, removing the oldest ones if necessary.
+ *
+ * @param {Object} result - The result object to save
+ * @return {void}
+ *
+ * @note Uses localStorage to persist results between sessions
+ * @note Stores results as JSON strings
+ * @note Maintains a maximum of 10 results
+ * @note Each result is stored with a timestamp for sorting
+ * @see displayResults() - Calls this function after displaying results
+ */
+function saveResultToHistory(result) {
+    try {
+        // Get existing results from localStorage
+        const existingResults = JSON.parse(localStorage.getItem('docmind-results')) || [];
+
+        // Create result object with timestamp
+        const resultToSave = {
+            id: Date.now().toString(),
+            timestamp: Date.now(),
+            title: result.tool ? toolsData[result.tool]?.name || 'Analysis Result' : 'Analysis Result',
+            tool: result.tool || '',
+            content: result
+        };
+
+        // Add new result to the beginning of the array
+        existingResults.unshift(resultToSave);
+
+        // Keep only the 10 most recent results
+        if (existingResults.length > 10) {
+            existingResults.length = 10;
+        }
+
+        // Save back to localStorage
+        localStorage.setItem('docmind-results', JSON.stringify(existingResults));
+    } catch (error) {
+        console.error('Failed to save result to history:', error);
+    }
+}
+
+/**
+ * Load results from localStorage
+ *
+ * This function loads saved results from localStorage and returns them.
+ *
+ * @return {Array} Array of saved results, sorted by timestamp (newest first)
+ *
+ * @note Returns empty array if no results are found or on error
+ * @note Sorts results by timestamp (newest first)
+ * @see displayHistory() - Uses this function to show history
+ */
+function loadResultsFromHistory() {
+    try {
+        const results = JSON.parse(localStorage.getItem('docmind-results')) || [];
+        // Sort by timestamp (newest first)
+        return results.sort((a, b) => b.timestamp - a.timestamp);
+    } catch (error) {
+        console.error('Failed to load results from history:', error);
+        return [];
+    }
+}
+
+/**
+ * Display a specific result from history
+ *
+ * This function loads and displays a specific result from the history.
+ *
+ * @param {string} resultId - The ID of the result to display
+ * @return {void}
+ *
+ * @note Finds the result by ID in localStorage
+ * @note Displays the result using the displayResults function
+ * @note Shows error if result is not found
+ * @see displayHistory() - Calls this function when a history item is clicked
+ */
+function displayHistoryResult(resultId) {
+    try {
+        const results = loadResultsFromHistory();
+        const result = results.find(r => r.id === resultId);
+
+        if (result) {
+            // Display the saved content
+            displayResults(result.content);
+            // Switch to results view
+            switchView('results');
+        } else {
+            showError('Result not found in history');
+        }
+    } catch (error) {
+        showError('Failed to load result from history: ' + error.message);
+    }
+}
+
+/**
+ * Clear all saved results from history
+ *
+ * This function removes all saved results from localStorage and refreshes the history view.
+ *
+ * @return {void}
+ *
+ * @note Shows a confirmation dialog before clearing
+ * @note Removes the 'docmind-results' item from localStorage
+ * @note Refreshes the history view to show empty state
+ * @see displayHistory() - Called after clearing to refresh the view
+ */
+function clearHistory() {
+    if (confirm('Are you sure you want to clear all history? This cannot be undone.')) {
+        try {
+            localStorage.removeItem('docmind-results');
+            // Refresh the history view
+            displayHistory();
+            showNotification('History cleared successfully', 'success');
+        } catch (error) {
+            showError('Failed to clear history: ' + error.message);
+        }
+    }
+}
+
+/**
+ * Display history of saved results
+ *
+ * This function populates the history view with saved results from localStorage.
+ * It creates clickable history items that allow users to view previous results.
+ *
+ * @return {void}
+ *
+ * @note Loads results from localStorage using loadResultsFromHistory()
+ * @note Creates history items with timestamps and tool names
+ * @note Sets up click handlers to display specific results
+ * @note Shows a message if no history is available
+ * @see switchView() - Calls this function when history view is selected
+ */
+function displayHistory() {
+    const historyList = document.querySelector('.history-list');
+    if (!historyList) {
+        console.error('History list element not found');
+        return;
+    }
+
+    // Clear existing history items
+    historyList.innerHTML = '';
+
+    // Load results from history
+    const results = loadResultsFromHistory();
+
+    if (results.length === 0) {
+        // Show empty state using template
+        const emptyTemplate = document.getElementById('historyEmptyTemplate');
+        if (emptyTemplate) {
+            const emptyState = emptyTemplate.content.cloneNode(true);
+            historyList.appendChild(emptyState);
+        } else {
+            // Fallback if template not found
+            const emptyState = document.createElement('div');
+            emptyState.className = 'history-empty-state';
+            emptyState.innerHTML = `
+                <div class="empty-state-icon">📄</div>
+                <h3 class="empty-state-title">No history yet</h3>
+                <p class="empty-state-description">Your analysis history will appear here</p>
+            `;
+            historyList.appendChild(emptyState);
+        }
+        return;
+    }
+
+    // Create history items
+    results.forEach(result => {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.dataset.resultId = result.id;
+
+        // Format date
+        const date = new Date(result.timestamp);
+        const formattedDate = date.toLocaleString();
+
+        historyItem.innerHTML = `
+            <div class="history-icon">📄</div>
+            <div class="history-info">
+                <h3 class="history-title">${result.title}</h3>
+                <p class="history-date">${formattedDate}</p>
+                ${result.tool ? `<p class="history-tool">Tool: ${result.tool}</p>` : ''}
+            </div>
+            <button class="btn btn-small history-view-btn">View</button>
+        `;
+
+        // Add click handler to view button
+        const viewButton = historyItem.querySelector('.history-view-btn');
+        viewButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            displayHistoryResult(result.id);
+        });
+
+        // Add click handler to entire item
+        historyItem.addEventListener('click', () => {
+            displayHistoryResult(result.id);
+        });
+
+        historyList.appendChild(historyItem);
+    });
 }
 
 /**
@@ -1738,6 +1949,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('menuToggle')?.addEventListener('click', toggleMenu);
     // Set up copy results button
     document.getElementById('copyResultsBtn')?.addEventListener('click', copyResultsToClipboard);
+    // Set up clear history button (only if it exists)
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    if (clearHistoryBtn) {
+        clearHistoryBtn.addEventListener('click', clearHistory);
+    }
     // Set up view switching for sidebar navigation
     const navButtons = document.querySelectorAll('.nav-item');
     navButtons.forEach(button => {
