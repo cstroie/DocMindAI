@@ -980,9 +980,7 @@ body {
 }
 
 label {
-    display: block;
     font-weight: 600;
-    margin-bottom: 0.5rem;
     color: var(--text-primary);
     font-size: 0.875rem;
 }
@@ -1089,10 +1087,9 @@ input:focus, select:focus {
     gap: 0.5rem;
 }
 
-small {
+.form-field small {
     font-size: 0.75rem;
     color: var(--text-secondary);
-    margin-top: 0.25rem;
     display: block;
 }
 
