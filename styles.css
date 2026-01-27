@@ -639,10 +639,10 @@ body {
 }
 
 .results-content {
-    background: var(--light-bg);
+    /*background: var(--light-bg);
     border-radius: var(--radius-md);
     padding: 1.5rem;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-color);*/
     font-size: 0.875rem;
     line-height: 1.6;
     overflow-x: auto;
@@ -1451,10 +1451,12 @@ input:focus, select:focus {
     border-color: #334155;
 }
 
+/*
 [data-theme="dark"] .results-content {
     background-color: #0f172a;
     border-color: #334155;
 }
+*/
 
 [data-theme="dark"] .history-item {
     background-color: #1e293b;

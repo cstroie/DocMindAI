@@ -39,8 +39,7 @@
         ],
         "radiology_report": "{text}"
       },
-      "output": "json",
-      "display": "markdown",
+      "display": "html",
       "form": {
         "title": "Radiology Report Analysis",
         "description": "Review the extracted medical information from the radiology report. The AI has analyzed the report and provided structured data including pathological status, severity, summary, and specific diagnoses.",
@@ -79,7 +78,7 @@
       "prompt": {
         "role": "You are a data extraction API.",
         "task": "Extract structured data from the following. If a file is provided, extract data from the file content as well.",
-        "output_format": "{output_format}",
+        "output_format": "{output}",
         "text": "{text}"
       },
       "form": {
@@ -103,7 +102,7 @@
             "required": false
           },
           {
-            "name": "output_format",
+            "name": "output",
             "type": "select",
             "label": "Output Format",
             "help": "Select the output format for the extracted data.",
@@ -265,11 +264,6 @@
             "required": false
           },
           {
-            "name": "output_format",
-            "type": "hidden",
-            "value": "html"
-          },
-          {
             "name": "model",
             "type": "select",
             "label": "AI Model",
@@ -330,7 +324,6 @@
         ],
         "discharge_paper": "{text}"
       },
-      "output": "json",
       "display": "html",
       "form": {
         "title": "Discharge Paper Analysis",

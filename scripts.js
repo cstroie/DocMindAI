@@ -1214,7 +1214,7 @@ function displayResults(results) {
     console.log('Code fence info:\n', resultsInfo);
 
     // Check the desired display format from tool
-    const displayFormat = tool && tool.display ? tool.display.toLowerCase() : 'html';
+    const displayFormat = tool && tool.display ? tool.display.toLowerCase() : resultsInfo.type;
     console.log('Display format requested: ', displayFormat);
 
     // Check if the response need conversion based on resultsInfo format and display format
