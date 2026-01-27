@@ -1629,6 +1629,30 @@ function switchView(viewName) {
             button.classList.add('active');
         }
     });
+
+    // Update page title and subtitle based on view
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
+
+    if (pageTitle && pageSubtitle) {
+        switch (viewName) {
+            case 'home':
+                pageTitle.textContent = '🏠 Home';
+                pageSubtitle.textContent = 'Welcome to DocMind AI - Intelligent Document Processing';
+                break;
+            case 'history':
+                pageTitle.textContent = '🕒 History';
+                pageSubtitle.textContent = 'View your previous analysis sessions and results';
+                break;
+            case 'settings':
+                pageTitle.textContent = '⚙️ Settings';
+                pageSubtitle.textContent = 'Configure your preferences and account settings';
+                break;
+            default:
+                // Don't change title for other views (tools, form, results)
+                break;
+        }
+    }
 }
 
 /**
