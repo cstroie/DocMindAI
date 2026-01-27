@@ -706,6 +706,9 @@ function createFormField(field, cookies = {}) {
         label.textContent = field.label || field.name;
         label.htmlFor = field.name;
         container.appendChild(label);
+    } else {
+        // For hidden fields add hidden-field class
+        container.className = 'hidden-field';
     }
 
     let input;

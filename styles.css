@@ -512,10 +512,20 @@ body {
     gap: 0.5rem;
 }
 
-.form-label {
+.hidden-field {
+    display: none !important;
+}
+
+.form-field label {
     font-weight: 600;
     color: var(--text-primary);
     font-size: 0.875rem;
+}
+
+.form-field small {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: block;
 }
 
 .form-control-container {
@@ -1090,12 +1100,6 @@ input:focus, select:focus {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-.form-field small {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    display: block;
 }
 
 .preprocessed-image-container {
