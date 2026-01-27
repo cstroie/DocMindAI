@@ -1160,7 +1160,7 @@ async function handleFormSubmit(event) {
  * @see applySyntaxHighlighting() - Called to highlight code blocks
  * @see showError() - Called if no valid response content is found
  */
-function displayResults(results) {
+function displayResults(results, fromHistory = false) {
     // Get results area and title elements
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
@@ -1278,8 +1278,10 @@ function displayResults(results) {
     // Scroll to results
     resultsArea.scrollIntoView({ behavior: 'smooth' });
 
-    // Save result to history
-    saveResultToHistory(results);
+    // Save result to history only if it's not from history
+    if (!fromHistory) {
+        saveResultToHistory(results);
+    }
 }
 
 /**
@@ -1774,8 +1776,8 @@ function displayHistoryResult(resultId) {
         const result = results.find(r => r.id === resultId);
 
         if (result) {
-            // Display the saved content
-            displayResults(result.content);
+            // Display the saved content with fromHistory flag
+            displayResults(result.content, true);
             // Switch to results view
             switchView('results');
         } else {
