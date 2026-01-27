@@ -519,7 +519,9 @@
           "Highlight any follow-up requirements",
           "Use markdown formatting for clarity",
           "Include the language instruction at the beginning of the output",
-          "Respond ONLY with the MARKDOWN, without additional text"
+          "Respond ONLY with the MARKDOWN, without additional text",
+          "If extracted data is missing information, remove that list item from the output",
+          "If a section contains only empty list items, remove the entire section"
         ],
         "discharge_paper": "{text}"
       },
