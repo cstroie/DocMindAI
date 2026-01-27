@@ -267,6 +267,9 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
         text: text
     };
 
+    // TODO Strip the text of leading/trailing whitespace
+    text = text.trim();
+
     // Regular expression to match markdown code fences
     const fenceRegex = /^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s;
     const matches = text.match(fenceRegex);
@@ -690,6 +693,7 @@ function createFormField(field, cookies = {}) {
     // Create label if not hidden field
     if (field.type !== 'hidden') {
         const label = document.createElement('label');
+        label.className = 'form-label';
         label.textContent = field.label || field.name;
         label.htmlFor = field.name;
         container.appendChild(label);
