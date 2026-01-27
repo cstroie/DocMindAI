@@ -142,7 +142,6 @@ body {
     padding-left: 1rem;
 }
 
-.nav-item:hover .nav-submenu,
 .nav-item.active .nav-submenu {
     display: flex;
 }
