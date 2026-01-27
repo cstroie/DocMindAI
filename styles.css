@@ -1003,7 +1003,8 @@ textarea:focus {
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
-input, select {
+input:not([type="hidden"]),
+select {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid var(--border-color);
@@ -1013,6 +1014,10 @@ input, select {
     background: white;
     cursor: pointer;
     transition: var(--transition);
+}
+
+input[type="hidden"] {
+    display: none !important;
 }
 
 input:focus, select:focus {
