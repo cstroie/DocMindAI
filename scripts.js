@@ -1746,7 +1746,24 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Set up view switching for sidebar navigation
     const navButtons = document.querySelectorAll('.nav-item');
     navButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+            // Check if this is a category button with submenu
+            const submenu = this.querySelector('.nav-submenu');
+            if (submenu && submenu.children.length > 0) {
+                e.stopPropagation();
+                // Toggle the active state for this button only
+                this.classList.toggle('active');
+
+                // Close other open submenus
+                navButtons.forEach(otherButton => {
+                    if (otherButton !== this && otherButton.classList.contains('active')) {
+                        otherButton.classList.remove('active');
+                    }
+                });
+                return;
+            }
+
+            // If no submenu or submenu is empty, proceed with view switching
             const viewName = this.dataset.view;
             if (viewName) {
                 switchView(viewName);
@@ -1771,6 +1788,13 @@ document.addEventListener('DOMContentLoaded', async function() {
             const toolId = this.dataset.toolId;
             if (toolId) {
                 displayToolForm(toolId);
+
+                // Close the parent submenu
+                const parentNavItem = this.closest('.nav-item');
+                if (parentNavItem) {
+                    parentNavItem.classList.remove('active');
+                }
+
                 // Close sidebar on mobile after selecting a tool
                 const sidebar = document.querySelector('.sidebar');
                 if (sidebar && window.innerWidth <= 768) {
