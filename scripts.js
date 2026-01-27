@@ -628,7 +628,16 @@ function displayToolForm(toolId) {
     if (tool.form && tool.form.fields) {
         tool.form.fields.forEach(field => {
             const fieldElement = createFormField(field, cookies);
-            formFields.appendChild(fieldElement);
+            if (fieldElement) {
+                formFields.appendChild(fieldElement);
+            } else if (field.type === 'hidden') {
+                // Create and append hidden input directly to the form
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = field.name;
+                hiddenInput.value = field.value || '';
+                toolForm.appendChild(hiddenInput);
+            }
         });
     }
 
