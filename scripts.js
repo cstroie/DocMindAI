@@ -623,10 +623,10 @@ function displayToolForm(toolId) {
     }
 
     // Update form title and description
-    const formTitle = document.getElementById('formTitle');
-    const formDescription = document.getElementById('formDescription');
-    if (formTitle) formTitle.textContent = tool.icon + ' ' + tool.name;
-    if (formDescription) formDescription.textContent = tool.description || '';
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
+    if (pageTitle) pageTitle.textContent = tool.icon + ' ' + tool.name;
+    if (pageSubtitle) pageSubtitle.textContent = tool.description || '';
 
     // Populate the form fields
     const toolForm = document.getElementById('toolForm');
@@ -1164,8 +1164,8 @@ function displayResults(results) {
     // Get results area and title elements
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
-    const resultsTitle = document.getElementById('resultsTitle');
-    const resultsDescription = document.getElementById('resultsDescription');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
 
     // Extract the actual response content from the API response
     let responseContent = '';
@@ -1197,16 +1197,16 @@ function displayResults(results) {
     const toolId = results.tool || '';
     const tool = toolsData[toolId] || null;
 
-    // Update results title and description if tool has form.title and form.description
+    // Update page title and subtitle if tool has form.title and form.description
     if (tool && tool.form && tool.form.title) {
-        resultsTitle.textContent = tool.form.title;
+        pageTitle.textContent = tool.form.title;
     } else {
-        resultsTitle.textContent = '📝 Results';
+        pageTitle.textContent = '📝 Results';
     }
     if (tool && tool.form && tool.form.description) {
-        resultsDescription.textContent = tool.form.description;
+        pageSubtitle.textContent = tool.form.description;
     } else {
-        resultsDescription.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
+        pageSubtitle.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
     }
 
     // Check if the result contains markdown code fences
@@ -1595,7 +1595,7 @@ function arrayOfObjectsToTable(arr) {
  * This function handles view switching by hiding all views and showing
  * the selected view. It also updates the active state of navigation buttons.
  *
- * @param {string} viewName - The name of the view to show (e.g., 'home', 'tools', 'history', 'settings')
+ * @param {string} viewName - The name of the view to show (e.g., 'home', 'tools', 'history')
  * @return {void}
  *
  * @note Hides all views and shows only the selected one
@@ -1629,35 +1629,6 @@ function switchView(viewName) {
             button.classList.add('active');
         }
     });
-
-    // Update page title
-    // TODO: Improve title handling for dynamic category views
-    const pageTitle = document.getElementById('pageTitle');
-    if (pageTitle) {
-        if (viewName.startsWith('tools-')) {
-            // For category views, get the category name from categoriesData
-            const categoryId = viewName.replace('tools-', '');
-            const categoryInfo = categoriesData && categoriesData[categoryId] ? categoriesData[categoryId] : null;
-            pageTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : categoryId) + ' Tools';
-        } else {
-            switch (viewName) {
-                case 'home':
-                    pageTitle.textContent = 'Welcome to DocMind AI';
-                    break;
-                case 'tools':
-                    pageTitle.textContent = 'AI Tools';
-                    break;
-                case 'history':
-                    pageTitle.textContent = 'Analysis History';
-                    break;
-                case 'settings':
-                    pageTitle.textContent = 'Application Settings';
-                    break;
-                default:
-                    pageTitle.textContent = 'DocMind AI';
-            }
-        }
-    }
 }
 
 /**

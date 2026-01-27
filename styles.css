@@ -239,8 +239,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 1.5rem;
+    /*border-bottom: 1px solid var(--border-color);*/
+    /*margin-bottom: 1.5rem;*/
 }
 
 .top-bar-left {
@@ -881,69 +881,6 @@ body {
     color: var(--text-secondary);
 }
 
-.settings-container {
-    background: white;
-    padding: 2rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-}
-
-.settings-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 1.5rem;
-}
-
-.settings-sections {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-
-.settings-section {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.section-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.5rem;
-}
-
-.setting-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.setting-label {
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.875rem;
-}
-
-.setting-select {
-    padding: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    font-size: 0.9rem;
-    background: white;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.setting-select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-}
-
 .notification-container {
     position: fixed;
     top: 1rem;
@@ -1496,7 +1433,6 @@ input:focus, select:focus {
 [data-theme="dark"] .form-container,
 [data-theme="dark"] .results-container,
 [data-theme="dark"] .history-container,
-[data-theme="dark"] .settings-container,
 [data-theme="dark"] .chat-container {
     background-color: #1e293b;
     border-color: #334155;

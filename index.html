@@ -38,12 +38,6 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                         <span class="nav-text">History</span>
                     </div>
                 </button>
-                <button class="nav-item" data-view="settings">
-                    <div class="nav-item-content">
-                        <span class="nav-icon">⚙️</span>
-                        <span class="nav-text">Settings</span>
-                    </div>
-                </button>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-profile">
@@ -64,13 +58,12 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                     <button class="menu-toggle" id="menuToggle">
                         <span class="menu-icon">☰</span>
                     </button>
-                    <h1 class="page-title" id="pageTitle">Welcome to DocMind AI</h1>
+                    <hgroup>
+                        <h1 class="page-title" id="pageTitle">Welcome to DocMind AI</h1>
+                        <p class="page-subtitle" id="pageSubtitle">Intelligent Document Processing</p>
+                    </hgroup>
                 </div>
                 <div class="top-bar-right">
-                    <div class="search-container">
-                        <input type="text" placeholder="Search..." class="search-input">
-                        <button class="search-button">🔍</button>
-                    </div>
                     <button class="theme-toggle" id="themeToggle">
                         <span class="theme-icon" id="themeIcon">🌙</span>
                     </button>
@@ -125,10 +118,6 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                 <!-- Results View -->
                 <section class="view results-view" style="display: none;">
                     <div class="results-container" id="resultsArea">
-                        <header class="results-header">
-                            <h2 class="results-title" id="resultsTitle">📊 Analysis Results</h2>
-                            <p class="results-subtitle" id="resultsDescription">Review the processed results below</p>
-                        </header>
                         <main class="results-content" id="resultsContent">
                             <!-- Results will be displayed here -->
                         </main>
@@ -142,10 +131,6 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                 <!-- Form View -->
                 <section class="view form-view" style="display: none;">
                     <div class="form-container" id="toolForm">
-                        <hgroup class="form-header">
-                            <h2 class="form-title" id="formTitle">Tool Configuration</h2>
-                            <p class="form-description" id="formDescription">Configure the tool parameters</p>
-                        </hgroup>
                         <form id="apiForm" class="tool-form">
                             <input type="hidden" name="tool" id="toolId">
                             <div class="form-fields" id="formFields">
@@ -178,43 +163,6 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                                     <p class="history-date">January 22, 2026</p>
                                 </div>
                                 <button class="btn btn-small">View</button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Settings View -->
-                <section class="view settings-view">
-                    <div class="settings-container">
-                        <h2 class="settings-title">Application Settings</h2>
-                        <div class="settings-sections">
-                            <div class="settings-section">
-                                <h3 class="section-title">General Settings</h3>
-                                <div class="setting-item">
-                                    <label class="setting-label">Theme</label>
-                                    <select class="setting-select">
-                                        <option value="system">System Default</option>
-                                        <option value="light">Light</option>
-                                        <option value="dark">Dark</option>
-                                    </select>
-                                </div>
-                                <div class="setting-item">
-                                    <label class="setting-label">Language</label>
-                                    <select class="setting-select">
-                                        <option value="en">English</option>
-                                        <option value="es">Español</option>
-                                        <option value="fr">Français</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="settings-section">
-                                <h3 class="section-title">API Settings</h3>
-                                <div class="setting-item">
-                                    <label class="setting-label">Default Model</label>
-                                    <select class="setting-select" id="defaultModelSelect">
-                                        <option value="">Select a model</option>
-                                    </select>
-                                </div>
                             </div>
                         </div>
                     </div>
