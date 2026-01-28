@@ -1304,22 +1304,6 @@ function displayResults(results, fromHistory = false) {
         console.error('Results content is empty');
     }
 
-    // Apply Handlebars template if tool has a template and display format is html
-    if (displayFormat === 'html' && tool && tool.template && typeof Handlebars !== 'undefined') {
-        try {
-            const template = Handlebars.compile(tool.template);
-            const html = template(resultsInfo.type === 'json' ? JSON.parse(resultsInfo.text) : results);
-            resultsContent.innerHTML = html;
-        } catch (error) {
-            console.error('Handlebars template error:', error);
-            // Fallback to existing display method
-            const markdownContent = resultsInfo.type === 'json' ? 
-                jsonToMarkdown(JSON.parse(resultsInfo.text)) : 
-                resultsInfo.text;
-            resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
-        }
-    }
-
     // Scroll to results
     resultsArea.scrollIntoView({ behavior: 'smooth' });
 
