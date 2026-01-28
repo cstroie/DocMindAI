@@ -1242,17 +1242,28 @@ function displayResults(results, fromHistory = false) {
             const jsonData = JSON.parse(resultsInfo.text);
             console.log('Parsed JSON data:\n', jsonData);
 
-            // JSON can be converted to markdown, html, or displayed as JSON (with syntax highlighting)
-            if (displayFormat === 'markdown') {
+            // HTML display format with Handlebars template
+            if (displayFormat === 'html') {
+                if (tool && tool.template && typeof Handlebars !== 'undefined') {
+                    try {
+                        const template = Handlebars.compile(tool.template);
+                        resultsContent.innerHTML = template(jsonData);
+                    } catch (error) {
+                        console.error('Handlebars template error:', error);
+                        // Fallback to markdown rendering
+                        const markdownContent = jsonToMarkdown(jsonData);
+                        resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
+                    }
+                } else {
+                    // Convert JSON to HTML via markdown
+                    const markdownContent = jsonToMarkdown(jsonData);
+                    resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
+                }
+            } else if (displayFormat === 'markdown') {
                 // Convert JSON to markdown
                 const markdownContent = jsonToMarkdown(jsonData);
                 console.log('JSON to Markdown conversion:\n', markdownContent);
                 resultsContent.innerHTML = `<pre><code class="${displayFormat}">${markdownContent}</code></pre>`;
-            } else if (displayFormat === 'html') {
-                // Convert JSON to HTML via markdown
-                const markdownContent = jsonToMarkdown(jsonData);
-                console.log('JSON to Markdown conversion for HTML:\n', markdownContent);
-                resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
             } else {
                 // Convert JSON to pretty JSON string
                 const prettyJson = JSON.stringify(jsonData, null, 2);
