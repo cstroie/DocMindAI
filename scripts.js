@@ -5,6 +5,24 @@ let toolsData = null;
 let languagesData = null;
 let promptsData = null;
 
+// Register Handlebars helpers
+if (typeof Handlebars !== 'undefined') {
+    Handlebars.registerHelper('eq', (a, b) => a === b);
+    Handlebars.registerHelper('getSeverityColor', severity => {
+        if (severity == 0) return '#10b981';
+        if (severity <= 3) return '#3b82f6';
+        if (severity <= 6) return '#f59e0b';
+        return '#ef4444';
+    });
+    Handlebars.registerHelper('getSeverityLabel', severity => {
+        if (severity == 0) return 'Normal';
+        if (severity <= 3) return 'Minor';
+        if (severity <= 6) return 'Moderate';
+        if (severity <= 8) return 'Severe';
+        return 'Critic';
+    });
+}
+
 /**
  * Toggle between light and dark themes
  *
@@ -1273,6 +1291,22 @@ function displayResults(results, fromHistory = false) {
         applySyntaxHighlighting();
     } else {
         console.error('Results content is empty');
+    }
+
+    // Apply Handlebars template if tool has a template and display format is html
+    if (displayFormat === 'html' && tool && tool.template && typeof Handlebars !== 'undefined') {
+        try {
+            const template = Handlebars.compile(tool.template);
+            const html = template(resultsInfo.type === 'json' ? JSON.parse(resultsInfo.text) : results);
+            resultsContent.innerHTML = html;
+        } catch (error) {
+            console.error('Handlebars template error:', error);
+            // Fallback to existing display method
+            const markdownContent = resultsInfo.type === 'json' ? 
+                jsonToMarkdown(JSON.parse(resultsInfo.text)) : 
+                resultsInfo.text;
+            resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
+        }
     }
 
     // Scroll to results
