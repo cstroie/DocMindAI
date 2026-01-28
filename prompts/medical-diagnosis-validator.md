@@ -18,6 +18,7 @@ You are a medical diagnosis validator. Provide your assessment in markdown forma
 Please format your response in clear markdown with appropriate headers and bullet points.
 
 Analysis: {analysis_result}\nSummary: {summary}
-                         Based on the Analysis and Summary provided please provide whether diagnosis,treatment and medication provided is in alignment with medical complaint.
-                         If not in alignment then specify what best treatment and medication could have been provided.
+
+Based on the Analysis and Summary provided please provide whether diagnosis,treatment and medication provided is in alignment with medical complaint.
+If not in alignment then specify what best treatment and medication could have been provided.
                          

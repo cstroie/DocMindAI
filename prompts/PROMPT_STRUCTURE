@@ -1,0 +1,51 @@
+# Prompt structure
+
+1. CONTEXT / BACKGROUND
+   - General information about the domain
+   - Relevant context for the task
+
+2. ROLE / PERSONA
+   - Definition of the role the LLM will take
+   - Assumed expertise and competencies
+   - Perspective from which to respond
+
+3. TASK / OBJECTIVE
+   - Exactly what needs to be done
+   - Expected output
+   - Final purpose
+
+4. INSTRUCTIONS / STEPS
+   - Specific steps to follow
+   - Processing logic
+   - Recommended work order
+   - Important details
+
+5. CONSTRAINTS / RULES
+   - Limitations and restrictions
+   - What NOT to do
+   - Standards and norms to respect
+
+6. OUTPUT_FORMAT / STRUCTURE
+   - Exactly how the result should be formatted
+   - Response template
+   - Data schema or structure
+
+7. EXAMPLES (optional but recommended)
+   - Input examples with corresponding output
+   - Few-shot examples for clarity
+   - Concrete use cases
+
+8. QUALITY_CHECKS / VALIDATION
+   - Validation criteria
+   - What to check before responding
+   - Quality checklists
+
+9. ADDITIONAL_NOTES (optional)
+   - Special instructions
+   - Edge cases
+   - Important nuances
+
+10. INPUT / DATA (AT THE END)
+    - Data to work with
+    - Input format
+    - Placeholders for dynamic data
