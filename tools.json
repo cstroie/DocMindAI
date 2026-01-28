@@ -8,14 +8,14 @@
     "schema_version": "1.0"
   },
   "tools": {
-    "rra": {
-      "id": "rra",
-      "name": "Radiology Report Analyzer",
+    "rrs": {
+      "id": "rrs",
+      "name": "Radiology Report Summarizer",
       "description": "Analyze radiology reports and extract key medical information",
       "category": "medical",
       "icon": "🔍",
       "prompt": {
-        "role": "You are a medical exper analyzing radiology reports.",
+        "role": "You are a medical expert analyzing radiology reports.",
         "task": "Read the report and extract the main pathological information in JSON format.",
         "critical_instruction": "{language_instruction}",
         "output_format": [
@@ -41,8 +41,8 @@
       },
       "display": "html",
       "form": {
-        "title": "Radiology Report Analysis",
-        "description": "Review the extracted medical information from the radiology report. The AI has analyzed the report and provided structured data including pathological status, severity, summary, and specific diagnoses.",
+        "title": "Radiology Report Summary",
+        "description": "This is the extracted medical information from the radiology report. The AI has analyzed the report and provided structured data including pathological status, severity, summary, and specific diagnoses.",
         "fields": [
           {
             "name": "text",
@@ -482,44 +482,12 @@
         ]
       }
     },
-    "dpa": {
-      "id": "dpa",
-      "name": "Discharge Paper Analyzer",
+    "dps": {
+      "id": "dps",
+      "name": "Discharge Paper Summarizer",
       "description": "Analyze patient discharge papers to extract radiology-relevant information",
       "category": "medical",
       "icon": "📋",
-      "display": "html",
-      "template": [
-        "<article>",
-        "  <header>",
-        "    <h2>Analysis Result</h2>",
-        "    <div>",
-        "      <span class=\"pathology-badge {{#if (eq pathologic 'yes')}}pathology-yes{{else}}pathology-no{{/if}}\">",
-        "        {{summary}}",
-        "      </span>",
-        "    </div>",
-        "  </header>",
-        "  ",
-        "  <section>",
-        "    <h3>Severity level</h3>",
-        "    <div style=\"display: flex; align-items: center; gap: 16px;\">",
-        "      <span style=\"font-weight: 600; color: {{getSeverityColor severity}}\">",
-        "        {{getSeverityLabel severity}} ({{severity}}/10)",
-        "      </span>",
-        "      <progress class=\"severity-bar\" value=\"{{severity}}\" max=\"10\" data-severity=\"{{severity}}\" style=\"flex: 1;\"></progress>",
-        "    </div>",
-        "  </section>",
-        "  ",
-        "  <footer>",
-        "    <h3>Keywords</h3>",
-        "    <div>",
-        "      {{#each keywords}}",
-        "        <span>{{this}}</span>",
-        "      {{/each}}",
-        "    </div>",
-        "  </footer>",
-        "</article>"
-      ],
       "prompt": {
         "role": "You are a medical assistant analyzing patient discharge papers for radiology relevance.",
         "task": "Read the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation. Do not exceed 50 words.",
@@ -547,8 +515,8 @@
       },
       "display": "html",
       "form": {
-        "title": "Discharge Paper Analysis",
-        "description": "Review the radiology-focused analysis of the discharge paper. The AI has extracted key information including pathological status, severity, summary, and relevant keywords.",
+        "title": "Discharge Paper Summary",
+        "description": "This is the radiology-focused analysis of the discharge paper. The AI has extracted key information including pathological status, severity, summary, and relevant keywords.",
         "fields": [
           {
             "name": "text",
@@ -580,7 +548,31 @@
             "options": []
           }
         ]
-      }
+      },
+      "template": [
+        "<article>",
+        "  <header>",
+        "    <h3>{{summary}}</h3>",
+        "  </header>",
+        "  <section>",
+        "    <h4>Severity level</h4>",
+        "    <div style=\"display: flex; align-items: center; gap: 16px;\">",
+        "      <span style=\"font-weight: 600; color: {{getSeverityColor severity}}\">",
+        "        {{getSeverityLabel severity}} ({{severity}}/10)",
+        "      </span>",
+        "      <progress class=\"severity-bar\" value=\"{{severity}}\" max=\"10\" data-severity=\"{{severity}}\" style=\"flex: 1;\"></progress>",
+        "    </div>",
+        "  </section>",
+        "  <footer>",
+        "    <h4>Keywords</h4>",
+        "    <ul>",
+        "      {{#each keywords}}",
+        "        <li>{{this}}</li>",
+        "      {{/each}}",
+        "    </ul>",
+        "  </footer>",
+        "</article>"
+      ]
     },
     "hda": {
       "id": "hda",
@@ -788,66 +780,35 @@
       "description": "Generate ranked differential diagnoses from radiology reports with supporting evidence",
       "category": "medical",
       "icon": "🩺",
-      "display": "html",
-      "template": [
-        "<article>",
-        "  <header><h2>Differential Diagnoses</h2></header>",
-        "  {{#each diagnoses}}",
-        "  <section class=\"diagnosis-item\">",
-        "    <div class=\"diagnosis-header\">",
-        "      <h3>{{sum @index 1}}. {{condition}}</h3>",
-        "      <span class=\"probability-score\" style=\"color: {{getProbabilityColor probability}};\">",
-        "        {{probability}}%",
-        "      </span>",
-        "    </div>",
-        "    <p>{{description}}</p>",
-        "    <div>",
-        "      <h4>Supporting Radiological Features:</h4>",
-        "      <ul>",
-        "        {{#each supporting_features}}<li>{{this}}</li>{{/each}}",
-        "      </ul>",
-        "    </div>",
-        "    {{#if references}}",
-        "    <div>",
-        "      <h4>References:</h4>",
-        "      <ul>",
-        "        {{#each references}}<li>{{this}}</li>{{/each}}",
-        "      </ul>",
-        "    </div>",
-        "    {{/if}}",
-        "    {{#unless @last}}<hr>{{/unless}}",
-        "  </section>",
-        "  {{/each}}",
-        "</article>"
-      ],
       "prompt": {
         "role": "You are a radiology expert specializing in differential diagnosis.",
         "task": "Your task is to analyze radiology reports and provide a ranked list of differential diagnoses with supporting information.",
         "critical_instruction": "{language_instruction}",
         "output_format": [
           "```json",
-          "{",
-          "  \"first\": {",
+          "[",
+          "  {",
           "    \"condition\": \"medical condition name\",",
           "    \"probability\": 85,",
           "    \"description\": \"detailed explanation of the condition\",",
           "    \"supporting_features\": [\"radiological feature 1\", \"radiological feature 2\", \"clinical correlation\"],",
           "    \"references\": [\"reference 1\", \"reference 2\"]",
           "  },",
-          "  \"second\": {",
+          "  {",
           "    \"condition\": \"medical condition name\",",
           "    \"probability\": 60,",
           "    \"description\": \"detailed explanation of the condition\",",
           "    \"supporting_features\": [\"radiological feature 1\", \"radiological feature 2\", \"clinical correlation\"],",
           "    \"references\": [\"reference 1\", \"reference 2\"]",
           "  },",
-          "  \"third\": {",
+          "  {",
           "    \"condition\": \"medical condition name\",",
           "    \"probability\": 40,",
           "    \"description\": \"detailed explanation of the condition\",",
           "    \"supporting_features\": [\"radiological feature 1\", \"radiological feature 2\", \"clinical correlation\"],",
           "    \"references\": [\"reference 1\", \"reference 2\"]",
           "  }",
+          "]",
           "```"
         ],
         "rules": [
@@ -861,41 +822,12 @@
           "Do not include treatments or management recommendations",
           "Respond ONLY with the JSON, without additional text"
         ],
-        "example": [
-          "Report: \"Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum.\"",
-          "Response:",
-          "```json",
-          "{",
-          "  \"first\": {",
-          "    \"condition\": \"Bacterial Pneumonia\",",
-          "    \"probability\": 75,",
-          "    \"description\": \"Infection of the lung parenchyma causing consolidation. Common pathogens include Streptococcus pneumoniae and Haemophilus influenzae. Presents with fever, cough, and focal consolidation on imaging.\",",
-          "    \"supporting_features\": [\"Hazy opacity in lung field\", \"Consolidation pattern\", \"No pleural effusion\"],",
-          "    \"references\": [\"Harrison's Principles of Internal Medicine, 21st Edition\", \"Radiology Assistant: Pneumonia Patterns\"]",
-          "    },",
-          "  \"second\": {",
-          "      \"condition\": \"Viral Pneumonia\",",
-          "      \"probability\": 60,",
-          "      \"description\": \"Viral infection causing interstitial and alveolar inflammation. Common viruses include influenza, RSV, and COVID-19. May present with similar imaging findings to bacterial pneumonia.\",",
-          "      \"supporting_features\": [\"Hazy infiltrate pattern\", \"Single lobe involvement\", \"Absence of cavitation\"],",
-          "      \"references\": [\"Chest Imaging Patterns in Viral Pneumonia, Radiographics\", \"ATS Guidelines on Community-Acquired Pneumonia\"]",
-          "    },",
-            "  \"third\": {",
-          "      \"condition\": \"Pulmonary Edema\",",
-          "      \"probability\": 40,",
-          "      \"description\": \"Accumulation of fluid in the lung interstitium and alveoli. Can be cardiogenic (heart failure) or non-cardiogenic (ARDS). May present with bilateral hazy opacities.\",",
-          "      \"supporting_features\": [\"Hazy opacity\", \"Single lobe distribution (atypical)\", \"No pleural effusion\"],",
-          "      \"references\": [\"ACR Appropriateness Criteria: Acute Respiratory Illness\", \"Radiology Education: Pulmonary Edema Patterns\"]",
-          "    }",
-          "}",
-          "```"
-        ],
         "radiology_report": "{report}"
       },
       "display": "html",
       "form": {
         "title": "Differential Diagnosis",
-        "description": "Review the ranked differential diagnoses generated from the radiology report. The AI has analyzed the report and provided three potential diagnoses with probabilities, descriptions, supporting features, and references.",
+        "description": "These are the ranked differential diagnoses generated from the radiology report. The AI has analyzed the report and provided three potential diagnoses with probabilities, descriptions, supporting features, and references.",
         "fields": [
           {
             "name": "report",
@@ -920,7 +852,38 @@
             "options": []
           }
         ]
-      }
+      },
+      "template": [
+        "<article>",
+        "  <header><h3>Differential Diagnoses</h3></header>",
+        "  {{#each diagnoses}}",
+        "  <section class=\"diagnosis-item\">",
+        "    <header class=\"diagnosis-header\">",
+        "      <h4>{{sum @index 1}}. {{condition}}</h4>",
+        "      <span class=\"probability-score\" style=\"color: {{getProbabilityColor probability}};\">",
+        "        {{probability}}%",
+        "      </span>",
+        "    </header>",
+        "    <p>{{description}}</p>",
+        "    <div>",
+        "      <h5>Supporting Radiological Features:</h5>",
+        "      <ul>",
+        "        {{#each supporting_features}}<li>{{this}}</li>{{/each}}",
+        "      </ul>",
+        "    </div>",
+        "    {{#if references}}",
+        "    <div>",
+        "      <h5>References:</h5>",
+        "      <ul>",
+        "        {{#each references}}<li>{{this}}</li>{{/each}}",
+        "      </ul>",
+        "    </div>",
+        "    {{/if}}",
+        "    {{#unless @last}}<hr>{{/unless}}",
+        "  </section>",
+        "  {{/each}}",
+        "</article>"
+      ]
     },
     "pre": {
       "id": "pre",
