@@ -16,10 +16,11 @@ if (file_exists('config.php')) {
     include 'config.php';
 }
 
-// Create chat endpoint URL
+// Create chat endpoint URL by appending the chat completions path
 $LLM_API_ENDPOINT_CHAT = $LLM_API_ENDPOINT . '/chat/completions';
 
 // Determine if this is an API request
+// Check for: 1) action parameter in GET/POST, 2) JSON Accept header
 $is_api_request = isset($_GET['action']) || isset($_POST['action']) ||
                  (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
 
@@ -33,39 +34,70 @@ if ($is_api_request) {
 displayWebInterface();
 
 /**
- * Handle API requests
+ * Handle incoming API requests by validating and routing to appropriate handlers
+ *
+ * This function acts as the main API router. It:
+ * 1. Determines the requested action from GET/POST parameters
+ * 2. Validates the action against a whitelist of available actions
+ * 3. Dynamically loads valid actions from tools.json
+ * 4. Routes to the appropriate handler function based on the action
+ *
+ * @return void Terminates script execution after sending response
+ *
+ * @see handleGetModels() - Handles 'get_models' action
+ * @see handleGetPrompts() - Handles 'get_prompts' action
+ * @see handleToolAction() - Handles tool-specific actions
+ * @see sendJsonResponse() - Sends JSON responses
+ * @see loadResourceFromJson() - Loads tool configuration
  */
 function handleApiRequest() {
-    $action = $_REQUEST['action'] ?? 'list_actions';
+    // Extract action from request parameters
+    $action = $_REQUEST['action'] ?? null;
     $method = $_SERVER['REQUEST_METHOD'];
 
-    // Validate action - load valid actions dynamically from profiles.json
-    $valid_actions = ['get_models', 'get_form', 'get_prompts', 'get_profiles'];
+    // Validate action - load valid actions dynamically from tools.json
+    $valid_actions = ['get_models', 'get_form', 'get_prompts', 'get_tools'];
 
-    // Load profiles to get additional valid actions
-    $profiles_data = loadResourceFromJson('profiles.json');
-    if (!isset($profiles_data['error']) && isset($profiles_data['profiles'])) {
-        foreach ($profiles_data['profiles'] as $profile_id => $profile_data) {
-            $valid_actions[] = $profile_id;
+    // Load tools to get additional valid actions
+    // This allows new tools to be added without modifying this code
+    $tools_data = loadResourceFromJson('tools.json');
+    if (!isset($tools_data['error']) && isset($tools_data['tools'])) {
+        foreach ($tools_data['tools'] as $tool_id => $tool_data) {
+            $valid_actions[] = $tool_id;
         }
     }
 
+    // Check if action is specified
+    if ($action === null) {
+        // If no action specified, check for 'tool' parameter
+        $tool_id = $_REQUEST['tool'] ?? null;
+        if ($tool_id && isset($tools_data['tools'][$tool_id])) {
+            $action = $tool_id;
+        } else {
+            sendJsonResponse(['error' => 'No action or tool specified'], true);
+        }
+    }
+
+    // Reject invalid actions with error response
     if (!in_array($action, $valid_actions)) {
         sendJsonResponse(['error' => 'Invalid action'], true);
     }
 
-    // Route to appropriate handler
+    // Route to appropriate handler based on action
     switch ($action) {
         case 'get_models':
+            // Handle request for available AI models
             handleGetModels();
             break;
         case 'get_prompts':
+            // Handle request for available prompts
             handleGetPrompts();
             break;
         default:
-            // Handle profile-specific actions
-            if (in_array($action, array_keys($profiles_data['profiles'] ?? []))) {
-                handleProfileAction($action);
+            // Handle tool-specific actions
+            // Check if action corresponds to a valid tool
+            if (in_array($action, array_keys($tools_data['tools'] ?? []))) {
+                handleToolAction($action);
             } else {
                 sendJsonResponse(['error' => 'Unhandled action'], true);
             }
@@ -74,7 +106,22 @@ function handleApiRequest() {
 }
 
 /**
- * Handle get_models action
+ * Handle the 'get_models' API action - retrieve available AI models
+ * 
+ * This function fetches the list of available AI models from the configured
+ * LLM API endpoint. It uses server-side configuration values and provides
+ * fallback defaults if the API call fails.
+ * 
+ * @global string $LLM_API_ENDPOINT The base API endpoint URL
+ * @global string $LLM_API_KEY The API authentication key
+ * @global string $LLM_API_FILTER Optional regex filter for model names
+ * 
+ * @return void Sends JSON response with models list or error
+ * 
+ * @see getAvailableModels() - Fetches models from API
+ * @see sendJsonResponse() - Sends the final response
+ * 
+ * @note If API call fails, returns default models for fallback functionality
  */
 function handleGetModels() {
     global $LLM_API_ENDPOINT, $LLM_API_KEY, $LLM_API_FILTER;
@@ -89,28 +136,56 @@ function handleGetModels() {
         sendJsonResponse(['error' => 'API endpoint not configured'], true);
     }
 
+    // Fetch available models from the API
     $models = getAvailableModels($api_endpoint, $api_key, $filter);
 
     // Check if models contain an error
     if (isset($models['error'])) {
-        // If API call fails, use default models
+        // If API call fails, use default models as fallback
+        // This ensures the application remains functional even if API is unavailable
         $models = [
             'gemma3:1b' => 'Gemma 3 (1B)',
             'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)'
         ];
     }
 
-    // Sort models alphabetically by key (model name)
+    // Sort models alphabetically by key (model name) for consistent UI display
     ksort($models);
 
+    // Send the models list as JSON response
     sendJsonResponse(['models' => $models], true);
 }
 
 
 /**
- * Handle profile-specific actions
+ * Handle tool-specific API actions - main processing pipeline
+ * 
+ * This function implements the complete processing pipeline for tool-specific actions:
+ * 1. Validates API configuration and tool existence
+ * 2. Processes form data and file uploads (images and documents)
+ * 3. Builds prompts based on tool configuration
+ * 4. Prepares and sends API request to LLM
+ * 5. Processes and returns the response
+ * 
+ * @param string $tool_id The identifier of the tool to process
+ * @global string $LLM_API_ENDPOINT_CHAT The chat completion API endpoint
+ * @global string $LLM_API_KEY The API authentication key
+ * 
+ * @return void Sends JSON response with processed results or errors
+ * 
+ * @see loadResourceFromJson() - Loads tool configuration
+ * @see processUploadedImage() - Handles image uploads
+ * @see extractTextFromDocument() - Extracts text from documents
+ * @see buildToolPrompt() - Constructs the prompt
+ * @see callLLMApi() - Calls the LLM API
+ * @see processToolResponse() - Processes the API response
+ * @see sendJsonResponse() - Sends final response
+ * 
+ * @note Supports both text documents and images
+ * @note Includes debug information in response
+ * @note Sets CORS headers for cross-origin requests
  */
-function handleProfileAction($profile_id) {
+function handleToolAction($tool_id) {
     global $LLM_API_ENDPOINT_CHAT, $LLM_API_KEY;
 
     // Validate required parameters
@@ -118,17 +193,17 @@ function handleProfileAction($profile_id) {
         sendJsonResponse(['error' => 'API endpoint not configured'], true);
     }
 
-    // Load profile configuration
-    $profiles_data = loadResourceFromJson('profiles.json');
-    if (isset($profiles_data['error'])) {
-        sendJsonResponse(['error' => $profiles_data['error']], true);
+    // Load tool configuration
+    $tools_data = loadResourceFromJson('tools.json');
+    if (isset($tools_data['error'])) {
+        sendJsonResponse(['error' => $tools_data['error']], true);
     }
 
-    if (!isset($profiles_data['profiles'][$profile_id])) {
-        sendJsonResponse(['error' => 'Invalid profile'], true);
+    if (!isset($tools_data['tools'][$tool_id])) {
+        sendJsonResponse(['error' => 'Invalid tool'], true);
     }
 
-    $profile = $profiles_data['profiles'][$profile_id];
+    $tool = $tools_data['tools'][$tool_id];
 
     // Get form data
     $form_data = $_POST;
@@ -176,7 +251,7 @@ function handleProfileAction($profile_id) {
 
     // Validate required fields
     $required_fields = [];
-    foreach ($profile['form']['fields'] as $field) {
+    foreach ($tool['form']['fields'] as $field) {
         if (isset($field['required']) && $field['required'] && !isset($form_data[$field['name']])) {
             $required_fields[] = $field['name'];
         }
@@ -186,11 +261,11 @@ function handleProfileAction($profile_id) {
         sendJsonResponse(['error' => 'Missing required fields: ' . implode(', ', $required_fields)], true);
     }
 
-    // Build the prompt based on profile type
-    $prompt = buildProfilePrompt($profile_id, $form_data);
+    // Build the prompt based on tool type
+    $prompt = buildToolPrompt($tool_id, $form_data);
 
     // Prepare API request data
-    // TOOD use a default model if not specified in form_data
+    // TODO: use a default model if not specified in form_data
     $api_data = [
         'model' => $form_data['model'] ?? '',
         'messages' => [],
@@ -225,7 +300,7 @@ function handleProfileAction($profile_id) {
     }
 
     // Process and return the response
-    $result = processProfileResponse($profile_id, $response);
+    $result = processToolResponse($tool_id, $response);
 
     // Add form data and API data to the response
     $result['debug']['form_data'] = $form_data;
@@ -240,14 +315,26 @@ function handleProfileAction($profile_id) {
 }
 
 /**
- * Execute a tool based on profile configuration
- *
- * @param string $tool_name Name of the tool to execute
- * @param array $form_data Form data containing tool parameters
- * @return string|false Tool output or false on error
+ * Execute a helper based on tool configuration
+ * 
+ * This function acts as a helper dispatcher, executing different helpers based on the
+ * tool's helper specification. It validates input parameters and returns helper
+ * output or false on error.
+ * 
+ * @param string $helper_name Name of the helper to execute (e.g., 'web_scraper', 'medical_literature_search')
+ * @param array $form_data Form data containing helper parameters (URL, query, etc.)
+ * @return string|false Helper output as string, or false on error/invalid parameters
+ * 
+ * @see scrapeUrl() - Web scraping helper
+ * @see searchPubMed() - Medical literature search helper
+ * 
+ * @note Currently supports:
+ *       - 'web_scraper': Scrapes content from a URL
+ *       - 'medical_literature_search': Searches PubMed for medical articles
+ * @note All helpers validate their required parameters before execution
  */
-function executeTool($tool_name, $form_data) {
-    switch ($tool_name) {
+function executeHelper($helper_name, $form_data) {
+    switch ($helper_name) {
         case 'web_scraper':
             // Check if URL is provided
             if (empty($form_data['url'])) {
@@ -288,56 +375,76 @@ function executeTool($tool_name, $form_data) {
 }
 
 /**
- * Build prompt based on profile configuration
+ * Build prompt based on tool configuration with placeholder replacement
+ * 
+ * This function constructs the final prompt by:
+ * 1. Loading tool and language configurations
+ * 2. Executing helpers if specified by the tool
+ * 3. Selecting the appropriate prompt template
+ * 4. Converting array-based prompts to text format
+ * 5. Replacing placeholders with actual form data
+ * 6. Handling language-specific instructions
+ * 
+ * @param string $tool_id The tool identifier
+ * @param array $form_data User-submitted form data containing values for placeholders
+ * @return string The constructed prompt ready for LLM processing
+ * 
+ * @see loadResourceFromJson() - Loads configuration files
+ * @see executeHelper() - Executes tool helpers
+ * @see convertPromptArrayToText() - Converts array prompts to text
+ * 
+ * @note Supported placeholders: {language_instruction}, {language}, and any form field name
+ * @note If tool has 'helper' specification, helper output is added to form_data['content']
+ * @note Falls back to generic analysis prompt if no valid prompt found
  */
-function buildProfilePrompt($profile_id, $form_data) {
-    // Load profiles from JSON
-    $profiles_data = loadResourceFromJson('profiles.json');
+function buildToolPrompt($tool_id, $form_data) {
+    // Load tools from JSON
+    $tools_data = loadResourceFromJson('tools.json');
 
-    if (isset($profiles_data['error'])) {
+    if (isset($tools_data['error'])) {
         return "Analyze the following input: " . json_encode($form_data);
     }
 
     // Load languages from JSON
     $languages_data = loadResourceFromJson('languages.json');
 
-    // Get the profile configuration
-    $profile = $profiles_data['profiles'][$profile_id] ?? null;
+    // Get the tool configuration
+    $tool = $tools_data['tools'][$tool_id] ?? null;
 
-    // Check if profile has a prompt field, otherwise look for it in form_data
-    if (!$profile) {
+    // Check if tool has a prompt field, otherwise look for it in form_data
+    if (!$tool) {
         return "Analyze the following input: " . json_encode($form_data);
     }
 
-    // Check if profile has a tool specification
-    if (isset($profile['tool']) && !empty($profile['tool'])) {
-        $tool_output = executeTool($profile['tool'], $form_data);
-        if ($tool_output === false) {
-            return "Failed to execute tool: " . $profile['tool'];
+    // Check if tool has a helper specification
+    if (isset($tool['helper']) && !empty($tool['helper'])) {
+        $helper_output = executeHelper($tool['helper'], $form_data);
+        if ($helper_output === false) {
+            return "Failed to execute helper: " . $tool['helper'];
         }
-        // Add tool output to form data as 'content' field
-        $form_data['content'] = $tool_output;
+        // Add helper output to form data as 'content' field
+        $form_data['content'] = $helper_output;
     }
 
-    // Handle case where profile has 'prompts' key (multiple prompts)
-    if (isset($profile['prompts']) && is_array($profile['prompts'])) {
+    // Handle case where tool has 'prompts' key (multiple prompts)
+    if (isset($tool['prompts']) && is_array($tool['prompts'])) {
         // Get the selected prompt from form data
         $selected_prompt_key = $form_data['prompt'] ?? '';
         // Check if the selected prompt exists
-        if (!empty($selected_prompt_key) && isset($profile['prompts'][$selected_prompt_key])) {
+        if (!empty($selected_prompt_key) && isset($tool['prompts'][$selected_prompt_key])) {
             // Use the selected prompt
-            $prompt = $profile['prompts'][$selected_prompt_key];
+            $prompt = $tool['prompts'][$selected_prompt_key];
         } else {
             // If no specific prompt selected or invalid, use the first available prompt
-            $first_prompt = reset($profile['prompts']);
+            $first_prompt = reset($tool['prompts']);
             $prompt = $first_prompt;
         }
     }
-    // Handle case where profile has a 'prompt' field
-    elseif (!empty($profile['prompt'])) {
-        $prompt = $profile['prompt'];
+    // Handle case where tool has a 'prompt' field
+    elseif (!empty($tool['prompt'])) {
+        $prompt = $tool['prompt'];
     }
-    // If no prompt found in profile, check form_data
+    // If no prompt found in tool, check form_data
     elseif (isset($form_data['prompt']) && !empty($form_data['prompt'])) {
         $prompt = $form_data['prompt'];
     }
@@ -373,10 +480,26 @@ function buildProfilePrompt($profile_id, $form_data) {
 
 /**
  * Convert prompt array to formatted text recursively
- *
+ * 
+ * This function handles two types of array structures:
+ * 1. Associative arrays (JSON objects): Converted to uppercase headers with content
+ * 2. Sequential arrays: Converted to newline-separated text
+ * 
  * @param array $prompt_array The prompt array to convert
  * @param int $indent_level Current indentation level (for nested arrays)
  * @return string Formatted text version of the prompt
+ * 
+ * @note Example associative array:
+ *       ['role' => 'You are a helpful assistant', 'rules' => ['rule1', 'rule2']]
+ *       becomes:
+ *       ROLE
+ *       You are a helpful assistant
+ *       
+ *       RULES
+ *       rule1
+ *       rule2
+ * @note Example sequential array:
+ *       ['line1', 'line2', 'line3'] becomes "line1\nline2\nline3"
  */
 function convertPromptArrayToText($prompt_array, $indent_level = 0) {
     // Check if this is an associative array (JSON object)
@@ -413,22 +536,36 @@ function convertPromptArrayToText($prompt_array, $indent_level = 0) {
 }
 
 /**
- * Process profile response
+ * Process tool response and extract JSON if required
+ * 
+ * This function processes the LLM API response based on tool configuration.
+ * It can optionally extract JSON data from the response content if the tool
+ * specifies JSON output format.
+ * 
+ * @param string $tool_id The tool identifier
+ * @param array $api_response The raw API response from the LLM
+ * @return array Processed result containing tool info, response, and optional JSON data
+ * 
+ * @see loadResourceFromJson() - Loads tool configuration
+ * @see extractJsonFromResponse() - Extracts JSON from response content
+ * 
+ * @note If tool has 'output' => 'json', attempts to extract JSON from response
+ * @note Returns array with keys: 'tool', 'response', and optionally 'json'
  */
-function processProfileResponse($profile_id, $api_response) {
+function processToolResponse($tool_id, $api_response) {
     $result = [
-        'profile' => $profile_id,
+        'tool' => $tool_id,
         'response' => $api_response
     ];
 
-    // Load profiles from JSON
-    $profiles_data = loadResourceFromJson('profiles.json');
+    // Load tools from JSON
+    $tools_data = loadResourceFromJson('tools.json');
 
-    if (!isset($profiles_data['error']) && isset($profiles_data['profiles'][$profile_id])) {
-        $profile = $profiles_data['profiles'][$profile_id];
+    if (!isset($tools_data['error']) && isset($tools_data['tools'][$tool_id])) {
+        $tool = $tools_data['tools'][$tool_id];
 
-        // Check if profile has 'output' key set to 'json'
-        if (isset($profile['output']) && $profile['output'] === 'json') {
+        // Check if tool has 'output' key set to 'json'
+        if (isset($tool['output']) && $tool['output'] === 'json') {
             // Try to extract JSON if present
             $content = $api_response['choices'][0]['message']['content'] ?? '';
             $json_data = extractJsonFromResponse($content);
@@ -444,7 +581,19 @@ function processProfileResponse($profile_id, $api_response) {
 }
 
 /**
- * Handle get_prompts action
+ * Handle the 'get_prompts' API action - retrieve available prompt templates
+ * 
+ * This function scans the 'prompts' directory for prompt template files and
+ * returns them as a structured list. It supports multiple file formats and
+ * provides clean labels for display.
+ * 
+ * @return void Sends JSON response with prompts list
+ * 
+ * @see sendJsonResponse() - Sends the final response
+ * 
+ * @note Supported file extensions: .txt, .md, .xml
+ * @note Prompts are loaded from the 'prompts' subdirectory
+ * @note File names are converted to readable labels (e.g., 'medical_report' -> 'Medical Report')
  */
 function handleGetPrompts() {
     // Load prompts from files in the prompts directory
@@ -483,6 +632,14 @@ function handleGetPrompts() {
 
 /**
  * Display web interface
+ * 
+ * This function serves the main web interface by including the index.html file.
+ * It acts as a simple wrapper for the web interface presentation layer.
+ * 
+ * @return void Includes and executes index.html content
+ * 
+ * @note The index.html file should contain the complete web interface markup
+ * @note This function is called when the request is not an API request
  */
 function displayWebInterface() {
     include 'index.html';

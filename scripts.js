@@ -1,12 +1,215 @@
 
-// Global variables to store categories, profiles, languages, and prompts
+// Global variables to store categories, tools, languages, and prompts
 let categoriesData = null;
-let profilesData = null;
+let toolsData = null;
 let languagesData = null;
 let promptsData = null;
 
 /**
+ * Toggle between light and dark themes
+ *
+ * This function toggles the application theme between light and dark modes
+ * by updating the theme preference cookie and applying the appropriate CSS
+ * classes. It also updates the theme toggle button icon.
+ *
+ * @return {void}
+ *
+ * @note Uses document.cookie to store theme preference
+ * @note Updates the theme-toggle button icon based on current theme
+ * @note Updates the data-theme attribute on HTML element to apply theme changes
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up theme toggle handler
+ */
+function toggleTheme() {
+    // Get current theme from cookie or use system preference
+    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+        const [name, value] = cookie.trim().split('=');
+        acc[name] = decodeURIComponent(value);
+        return acc;
+    }, {});
+
+    const currentTheme = cookies['docmind-theme'] || 'system';
+    let newTheme;
+
+    // Determine new theme based on current theme
+    if (currentTheme === 'light') {
+        newTheme = 'dark';
+    } else if (currentTheme === 'dark') {
+        newTheme = 'light';
+    } else {
+        // If system preference, check what the system is using
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        newTheme = systemPrefersDark ? 'light' : 'dark';
+    }
+
+    // Save theme preference as cookie (30 days)
+    saveCookie('docmind-theme', newTheme, 30);
+
+    // Update theme icon immediately
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+        themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    // Apply theme by setting data-theme attribute on HTML element
+    document.documentElement.setAttribute('data-theme', newTheme);
+}
+
+/**
+ * Toggle sidebar menu for mobile devices
+ *
+ * This function toggles the visibility of the sidebar menu on mobile devices.
+ * It adds/removes the 'active' class to show/hide the sidebar.
+ *
+ * @return {void}
+ *
+ * @note Toggles the 'active' class on the sidebar element
+ * @note Updates the menu toggle button icon
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up menu toggle handler
+ */
+function toggleMenu() {
+    const sidebar = document.querySelector('.sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+
+    if (sidebar && menuToggle) {
+        sidebar.classList.toggle('active');
+        // Update menu icon based on sidebar state
+        menuToggle.innerHTML = sidebar.classList.contains('active') ? '✕' : '☰';
+    }
+}
+
+/**
+ * Apply theme based on user preference
+ *
+ * This function applies the theme based on user preference stored in cookies
+ * or system preference. It updates the theme toggle button icon accordingly
+ * and sets the data-theme attribute on the HTML element.
+ *
+ * @return {void}
+ *
+ * @note Reads theme preference from docmind-theme cookie
+ * @note Falls back to system preference if no cookie is set
+ * @note Updates the theme toggle button icon
+ * @note Sets data-theme attribute on HTML element
+ * @see Document.addEventListener('DOMContentLoaded') - Calls this function on page load
+ */
+function applyTheme() {
+    // Get theme preference from cookie
+    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+        const [name, value] = cookie.trim().split('=');
+        acc[name] = decodeURIComponent(value);
+        return acc;
+    }, {});
+
+    const theme = cookies['docmind-theme'] || 'system';
+
+    // Update theme icon based on current theme
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+        if (theme === 'dark') {
+            themeIcon.textContent = '☀️';
+        } else if (theme === 'light') {
+            themeIcon.textContent = '🌙';
+        } else {
+            // System preference - check what the system is using
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            themeIcon.textContent = systemPrefersDark ? '☀️' : '🌙';
+        }
+    }
+
+    // Apply theme by setting data-theme attribute on HTML element
+    if (theme === 'system') {
+        // For system theme, check system preference
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', systemPrefersDark ? 'dark' : 'light');
+    } else {
+        document.documentElement.setAttribute('data-theme', theme);
+    }
+}
+
+/**
+ * Copy results content to clipboard
+ *
+ * This function copies the content from the results area to the clipboard.
+ * It handles both text content and HTML content, and shows a notification
+ * to indicate success or failure.
+ *
+ * @return {Promise<void>}
+ *
+ * @note Uses the Clipboard API for modern browsers
+ * @note Falls back to document.execCommand for older browsers
+ * @note Shows success/error notifications using showNotification()
+ * @note Handles cases where clipboard access is denied
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up this handler
+ */
+async function copyResultsToClipboard() {
+    const resultsContent = document.getElementById('resultsContent');
+
+    if (!resultsContent) {
+        showError('Results content not found');
+        return;
+    }
+
+    try {
+        // Get the text content to copy
+        let textToCopy;
+
+        // Check if the content is in a code block (pre > code)
+        const codeBlock = resultsContent.querySelector('pre code');
+        if (codeBlock) {
+            // For code blocks, get the text content
+            textToCopy = codeBlock.textContent;
+        } else {
+            // For regular content, get the text content
+            textToCopy = resultsContent.textContent;
+        }
+
+        // Use the Clipboard API if available
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(textToCopy);
+            showNotification('Results copied to clipboard!', 'success');
+        }
+        // Fallback for older browsers
+        else {
+            // Create a temporary textarea element
+            const textarea = document.createElement('textarea');
+            textarea.value = textToCopy;
+            textarea.style.position = 'fixed';  // Avoid scrolling to bottom
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                // Execute the copy command
+                const success = document.execCommand('copy');
+                if (success) {
+                    showNotification('Results copied to clipboard!', 'success');
+                } else {
+                    showError('Failed to copy results to clipboard');
+                }
+            } catch (err) {
+                showError('Failed to copy results: ' + err.message);
+            } finally {
+                // Remove the temporary textarea
+                document.body.removeChild(textarea);
+            }
+        }
+    } catch (error) {
+        showError('Failed to copy results: ' + error.message);
+    }
+}
+
+/**
  * Apply syntax highlighting using highlight.js
+ *
+ * This function applies syntax highlighting to all code blocks on the page
+ * using the highlight.js library. It automatically detects the programming
+ * language of each code block and applies appropriate styling.
+ *
+ * @return {void}
+ *
+ * @note This function is called after rendering results to enhance code readability
+ * @note Requires the highlight.js library to be loaded
+ * @note Uses the hljs global object for highlighting
+ * @see displayResults() - Calls this function after rendering content
  */
 function applySyntaxHighlighting() {
     // Initialize highlight.js
@@ -19,6 +222,18 @@ function applySyntaxHighlighting() {
 
 /**
  * Escape HTML special characters
+ * 
+ * This function safely escapes HTML special characters to prevent XSS attacks
+ * and ensure proper rendering of text content. It converts characters like
+ * <, >, &, and " into their HTML entity equivalents.
+ * 
+ * @param {string} text - The text to escape
+ * @return {string} The escaped HTML-safe text
+ * 
+ * @note Uses the DOM API for reliable escaping
+ * @note Prevents script injection and HTML injection attacks
+ * @note Used for displaying user-generated or API-generated content safely
+ * @see displayResults() - Uses this for rendering code blocks
  */
 function escapeHtml(text) {
     const div = document.createElement('div');
@@ -28,16 +243,32 @@ function escapeHtml(text) {
 
 /**
  * Extract code fence information from text
- *
+ * 
+ * This function analyzes text to detect markdown code fences and extract
+ * the programming language type and the actual code content. It's used to
+ * determine how to display and highlight code blocks in the UI.
+ * 
  * @param {string} text - Text to analyze
  * @param {string} [defaultType='text'] - Default type when no fence is found
  * @returns {Object} Object with 'type' and 'text' keys
+ * 
+ * @note Supports markdown code fences in format ```language
+ * @note Returns empty type if no language is specified in the fence
+ * @note If no fence is found, uses the default type
+ * @note The returned object contains:
+ *       - type: The detected language type (e.g., 'json', 'markdown', 'text')
+ *       - text: The content inside the code fences (or original text if no fence)
+ * @see displayResults() - Uses this to determine how to render response content
+ * @see jsonToMarkdown() - Uses this for JSON content processing
  */
 function extractCodeFenceInfo(text, defaultType = 'text') {
     const result = {
         type: '',
         text: text
     };
+
+    // TODO Strip the text of leading/trailing whitespace
+    text = text.trim();
 
     // Regular expression to match markdown code fences
     const fenceRegex = /^```([a-zA-Z0-9_-]*)\s*(.*?)\s*```$/s;
@@ -51,17 +282,30 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
         // Set default type if no fence found
         result.type = defaultType;
     }
-    
+
     // Return the result
     return result;
 }
 
 /**
  * Load JSON resource from file
- *
- * @param {string} filename - The JSON file to load
- * @param {string} rootKey - The root key to extract from the JSON data
+ * 
+ * This function fetches and parses a JSON configuration file from the server.
+ * It handles errors gracefully and can extract a specific root key from the
+ * JSON data if provided.
+ * 
+ * @param {string} filename - The JSON file to load (e.g., 'tools.json')
+ * @param {string} rootKey - The root key to extract from the JSON data (e.g., 'tools')
  * @returns {Promise<Object|null>} Promise resolving to the extracted data or null on error
+ * 
+ * @note Uses the Fetch API to retrieve the JSON file
+ * @note Handles network errors and JSON parsing errors
+ * @note If rootKey is provided, returns data[rootKey] if it exists, otherwise returns entire data
+ * @note Logs errors to console for debugging
+ * @note Used for loading tools, languages, categories, and prompts
+ * @see displayTools() - Uses this to load tools data
+ * @see populateToolSelect() - Uses this to load tools data
+ * @see Document.addEventListener('DOMContentLoaded') - Calls this for initial data loading
  */
 async function loadJSONResource(filename, rootKey) {
     try {
@@ -84,225 +328,312 @@ async function loadJSONResource(filename, rootKey) {
 }
 
 /**
- * Display profiles grouped by category in the UI
+ * Create category views dynamically using the tools view template
  *
- * @returns {void}
+ * This function creates view sections for each category in the categories data.
+ * Each category view will display tools belonging to that category.
+ *
+ * @param {Object} categories - The categories data object
+ * @return {void}
+ *
+ * @note Creates a view section for each category
+ * @note Uses the toolsViewTemplate to create consistent category views
+ * @note Each view has the class 'view' and 'category-view'
+ * @note View ID is 'category-{categoryId}-view'
+ * @note View data-view attribute is 'category-{categoryId}'
+ * @note Each view contains a tools grid that will be populated with category tools
+ * @note Calls displayToolsByCategory to populate each category view with tools
+ * @see displayToolsByCategory() - Populates category views with tools
+ * @see Document.addEventListener('DOMContentLoaded') - Calls this function after loading categories
  */
-function displayProfiles() {
-    const profilesGrid = document.getElementById('profilesGrid');
-    profilesGrid.innerHTML = '';
+function createCategoriesViews(categories) {
+    const viewContainer = document.querySelector('.view-container');
+    const toolsViewTemplate = document.getElementById('toolsViewTemplate');
+    const sidebarNav = document.querySelector('.sidebar-nav');
+    const homeButton = document.querySelector('.nav-item[data-view="home"]');
 
-    // Check if profilesData is available
-    if (!profilesData) {
-        showError('No profiles data available');
-        return;
-    }
+    // Create a view for each category (in reverse order)
+    const categoryEntries = Object.entries(categories);
+    for (let i = categoryEntries.length - 1; i >= 0; i--) {
+        const [categoryId, categoryData] = categoryEntries[i];
+        // Clone the template content
+        const templateContent = toolsViewTemplate.content.cloneNode(true);
+        const categoryView = templateContent.querySelector('.tools-view');
 
-    // Group profiles by category
-    const categories = {};
-    for (const [profile_id, profile_data] of Object.entries(profilesData)) {
-        const category = profile_data.category;
-        if (!categories[category]) {
-            categories[category] = [];
+        // Update the view properties
+        //categoryView.classList.add('category-view');
+        categoryView.classList.add(`tools-${categoryId}-view`);
+        categoryView.dataset.view = `tools-${categoryId}`;
+        categoryView.style.display = 'none';
+
+        // Update the title and description
+        const titleElement = categoryView.querySelector('.tools-title');
+        const descriptionElement = categoryView.querySelector('.tools-subtitle');
+        if (titleElement) {
+            titleElement.textContent = `${categoryData.icon || '📄'} ${categoryData.name}`;
         }
-        categories[category].push({
-            'id': profile_id,
-            'name': profile_data.name,
-            'description': profile_data.description,
-            'icon': profile_data.icon
-        });
-    }
-
-    // Display each category
-    for (const [category, categoryProfiles] of Object.entries(categories)) {
-        const categoryDiv = document.createElement('section');
-        categoryDiv.className = 'category-section category-' + category;
-
-        // Get category info from categories.json
-        const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
-
-        // Create category header
-        const categoryHeader = document.createElement('hgroup');
-
-        // Add category title with icon
-        const categoryTitle = document.createElement('h2');
-        categoryTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category);
-        categoryHeader.appendChild(categoryTitle);
-
-        // Add category description if available
-        if (categoryInfo && categoryInfo.description) {
-            const categoryDescription = document.createElement('p');
-            categoryDescription.textContent = categoryInfo.description;
-            categoryHeader.appendChild(categoryDescription);
+        if (descriptionElement) {
+            descriptionElement.textContent = categoryData.description || '';
         }
 
-        // Append header to category div
-        categoryDiv.appendChild(categoryHeader);
+        // Update the tools grid ID
+        const toolsGrid = categoryView.querySelector('.tools-grid');
+        if (toolsGrid) {
+            toolsGrid.id = `${categoryId}ToolsGrid`;
+        }
 
-        // Create grid for profiles
-        const grid = document.createElement('main');
+        // Append the category view to the container
+        viewContainer.appendChild(categoryView);
 
-        // Add profiles to the grid
-        categoryProfiles.forEach(profile => {
-            const profileCard = document.createElement('a');
-            profileCard.className = 'tool-card';
-            profileCard.href = '#';
-            profileCard.onclick = (e) => {
-                e.preventDefault();
-                loadProfileForm(profile.id);
-            };
+        // Populate the category view with tools
+        loadToolsInCategory(categoryId);
 
-            // Add profile icon, name, and description
-            profileCard.innerHTML = `
-                <div class="tool-icon">${profile.icon || '📄'}</div>
-                <h3>${profile.name}</h3>
-                <p>${profile.description}</p>
-            `;
+        // Create category button for sidebar
+        const categoryButton = document.createElement('button');
+        categoryButton.className = 'nav-item';
+        categoryButton.dataset.view = 'tools-' + categoryId;
+        categoryButton.innerHTML = `
+            <div class="nav-item-content">
+                <span class="nav-icon">${categoryData.icon || '📄'}</span>
+                <span class="nav-text">${categoryData.name}</span>
+                <span class="nav-arrow">▼</span>
+            </div>
+            <div class="nav-submenu"></div>
+        `;
 
-            // Append profile card to grid
-            grid.appendChild(profileCard);
-        });
+        // Add tools as submenu items
+        const submenu = categoryButton.querySelector('.nav-submenu');
+        for (const [toolId, toolData] of Object.entries(toolsData)) {
+            if (toolData.category === categoryId) {
+                const toolButton = document.createElement('button');
+                toolButton.className = 'sub-nav-item';
+                toolButton.dataset.toolId = toolId;
+                toolButton.innerHTML = `
+                    <span class="sub-nav-icon">${toolData.icon || '📄'}</span>
+                    <span class="sub-nav-text">${toolData.name}</span>
+                `;
+                submenu.appendChild(toolButton);
+            }
+        }
 
-        // Append grid to category div
-        categoryDiv.appendChild(grid);
-        profilesGrid.appendChild(categoryDiv);
+        // Insert category button after the home button
+        if (homeButton && homeButton.nextSibling) {
+            sidebarNav.insertBefore(categoryButton, homeButton.nextSibling);
+        } else {
+            sidebarNav.appendChild(categoryButton);
+        }
     }
 }
 
 /**
- * Populate the profile select dropdown with grouped options
+ * Display tools for a specific category
  *
- * @param {HTMLSelectElement} profileSelect - The select element to populate
- * @returns {void}
+ * This function displays only the tools belonging to a specific category.
+ * It filters the tools by category and renders them in the category view.
+ *
+ * @param {string} category - The category to display
+ * @return {void}
+ *
+ * @note Shows only tools from the specified category
+ * @note Updates the category view title and description
+ * @note Uses the global toolsData and categoriesData variables
+ * @note Displays an error if toolsData is not available
+ * @see switchView() - Calls this function when a category is selected
+ * @see displayToolForm() - Called when a tool card is clicked
  */
-function populateProfileSelect(profileSelect) {
-    // Clear existing options
-    profileSelect.innerHTML = '<option value="">-- Select a profile --</option>';
-
-    // Check if profilesData is available
-    if (!profilesData) {
-        console.error('No profiles data available');
+function loadToolsInCategory(category) {
+    // Get the category tools grid
+    const toolsGrid = document.getElementById(`${category}ToolsGrid`);
+    if (!toolsGrid) {
+        showError(`Category tools grid not found for category: ${category}`);
         return;
     }
 
-    // Group profiles by category
+    toolsGrid.innerHTML = '';
+
+    // Check if toolsData is available
+    if (!toolsData) {
+        showError('No tools data available');
+        return;
+    }
+
+    // Filter tools by category
+    const categoryTools = [];
+    for (const [tool_id, tool_data] of Object.entries(toolsData)) {
+        if (tool_data.category === category) {
+            categoryTools.push({
+                'id': tool_id,
+                'name': tool_data.name,
+                'description': tool_data.description,
+                'icon': tool_data.icon
+            });
+        }
+    }
+
+    // Get category info from categories.json
+    const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
+
+    // Create grid for tools
+    const grid = document.createElement('main');
+    grid.className = 'tools-grid';
+
+    // Add tools to the grid
+    categoryTools.forEach(tool => {
+        const toolCard = document.createElement('a');
+        toolCard.className = 'tool-card';
+        toolCard.href = '#';
+        toolCard.onclick = (e) => {
+            e.preventDefault();
+            displayToolForm(tool.id);
+        };
+
+        // Add tool icon, name, and description
+        toolCard.innerHTML = `
+            <div class="tool-icon">${tool.icon || '📄'}</div>
+            <h3>${tool.name}</h3>
+            <p>${tool.description}</p>
+        `;
+
+        // Append tool card to grid
+        grid.appendChild(toolCard);
+    });
+
+    // Append grid to tools grid
+    toolsGrid.appendChild(grid);
+
+    // Update category view title and description
+    const categoryTitle = document.getElementById('categoryTitle');
+    const categoryDescription = document.getElementById('categoryDescription');
+    if (categoryTitle) {
+        categoryTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category);
+    }
+    if (categoryDescription) {
+        categoryDescription.textContent = categoryInfo && categoryInfo.description ? categoryInfo.description : '';
+    }
+}
+
+/**
+ * Populate the tool select dropdown with grouped options
+ * 
+ * This function populates the tool selection dropdown with all available
+ * tools, organized by category. It creates optgroups for each category
+ * and adds tool options with icons and names.
+ * 
+ * @param {HTMLSelectElement} toolSelect - The select element to populate
+ * @return {void}
+ * 
+ * @note Tools are grouped by their 'category' property
+ * @note Each category becomes an optgroup in the dropdown
+ * @note Tool icons are displayed before the tool name
+ * @note Uses the global toolsData and categoriesData variables
+ * @note Logs an error to console if toolsData is not available
+ */
+function populateToolSelect(toolSelect) {
+    // Clear existing options
+    toolSelect.innerHTML = '<option value="">-- Select a tool --</option>';
+
+    // Check if toolsData is available
+    if (!toolsData) {
+        console.error('No tools data available');
+        return;
+    }
+
+    // Group tools by category
     const categories = {};
-    for (const [profileId, profileData] of Object.entries(profilesData)) {
-        const category = profileData.category;
+    for (const [toolId, toolData] of Object.entries(toolsData)) {
+        const category = toolData.category;
         if (!categories[category]) {
             categories[category] = [];
         }
         categories[category].push({
-            id: profileId,
-            name: profileData.name,
-            icon: profileData.icon
+            id: toolId,
+            name: toolData.name,
+            icon: toolData.icon
         });
     }
 
     // Add optgroups for each category
-    for (const [category, categoryProfiles] of Object.entries(categories)) {
+    for (const [category, categoryTools] of Object.entries(categories)) {
         const optgroup = document.createElement('optgroup');
 
         // Use category name from categories.json if available
         const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
         optgroup.label = categoryInfo ? categoryInfo.name : category;
 
-        // Add profiles as options
-        categoryProfiles.forEach(profile => {
+        // Add tools as options
+        categoryTools.forEach(tool => {
             const option = document.createElement('option');
-            option.value = profile.id;
-            // Add profile icon before the name
-            option.textContent = `${profile.icon || '📄'} ${profile.name}`;
+            option.value = tool.id;
+            // Add tool icon before the name
+            option.textContent = `${tool.icon || '📄'} ${tool.name}`;
             optgroup.appendChild(option);
         });
 
         // Append optgroup to select
-        profileSelect.appendChild(optgroup);
+        toolSelect.appendChild(optgroup);
     }
 }
 
-
 /**
- * Load a profile form based on the selected profile ID
- *
- * @param {string} profileId - The ID of the profile to load
- * @returns {Promise<void>}
+ * Display a tool form with the given configuration
+ * 
+ * This function renders the form for a specific tool. It:
+ * 1. Updates the top title and description with tool information
+ * 2. Sets up the form action input with the tool ID
+ * 3. Retrieves saved preferences from cookies
+ * 4. Creates form fields based on the tool configuration
+ * 5. Shows the form and hides the results area
+ * 6. Scrolls to the form for better UX
+ * 
+ * @param {Object} tool - The tool configuration object
+ * @return {void}
+ * 
+ * @note Uses the tool's form.fields array to create input elements
+ * @note Retrieves saved model and language preferences from cookies
+ * @note Hides the results area when displaying a new form
+ * @note Uses smooth scrolling to bring the form into view
+ * @see createFormField() - Called to create each form field
  */
-async function loadProfileForm(profileId) {
-    try {
-        // Clear the page
-        document.querySelector('.profile-selector').style.display = 'none';
-        // Use the global profilesData if available
-        if (!profilesData) {
-            showError('No profiles data available');
-            return;
-        }
+function displayToolForm(toolId) {
+    // Clear the page
+    document.querySelector('.tool-selector').style.display = 'none';
+    // Use the global toolsData if available
+    if (!toolsData) {
+        showError('No tools data available');
+        return;
+    }
 
-        // Get the selected profile
-        const profile = profilesData[profileId];
-        if (!profile) {
-            showError('Profile not found');
-            return;
-        }
-        // Set the profile ID in the profile object
-        profile.id = profileId;
+    // Get the selected tool
+    const tool = toolsData[toolId];
+    if (!tool) {
+        showError(`Tool ${toolId} not found`);
+        return;
+    }
 
-        // Show the profile select dropdown and enable the profile-select-container nav element
-        const profileSelect = document.getElementById('profileSelect');
-        profileSelect.style.display = 'block';
-        const profileSelectContainer = document.querySelector('.profile-select-container');
-        if (profileSelectContainer) {
-            profileSelectContainer.style.display = 'block';
-        }
+    // Set the tool ID in the tool object
+    tool.id = toolId;
 
-        // Populate the profile select dropdown
-        populateProfileSelect(profileSelect);
-
-        // Add event listener to handle profile selection
-        profileSelect.addEventListener('change', function() {
-            const selectedProfileId = this.value;
-            if (selectedProfileId) {
-                loadProfileForm(selectedProfileId);
+    // Update language field if present and hidden
+    if (tool.form.fields) {
+        tool.form.fields.forEach(field => {
+            if (field.name === 'language' && field.type === 'hidden') {
+                field.value = 'en';
             }
         });
-
-        // Update language field if present
-        if (profile.form.fields) {
-            profile.form.fields.forEach(field => {
-                if (field.name === 'language' && field.type === 'hidden') {
-                    field.value = 'en';
-                }
-            });
-        }
-
-        // Display the form
-        displayProfileForm(profile);
-    } catch (error) {
-        showError('Failed to load form: ' + error.message);
     }
-}
 
-/**
- * Display a profile form with the given configuration
- *
- * @param {Object} formConfig - The form configuration object
- * @param {string} profileId - The ID of the profile
- * @param {string} profileName - The name of the profile
- * @param {string} profileDescription - The description of the profile
- * @returns {void}
- */
-function displayProfileForm(profile) {
-    // Update top title and description
-    const topTitle = document.getElementById('topTitle');
-    const topDescription = document.getElementById('topDescription');
-    topTitle.textContent = profile.icon + ' ' + profile.name;
-    topDescription.textContent = profile.description || '';
+    // Update form title and description
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
+    if (pageTitle) pageTitle.textContent = tool.icon + ' ' + tool.name;
+    if (pageSubtitle) pageSubtitle.textContent = tool.description || '';
 
     // Populate the form fields
-    const profileForm = document.getElementById('profileForm');
+    const toolForm = document.getElementById('toolForm');
     const formFields = document.getElementById('formFields');
-    const actionInput = document.getElementById('actionInput');
-    actionInput.value = profile.id;
+    const toolIdInput = document.getElementById('toolId');
+
+    toolIdInput.value = tool.id;
     formFields.innerHTML = '';
 
     // Get cookies for model and language
@@ -313,22 +644,56 @@ function displayProfileForm(profile) {
     }, {});
 
     // Create form fields based on formConfig
-    profile.form.fields.forEach(field => {
-        const fieldElement = createFormField(field, cookies);
-        formFields.appendChild(fieldElement);
-    });
+    if (tool.form && tool.form.fields) {
+        tool.form.fields.forEach(field => {
+            const fieldElement = createFormField(field, cookies);
+            if (fieldElement) {
+                formFields.appendChild(fieldElement);
+            } else if (field.type === 'hidden') {
+                // Create and append hidden input directly to the form
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = field.name;
+                hiddenInput.value = field.value || '';
+                toolForm.appendChild(hiddenInput);
+            }
+        });
+    }
 
     // Show the form and hide results area
-    profileForm.style.display = 'block';
-    document.getElementById('resultsArea').style.display = 'none';
+    try {
+        if (toolForm.style) toolForm.style.display = 'block';
+        const resultsArea = document.getElementById('resultsArea');
+        if (resultsArea && resultsArea.style) resultsArea.style.display = 'none';
+    } catch (error) {
+        console.error('Failed to update form visibility:', error);
+    }
+
+    // Set up cancel button to go back to tools view
+    const cancelBtn = document.getElementById('cancelBtn');
+    if (cancelBtn) {
+        cancelBtn.onclick = function() {
+            switchView('tools');
+        };
+    }
+
+    // Switch to form view
+    switchView('form');
 
     // Scroll to form
-    profileForm.scrollIntoView({ behavior: 'smooth' });
+    if (toolForm.scrollIntoView) {
+        toolForm.scrollIntoView({ behavior: 'smooth' });
+    }
 }
 
 /**
  * Create a form field element based on field configuration
- *
+ * 
+ * This function creates a form field element based on the provided field
+ * configuration. It supports various field types including text, textarea,
+ * select, hidden, and file inputs. For select fields, it can fetch options
+ * dynamically from the API (for models and prompts) or use predefined options.
+ * 
  * @param {Object} field - The field configuration object
  * @param {string} field.name - The name attribute for the field
  * @param {string} field.type - The type of field (textarea, select, hidden, text, etc.)
@@ -338,6 +703,15 @@ function displayProfileForm(profile) {
  * @param {string} [field.value] - Default value for the field
  * @param {Object} cookies - Object containing cookie values
  * @returns {HTMLElement} The created form field element
+ * 
+ * @note Supports dynamic fetching of models and prompts from API
+ * @note Uses global languagesData for language selection
+ * @note Applies saved preferences from cookies (docmind-model, docmind-language)
+ * @note Creates appropriate HTML elements based on field type
+ * @note Adds help text if provided in field configuration
+ * @see fetchModels() - Called for dynamic model loading
+ * @see fetchExpPrompts() - Called for dynamic prompt loading
+ * @see displayToolForm() - Calls this function for each field
  */
 function createFormField(field, cookies = {}) {
     // Create container div
@@ -347,9 +721,13 @@ function createFormField(field, cookies = {}) {
     // Create label if not hidden field
     if (field.type !== 'hidden') {
         const label = document.createElement('label');
+        label.className = 'form-label';
         label.textContent = field.label || field.name;
         label.htmlFor = field.name;
         container.appendChild(label);
+    } else {
+        // For hidden fields add hidden-field class
+        container.className = 'hidden-field';
     }
 
     let input;
@@ -378,7 +756,7 @@ function createFormField(field, cookies = {}) {
                 loadingOption.textContent = 'Loading prompts...';
                 input.appendChild(loadingOption);
                 // Fetch prompts from API
-                fetchPromptsForSelect(input);
+                fetchExpPrompts(input);
             }
             // If options are empty and field name is 'model', fetch models from API
             else if ((!field.options || field.options.length === 0) && field.name === 'model') {
@@ -388,7 +766,7 @@ function createFormField(field, cookies = {}) {
                 loadingOption.textContent = 'Loading models...';
                 input.appendChild(loadingOption);
                 // Fetch models from API
-                fetchModelsForSelect(input, cookies);
+                fetchModels(input, cookies);
             }
             // If options are empty and field name is 'language', use the languages object
             else if ((!field.options || field.options.length === 0) && field.name === 'language') {
@@ -470,12 +848,23 @@ function createFormField(field, cookies = {}) {
 
 /**
  * Fetch models from API and populate select element
- *
+ * 
+ * This function fetches available AI models from the server API and populates
+ * a select element with the retrieved models. It handles loading states,
+ * errors, and applies saved preferences from cookies.
+ * 
  * @param {HTMLSelectElement} selectElement - The select element to populate
  * @param {Object} cookies - Object containing cookie values
- * @returns {Promise<void>}
+ * @return {Promise<void>}
+ * 
+ * @note Makes API call to docmind.php?action=get_models
+ * @note Shows loading state while fetching
+ * @note Applies saved model preference from docmind-model cookie
+ * @note Handles network errors and API errors gracefully
+ * @note Clears loading option and adds error option on failure
+ * @see createFormField() - Calls this function for dynamic model loading
  */
-async function fetchModelsForSelect(selectElement, cookies = {}) {
+async function fetchModels(selectElement, cookies = {}) {
     try {
         const response = await fetch('docmind.php?action=get_models');
         const data = await response.json();
@@ -526,9 +915,20 @@ async function fetchModelsForSelect(selectElement, cookies = {}) {
 
 /**
  * Fetch languages from JSON and populate select element
- * TODO: This function is currently not used since languagesData is loaded globally
+ * 
+ * This function populates a select element with available languages from the
+ * global languagesData variable. It's currently not used since languagesData
+ * is loaded globally and used directly in createFormField().
+ * 
+ * @param {HTMLSelectElement} selectElement - The select element to populate
+ * @return {Promise<void>}
+ * 
+ * @note This function is currently not used in the codebase
+ * @note Languages are loaded globally and used directly in createFormField()
+ * @note Kept for potential future use or refactoring
+ * @see createFormField() - Uses global languagesData directly
  */
-async function fetchLanguagesForSelect(selectElement) {
+async function fetchLanguages(selectElement) {
     try {
         // Use the global languagesData if available
         if (!languagesData) {
@@ -571,11 +971,23 @@ async function fetchLanguagesForSelect(selectElement) {
 
 /**
  * Fetch prompts from API and populate select element
- *
+ * 
+ * This function fetches available prompt templates from the server API and
+ * populates a select element with the retrieved prompts. It also sets up an
+ * event listener to automatically populate the prompt textarea when a prompt
+ * is selected.
+ * 
  * @param {HTMLSelectElement} selectElement - The select element to populate
- * @returns {Promise<void>}
+ * @return {Promise<void>}
+ * 
+ * @note Makes API call to docmind.php?action=get_prompts
+ * @note Caches prompts data globally in promptsData variable
+ * @note Shows loading state while fetching
+ * @note Handles network errors and API errors gracefully
+ * @note Sets up change event listener to auto-fill prompt textarea
+ * @see createFormField() - Calls this function for dynamic prompt loading
  */
-async function fetchPromptsForSelect(selectElement) {
+async function fetchExpPrompts(selectElement) {
     try {
         // If promptsData is not loaded, fetch it from API
         if (!promptsData) {
@@ -637,11 +1049,31 @@ async function fetchPromptsForSelect(selectElement) {
 
 /**
  * Handle form submission
- *
+ * 
+ * This function handles the form submission event. It:
+ * 1. Prevents the default form submission
+ * 2. Collects form data
+ * 3. Shows a loading state on the submit button
+ * 4. Sends the form data to the server API
+ * 5. Processes the response
+ * 6. Saves user preferences as cookies
+ * 7. Restores the button state
+ * 
  * @param {Event} event - The form submission event
- * @returns {Promise<void>}
+ * @return {Promise<void>}
+ * 
+ * @note Uses the FormData API to collect form data
+ * @note Makes POST request to docmind.php
+ * @note Expects JSON response from the server
+ * @note Saves model and language preferences as cookies (30-day expiration)
+ * @note Handles network errors and API errors gracefully
+ * @note Shows loading state during processing
+ * @see displayResults() - Called to render successful responses
+ * @see showError() - Called to display error messages
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up this handler
  */
 async function handleFormSubmit(event) {
+    // Prevent default form submission
     event.preventDefault();
     // Get form data
     const form = event.target;
@@ -652,10 +1084,23 @@ async function handleFormSubmit(event) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="loading"></span> Processing...';
 
+    // Save selected model and language as cookies (30 days)
+    const model = formData.get('model');
+    if (model) {
+        saveCookie('docmind-model', model, 30);
+    }
+    const language = formData.get('language');
+    if (language) {
+        saveCookie('docmind-language', language, 30);
+    }
+
     try {
         const response = await fetch('docmind.php', {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
         });
 
         // Check if response is OK
@@ -673,7 +1118,6 @@ async function handleFormSubmit(event) {
                 showError(result.error);
                 return;
             }
-
             // Display results
             displayResults(result);
         } else {
@@ -681,22 +1125,6 @@ async function handleFormSubmit(event) {
             const text = await response.text();
             showError(`Unexpected response format: ${text}`);
             return;
-        }
-
-        // Set cookies for selected model and language (30 days)
-        const model = formData.get('model');
-        const language = formData.get('language');
-
-        if (model) {
-            const expirationDate = new Date();
-            expirationDate.setDate(expirationDate.getDate() + 30);
-            document.cookie = `docmind-model=${encodeURIComponent(model)}; expires=${expirationDate.toUTCString()}; path=/`;
-        }
-
-        if (language) {
-            const expirationDate = new Date();
-            expirationDate.setDate(expirationDate.getDate() + 30);
-            document.cookie = `docmind-language=${encodeURIComponent(language)}; expires=${expirationDate.toUTCString()}; path=/`;
         }
 
     } catch (error) {
@@ -710,16 +1138,34 @@ async function handleFormSubmit(event) {
 
 /**
  * Display results in the results area
- *
- * @param {Object} results - The results object to display
- * @returns {void}
+ * 
+ * This function renders the API response in the results area. It:
+ * 1. Extracts the response content from the API response
+ * 2. Updates the results title and description based on the tool
+ * 3. Detects the content type (JSON, markdown, or other)
+ * 4. Converts the content to the appropriate display format
+ * 5. Renders the content with syntax highlighting
+ * 6. Shows the results area and applies syntax highlighting
+ * 7. Scrolls to the results
+ * 
+ * @param {Object} results - The results object from the API
+ * @return {void}
+ * 
+ * @note Handles JSON, markdown, and plain text content
+ * @note Supports tool-specific display formats (markdown, html, json)
+ * @note Uses marked.js for markdown to HTML conversion
+ * @note Uses highlight.js for syntax highlighting
+ * @note Calls jsonToMarkdown() for JSON content conversion
+ * @see handleFormSubmit() - Calls this function on successful form submission
+ * @see applySyntaxHighlighting() - Called to highlight code blocks
+ * @see showError() - Called if no valid response content is found
  */
-function displayResults(results) {
+function displayResults(results, fromHistory = false) {
     // Get results area and title elements
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
-    const resultsTitle = document.getElementById('resultsTitle');
-    const resultsDescription = document.getElementById('resultsDescription');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
 
     // Extract the actual response content from the API response
     let responseContent = '';
@@ -747,28 +1193,28 @@ function displayResults(results) {
         return;
     }
 
-    // Get the current profile from results.profile
-    const profileId = results.profile || '';
-    const profile = profilesData[profileId] || null;
+    // Get the current tool from results.tool
+    const toolId = results.tool || '';
+    const tool = toolsData[toolId] || null;
 
-    // Update results title and description if profile has form.title and form.description
-    if (profile && profile.form && profile.form.title) {
-        resultsTitle.textContent = profile.form.title;
+    // Update page title and subtitle if tool has form.title and form.description
+    if (tool && tool.form && tool.form.title) {
+        pageTitle.textContent = tool.form.title;
     } else {
-        resultsTitle.textContent = '📝 Results';
+        pageTitle.textContent = '📝 Results';
     }
-    if (profile && profile.form && profile.form.description) {
-        resultsDescription.textContent = profile.form.description;
+    if (tool && tool.form && tool.form.description) {
+        pageSubtitle.textContent = tool.form.description;
     } else {
-        resultsDescription.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
+        pageSubtitle.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
     }
 
     // Check if the result contains markdown code fences
     const resultsInfo = extractCodeFenceInfo(responseContent, 'markdown');
     console.log('Code fence info:\n', resultsInfo);
 
-    // Check the desired display format from profile
-    const displayFormat = profile && profile.display ? profile.display.toLowerCase() : '';
+    // Check the desired display format from tool
+    const displayFormat = tool && tool.display ? tool.display.toLowerCase() : resultsInfo.type;
     console.log('Display format requested: ', displayFormat);
 
     // Check if the response need conversion based on resultsInfo format and display format
@@ -788,7 +1234,7 @@ function displayResults(results) {
                 // Convert JSON to HTML via markdown
                 const markdownContent = jsonToMarkdown(jsonData);
                 console.log('JSON to Markdown conversion for HTML:\n', markdownContent);
-                resultsContent.innerHTML = marked.parse(markdownContent);
+                resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
             } else {
                 // Convert JSON to pretty JSON string
                 const prettyJson = JSON.stringify(jsonData, null, 2);
@@ -805,7 +1251,7 @@ function displayResults(results) {
         if (displayFormat === 'html') {
             // Convert JSON to HTML via markdown
             console.log('Converting markdown to HTML');
-            resultsContent.innerHTML = marked.parse(resultsInfo.text);
+            resultsContent.innerHTML = `<div class="article">${marked.parse(resultsInfo.text)}</div>`;
         } else {
             // Keep as markdown with syntax highlighting
             console.log('Displaying as markdown with syntax highlighting');
@@ -821,6 +1267,8 @@ function displayResults(results) {
     if (resultsContent.innerHTML.trim() !== '') {
         // Show results area
         resultsArea.style.display = 'block';
+        // Switch to results view
+        switchView('results');
         // Apply syntax highlighting
         applySyntaxHighlighting();
     } else {
@@ -829,16 +1277,106 @@ function displayResults(results) {
 
     // Scroll to results
     resultsArea.scrollIntoView({ behavior: 'smooth' });
+
+    // Save result to history only if it's not from history
+    if (!fromHistory) {
+        saveResultToHistory(results);
+    }
+}
+
+/**
+ * Show a notification message
+ *
+ * This function displays a notification message to the user. It supports
+ * different types of notifications (success, info, warning, error).
+ *
+ * @param {string} message - The notification message to display
+ * @param {string} type - The type of notification (success, info, warning, error)
+ * @return {void}
+ *
+ * @note Creates a notification element and adds it to the notification container
+ * @note Automatically removes the notification after 5 seconds
+ * @note Uses different colors and icons based on notification type
+ * @see copyResultsToClipboard() - Calls this function on successful copy
+ */
+function showNotification(message, type = 'info') {
+    const notificationContainer = document.getElementById('notificationContainer');
+    if (!notificationContainer) {
+        console.error('Notification container not found');
+        return;
+    }
+
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}-notification`;
+
+    // Set notification icon based on type
+    let icon = 'ℹ️';
+    if (type === 'success') icon = '✅';
+    else if (type === 'warning') icon = '⚠️';
+    else if (type === 'error') icon = '❌';
+
+    // Set notification content
+    notification.innerHTML = `
+        <div class="notification-icon">${icon}</div>
+        <div class="notification-content">${message}</div>
+        <button class="notification-close">×</button>
+    `;
+
+    // Add close button functionality
+    const closeButton = notification.querySelector('.notification-close');
+    closeButton.addEventListener('click', () => {
+        notification.remove();
+    });
+
+    // Add notification to container
+    notificationContainer.appendChild(notification);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification && notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
 }
 
 /**
  * Display an error message in the results area
- *
+ * 
+ * This function displays an error message in the results area. It uses the
+ * error template if available, or falls back to direct HTML rendering.
+ * 
  * @param {string} message - The error message to display
- * @returns {void}
+ * @return {void}
+ * 
+ * @note Uses the error template (#errorTemplate) if available
+ * @note Falls back to direct HTML rendering if template is not found
+ * @note Shows the results area and scrolls to it
+ * @note Escapes the message for security
+ * @see handleFormSubmit() - Calls this function on form submission errors
+ * @see displayTools() - Calls this function if tools data is unavailable
  */
 function showError(message) {
+    // Get the results area element
     const resultsArea = document.getElementById('resultsArea');
+
+    // Check if resultsArea exists
+    if (!resultsArea) {
+        console.error('Results area not found:', message);
+        // Try to show error in main content as fallback
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            const errorElement = document.createElement('div');
+            errorElement.className = 'error';
+            errorElement.innerHTML = `
+                <strong>Error:</strong> ${escapeHtml(message)}
+            `;
+            mainContent.innerHTML = '';
+            mainContent.appendChild(errorElement);
+        }
+        return;
+    }
+
     // Get the error template
     const errorTemplate = document.getElementById('errorTemplate');
     if (errorTemplate) {
@@ -858,17 +1396,41 @@ function showError(message) {
         // Fallback to direct HTML if template not found
         resultsArea.innerHTML = `<div class="error-message">${escapeHtml(message)}</div>`;
     }
-    // Show results area
-    resultsArea.style.display = 'block';
-    // Scroll to error
-    resultsArea.scrollIntoView({ behavior: 'smooth' });
+
+    // Check if resultsArea.style exists before trying to access it
+    if (resultsArea.style) {
+        // Show results area
+        resultsArea.style.display = 'block';
+        // Switch to results view
+        switchView('results');
+        // Scroll to error
+        resultsArea.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        console.error('Results area style property not available');
+    }
 }
 
 /**
  * Convert structured JSON objects to markdown for better human readability
- *
+ * 
+ * This function converts JSON data structures into human-readable markdown
+ * format. It handles strings, arrays, and objects differently:
+ * - Strings: Returned as-is
+ * - Arrays of objects: Converted to markdown tables
+ * - Arrays of primitives: Converted to markdown lists
+ * - Objects: Converted to markdown headings and paragraphs
+ * 
  * @param {Object|Array|string} data - The JSON data to convert
- * @returns {string} Markdown representation of the data
+ * @return {string} Markdown representation of the data
+ * 
+ * @note Uses arrayOfObjectsToTable() for arrays of objects
+ * @note Uses arrayToList() for arrays of primitives
+ * @note Uses objectToMarkdown() for objects
+ * @note Falls back to String() for other types
+ * @see displayResults() - Calls this function for JSON content conversion
+ * @see arrayOfObjectsToTable() - Called for table conversion
+ * @see arrayToList() - Called for list conversion
+ * @see objectToMarkdown() - Called for object conversion
  */
 function jsonToMarkdown(data) {
     // If data is already a string, return it as-is (could be markdown or HTML)
@@ -897,10 +1459,22 @@ function jsonToMarkdown(data) {
 
 /**
  * Convert an object to markdown headings and paragraphs
- *
+ * 
+ * This function converts a JavaScript object into markdown format with
+ * headings and paragraphs. Each key becomes a heading, and each value
+ * becomes content. Nested objects and arrays are handled recursively.
+ * 
  * @param {Object} obj - The object to convert
- * @param {number} [level=3] - The heading level to start with
- * @returns {string} Markdown representation
+ * @param {number} [level=3] - The heading level to start with (1-6)
+ * @return {string} Markdown representation
+ * 
+ * @note Skips null and undefined values
+ * @note Capitalizes the first letter of each key
+ * @note Uses markdown headings (#) based on the level parameter
+ * @note Handles nested objects recursively with increasing heading level
+ * @note Handles arrays by calling jsonToMarkdown() recursively
+ * @note Converts numbers and booleans to strings
+ * @see jsonToMarkdown() - Calls this function for object conversion
  */
 function objectToMarkdown(obj, level = 3) {
     let markdown = '';
@@ -937,9 +1511,20 @@ function objectToMarkdown(obj, level = 3) {
 
 /**
  * Convert an array to a markdown list
- *
+ * 
+ * This function converts a JavaScript array into a markdown list format.
+ * Each array item becomes a list item. Nested arrays and objects are
+ * handled recursively.
+ * 
  * @param {Array} arr - The array to convert
- * @returns {string} Markdown list representation
+ * @return {string} Markdown list representation
+ * 
+ * @note Skips null and undefined values
+ * @note Handles nested arrays recursively
+ * @note Handles objects by calling objectToMarkdown() recursively
+ * @note Converts simple values (strings, numbers, booleans) to strings
+ * @note Each item is prefixed with "- " for markdown list format
+ * @see jsonToMarkdown() - Calls this function for array conversion
  */
 function arrayToList(arr) {
     let markdown = '';
@@ -966,9 +1551,22 @@ function arrayToList(arr) {
 
 /**
  * Convert an array of objects to a markdown table
- *
+ * 
+ * This function converts an array of objects into a markdown table format.
+ * Each object represents a row, and each key represents a column. The
+ * function automatically detects all unique keys across all objects.
+ * 
  * @param {Array<Object>} arr - The array of objects to convert
- * @returns {string} Markdown table representation
+ * @return {string} Markdown table representation
+ * 
+ * @note Returns empty string if array is empty
+ * @note Automatically detects all unique keys from all objects
+ * @note Creates a header row with column names
+ * @note Creates a separator row with markdown table syntax
+ * @note Creates data rows for each object
+ * @note Handles null/undefined values as empty cells
+ * @note Converts nested objects to JSON strings
+ * @see jsonToMarkdown() - Calls this function for arrays of objects
  */
 function arrayOfObjectsToTable(arr) {
     if (arr.length === 0) return '';
@@ -996,16 +1594,430 @@ function arrayOfObjectsToTable(arr) {
     return markdown.trim();
 }
 
-// DocMind-specific JavaScript
+/**
+ * Switch between different views in the application
+ *
+ * This function handles view switching by hiding all views and showing
+ * the selected view. It also updates the active state of navigation buttons.
+ *
+ * @param {string} viewName - The name of the view to show (e.g., 'home', 'tools', 'history')
+ * @return {void}
+ *
+ * @note Hides all views and shows only the selected one
+ * @note Updates active state of sidebar navigation buttons
+ * @note Updates the page title based on the view
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up view switching handlers
+ */
+function switchView(viewName) {
+    // Hide all views
+    const views = document.querySelectorAll('.view');
+    views.forEach(view => {
+        view.classList.remove('active-view');
+        view.style.display = 'none';
+    });
+
+    // Show the selected view
+    const selectedView = document.querySelector(`.${viewName}-view`);
+    if (selectedView) {
+        selectedView.classList.add('active-view');
+        selectedView.style.display = 'block';
+    }
+    else {
+        console.error(`View not found: ${viewName}`);
+        return;
+    }
+
+    // Update active state of navigation buttons
+    const navButtons = document.querySelectorAll('.nav-item');
+    navButtons.forEach(button => {
+        button.classList.remove('active');
+        if (button.dataset.view === viewName) {
+            button.classList.add('active');
+        }
+    });
+
+    // Update page title and subtitle based on view
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
+
+    if (pageTitle && pageSubtitle) {
+        switch (viewName) {
+            case 'home':
+                pageTitle.textContent = '🏠 Home';
+                pageSubtitle.textContent = 'Welcome to DocMind AI - Intelligent Document Processing';
+                break;
+            case 'history':
+                pageTitle.textContent = '🕒 History';
+                pageSubtitle.textContent = 'View your previous analysis sessions and results';
+                // Load and display history when switching to history view
+                displayHistory();
+                break;
+            case 'settings':
+                pageTitle.textContent = '⚙️ Settings';
+                pageSubtitle.textContent = 'Configure your preferences and account settings';
+                break;
+            default:
+                // Don't change title for other views (tools, form, results)
+                break;
+        }
+    }
+}
+
+/**
+ * Save a cookie with the given name, value, and expiration days
+ *
+ * This helper function creates and saves a cookie with the specified parameters.
+ * It handles URL encoding of the value and sets the expiration date.
+ *
+ * @param {string} name - The name of the cookie
+ * @param {string} value - The value to store in the cookie
+ * @param {number} [days=30] - Number of days until the cookie expires
+ * @param {string} [path='/'] - The path for which the cookie is valid
+ * @return {void}
+ *
+ * @note URL-encodes the cookie value for security
+ * @note Sets expiration date based on current date + days parameter
+ * @note Defaults to 30 days expiration if not specified
+ * @note Sets cookie path to '/' by default
+ * @see handleFormSubmit() - Uses this function to save user preferences
+ * @see toggleTheme() - Uses this function to save theme preference
+ */
+function saveCookie(name, value, days = 30, path = '/') {
+    // Set expiration date
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + days);
+
+    // Create and save the cookie
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expirationDate.toUTCString()}; path=${path}`;
+}
+
+/**
+ * Save result to localStorage
+ *
+ * This function saves a result to localStorage with a timestamp.
+ * It maintains a maximum of 10 results, removing the oldest ones if necessary.
+ *
+ * @param {Object} result - The result object to save
+ * @return {void}
+ *
+ * @note Uses localStorage to persist results between sessions
+ * @note Stores results as JSON strings
+ * @note Maintains a maximum of 10 results
+ * @note Each result is stored with a timestamp for sorting
+ * @see displayResults() - Calls this function after displaying results
+ */
+function saveResultToHistory(result) {
+    try {
+        // Get existing results from localStorage
+        const existingResults = JSON.parse(localStorage.getItem('docmind-results')) || [];
+
+        // Create result object with timestamp
+        const resultToSave = {
+            id: Date.now().toString(),
+            timestamp: Date.now(),
+            title: result.tool ? toolsData[result.tool]?.name || 'Analysis Result' : 'Analysis Result',
+            tool: result.tool || '',
+            content: result
+        };
+
+        // Add new result to the beginning of the array
+        existingResults.unshift(resultToSave);
+
+        // Keep only the 10 most recent results
+        if (existingResults.length > 10) {
+            existingResults.length = 10;
+        }
+
+        // Save back to localStorage
+        localStorage.setItem('docmind-results', JSON.stringify(existingResults));
+    } catch (error) {
+        console.error('Failed to save result to history:', error);
+    }
+}
+
+/**
+ * Load results from localStorage
+ *
+ * This function loads saved results from localStorage and returns them.
+ *
+ * @return {Array} Array of saved results, sorted by timestamp (newest first)
+ *
+ * @note Returns empty array if no results are found or on error
+ * @note Sorts results by timestamp (newest first)
+ * @see displayHistory() - Uses this function to show history
+ */
+function loadResultsFromHistory() {
+    try {
+        const results = JSON.parse(localStorage.getItem('docmind-results')) || [];
+        // Sort by timestamp (newest first)
+        return results.sort((a, b) => b.timestamp - a.timestamp);
+    } catch (error) {
+        console.error('Failed to load results from history:', error);
+        return [];
+    }
+}
+
+/**
+ * Display a specific result from history
+ *
+ * This function loads and displays a specific result from the history.
+ *
+ * @param {string} resultId - The ID of the result to display
+ * @return {void}
+ *
+ * @note Finds the result by ID in localStorage
+ * @note Displays the result using the displayResults function
+ * @note Shows error if result is not found
+ * @see displayHistory() - Calls this function when a history item is clicked
+ */
+function displayHistoryResult(resultId) {
+    try {
+        const results = loadResultsFromHistory();
+        const result = results.find(r => r.id === resultId);
+
+        if (result) {
+            // Display the saved content with fromHistory flag
+            displayResults(result.content, true);
+            // Switch to results view
+            switchView('results');
+        } else {
+            showError('Result not found in history');
+        }
+    } catch (error) {
+        showError('Failed to load result from history: ' + error.message);
+    }
+}
+
+/**
+ * Clear all saved results from history
+ *
+ * This function removes all saved results from localStorage and refreshes the history view.
+ *
+ * @return {void}
+ *
+ * @note Shows a confirmation dialog before clearing
+ * @note Removes the 'docmind-results' item from localStorage
+ * @note Refreshes the history view to show empty state
+ * @see displayHistory() - Called after clearing to refresh the view
+ */
+function clearHistory() {
+    if (confirm('Are you sure you want to clear all history? This cannot be undone.')) {
+        try {
+            localStorage.removeItem('docmind-results');
+            // Refresh the history view
+            displayHistory();
+            showNotification('History cleared successfully', 'success');
+        } catch (error) {
+            showError('Failed to clear history: ' + error.message);
+        }
+    }
+}
+
+/**
+ * Display history of saved results
+ *
+ * This function populates the history view with saved results from localStorage.
+ * It creates clickable history items that allow users to view previous results.
+ *
+ * @return {void}
+ *
+ * @note Loads results from localStorage using loadResultsFromHistory()
+ * @note Creates history items with timestamps and tool names
+ * @note Sets up click handlers to display specific results
+ * @note Shows a message if no history is available
+ * @see switchView() - Calls this function when history view is selected
+ */
+function displayHistory() {
+    const historyList = document.querySelector('.history-list');
+    if (!historyList) {
+        console.error('History list element not found');
+        return;
+    }
+
+    // Clear existing history items
+    historyList.innerHTML = '';
+
+    // Load results from history
+    const results = loadResultsFromHistory();
+
+    if (results.length === 0) {
+        // Show empty state using template
+        const emptyTemplate = document.getElementById('historyEmptyTemplate');
+        if (emptyTemplate) {
+            const emptyState = emptyTemplate.content.cloneNode(true);
+            historyList.appendChild(emptyState);
+        } else {
+            // Fallback if template not found
+            const emptyState = document.createElement('div');
+            emptyState.className = 'history-empty-state';
+            emptyState.innerHTML = `
+                <div class="empty-state-icon">📄</div>
+                <h3 class="empty-state-title">No history yet</h3>
+                <p class="empty-state-description">Your analysis history will appear here</p>
+            `;
+            historyList.appendChild(emptyState);
+        }
+        return;
+    }
+
+    // Create history items
+    results.forEach(result => {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.dataset.resultId = result.id;
+
+        // Format date
+        const date = new Date(result.timestamp);
+        const formattedDate = date.toLocaleString();
+
+        historyItem.innerHTML = `
+            <div class="history-icon">📄</div>
+            <div class="history-info">
+                <h3 class="history-title">${result.title}</h3>
+                <p class="history-date">${formattedDate}</p>
+                ${result.tool ? `<p class="history-tool">Tool: ${result.tool}</p>` : ''}
+            </div>
+            <button class="btn btn-small history-view-btn">View</button>
+        `;
+
+        // Add click handler to view button
+        const viewButton = historyItem.querySelector('.history-view-btn');
+        viewButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            displayHistoryResult(result.id);
+        });
+
+        // Add click handler to entire item
+        historyItem.addEventListener('click', () => {
+            displayHistoryResult(result.id);
+        });
+
+        historyList.appendChild(historyItem);
+    });
+}
+
+/**
+ * DocMind-specific JavaScript initialization
+ *
+ * This function initializes the DocMind AI application when the DOM is fully loaded.
+ * It performs the following tasks:
+ * 1. Loads configuration data (categories, tools, languages)
+ * 2. Creates category views
+ * 3. Displays available tools in the UI
+ * 4. Sets up the form submission handler
+ * 5. Sets up the theme toggle button
+ * 6. Sets up view switching for sidebar navigation
+ * 7. Sets up category buttons in the sidebar
+ * 8. Applies the user's theme preference
+ *
+ * @note This is the main entry point for the application
+ * @note Uses async/await for sequential data loading
+ * @note Sets up global variables: categoriesData, toolsData, languagesData
+ * @note Calls createCategoryViews() to create category view sections
+ * @note Calls displayTools() to render tool cards
+ * @note Attaches form submission handler to the API form
+ * @note Sets up theme toggle button click handler
+ * @note Sets up sidebar navigation click handlers
+ * @note Sets up category button click handlers
+ * @note Applies theme preference on page load
+ * @see loadJSONResource() - Used to load configuration data
+ * @see createCategoryViews() - Creates category view sections
+ * @see displayTools() - Renders tool cards
+ * @see handleFormSubmit() - Handles form submissions
+ * @see toggleTheme() - Handles theme toggling
+ * @see switchView() - Handles view switching
+ * @see applyTheme() - Applies theme preference
+ */
 document.addEventListener('DOMContentLoaded', async function() {
+    // Apply theme preference
+    applyTheme();
     // Load categories data
     categoriesData = await loadJSONResource('categories.json', 'categories');
-    // Load profiles data
-    profilesData = await loadJSONResource('profiles.json', 'profiles');
+    // Load tools data
+    toolsData = await loadJSONResource('tools.json', 'tools');
     // Load languages data
     languagesData = await loadJSONResource('languages.json', 'languages');
-    // Display profiles in the UI
-    displayProfiles();
+
+    // Create category views and buttons after loading data
+    if (categoriesData) {
+        createCategoriesViews(categoriesData);
+    }
+
     // Set up form submission
     document.getElementById('apiForm')?.addEventListener('submit', handleFormSubmit);
+    // Set up theme toggle button
+    document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+    // Set up menu toggle button
+    document.getElementById('menuToggle')?.addEventListener('click', toggleMenu);
+    // Set up copy results button
+    document.getElementById('copyResultsBtn')?.addEventListener('click', copyResultsToClipboard);
+    // Set up clear history button (only if it exists)
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    if (clearHistoryBtn) {
+        clearHistoryBtn.addEventListener('click', clearHistory);
+    }
+    // Set up view switching for sidebar navigation
+    const navButtons = document.querySelectorAll('.nav-item');
+    navButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Check if this is a category button with submenu
+            const submenu = this.querySelector('.nav-submenu');
+            if (submenu && submenu.children.length > 0) {
+                e.stopPropagation();
+                // Toggle the active state for this button only
+                this.classList.toggle('active');
+
+                // Close other open submenus
+                navButtons.forEach(otherButton => {
+                    if (otherButton !== this && otherButton.classList.contains('active')) {
+                        otherButton.classList.remove('active');
+                    }
+                });
+                return;
+            }
+
+            // If no submenu or submenu is empty, proceed with view switching
+            const viewName = this.dataset.view;
+            if (viewName) {
+                switchView(viewName);
+                // Close sidebar on mobile after selecting a view
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar && window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                    const menuToggle = document.getElementById('menuToggle');
+                    if (menuToggle) {
+                        menuToggle.innerHTML = '☰';
+                    }
+                }
+            }
+        });
+    });
+
+    // Handle tool selection from submenus
+    const subNavButtons = document.querySelectorAll('.sub-nav-item');
+    subNavButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const toolId = this.dataset.toolId;
+            if (toolId) {
+                displayToolForm(toolId);
+
+                // Close the parent submenu
+                const parentNavItem = this.closest('.nav-item');
+                if (parentNavItem) {
+                    parentNavItem.classList.remove('active');
+                }
+
+                // Close sidebar on mobile after selecting a tool
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar && window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                    const menuToggle = document.getElementById('menuToggle');
+                    if (menuToggle) {
+                        menuToggle.innerHTML = '☰';
+                    }
+                }
+            }
+        });
+    });
 });

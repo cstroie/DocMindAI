@@ -1,99 +1,261 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocMind AI</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A5%3C/text%3E%3C/svg%3E">
+    <meta name="description" content="DocMind AI - Advanced document processing and analysis tools">
+    <title>DocMind AI | Intelligent Document Processing</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em'
+font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="vs.min.css">
-    <script src="scripts.js"></script>
-    <script src="marked.js"></script>
-    <script src="highlight.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="scripts.js" defer></script>
+    <script src="marked.js" defer></script>
+    <script src="highlight.min.js" defer></script>
 </head>
 <body>
-    <div class="container">
-        <hgroup>
-            <h1 id="topTitle">🏥 DocMind AI</h1>
-            <p id="topDescription">A collection of specialized tools designed to process, analyze, and extract key information from various documents using artificial intelligence.</p>
-        </hgroup>
-        <header>
-            <nav class="profile-select-container" style="display: none;">
-                <select id="profileSelect" class="form-control">
-                    <option value="">-- Select a profile --</option>
-                    <!-- Will be populated by JavaScript -->
-                </select>
-            </nav>
-        </header>
-        <main>
-            <section class="profile-selector">
-                <div id="profilesGrid">
-                    <!-- Will be populated by JavaScript -->
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🏥</span>
+                    <span class="logo-text">DocMind AI</span>
                 </div>
-            </section>
+                <button class="theme-toggle" id="themeToggle">
+                    <span class="theme-icon" id="themeIcon">🌙</span>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-view="home">
+                    <div class="nav-item-content">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Home</span>
+                    </div>
+                </button>
+                <button class="nav-item" data-view="history">
+                    <div class="nav-item-content">
+                        <span class="nav-icon">🕒</span>
+                        <span class="nav-text">History</span>
+                    </div>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">👤</div>
+                    <div class="user-info">
+                        <span class="user-name">User</span>
+                        <span class="user-status">Online</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
 
-            <article class="results-area" id="resultsArea" style="display: none;">
-                <hgroup>
-                    <h2 id="resultsTitle">📝 Results</h2>
-                    <p id="resultsDescription">Review the AI-generated results below. You can copy the content or download it as a file.</p>
-                </hgroup>
-                <main id="resultsContent"></main>
-            </article>
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <span class="menu-icon">☰</span>
+                    </button>
+                    <hgroup>
+                        <h1 class="page-title" id="pageTitle">Welcome to DocMind AI</h1>
+                        <p class="page-subtitle" id="pageSubtitle">Intelligent Document Processing</p>
+                    </hgroup>
+                </div>
+                <div class="top-bar-right">
+                </div>
+            </header>
 
-            <section class="profile-form" id="profileForm" style="display: none;">
-                <form id="apiForm">
-                    <input type="hidden" name="action" id="actionInput">
-                    <fieldset id="formFields">
-                        <!-- Will be populated by JavaScript -->
-                    </fieldset>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
-                </form>
-            </section>
+            <!-- View Container -->
+            <div class="view-container">
+                <!-- Home View -->
+                <section class="view home-view active-view">
+                    <div class="hero-section">
+                        <div class="hero-content">
+                            <h2 class="hero-title">Intelligent Document Processing</h2>
+                            <p class="hero-subtitle">Transform your documents with AI-powered analysis and extraction tools</p>
+                            <div class="hero-actions">
+                                <button class="btn btn-primary btn-large" id="getStartedBtn">Get Started</button>
+                                <button class="btn btn-secondary btn-large" id="learnMoreBtn">Learn More</button>
+                            </div>
+                        </div>
+                        <div class="hero-illustration">
+                            <div class="illustration-content">📄🔍🤖</div>
+                        </div>
+                    </div>
+
+                    <div class="features-section">
+                        <h3 class="section-title">Key Features</h3>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">📊</div>
+                                <h4 class="feature-title">Advanced Analysis</h4>
+                                <p class="feature-description">Deep document analysis with AI-powered insights</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">⚡</div>
+                                <h4 class="feature-title">Fast Processing</h4>
+                                <p class="feature-description">Quick results with optimized algorithms</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🔒</div>
+                                <h4 class="feature-title">Secure</h4>
+                                <p class="feature-description">Your data privacy is our priority</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🌐</div>
+                                <h4 class="feature-title">Multi-language</h4>
+                                <p class="feature-description">Support for multiple languages</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Results View -->
+                <section class="view results-view" style="display: none;">
+                    <div class="results-container" id="resultsArea">
+                        <main class="results-content" id="resultsContent">
+                            <!-- Results will be displayed here -->
+                        </main>
+                        <footer class="results-actions">
+                            <button class="btn btn-primary" id="copyResultsBtn">Copy Results</button>
+                            <button class="btn btn-secondary" id="downloadResultsBtn">Download</button>
+                        </footer>
+                    </div>
+                </section>
+
+                <!-- Form View -->
+                <section class="view form-view" style="display: none;">
+                    <div class="form-container" id="toolForm">
+                        <form id="apiForm" class="tool-form">
+                            <input type="hidden" name="tool" id="toolId">
+                            <div class="form-fields" id="formFields">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    <span class="btn-text">Submit</span>
+                                    <span class="btn-loading" style="display: none;">
+                                        <span class="loading-spinner"></span>
+                                        Processing...
+                                    </span>
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- History View -->
+                <section class="view history-view">
+                    <div class="history-container">
+                        <div class="history-header">
+                            <h2 class="history-title">Analysis History</h2>
+                            <button class="btn btn-secondary btn-small" id="clearHistoryBtn">Clear History</button>
+                        </div>
+                        <div class="history-list">
+                            <!-- History items will be displayed here -->
+                        </div>
+                    </div>
+                </section>
+            </div>
         </main>
+
+        <!-- Notifications -->
+        <div class="notification-container" id="notificationContainer"></div>
     </div>
 
-    <!-- Error Template -->
+    <!-- Templates -->
     <template id="errorTemplate">
-        <section role="alert" class="error">
-            <strong>⚠️ Error:</strong>
-            <div class="error-message"></div>
+        <div class="notification error-notification">
+            <div class="notification-icon">⚠️</div>
+            <div class="notification-content">
+                <strong>Error:</strong>
+                <div class="error-message"></div>
+            </div>
+            <button class="notification-close">×</button>
+        </div>
+    </template>
+
+    <template id="loadingTemplate">
+        <div class="loading-overlay">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Processing your request...</div>
+            </div>
+        </div>
+    </template>
+
+    <template id="historyEmptyTemplate">
+        <div class="history-empty-state">
+            <div class="empty-state-icon">📄</div>
+            <h3 class="empty-state-title">No history yet</h3>
+            <p class="empty-state-description">Your analysis history will appear here</p>
+        </div>
+    </template>
+
+    <!-- Tools View Template -->
+    <template id="toolsViewTemplate">
+        <section class="view tools-view">
+            <hgroup class="tools-header">
+                <h2 class="tools-title" id="topTitle">🔧 AI Tools</h2>
+                <p class="tools-subtitle" id="topDescription">Select a tool to process your documents</p>
+            </hgroup>
+
+            <!-- Tool Selector -->
+            <div class="tool-selector-container" style="display: none;">
+                <select id="toolSelect" class="form-select">
+                    <option value="">-- Select a tool --</option>
+                </select>
+            </div>
+            <div class="tool-selector" style="display: none;"></div>
+
+            <!-- Tools Grid -->
+            <div class="tools-grid" id="toolsGrid">
+                <!-- Will be populated by JavaScript -->
+            </div>
         </section>
     </template>
 
-    <!-- Loading Template -->
-    <template id="loadingTemplate">
-        <div class="loading-indicator">
-            <span class="loading"></span>
-            <span class="loading-text">Processing...</span>
+    <template id="toolCardTemplate">
+        <div class="tool-card">
+            <div class="tool-card-header">
+                <div class="tool-icon"></div>
+                <div class="tool-category-badge"></div>
+            </div>
+            <div class="tool-card-content">
+                <h3 class="tool-title"></h3>
+                <p class="tool-description"></p>
+            </div>
+            <div class="tool-card-footer">
+                <button class="btn btn-small tool-select-btn">Select Tool</button>
+            </div>
         </div>
     </template>
 
-    <!-- Profile Card Template -->
-    <template id="profileCardTemplate">
-        <a class="tool-card" href="#">
-            <div class="tool-icon"></div>
-            <h3></h3>
-            <p></p>
-        </a>
-    </template>
-
-    <!-- Form Field Template -->
     <template id="formFieldTemplate">
-        <div class="form-field">
-            <label></label>
-            <div class="field-input"></div>
+        <div class="form-group">
+            <label class="form-label"></label>
+            <div class="form-control-container"></div>
+            <div class="form-help-text"></div>
         </div>
     </template>
 
-    <!-- Result Template -->
     <template id="resultTemplate">
-        <article>
-            <header>
-                <h2>Results</h2>
-            </header>
+        <div class="result-card">
+            <div class="result-header">
+                <h3 class="result-title"></h3>
+                <div class="result-meta"></div>
+            </div>
             <div class="result-content"></div>
-        </article>
+            <div class="result-footer">
+                <div class="result-actions"></div>
+            </div>
+        </div>
     </template>
-
 </body>
 </html>
