@@ -14,6 +14,7 @@
       "description": "Analyze radiology reports and extract key medical information",
       "category": "medical",
       "icon": "🔍",
+      "template": "<article>\n  <header>\n    <h2>Analysis Result</h2>\n    <div>\n      <span class=\"pathology-badge {{#if (eq pathologic 'yes')}}pathology-yes{{else}}pathology-no{{/if}}\">\n        {{summary}}\n      </span>\n    </div>\n  </header>\n  \n  <section>\n    <h3>Severity level</h3>\n    <div style=\"display: flex; align-items: center; gap: 16px;\">\n      <span style=\"font-weight: 600; color: {{getSeverityColor severity}}\">\n        {{getSeverityLabel severity}} ({{severity}}/10)\n      </span>\n      <progress class=\"severity-bar\" value=\"{{severity}}\" data-severity=\"{{severity}}\" style=\"flex: 1;\"></progress>\n    </div>\n  </section>\n  \n  <footer>\n    <h3>Diagnoses</h3>\n    <div>\n      {{#each diagnoses}}\n        <span>{{this}}</span>\n      {{/each}}\n    </div>\n  </footer>\n</article>",
       "prompt": {
         "role": "You are a medical exper analyzing radiology reports.",
         "task": "Read the report and extract the main pathological information in JSON format.",
