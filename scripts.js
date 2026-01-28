@@ -1246,7 +1246,11 @@ function displayResults(results, fromHistory = false) {
             if (displayFormat === 'html') {
                 if (tool && tool.template && typeof Handlebars !== 'undefined') {
                     try {
-                        const template = Handlebars.compile(tool.template);
+                        // Handle both string and array templates
+                        const templateContent = Array.isArray(tool.template) ? 
+                            tool.template.join('\n') : 
+                            tool.template;
+                        const template = Handlebars.compile(templateContent);
                         resultsContent.innerHTML = template(jsonData);
                     } catch (error) {
                         console.error('Handlebars template error:', error);
