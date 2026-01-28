@@ -1655,7 +1655,6 @@
       },
       "display": "html",
       "template": [
-        "<h2>Search Results ({{this.length}})</h2>",
         "{{#each this}}",
         "<article class=\"summary-item\">",
         "  <header>",
