@@ -1346,20 +1346,20 @@
       "template": [
         "<article>",
         "  <header>",
-        "    <h2>{{title}}</h2>",
+        "    <h3>{{title}}</h3>",
         "  </header>",
         "  <section>",
-        "    <h3>Summary</h3>",
+        "    <h4>Summary</h4>",
         "    <p>{{summary}}</p>",
         "  </section>",
         "  <section>",
-        "    <h3>Key Points</h3>",
+        "    <h4>Key Points</h4>",
         "    <ul>",
         "      {{#each key_points}}<li>{{this}}</li>{{/each}}",
         "    </ul>",
         "  </section>",
         "  <footer>",
-        "    <h3>Keywords</h3>",
+        "    <h4>Keywords</h4>",
         "    <div class=\"keywords\">",
         "      {{#each keywords}}<span>{{this}}</span>{{/each}}",
         "    </div>",
@@ -1404,7 +1404,8 @@
       "icon": "📄",
       "prompts": {
         "three_pass": {
-          "role": "You are an academic paper analyzer. Your task is to analyze research papers using a three-pass approach.",
+          "role": "You are an academic paper analyzer.",
+          "task": "Your task is to analyze research papers using a three-pass approach.",
           "critical_instruction": "{language_instruction}",
           "output_format": [
             "```json",
@@ -1437,7 +1438,8 @@
           "paper_content": "{content}"
         },
         "problem_idea_evidence": {
-          "role": "You are an academic paper analyzer. Your task is to analyze research papers and extract key information using a structured approach.",
+          "role": "You are an academic paper analyzer.",
+          "task": "Your task is to analyze research papers and extract key information using a structured approach.",
           "critical_instruction": "{language_instruction}",
           "output_format": [
             "```json",
