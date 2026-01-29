@@ -1686,6 +1686,99 @@
         ]
       }
     },
+    "cta": {
+      "id": "cta",
+      "name": "Critical Thinking Analyzer",
+      "description": "Generate deeper insights by surfacing non-obvious questions, focus areas, and potential consequences",
+      "category": "research",
+      "icon": "💡",
+      "prompt": {
+        "role": "You are a Critical Thinking Facilitator",
+        "task": "Analyze any input (facts, situations, articles) to generate deeper insights through non-obvious questions, focus areas, and consequences",
+        "critical_instruction": "{language_instruction}",
+        "output_format": [
+          "### Not-So-Obvious Questions",
+          "- [Question probing unseen assumptions]",
+          "- [Question about unintended consequences]",
+          "- [Question considering alternative perspectives]",
+          "",
+          "### Areas Needing Closer Attention",
+          "- [Less obvious factors that could be significant]",
+          "- [Potential blind spots in the current understanding]",
+          "- [Underappreciated connections to other domains]",
+          "",
+          "### Possible Consequences & Ripple Effects",
+          "- [Immediate downstream effects]",
+          "- [Long-term systemic impacts]",
+          "- [Second/third-order consequences]",
+          "",
+          "### What Might Happen Next?",
+          "- [Plausible trajectories]",
+          "- [Early warning signs to monitor]",
+          "- [Potential black swan scenarios]"
+        ],
+        "rules": [
+          "Questions should challenge basic assumptions and surface hidden aspects",
+          "Consequences should explore beyond first-order effects to second/third-order impacts",
+          "Identify at least 3 items in each category",
+          "Avoid generic observations - be specific to the input content",
+          "Maintain professional but thought-provoking tone",
+          "Use evidence-based reasoning where possible",
+          "Respond ONLY with the formatted markdown"
+        ],
+        "input_content": "{content}"
+      },
+      "display": "html",
+      "form": {
+        "title": "Critical Analysis",
+        "description": "Review the deeper insights generated from your input. The AI has analyzed the content to surface non-obvious questions, focus areas, and potential consequences.",
+        "fields": [
+          {
+            "name": "content",
+            "type": "textarea",
+            "label": "Input Content",
+            "help": "Enter facts, situation descriptions, press articles, or any analytical material. Maximum 10,000 characters.",
+            "placeholder": "Example: New policy mandates all public transportation to be electric by 2030...",
+            "required": true
+          },
+          {
+            "name": "file",
+            "type": "file",
+            "label": "Upload File (optional)",
+            "help": "Upload documents, articles, or reports (text/PDF/image). Max 5MB.",
+            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
+            "required": false
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "help": "Select model for critical analysis",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "help": "Select output language",
+            "options": []
+          },
+          {
+            "name": "max_image_size",
+            "type": "select",
+            "label": "Maximum Image Size",
+            "help": "Select maximum dimensions for uploaded images",
+            "options": [
+              {"value": "original", "label": "Original"},
+              {"value": "200", "label": "200x200"},
+              {"value": "500", "label": "500x500"},
+              {"value": "800", "label": "800x800"},
+              {"value": "1000", "label": "1000x1000"}
+            ]
+          }
+        ]
+      }
+    },
     "stp": {
       "id": "stp",
       "name": "Summarize This Paper",
