@@ -437,10 +437,6 @@ function buildToolPrompt($tool_id, $form_data) {
             // Add helper output to form data as 'content' field
             $form_data['content'] = $helper_output;
         }
-        else {
-            // If helper execution failed, set content to empty
-            $form_data['content'] = "";
-        }
     }
 
     // Handle case where tool has 'prompts' key (multiple prompts)

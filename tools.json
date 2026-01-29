@@ -1308,7 +1308,7 @@
         "source_content": "{content}"
       },
       "display": "html",
-      "helper": "web_scraper",
+      "helper": "lynx",
       "form": {
         "title": "Reader's Digest Summary",
         "description": "Review your condensed article in classic Reader's Digest format. The AI has processed the long content and created a short, engaging summary.",
@@ -1750,7 +1750,7 @@
         "input_content": "{content}"
       },
       "display": "html",
-      "helper": "web_scraper",
+      "helper": "lynx",
       "form": {
         "title": "Critical Analysis",
         "description": "Review the deeper insights generated from your input. The AI has analyzed the content to surface non-obvious questions, focus areas, and potential consequences.",
