@@ -707,6 +707,32 @@ function scrapeUrl($url) {
 }
 
 /**
+ * Run lynx command to get text content from URL
+ * 
+ * This function executes lynx with specific options to extract clean text
+ * content from a web page URL
+ * 
+ * @param string $url URL to process with lynx
+ * @return string|false Text content or false on error
+ */
+function runLynxCommand($url) {
+    // Validate URL first
+    $processed_url = processUrl($url);
+    if (!$processed_url['valid']) {
+        return false;
+    }
+    $url = $processed_url['data'];
+
+    if (file_exists('/usr/bin/lynx')) {
+        return shell_exec('lynx -dump -force_html -width=80 -nolist -nobold -nocolor ' . escapeshellarg($url) . ' 2>&1');
+    } elseif (file_exists('/usr/local/bin/lynx')) {
+        return shell_exec('lynx -dump -force_html -width=80 -nolist -nobold -nocolor ' . escapeshellarg($url) . ' 2>&1');
+    }
+    
+    return false;
+}
+
+/**
  * Extract images from PDF file
  * 
  * This function extracts images from a PDF file using either the Imagick or
