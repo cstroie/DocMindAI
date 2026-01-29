@@ -1040,6 +1040,7 @@
           "Include at least 3 key points/bullets",
           "Highlight surprising facts or emotional elements",
           "Maintain original content meaning",
+          "Translate all section headers ({title}, {gist_header}, {story_header}, {takeaways_header}, {parting_header}) to match the output language",
           "Respond ONLY with the Markdown content, without additional text"
         ],
         "source_content": "{text}"
