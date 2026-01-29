@@ -1305,20 +1305,29 @@
           "Translate all section headers ([Short Title], [The Gist], [Main Story], [Key Takeaways], [Parting Thought]) to match the output language",
           "Respond ONLY with the Markdown content, without additional text"
         ],
-        "source_content": "{text}"
+        "source_content": "{content}"
       },
       "display": "html",
+      "helper": "web_scraper",
       "form": {
         "title": "Reader's Digest Summary",
         "description": "Review your condensed article in classic Reader's Digest format. The AI has processed the long content and created a short, engaging summary.",
         "fields": [
           {
-            "name": "text",
+            "name": "content",
             "type": "textarea",
             "label": "Article Content",
             "help": "Enter the article or paper content to condense. Maximum 50,000 characters.",
             "placeholder": "Paste long article content here...",
-            "required": true
+            "required": false
+          },
+          {
+            "name": "url",
+            "type": "url",
+            "label": "Or enter URL",
+            "help": "Optionally provide a URL with article content",
+            "placeholder": "https://example.com/document",
+            "required": false
           },
           {
             "name": "file",
@@ -1741,6 +1750,7 @@
         "input_content": "{content}"
       },
       "display": "html",
+      "helper": "web_scraper",
       "form": {
         "title": "Critical Analysis",
         "description": "Review the deeper insights generated from your input. The AI has analyzed the content to surface non-obvious questions, focus areas, and potential consequences.",
@@ -1751,7 +1761,7 @@
             "label": "Input Content",
             "help": "Enter facts, situation descriptions, press articles, or any analytical material. Maximum 10,000 characters.",
             "placeholder": "Example: New policy mandates all public transportation to be electric by 2030...",
-            "required": true
+            "required": false
           },
           {
             "name": "url",
@@ -2160,8 +2170,8 @@
         ]
       }
     },
-    "med": {
-      "id": "med",
+    "mex": {
+      "id": "mex",
       "name": "Medication Explainer",
       "description": "Provide patient-friendly medication explanations in simple terms",
       "category": "medical",
@@ -2374,14 +2384,6 @@
             "help": "Enter a medical topic, research question, or keywords to search for relevant literature.",
             "placeholder": "Enter medical topic or research question...",
             "required": true
-          },
-          {
-            "name": "url",
-            "type": "url",
-            "label": "Or enter URL",
-            "help": "Optionally provide a URL with medical content",
-            "placeholder": "https://example.com/document",
-            "required": false
           },
           {
             "name": "model",

@@ -419,11 +419,14 @@ function buildToolPrompt($tool_id, $form_data) {
     // Check if tool has a helper specification
     if (isset($tool['helper']) && !empty($tool['helper'])) {
         $helper_output = executeHelper($tool['helper'], $form_data);
-        if ($helper_output === false) {
-            return "Failed to execute helper: " . $tool['helper'];
+        if ($helper_output !== false) {
+            // Add helper output to form data as 'content' field
+            $form_data['content'] = $helper_output;
         }
-        // Add helper output to form data as 'content' field
-        $form_data['content'] = $helper_output;
+        else {
+            // If helper execution failed, set content to empty
+            $form_data['content'] = "";
+        }
     }
 
     // Handle case where tool has 'prompts' key (multiple prompts)
