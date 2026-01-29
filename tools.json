@@ -1603,13 +1603,13 @@
     },
     "sbar": {
       "id": "sbar",
-      "name": "SBAR Nursing Report",
-      "description": "Generate structured SBAR (Situation, Background, Assessment, Recommendation) reports for clinical communication",
+      "name": "SBAR Nursing Note",
+      "description": "Generate structured SBAR (Situation, Background, Assessment, Recommendation) notes for clinical communication",
       "category": "medical",
       "icon": "📞",
       "prompt": {
         "role": "You are a clinical documentation assistant.",
-        "task": "Read medical transcripts or notes and structure them into professional SBAR reports.",
+        "task": "Read medical transcripts or notes and structure them into professional SBAR notes.",
         "critical_instruction": "{language_instruction}",
         "output_format": [
           "### Situation",
