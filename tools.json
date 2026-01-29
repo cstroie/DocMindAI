@@ -888,6 +888,85 @@
       "id": "pre",
       "name": "Prescription Analyzer",
       "description": "Analyze medical prescriptions and extract structured treatment information in YAML format",
+    },
+    "rdg": {
+      "id": "rdg",
+      "name": "Reader's Digest",
+      "description": "Convert long papers and articles into short, easily digestible summaries",
+      "category": "general",
+      "icon": "📖",
+      "prompt": {
+        "role": "You are an editorial assistant trained in the Reader's Digest style",
+        "task": "Condense this long content into a short, engaging summary while preserving key information.",
+        "critical_instruction": "{language_instruction}",
+        "output_format": [
+          "# [Short Title]",
+          "",
+          "## The Gist",
+          "- Key point 1",
+          "- Key point 2",
+          "- Key point 3",
+          "",
+          "## Main Story",
+          "[2-3 engaging paragraphs capturing the essence of the content]",
+          "",
+          "### Key Takeaways",
+          "- Summary point 1",
+          "- Summary point 2",
+          "- Memorable quote or fact",
+          "",
+          "## Parting Thought",
+          "[1 sentence conclusion that leaves reader with something to ponder]"
+        ],
+        "rules": [
+          "Use simple, conversational language",
+          "Focus on human-interest elements",
+          "Keep paragraphs short (2-3 sentences max)",
+          "Use section headings to guide readers",
+          "Include at least 3 key points/bullets",
+          "Highlight surprising facts or emotional elements",
+          "Maintain original content meaning",
+          "Respond ONLY with the Markdown content, without additional text"
+        ],
+        "source_content": "{text}"
+      },
+      "display": "markdown",
+      "form": {
+        "title": "Reader's Digest Summary",
+        "description": "Review your condensed article in classic Reader's Digest format. The AI has processed the long content and created a short, engaging summary.",
+        "fields": [
+          {
+            "name": "text",
+            "type": "textarea",
+            "label": "Article Content",
+            "help": "Enter the article or paper content to condense. Maximum 50,000 characters.",
+            "placeholder": "Paste long article content here...",
+            "required": true
+          },
+          {
+            "name": "file",
+            "type": "file",
+            "label": "Upload File (optional)",
+            "help": "Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file. Maximum size: 10MB.",
+            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
+            "required": false
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "help": "Select the AI model to use for condensation.",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "help": "Select the language for the condensed article.",
+            "options": []
+          }
+        ]
+      }
       "category": "medical",
       "icon": "💊",
       "prompt": {
