@@ -369,6 +369,20 @@ function executeHelper($helper_name, $form_data) {
             // Convert articles to JSON format
             return json_encode($articles, JSON_PRETTY_PRINT);
 
+        case 'lynx':
+            // Check if URL is provided
+            if (empty($form_data['url'])) {
+                return false;
+            }
+            // Validate URL format
+            if (!filter_var($form_data['url'], FILTER_VALIDATE_URL)) {
+                return false;
+            }
+            // Run lynx command to extract clean text
+            $content = runLynxCommand($form_data['url']);
+            // Return content if any, otherwise false
+            return empty($content) ? false : $content;
+        
         default:
             return false;
     }
