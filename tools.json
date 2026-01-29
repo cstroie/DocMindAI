@@ -2047,6 +2047,98 @@
         ]
       }
     },
+    "med": {
+      "id": "med",
+      "name": "Medication Explainer",
+      "description": "Provide patient-friendly medication explanations in simple terms",
+      "category": "medical",
+      "icon": "💊",
+      "prompt": {
+        "role": "You are a friendly healthcare assistant explaining medications to patients.",
+        "task": "Explain medications clearly and simply following all rules.",
+        "critical_instruction": "{language_instruction}",
+        "output_format": [
+          "### [Medication Name] Explanation",
+          "",
+          "**Purpose:**",
+          "[What this medication is for in simple terms]",
+          "",
+          "**How to Take:** ",
+          "- [Dosage instructions]",
+          "- [Special timing instructions]",
+          "",
+          "**Important Reminders:** ",
+          "- [Key safety information]",
+          "- [Important interactions or warnings]",
+          "",
+          "**Possible Side Effects:**",
+          "- [Common side effects to watch for]",
+          "",
+          "Always consult your doctor or pharmacist if you have questions!"
+        ],
+        "rules": [
+          "Use simple language at 6th-grade reading level",
+          "Avoid medical jargon - explain any technical terms",
+          "Be encouraging and supportive",
+          "Group information under clear headings",
+          "Use bullet points for easy reading",
+          "Include only the most common side effects",
+          "Emphasize following doctor's instructions",
+          "Respond ONLY with the formatted markdown"
+        ],
+        "medication_info": "{info}"
+      },
+      "display": "html",
+      "form": {
+        "title": "Medication Explanation",
+        "description": "Review the patient-friendly medication explanation. The AI has simplified complex medical information into clear instructions.",
+        "fields": [
+          {
+            "name": "info",
+            "type": "textarea",
+            "label": "Medication Information",
+            "help": "Enter medication details including name, dosage, frequency and purpose. Maximum 10,000 characters.",
+            "placeholder": "Example:\nLisinopril 10mg tablet\nTake once daily\nFor high blood pressure",
+            "required": true
+          },
+          {
+            "name": "file",
+            "type": "file",
+            "label": "Upload File (optional)",
+            "help": "Upload a prescription image or document. Max 5MB.",
+            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,image/jpeg,image/png,application/pdf",
+            "required": false
+          },
+          {
+            "name": "model",
+            "type": "select",
+            "label": "AI Model",
+            "help": "Select model for explanation generation",
+            "options": []
+          },
+          {
+            "name": "language",
+            "type": "select",
+            "label": "Response Language",
+            "help": "Select output language",
+            "options": []
+          },
+          {
+            "name": "max_image_size",
+            "type": "select",
+            "label": "Maximum Image Size",
+            "help": "Select maximum dimensions for uploaded images",
+            "options": [
+              {"value": "original", "label": "Original"},
+              {"value": "200", "label": "200x200"},
+              {"value": "500", "label": "500x500"},
+              {"value": "800", "label": "800x800"},
+              {"value": "1000", "label": "1000x1000"}
+            ]
+          }
+        ]
+      }
+    },
     "sml": {
       "id": "sml",
       "name": "Search Medical Literature",
