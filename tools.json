@@ -1754,6 +1754,14 @@
             "required": true
           },
           {
+            "name": "url",
+            "type": "url",
+            "label": "Or enter URL",
+            "help": "Optionally provide a URL to fetch content from",
+            "placeholder": "https://example.com/document",
+            "required": false
+          },
+          {
             "name": "file",
             "type": "file",
             "label": "Upload File (optional)",
@@ -2366,6 +2374,14 @@
             "help": "Enter a medical topic, research question, or keywords to search for relevant literature.",
             "placeholder": "Enter medical topic or research question...",
             "required": true
+          },
+          {
+            "name": "url",
+            "type": "url",
+            "label": "Or enter URL",
+            "help": "Optionally provide a URL with medical content",
+            "placeholder": "https://example.com/document",
+            "required": false
           },
           {
             "name": "model",
