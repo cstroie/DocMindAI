@@ -537,32 +537,40 @@ function loadToolsInCategory(category) {
     // Get category info from categories.json
     const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
 
-    // Create grid for tools
-    const grid = document.createElement('main');
-    grid.className = 'tools-grid';
+    // Clear existing tools grid
+    toolsGrid.innerHTML = '';
 
-    // Add tools to the grid
+    // Get card template
+    const template = document.getElementById('cardTemplate');
+    if (!template) {
+        console.error('Card template not found');
+        return;
+    }
+
+    // Add a card for each tool
     categoryTools.forEach(tool => {
-        const toolCard = document.createElement('article');
-        toolCard.className = 'tool-card';
-        toolCard.onclick = (e) => {
-            e.preventDefault();
-            displayToolForm(tool.id);
-        };
+        const clone = template.content.cloneNode(true);
+        
+        // Populate card elements
+        const iconElement = clone.querySelector('.card-icon');
+        const titleElement = clone.querySelector('.card-title');
+        const descriptionElement = clone.querySelector('.card-description');
+        
+        if (iconElement) iconElement.textContent = tool.icon || '📄';
+        if (titleElement) titleElement.textContent = tool.name;
+        if (descriptionElement) descriptionElement.textContent = tool.description || '';
+        
+        // Add click handler to show tool form
+        const card = clone.querySelector('.card');
+        if (card) {
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                displayToolForm(tool.id);
+            });
+        }
 
-        // Add tool icon, name, and description
-        toolCard.innerHTML = `
-            <div class="tool-icon">${tool.icon || '📄'}</div>
-            <h3>${tool.name}</h3>
-            <p>${tool.description}</p>
-        `;
-
-        // Append tool card to grid
-        grid.appendChild(toolCard);
+        toolsGrid.appendChild(clone);
     });
-
-    // Append grid to tools grid
-    toolsGrid.appendChild(grid);
 
     // Update category view title and description
     const categoryTitle = document.getElementById('categoryTitle');
