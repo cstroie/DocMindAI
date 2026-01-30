@@ -64,34 +64,69 @@ if (typeof Handlebars !== 'undefined') {
  * @note Updates the data-theme attribute on HTML element to apply theme changes
  * @see Document.addEventListener('DOMContentLoaded') - Sets up theme toggle handler
  */
-function toggleTheme() {
-    // Get current theme from localStorage or use system preference
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'auto';
-    let newTheme;
-
-    // Determine new theme based on current theme
-    if (currentTheme === 'light') {
-        newTheme = 'dark';
-    } else if (currentTheme === 'dark') {
-        newTheme = 'light';
-    } else {
-        // If system preference, check what the system is using
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        newTheme = systemPrefersDark ? 'light' : 'dark';
-    }
-
-    // Save theme preference
-    saveToLocalStorage('docmind-theme', newTheme);
-
-    // Update theme icon immediately
-    const themeIcon = document.getElementById('themeToggle');
-    if (themeIcon) {
-        themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-    }
-
-    // Apply theme by setting data-theme attribute on HTML element
-    document.documentElement.setAttribute('data-theme', newTheme);
-}
+function toggleTheme() {                                                                                                                 
+    // Get current preference from localStorage                                                                                          
+    const currentPreference = localStorage.getItem('docmind-theme') || 'system';                                                         
+    let newPreference;                                                                                                                   
+                                                                                                                                         
+    // Cycle through theme preferences                                                                                                   
+    if (currentPreference === 'light') {                                                                                                 
+        newPreference = 'dark';                                                                                                          
+    } else if (currentPreference === 'dark') {                                                                                           
+        newPreference = 'system';                                                                                                        
+    } else {                                                                                                                             
+        newPreference = 'light';                                                                                                         
+    }                                                                                                                                    
+                                                                                                                                         
+    // Save theme preference                                                                                                             
+    localStorage.setItem('docmind-theme', newPreference);                                                                                
+                                                                                                                                         
+    // Apply the new theme                                                                                                               
+    applyTheme();                                                                                                                        
+}                                                                                                                                        
+                                                                                                                                         
+/**
+ * Apply theme based on user preference
+ *
+ * This function applies the theme based on user preference stored in cookies
+ * or system preference. It updates the theme toggle button icon accordingly
+ * and sets the data-theme attribute on the HTML element.
+ *
+ * @return {void}
+ *
+ * @note Reads theme preference from docmind-theme cookie
+ * @note Falls back to system preference if no cookie is set
+ * @note Updates the theme toggle button icon
+ * @note Sets data-theme attribute on HTML element
+ * @see Document.addEventListener('DOMContentLoaded') - Calls this function on page load
+ */
+function applyTheme() {                                                                                                                  
+    // Get theme preference from localStorage                                                                                            
+    const preference = localStorage.getItem('docmind-theme') || 'system';                                                                
+    let actualTheme, themeIconChar;                                                                                                      
+                                                                                                                                         
+    // Determine the actual theme to apply and icon to show                                                                              
+    if (preference === 'light') {                                                                                                        
+        actualTheme = 'light';                                                                                                           
+        themeIconChar = '🌙';                                                                                                            
+    } else if (preference === 'dark') {                                                                                                  
+        actualTheme = 'dark';                                                                                                            
+        themeIconChar = '☀️';                                                                                                            
+    } else { // system                                                                                                                   
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;                                             
+        actualTheme = systemPrefersDark ? 'dark' : 'light';                                                                              
+        themeIconChar = systemPrefersDark ? '☀️' : '🌙';                                                                                  
+    }                                                                                                                                    
+                                                                                                                                         
+    // Update theme button icon                                                                                                          
+    const themeButton = document.getElementById('themeToggle');                                                                          
+    if (themeButton) {                                                                                                                   
+        themeButton.textContent = themeIconChar;                                                                                         
+    }                                                                                                                                    
+                                                                                                                                         
+    // Apply the theme                                                                                                                   
+    document.documentElement.setAttribute('data-theme', actualTheme);                                                                    
+}                                                                                                                                        
 
 /**
  * Toggle sidebar menu for mobile devices
@@ -113,49 +148,6 @@ function toggleMenu() {
         sidebar.classList.toggle('active');
         // Update menu icon based on sidebar state
         menuToggle.innerHTML = sidebar.classList.contains('active') ? '✕' : '☰';
-    }
-}
-
-/**
- * Apply theme based on user preference
- *
- * This function applies the theme based on user preference stored in cookies
- * or system preference. It updates the theme toggle button icon accordingly
- * and sets the data-theme attribute on the HTML element.
- *
- * @return {void}
- *
- * @note Reads theme preference from docmind-theme cookie
- * @note Falls back to system preference if no cookie is set
- * @note Updates the theme toggle button icon
- * @note Sets data-theme attribute on HTML element
- * @see Document.addEventListener('DOMContentLoaded') - Calls this function on page load
- */
-function applyTheme() {
-    // Get theme preference from localStorage
-    const theme = localStorage.getItem('docmind-theme') || 'system';
-
-    // Update theme icon based on current theme
-    const themeIcon = document.getElementById('themeIcon');
-    if (themeIcon) {
-        if (theme === 'dark') {
-            themeIcon.textContent = '☀️';
-        } else if (theme === 'light') {
-            themeIcon.textContent = '🌙';
-        } else {
-            // System preference - check what the system is using
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            themeIcon.textContent = systemPrefersDark ? '☀️' : '🌙';
-        }
-    }
-
-    // Apply theme by setting data-theme attribute on HTML element
-    if (theme === 'system') {
-        // For system theme, check system preference
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', systemPrefersDark ? 'dark' : 'light');
-    } else {
-        document.documentElement.setAttribute('data-theme', theme);
     }
 }
 

@@ -27,18 +27,17 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                 </strong>
             </li>
         </ul>
-        <ul class="menu">
-            <li class="menu-categories" id="categoriesMenu">
-                <!-- Categories will be dynamically populated by JavaScript -->
+        <ul class="menu" id="categoriesMenu">
+            <li>
+                <a data-view="home" aria-label="Home" onclick="switchView('home')">🏠</a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a data-view="history" aria-label="View history" onclick="switchView('history')">📜</a>
             </li>
             <li>
-                <button class="outline" data-view="history" 
-                        aria-label="View history" onclick="switchView('history')">
-                    🕒 History
-                </button>
-            </li>
-            <li>
-                <button id="themeToggle" class="outline" aria-label="Toggle theme" onclick="toggleTheme()">🌙</button>
+                <a id="themeToggle" class="outline" aria-label="Toggle theme" onclick="toggleTheme()">🌙</a>
             </li>
         </ul>
     </nav>
