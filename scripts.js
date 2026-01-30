@@ -60,8 +60,8 @@ function toggleTheme() {
         newTheme = systemPrefersDark ? 'light' : 'dark';
     }
 
-    // Save theme preference as cookie (30 days)
-    saveCookie('docmind-theme', newTheme, 30);
+    // Save theme preference
+    saveToLocalStorage('docmind-theme', newTheme);
 
     // Update theme icon immediately
     const themeIcon = document.getElementById('themeIcon');
@@ -1117,14 +1117,14 @@ async function handleFormSubmit(event) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="loading"></span> Processing...';
 
-    // Save selected model and language as cookies (30 days)
+    // Save preferences to localStorage
     const model = formData.get('model');
     if (model) {
-        saveCookie('docmind-model', model, 30);
+        saveToLocalStorage('docmind-model', model);
     }
     const language = formData.get('language');
     if (language) {
-        saveCookie('docmind-language', language, 30);
+        saveToLocalStorage('docmind-language', language);
     }
 
     try {
@@ -1730,14 +1730,9 @@ function switchView(viewName) {
  * @see handleFormSubmit() - Uses this function to save user preferences
  * @see toggleTheme() - Uses this function to save theme preference
  */
-function saveCookie(name, value, days = 30, path = '/') {
-    // Set expiration date
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + days);
-
-    // Create and save the cookie
-    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expirationDate.toUTCString()}; path=${path}`;
-}
+function saveToLocalStorage(key, value) {                                                                         
+    localStorage.setItem(key, value);                                                                             
+}                                                                                                                 
 
 /**
  * Save result to localStorage
