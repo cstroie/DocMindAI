@@ -7,6 +7,39 @@
     "license": "GPLv3",
     "schema_version": "1.0"
   },
+  "common": {
+    "form": {
+      "fields": [
+        {
+          "name": "model",
+          "type": "select",
+          "label": "AI Model",
+          "help": "Select model for question generation",
+          "options": []
+        },
+        {
+          "name": "language",
+          "type": "select",
+          "label": "Response Language",
+          "help": "Select output language",
+          "options": []
+        },
+        {
+          "name": "max_image_size",
+          "type": "select",
+          "label": "Maximum Image Size",
+          "help": "Select maximum dimensions for uploaded images",
+          "options": [
+            {"value": "original", "label": "Original"},
+            {"value": "200", "label": "200x200"},
+            {"value": "500", "label": "500x500"},
+            {"value": "800", "label": "800x800"},
+            {"value": "1000", "label": "1000x1000"}
+          ]
+        }
+      ]
+    }
+  },
   "tools": {
     "dqc": {
       "id": "dqc",
