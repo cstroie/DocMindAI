@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,59 +19,29 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
 <body>
     <nav class="container-fluid">
         <ul>
-            <li><strong><span class="logo-icon">🏥</span><span class="logo-text">DocMind AI</span></strong></li>
+            <li>
+                <span class="logo-icon">🏥</span>
+                <strong class="logo-text">
+                    <span class="logo-text-first">DocMind</span>
+                    <span class="logo-text-second">AI</span>
+                </strong>
+            </li>
         </ul>
         <ul class="menu">
             <li><a href="#">About</a></li>
             <li><a href="#">Services</a></li>
             <li><a href="#">Products</a></li>
+            <li>
+                <button id="themeToggle" class="outline" aria-label="Toggle theme" onclick="toggleTheme()">🌙</button>
+            </li>
         </ul>
-        <button class="theme-toggle" id="themeToggle">
-            <span class="theme-icon" id="themeIcon">🌙</span>
-        </button>
     </nav>
 
-    <header>
+    <header class="container-fluid">
         <select id="toolSelect">
             <option value="">Home</option>
         </select>
     </header>
-
-    <div class="app-container">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <span class="logo-icon">🏥</span>
-                    <span class="logo-text">DocMind AI</span>
-                </div>
-            </div>
-            <nav class="sidebar-nav">
-                <button class="nav-item active" data-view="home">
-                    <div class="nav-item-content">
-                        <span class="nav-icon">🏠</span>
-                        <span class="nav-text">Home</span>
-                    </div>
-                </button>
-                <button class="nav-item" data-view="history">
-                    <div class="nav-item-content">
-                        <span class="nav-icon">🕒</span>
-                        <span class="nav-text">History</span>
-                    </div>
-                </button>
-            </nav>
-            <div class="sidebar-footer">
-                <div class="user-profile">
-                    <div class="user-avatar">👤</div>
-                    <div class="user-info">
-                        <span class="user-name">User</span>
-                        <span class="user-status">Online</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
-    </div>
-
 
     <!-- Main Content Area -->
     <main class="container view-container">
