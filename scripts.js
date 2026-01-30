@@ -592,7 +592,7 @@ function loadToolsInCategory(category) {
  */
 function populateToolSelect(toolSelect) {
     // Clear existing options
-    toolSelect.innerHTML = '<option value="">Select a tool</option>';
+    toolSelect.innerHTML = '<option selected disabled value="">Select a tool</option>';
 
     // Check if toolsData is available
     if (!toolsData) {
@@ -695,10 +695,10 @@ function displayToolForm(toolId) {
     }
 
     // Update form title and description
-    const pageTitle = document.getElementById('pageTitle');
-    const pageSubtitle = document.getElementById('pageSubtitle');
-    if (pageTitle) pageTitle.textContent = tool.icon + ' ' + tool.name;
-    if (pageSubtitle) pageSubtitle.textContent = tool.description || '';
+    const formTitle = document.getElementById('formTitle');
+    const formSubtitle = document.getElementById('formSubtitle');
+    if (formTitle) formTitle.textContent = tool.icon + ' ' + tool.name;
+    if (formSubtitle) formSubtitle.textContent = tool.description || '';
 
     // Populate the form fields
     const toolForm = document.getElementById('toolForm');
@@ -1259,8 +1259,8 @@ function displayResults(results, fromHistory = false) {
     // Get results area and title elements
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
-    const pageTitle = document.getElementById('pageTitle');
-    const pageSubtitle = document.getElementById('pageSubtitle');
+    const resultsTitle = document.getElementById('resultsTitle');
+    const resultsSubtitle = document.getElementById('resultsSubtitle');
 
     // Extract the actual response content from the API response
     let responseContent = '';
@@ -1294,14 +1294,14 @@ function displayResults(results, fromHistory = false) {
 
     // Update page title and subtitle if tool has form.title and form.description
     if (tool && tool.form && tool.form.title) {
-        pageTitle.textContent = tool.form.title;
+        resultsTitle.textContent = tool.form.title;
     } else {
-        pageTitle.textContent = '📝 Results';
+        resultsTitle.textContent = '📝 Results';
     }
     if (tool && tool.form && tool.form.description) {
-        pageSubtitle.textContent = tool.form.description;
+        resultsSubtitle.textContent = tool.form.description;
     } else {
-        pageSubtitle.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
+        resultsSubtitle.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
     }
 
     // Check if the result contains markdown code fences

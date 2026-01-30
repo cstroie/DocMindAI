@@ -37,18 +37,18 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
         </ul>
     </nav>
 
-    <header class="container-fluid">
+    <header class="container">
+        <hgroup>
+            <h1 class="page-title" id="pageTitle">Welcome to DocMind AI</h1>
+            <p class="page-subtitle" id="pageSubtitle">Intelligent Document Processing</p>
+        </hgroup>
         <select id="toolSelect">
-            <option value="">Home</option>
+            <option selected disabled value="">Home</option>
         </select>
     </header>
 
     <!-- Main Content Area -->
     <main class="container view-container">
-        <hgroup>
-            <h1 class="page-title" id="pageTitle">Welcome to DocMind AI</h1>
-            <p class="page-subtitle" id="pageSubtitle">Intelligent Document Processing</p>
-        </hgroup>
 
         <!-- Home View -->
         <section class="view home-view active-view">
@@ -62,92 +62,77 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                         <div class="illustration-content">📄🔍🤖</div>
                     </aside>
                     <div class="hero-actions">
-                        <button class="btn btn-primary btn-large" id="getStartedBtn">Get Started</button>
-                        <button class="btn btn-secondary btn-large" id="learnMoreBtn">Learn More</button>
+                        <button class="primary" id="getStartedBtn">Get Started</button>
+                        <button class="secondary" id="learnMoreBtn">Learn More</button>
                     </div>
                 </main>
             </article>
 
-            <div class="features-section">
-                <h3 class="section-title">Key Features</h3>
-                <div class="grid features-grid">
-                    <article class="feature-card">
-                        <div class="feature-icon">📊</div>
-                        <h4 class="feature-title">Advanced Analysis</h4>
-                        <p class="feature-description">Deep document analysis with AI-powered insights</p>
-                    </article>
-                    <article class="feature-card">
-                        <div class="feature-icon">⚡</div>
-                        <h4 class="feature-title">Fast Processing</h4>
-                        <p class="feature-description">Quick results with optimized algorithms</p>
-                    </article>
-                    <article class="feature-card">
-                        <div class="feature-icon">🔒</div>
-                        <h4 class="feature-title">Secure</h4>
-                        <p class="feature-description">Your data privacy is our priority</p>
-                    </article>
-                    <article class="feature-card">
-                        <div class="feature-icon">🌐</div>
-                        <h4 class="feature-title">Multi-language</h4>
-                        <p class="feature-description">Support for multiple languages</p>
-                    </article>
-                </div>
+            <div class="grid" id="categoriesGrid">
+                <!-- Category cards will be populated by JavaScript -->
             </div>
         </section>
 
-            <!-- Results View -->
-            <section class="view results-view" style="display: none;">
-                <article class="results-container" id="resultsArea">
-                    <main class="results-content" id="resultsContent">
-                        <!-- Results will be displayed here -->
-                    </main>
-                    <footer class="grid results-actions">
-                        <button class="primary" id="copyResultsBtn">Copy Results</button>
-                        <button class="secondary" id="downloadResultsBtn">Download</button>
-                    </footer>
-                </article>
-            </section>
+        <!-- Results View -->
+        <section class="view results-view" style="display: none;">
+            <article id="resultsArea">
+                <hgroup>
+                    <h2 id="resultsTitle"></h2>
+                    <p id="resultsSubtitle"></p>
+                </hgroup>
+                <main id="resultsContent">
+                    <!-- Results will be displayed here -->
+                </main>
+                <footer class="grid">
+                    <button class="primary" id="copyResultsBtn">Copy Results</button>
+                    <button class="primary" id="downloadResultsBtn">Download</button>
+                    <button class="secondary" id="showFormBtn">Show Form</button>
+                </footer>
+            </article>
+        </section>
 
-            <!-- Form View -->
-            <section class="view form-view" style="display: none;">
-                <article class="form-container" id="toolForm">
-                    <form id="apiForm" class="tool-form">
-                        <input type="hidden" name="tool" id="toolId">
-                        <div class="form-fields" id="formFields">
-                            <!-- Will be populated by JavaScript -->
-                        </div>
-                        <div class="grid form-actions">
-                            <button type="submit" class="btn btn-primary" id="submitBtn">
-                                <span class="btn-text">Submit</span>
-                                <span class="btn-loading" style="display: none;">
-                                    <span class="loading-spinner"></span>
-                                    Processing...
-                                </span>
-                            </button>
-                            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-                        </div>
-                    </form>
-                </article>
-            </section>
+        <!-- Form View -->
+        <section class="view form-view" style="display: none;">
+            <article id="toolForm">
+                <hgroup>
+                    <h2 id="formTitle"></h2>
+                    <p id="formSubtitle"></p>
+                </hgroup>
+                <form id="apiForm">
+                    <input type="hidden" name="tool" id="toolId">
+                    <fieldset class="form-fields" id="formFields">
+                        <!-- Will be populated by JavaScript -->
+                    </fieldset>
+                </form>
+                <footer class="grid">
+                    <button type="submit" form="apiForm" class="primary" id="submitBtn">
+                        <span class="btn-text">Submit</span>
+                        <span class="btn-loading" style="display: none;">
+                            <span class="loading-spinner"></span>
+                            Processing...
+                        </span>
+                    </button>
+                    <button type="button" class="secondary" id="cancelBtn">Cancel</button>
+                </footer>
+            </article>
+        </section>
 
-            <!-- History View -->
-            <section class="view history-view">
-                <div class="history-container">
-                    <div class="history-header">
-                        <h2 class="history-title">Analysis History</h2>
-                        <button class="btn btn-secondary btn-small" id="clearHistoryBtn">Clear History</button>
-                    </div>
-                    <div class="history-list">
-                        <!-- History items will be displayed here -->
-                    </div>
+        <!-- History View -->
+        <section class="view history-view">
+            <div class="history-container">
+                <div class="history-header">
+                    <h2 class="history-title">Analysis History</h2>
+                    <button class="btn btn-secondary btn-small" id="clearHistoryBtn">Clear History</button>
                 </div>
-            </section>
-
+                <div class="history-list">
+                    <!-- History items will be displayed here -->
+                </div>
+            </div>
+        </section>
     </main>
 
-        <!-- Notifications -->
-        <div class="notification-container" id="notificationContainer"></div>
-
+    <!-- Notifications -->
+    <div class="notification-container" id="notificationContainer"></div>
 
     <!-- Templates -->
     <template id="errorTemplate">
