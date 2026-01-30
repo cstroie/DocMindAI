@@ -106,14 +106,8 @@ function toggleMenu() {
  * @see Document.addEventListener('DOMContentLoaded') - Calls this function on page load
  */
 function applyTheme() {
-    // Get theme preference from cookie
-    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-        const [name, value] = cookie.trim().split('=');
-        acc[name] = decodeURIComponent(value);
-        return acc;
-    }, {});
-
-    const theme = cookies['docmind-theme'] || 'system';
+    // Get theme preference from localStorage
+    const theme = localStorage.getItem('docmind-theme') || 'system';
 
     // Update theme icon based on current theme
     const themeIcon = document.getElementById('themeIcon');
