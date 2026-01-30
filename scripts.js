@@ -15,14 +15,12 @@ function populateCategoriesMenu() {
     const menuContainer = document.getElementById('categoriesMenu');
     if (!menuContainer || !categoriesData) return;
     
-    menuContainer.innerHTML = '';
-    
     for (const [categoryId, categoryData] of Object.entries(categoriesData)) {
         const menuItem = document.createElement('li');
         const menuLink = document.createElement('a');
         menuLink.href = '#';
         menuLink.dataset.view = `tools-${categoryId}`;
-        menuLink.innerHTML = `${categoryData.icon || '📁'} ${categoryData.name}`;
+        menuLink.innerHTML = `${categoryData.icon || '📁'}`;
         
         menuLink.addEventListener('click', (e) => {
             e.preventDefault();
