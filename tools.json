@@ -18,6 +18,14 @@
           "options": []
         },
         {
+            "name": "url",
+            "type": "url",
+            "label": "Or enter URL",
+            "help": "Optionally provide a URL to fetch content from",
+            "placeholder": "https://example.com/document",
+            "required": false
+        },
+        {
           "name": "language",
           "type": "select",
           "label": "Response Language",
@@ -1061,14 +1069,7 @@
             "placeholder": "Paste long article content here...",
             "required": false
           },
-          {
-            "name": "url",
-            "type": "url",
-            "label": "Or enter URL",
-            "help": "Optionally provide a URL with article content",
-            "placeholder": "https://example.com/document",
-            "required": false
-          },
+          "url",
           "file",
           "model",
           "language"
@@ -1390,14 +1391,7 @@
             "placeholder": "Example: New policy mandates all public transportation to be electric by 2030...",
             "required": false
           },
-          {
-            "name": "url",
-            "type": "url",
-            "label": "Or enter URL",
-            "help": "Optionally provide a URL to fetch content from",
-            "placeholder": "https://example.com/document",
-            "required": false
-          },
+          "url",
           "file",
           "model",
           "language",
