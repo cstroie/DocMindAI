@@ -433,6 +433,61 @@ function createCategoriesViews(categories) {
 }
 
 /**
+ * Populate home page with category cards
+ * 
+ * This function creates category cards for the home page using the template
+ * and populates them with category data. Each card shows the category icon,
+ * name, and description, and links to the tools view.
+ * 
+ * @return {void}
+ * 
+ * @note Uses the category card template (#categoryCardTemplate)
+ * @note Dynamically creates cards for each category with click handlers
+ * @see Document.addEventListener('DOMContentLoaded') - Calls this function
+ */
+function populateCategoryCards() {
+    const categoriesGrid = document.getElementById('categoriesGrid');
+    if (!categoriesGrid) {
+        console.error('Categories grid element not found');
+        return;
+    }
+
+    // Clear existing grid content
+    categoriesGrid.innerHTML = '';
+
+    // Get category card template
+    const template = document.getElementById('categoryCardTemplate');
+    if (!template) {
+        console.error('Category card template not found');
+        return;
+    }
+
+    // Add a card for each category
+    for (const [categoryId, categoryData] of Object.entries(categoriesData)) {
+        const clone = template.content.cloneNode(true);
+        
+        // Populate card elements
+        const iconElement = clone.querySelector('.category-icon');
+        const titleElement = clone.querySelector('.category-title');
+        const descriptionElement = clone.querySelector('.category-description');
+        
+        if (iconElement) iconElement.textContent = categoryData.icon || '📁';
+        if (titleElement) titleElement.textContent = categoryData.name;
+        if (descriptionElement) descriptionElement.textContent = categoryData.description || '';
+        
+        // Add click handler to show category tools
+        const card = clone.querySelector('.category-card');
+        if (card) {
+            card.addEventListener('click', () => {
+                switchView('tools-' + categoryId);
+            });
+        }
+
+        categoriesGrid.appendChild(clone);
+    }
+}
+
+/**
  * Display tools for a specific category
  *
  * This function displays only the tools belonging to a specific category.
@@ -1980,6 +2035,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         //createCategoriesViews(categoriesData);
         const toolSelect = document.getElementById('toolSelect');
         populateToolSelect(toolSelect);
+        populateCategoryCards();
     }
 
     // Set up form submission
