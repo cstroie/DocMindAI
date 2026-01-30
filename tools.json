@@ -1,7 +1,7 @@
 {
-  "version": "1.3",
+  "version": "2.0",
   "metadata": {
-    "last_updated": "2026-01-28",
+    "last_updated": "2026-01-30",
     "author": "Costin Stroie",
     "description": "Configuration file for DocMindAI tool profiles",
     "license": "GPLv3",
@@ -23,6 +23,14 @@
           "label": "Response Language",
           "help": "Select output language",
           "options": []
+        },
+        {
+            "name": "file",
+            "type": "file",
+            "label": "Upload File (optional)",
+            "help": "Upload a text, document or image file. Max 5MB.",
+            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
+            "required": false
         },
         {
           "name": "max_image_size",
@@ -104,41 +112,10 @@
             "help": "Any relevant details about your health situation",
             "placeholder": "Example: I have a family history of lung cancer"
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload a text, document or image file. Max 5MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select model for question generation",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select output language",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select maximum dimensions for uploaded images",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -196,41 +173,10 @@
             "help": "Any relevant patient-provided details to tailor explanation",
             "placeholder": "Example: 'My doctor ordered this scan because of persistent cough'"
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload a text, document or image file. Max 5MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select model for explanation generation",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select output language",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select maximum dimensions for uploaded images",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -278,20 +224,8 @@
             "placeholder": "Example: Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum.",
             "required": true
           },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for analysis.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the AI response.",
-            "options": []
-          }
+          "model",
+          "language"
         ]
       },
       "template": [
@@ -343,14 +277,7 @@
             "placeholder": "Example: Patient: John Doe, Age: 45, Diagnosis: Type 2 Diabetes, Treatment: Metformin 500mg twice daily",
             "required": true
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload a file to extract data from (text documents or images). Max 10MB.",
-            "accept": ".txt,.pdf,.doc,.docx,.odt,.md,.json,.csv,.xml,.png,.jpg,.jpeg,.gif,.webp",
-            "required": false
-          },
+          "file",
           {
             "name": "output",
             "type": "select",
@@ -364,26 +291,8 @@
               {"value": "markdown", "label": "Markdown"}
             ]
           },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for data extraction.",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select the maximum dimensions for resizing uploaded images. Choose 'Original' to send the image as-is without processing.",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "model",
+          "max_image_size"
         ]
       }
     },
@@ -514,41 +423,10 @@
             "placeholder": "Paste full paper text or PDF content here...",
             "required": true
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file. Maximum size: 10MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for analysis.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the analysis output.",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select the maximum dimensions for resizing uploaded images. Choose 'Original' to send the image as-is without processing.",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -578,41 +456,10 @@
             "placeholder": "Example: Explain quantum computing in simple terms",
             "required": true
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Optional file upload",
-            "help": "Upload a text document (content will be appended to prompt) or an image (will be sent with prompt).",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,.jpg,.jpeg,.png,.gif,.webp,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for processing the prompt.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the AI response.",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select the maximum dimensions for resizing uploaded images. Choose 'Original' to send the image as-is without processing.",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -670,41 +517,10 @@
             "placeholder": "Example:\nPhysician: What brings you in today?\nPatient: I've been having headaches for the past week...\n\nTip: You can also upload a text file or image of the transcript below.",
             "required": true
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file of the medical transcript. Maximum size: 2MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for SOAP note generation. MedGemma models work best for this task.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the SOAP note output.",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select the maximum dimensions for resizing uploaded images. Choose 'Original' to send the image as-is without processing.",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -766,41 +582,10 @@
             "help": "Any relevant patient-provided details to tailor guidance",
             "placeholder": "Example: 'My doctor is monitoring this finding with regular scans'"
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload a text, document or image file. Max 5MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select model for guidance generation",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select output language",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select maximum dimensions for uploaded images",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -847,28 +632,10 @@
             "help": "Enter the patient discharge paper you want to analyze. Maximum 10,000 characters.",
             "placeholder": "Example: Patient discharged after treatment for pneumonia. Chest X-ray shows resolved infiltrate."
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file of the medical transcript. Maximum size: 2MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for analysis.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the analysis output.",
-            "options": []
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       },
       "template": [
@@ -1072,27 +839,10 @@
             "help": "Enter the hospital discharge paper you want to analyze. Maximum 10,000 characters.",
             "placeholder": "Example: Patient: John Doe, Age: 65, Gender: Male, Admission Date: 2024-01-15, Discharge Date: 2024-01-20, Admission Diagnosis: Acute myocardial infarction, Final Diagnosis: Acute myocardial infarction with successful PCI, etc."
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file of the medical transcript. Maximum size: 2MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp"
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for analysis.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the analysis output.",
-            "options": []
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -1159,20 +909,8 @@
             "placeholder": "Example: Hazy opacity in the left mid lung field, possibly representing consolidation or infiltrate. No pleural effusion, pneumothorax or pneumoperitoneum.",
             "required": true
           },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for differential diagnosis.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the diagnosis output.",
-            "options": []
-          }
+          "model",
+          "language"
         ]
       },
       "template": [
@@ -1260,41 +998,10 @@
             "placeholder": "Example: Patient: John Doe, Age: 45, Diagnosis: Hypertension. Medication: Lisinopril 10mg tablet, once daily. Dr. Smith, Cardiology",
             "required": true
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload Prescription (optional)",
-            "help": "Upload a text document, image, or PDF of the prescription. Supported formats: .txt, .md, .doc, .docx, .pdf, .odt, .jpg, .jpeg, .png, .gif, .webp. Maximum size: 5MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,.jpg,.jpeg,.png,.gif,.webp,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for prescription analysis.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the analysis output.",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select the maximum dimensions for resizing uploaded images. Choose 'Original' to send the image as-is without processing.",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -1362,28 +1069,9 @@
             "placeholder": "https://example.com/document",
             "required": false
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file. Maximum size: 10MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for condensation.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the condensed article.",
-            "options": []
-          }
+          "file",
+          "model",
+          "language"
         ]
       }
     },
@@ -1446,63 +1134,8 @@
             "placeholder": "Example: The patient presents with acute myocardial infarction secondary to coronary artery occlusion. Percutaneous coronary intervention was performed with stent placement.",
             "required": true
           },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for content simplification.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the patient education content.",
-            "options": []
-          }
-        ]
-      }
-    },
-    "chat": {
-      "id": "chat",
-      "name": "Medical Chat Assistant",
-      "description": "Interact directly with an AI medical assistant for real-time medical queries",
-      "category": "clinical",
-      "icon": "💬",
-      "form": {
-        "title": "Medical Chat",
-        "description": "Review the AI medical assistant's response to your query. The response is tailored based on the selected personality and provides medical information in the requested language.",
-        "fields": [
-          {
-            "name": "message",
-            "type": "textarea",
-            "label": "Your Message",
-            "required": true
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "options": []
-          },
-          {
-            "name": "personality",
-            "type": "select",
-            "label": "AI Personality",
-            "options": [
-              {"value": "medical_assistant", "label": "Medical Assistant"},
-              {"value": "general_practitioner", "label": "General Practitioner"},
-              {"value": "specialist", "label": "Medical Specialist"},
-              {"value": "medical_researcher", "label": "Medical Researcher"},
-              {"value": "skippy", "label": "Skippy the Magnificent"}
-            ]
-          }
+          "model",
+          "language"
         ]
       }
     },
@@ -1516,25 +1149,10 @@
         "title": "OCR Form",
         "description": "Review the extracted text from your uploaded image. The OCR tool has processed the image and converted it to editable text format.",
         "fields": [
-          {
-            "name": "image",
-            "type": "file",
-            "label": "Image File",
-            "required": true,
-            "accept": "image/jpeg,image/png,image/gif,image/webp,application/pdf"
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "options": []
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -1607,20 +1225,8 @@
               {"value": "dokuwiki", "label": "DokuWiki"}
             ]
           },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for content conversion.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the converted content output.",
-            "options": []
-          }
+          "model",
+          "language"
         ]
       }
     },
@@ -1711,20 +1317,8 @@
             "required": true,
             "placeholder": "https://example.com/article"
           },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for summarization.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the summary output.",
-            "options": []
-          }
+          "model",
+          "language"
         ]
       }
     },
@@ -1804,41 +1398,10 @@
             "placeholder": "https://example.com/document",
             "required": false
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload documents, articles, or reports (text/PDF/image). Max 5MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select model for critical analysis",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select output language",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select maximum dimensions for uploaded images",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -1934,14 +1497,7 @@
             "placeholder": "Example: The patient presents with acute myocardial infarction secondary to coronary artery occlusion. Percutaneous coronary intervention was performed with stent placement.\n\nTip: You can also upload a text or markdown file below.",
             "required": true
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Or Upload File",
-            "help": "Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file of the paper. Maximum size: 10MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,.jpg,.jpeg,.png,.gif,.webp,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
+          "file",
           {
             "name": "prompt",
             "type": "select",
@@ -1952,33 +1508,9 @@
               {"value": "problem_idea_evidence", "label": "Problem-Idea-Evidence"}
             ]
           },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for analysis.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the analysis output.",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select the maximum dimensions for resizing uploaded images. Choose 'Original' to send the image as-is without processing.",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "model",
+          "language",
+          "max_image_size"
         ]
       },
       "template": [
@@ -2076,41 +1608,10 @@
             "placeholder": "Example:\nPatient: John Doe, Room 210\nConcern: Sudden difficulty breathing at 14:00\nHistory: COPD, admitted 2 days ago for pneumonia\nVitals: RR 28, SpO2 88% on room air",
             "required": true
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file. Maximum size: 5MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model for report generation. Clinical models work best.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select output language for SBAR report.",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select maximum dimensions for uploaded images.",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -2165,41 +1666,10 @@
             "placeholder": "Example:\nPatient: John Doe\nConcerns: Difficulty ambulating, pain level 7/10\nAssessment: Weakness in lower extremities, limited ROM",
             "required": true
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload a text (.txt, .md), document (.doc, .docx, .pdf, .odt), or image file. Maximum size: 5MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,text/plain,text/markdown,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.oasis.opendocument.text,image/jpeg,image/png,image/gif,image/webp",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select clinical model for care plan generation.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select output language for care plan.",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select maximum dimensions for uploaded images.",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -2257,41 +1727,10 @@
             "placeholder": "Example:\nLisinopril 10mg tablet\nTake once daily\nFor high blood pressure",
             "required": true
           },
-          {
-            "name": "file",
-            "type": "file",
-            "label": "Upload File (optional)",
-            "help": "Upload a prescription image or document. Max 5MB.",
-            "accept": ".txt,.md,.doc,.docx,.pdf,.odt,image/jpeg,image/png,application/pdf",
-            "required": false
-          },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select model for explanation generation",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select output language",
-            "options": []
-          },
-          {
-            "name": "max_image_size",
-            "type": "select",
-            "label": "Maximum Image Size",
-            "help": "Select maximum dimensions for uploaded images",
-            "options": [
-              {"value": "original", "label": "Original"},
-              {"value": "200", "label": "200x200"},
-              {"value": "500", "label": "500x500"},
-              {"value": "800", "label": "800x800"},
-              {"value": "1000", "label": "1000x1000"}
-            ]
-          }
+          "file",
+          "model",
+          "language",
+          "max_image_size"
         ]
       }
     },
@@ -2418,20 +1857,8 @@
             "placeholder": "Enter medical topic or research question...",
             "required": true
           },
-          {
-            "name": "model",
-            "type": "select",
-            "label": "AI Model",
-            "help": "Select the AI model to use for summarization.",
-            "options": []
-          },
-          {
-            "name": "language",
-            "type": "select",
-            "label": "Response Language",
-            "help": "Select the language for the summary output.",
-            "options": []
-          }
+          "model",
+          "language"
         ]
       }
     }
