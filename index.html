@@ -146,11 +146,11 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
         </div>
     </template>
 
-    <template id="categoryCardTemplate">
-        <article class="category-card">
-            <div class="category-icon"></div>
-            <h4 class="category-title"></h4>
-            <p class="category-description"></p>
+    <template id="cardTemplate">
+        <article class="card">
+            <div class="card-icon"></div>
+            <h4 class="card-title"></h4>
+            <p class="card-description"></p>
         </article>
     </template>
 
@@ -180,26 +180,10 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
             </hgroup>
 
             <!-- Tools Grid -->
-            <div class="tools-grid" id="toolsGrid">
+            <div class="grid tools-grid" id="toolsGrid">
                 <!-- Will be populated by JavaScript -->
             </div>
         </section>
-    </template>
-
-    <template id="toolCardTemplate">
-        <div class="tool-card">
-            <div class="tool-card-header">
-                <div class="tool-icon"></div>
-                <div class="tool-category-badge"></div>
-            </div>
-            <div class="tool-card-content">
-                <h3 class="tool-title"></h3>
-                <p class="tool-description"></p>
-            </div>
-            <div class="tool-card-footer">
-                <button class="btn btn-small tool-select-btn">Select Tool</button>
-            </div>
-        </div>
     </template>
 
     <template id="formFieldTemplate">
