@@ -2,6 +2,7 @@
 // Global variables to store categories, tools, languages, and prompts
 let categoriesData = null;
 let toolsData = null;
+let commonData = null;
 let languagesData = null;
 let promptsData = null;
 
@@ -661,21 +662,35 @@ function displayToolForm(toolId) {
         return acc;
     }, {});
 
-    // Create form fields based on formConfig
-    if (tool.form && tool.form.fields) {
-        tool.form.fields.forEach(field => {
-            const fieldElement = createFormField(field, cookies);
-            if (fieldElement) {
-                formFields.appendChild(fieldElement);
-            } else if (field.type === 'hidden') {
-                // Create and append hidden input directly to the form
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = field.name;
-                hiddenInput.value = field.value || '';
-                toolForm.appendChild(hiddenInput);
-            }
-        });
+    // Create form fields based on formConfig                                                                         
+    if (tool.form && tool.form.fields) {                                                                          
+        tool.form.fields.forEach(field => {                                                                       
+            // If field is a string, get the field definition from common/form/fields                             
+            if (typeof field === 'string') {                                                                      
+                if (!commonData || !commonData.form || !commonData.form.fields) { 
+                    console.error('No common data available or common form fields not found');                     
+                    return;                                                                                       
+                }                                                                                                 
+                const commonField = commonData.form.fields.find(f => f.name === field);                     
+                if (!commonField) {                                                                               
+                    console.error(`Field "${field}" not found in common form fields`);                            
+                    return;                                                                                       
+                }                                                                                                 
+                field = commonField;                                                                              
+            }                                                                                                     
+                                                                                                                  
+            const fieldElement = createFormField(field, cookies);                                                 
+            if (fieldElement) {                                                                                   
+                formFields.appendChild(fieldElement);                                                             
+            } else if (field.type === 'hidden') {                                                                 
+                // Create and append hidden input directly to the form                                            
+                const hiddenInput = document.createElement('input');                                              
+                hiddenInput.type = 'hidden';                                                                      
+                hiddenInput.name = field.name;                                                                    
+                hiddenInput.value = field.value || '';                                                            
+                toolForm.appendChild(hiddenInput);                                                                
+            }                                                                                                     
+        });                                                                                                       
     }
 
     // Show the form and hide results area
@@ -1967,7 +1982,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load categories data
     categoriesData = await loadJSONResource('categories.json', 'categories');
     // Load tools data
-    toolsData = await loadJSONResource('tools.json', 'tools');
+    configData = await loadJSONResource('tools.json');
+    toolsData = configData.tools || {};
+    commonData = configData.common || {};
     // Load languages data
     languagesData = await loadJSONResource('languages.json', 'languages');
 
