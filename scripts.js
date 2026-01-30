@@ -39,14 +39,8 @@ if (typeof Handlebars !== 'undefined') {
  * @see Document.addEventListener('DOMContentLoaded') - Sets up theme toggle handler
  */
 function toggleTheme() {
-    // Get current theme from cookie or use system preference
-    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-        const [name, value] = cookie.trim().split('=');
-        acc[name] = decodeURIComponent(value);
-        return acc;
-    }, {});
-
-    const currentTheme = cookies['docmind-theme'] || 'system';
+    // Get current theme from localStorage or use system preference
+    const currentTheme = localStorage.getItem('docmind-theme') || 'system';
     let newTheme;
 
     // Determine new theme based on current theme
@@ -655,12 +649,17 @@ function displayToolForm(toolId) {
     toolIdInput.value = tool.id;
     formFields.innerHTML = '';
 
-    // Get cookies for model and language
-    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-        const [name, value] = cookie.trim().split('=');
-        acc[name] = decodeURIComponent(value);
-        return acc;
-    }, {});
+    // Get preferences from localStorage
+    const savedModel = localStorage.getItem('docmind-model');
+    const savedLanguage = localStorage.getItem('docmind-language');
+    const savedMaxImageSize = localStorage.getItem('docmind-max_image_size');
+
+    // Create cookies object for compatibility (TODO: Remove after full transition)
+    const cookies = {
+        'docmind-model': savedModel,
+        'docmind-language': savedLanguage,
+        'docmind-max_image_size': savedMaxImageSize
+    };
 
     // Create form fields based on formConfig                                                                         
     if (tool.form && tool.form.fields) {                                                                          
@@ -1120,11 +1119,15 @@ async function handleFormSubmit(event) {
     // Save preferences to localStorage
     const model = formData.get('model');
     if (model) {
-        saveToLocalStorage('docmind-model', model);
+        localStorage.setItem('docmind-model', model);
     }
     const language = formData.get('language');
     if (language) {
-        saveToLocalStorage('docmind-language', language);
+        localStorage.setItem('docmind-language', language);
+    }
+    const maxImageSize = formData.get('max_image_size');
+    if (maxImageSize) {
+        localStorage.setItem('docmind-max_image_size', maxImageSize);
     }
 
     try {
@@ -1712,23 +1715,8 @@ function switchView(viewName) {
 }
 
 /**
- * Save a cookie with the given name, value, and expiration days
- *
- * This helper function creates and saves a cookie with the specified parameters.
- * It handles URL encoding of the value and sets the expiration date.
- *
- * @param {string} name - The name of the cookie
- * @param {string} value - The value to store in the cookie
- * @param {number} [days=30] - Number of days until the cookie expires
- * @param {string} [path='/'] - The path for which the cookie is valid
- * @return {void}
- *
- * @note URL-encodes the cookie value for security
- * @note Sets expiration date based on current date + days parameter
- * @note Defaults to 30 days expiration if not specified
- * @note Sets cookie path to '/' by default
- * @see handleFormSubmit() - Uses this function to save user preferences
- * @see toggleTheme() - Uses this function to save theme preference
+ * Saves a value to localStorage
+ * @deprecated Use localStorage directly instead
  */
 function saveToLocalStorage(key, value) {                                                                         
     localStorage.setItem(key, value);                                                                             
