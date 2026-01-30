@@ -537,7 +537,7 @@ function loadToolsInCategory(category) {
  */
 function populateToolSelect(toolSelect) {
     // Clear existing options
-    toolSelect.innerHTML = '<option value="">-- Select a tool --</option>';
+    toolSelect.innerHTML = '<option value="">Select a tool</option>';
 
     // Check if toolsData is available
     if (!toolsData) {
@@ -1968,6 +1968,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Create category views and buttons after loading data
     if (categoriesData) {
         createCategoriesViews(categoriesData);
+        const toolSelect = document.getElementById('toolSelect');
+        populateToolSelect(toolSelect);
     }
 
     // Set up form submission

@@ -7,7 +7,7 @@
     <title>DocMind AI | Intelligent Document Processing</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em'
 font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -17,6 +17,26 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
     <script src="highlight.min.js" defer></script>
 </head>
 <body>
+    <nav class="container-fluid">
+        <ul>
+            <li><strong><span class="logo-icon">🏥</span><span class="logo-text">DocMind AI</span></strong></li>
+        </ul>
+        <ul class="menu">
+            <li><a href="#">About</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="#">Products</a></li>
+        </ul>
+        <button class="theme-toggle" id="themeToggle">
+            <span class="theme-icon" id="themeIcon">🌙</span>
+        </button>
+    </nav>
+
+    <header>
+        <select id="toolSelect">
+            <option value="">Home</option>
+        </select>
+    </header>
+
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
@@ -25,9 +45,6 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                     <span class="logo-icon">🏥</span>
                     <span class="logo-text">DocMind AI</span>
                 </div>
-                <button class="theme-toggle" id="themeToggle">
-                    <span class="theme-icon" id="themeIcon">🌙</span>
-                </button>
             </div>
             <nav class="sidebar-nav">
                 <button class="nav-item active" data-view="home">
@@ -53,122 +70,114 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                 </div>
             </div>
         </aside>
+    </div>
 
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <!-- Top Bar -->
-            <header class="top-bar">
-                <div class="top-bar-left">
-                    <button class="menu-toggle" id="menuToggle">
-                        <span class="menu-icon">☰</span>
-                    </button>
+
+    <!-- Main Content Area -->
+    <main class="container view-container">
+        <hgroup>
+            <h1 class="page-title" id="pageTitle">Welcome to DocMind AI</h1>
+            <p class="page-subtitle" id="pageSubtitle">Intelligent Document Processing</p>
+        </hgroup>
+
+        <!-- Home View -->
+        <section class="view home-view active-view">
+            <article class="hero-section">
+                <main class="hero-content">
                     <hgroup>
-                        <h1 class="page-title" id="pageTitle">Welcome to DocMind AI</h1>
-                        <p class="page-subtitle" id="pageSubtitle">Intelligent Document Processing</p>
+                        <h2 class="hero-title">Intelligent Document Processing</h2>
+                        <p class="hero-subtitle">Transform your documents with AI-powered analysis and extraction tools</p>
                     </hgroup>
+                    <aside class="hero-illustration">
+                        <div class="illustration-content">📄🔍🤖</div>
+                    </aside>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary btn-large" id="getStartedBtn">Get Started</button>
+                        <button class="btn btn-secondary btn-large" id="learnMoreBtn">Learn More</button>
+                    </div>
+                </main>
+            </article>
+
+            <div class="features-section">
+                <h3 class="section-title">Key Features</h3>
+                <div class="grid features-grid">
+                    <article class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h4 class="feature-title">Advanced Analysis</h4>
+                        <p class="feature-description">Deep document analysis with AI-powered insights</p>
+                    </article>
+                    <article class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h4 class="feature-title">Fast Processing</h4>
+                        <p class="feature-description">Quick results with optimized algorithms</p>
+                    </article>
+                    <article class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h4 class="feature-title">Secure</h4>
+                        <p class="feature-description">Your data privacy is our priority</p>
+                    </article>
+                    <article class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h4 class="feature-title">Multi-language</h4>
+                        <p class="feature-description">Support for multiple languages</p>
+                    </article>
                 </div>
-                <div class="top-bar-right">
-                </div>
-            </header>
-
-            <!-- View Container -->
-            <div class="view-container">
-                <!-- Home View -->
-                <section class="view home-view active-view">
-                    <div class="hero-section">
-                        <div class="hero-content">
-                            <h2 class="hero-title">Intelligent Document Processing</h2>
-                            <p class="hero-subtitle">Transform your documents with AI-powered analysis and extraction tools</p>
-                            <div class="hero-actions">
-                                <button class="btn btn-primary btn-large" id="getStartedBtn">Get Started</button>
-                                <button class="btn btn-secondary btn-large" id="learnMoreBtn">Learn More</button>
-                            </div>
-                        </div>
-                        <div class="hero-illustration">
-                            <div class="illustration-content">📄🔍🤖</div>
-                        </div>
-                    </div>
-
-                    <div class="features-section">
-                        <h3 class="section-title">Key Features</h3>
-                        <div class="features-grid">
-                            <div class="feature-card">
-                                <div class="feature-icon">📊</div>
-                                <h4 class="feature-title">Advanced Analysis</h4>
-                                <p class="feature-description">Deep document analysis with AI-powered insights</p>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">⚡</div>
-                                <h4 class="feature-title">Fast Processing</h4>
-                                <p class="feature-description">Quick results with optimized algorithms</p>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">🔒</div>
-                                <h4 class="feature-title">Secure</h4>
-                                <p class="feature-description">Your data privacy is our priority</p>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">🌐</div>
-                                <h4 class="feature-title">Multi-language</h4>
-                                <p class="feature-description">Support for multiple languages</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Results View -->
-                <section class="view results-view" style="display: none;">
-                    <div class="results-container" id="resultsArea">
-                        <main class="results-content" id="resultsContent">
-                            <!-- Results will be displayed here -->
-                        </main>
-                        <footer class="results-actions">
-                            <button class="btn btn-primary" id="copyResultsBtn">Copy Results</button>
-                            <button class="btn btn-secondary" id="downloadResultsBtn">Download</button>
-                        </footer>
-                    </div>
-                </section>
-
-                <!-- Form View -->
-                <section class="view form-view" style="display: none;">
-                    <div class="form-container" id="toolForm">
-                        <form id="apiForm" class="tool-form">
-                            <input type="hidden" name="tool" id="toolId">
-                            <div class="form-fields" id="formFields">
-                                <!-- Will be populated by JavaScript -->
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary" id="submitBtn">
-                                    <span class="btn-text">Submit</span>
-                                    <span class="btn-loading" style="display: none;">
-                                        <span class="loading-spinner"></span>
-                                        Processing...
-                                    </span>
-                                </button>
-                                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                </section>
-
-                <!-- History View -->
-                <section class="view history-view">
-                    <div class="history-container">
-                        <div class="history-header">
-                            <h2 class="history-title">Analysis History</h2>
-                            <button class="btn btn-secondary btn-small" id="clearHistoryBtn">Clear History</button>
-                        </div>
-                        <div class="history-list">
-                            <!-- History items will be displayed here -->
-                        </div>
-                    </div>
-                </section>
             </div>
-        </main>
+        </section>
+
+            <!-- Results View -->
+            <section class="view results-view" style="display: none;">
+                <article class="results-container" id="resultsArea">
+                    <main class="results-content" id="resultsContent">
+                        <!-- Results will be displayed here -->
+                    </main>
+                    <footer class="grid results-actions">
+                        <button class="primary" id="copyResultsBtn">Copy Results</button>
+                        <button class="secondary" id="downloadResultsBtn">Download</button>
+                    </footer>
+                </article>
+            </section>
+
+            <!-- Form View -->
+            <section class="view form-view" style="display: none;">
+                <article class="form-container" id="toolForm">
+                    <form id="apiForm" class="tool-form">
+                        <input type="hidden" name="tool" id="toolId">
+                        <div class="form-fields" id="formFields">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <div class="grid form-actions">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <span class="btn-text">Submit</span>
+                                <span class="btn-loading" style="display: none;">
+                                    <span class="loading-spinner"></span>
+                                    Processing...
+                                </span>
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                        </div>
+                    </form>
+                </article>
+            </section>
+
+            <!-- History View -->
+            <section class="view history-view">
+                <div class="history-container">
+                    <div class="history-header">
+                        <h2 class="history-title">Analysis History</h2>
+                        <button class="btn btn-secondary btn-small" id="clearHistoryBtn">Clear History</button>
+                    </div>
+                    <div class="history-list">
+                        <!-- History items will be displayed here -->
+                    </div>
+                </div>
+            </section>
+
+    </main>
 
         <!-- Notifications -->
         <div class="notification-container" id="notificationContainer"></div>
-    </div>
+
 
     <!-- Templates -->
     <template id="errorTemplate">
@@ -206,14 +215,6 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
                 <h2 class="tools-title" id="topTitle">🔧 AI Tools</h2>
                 <p class="tools-subtitle" id="topDescription">Select a tool to process your documents</p>
             </hgroup>
-
-            <!-- Tool Selector -->
-            <div class="tool-selector-container" style="display: none;">
-                <select id="toolSelect" class="form-select">
-                    <option value="">-- Select a tool --</option>
-                </select>
-            </div>
-            <div class="tool-selector" style="display: none;"></div>
 
             <!-- Tools Grid -->
             <div class="tools-grid" id="toolsGrid">
