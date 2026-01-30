@@ -12,7 +12,7 @@
       "id": "dqc",
       "name": "Doctor Questions Creator",
       "description": "Generate thoughtful questions for patients to ask their doctors about medical findings",
-      "category": "medical",
+      "category": "clinical",
       "icon": "❓",
       "prompt": {
         "role": "You are a patient advocate helping prepare for doctor consultations.",
@@ -113,7 +113,7 @@
       "id": "rex",
       "name": "Radiology Report Explainer",
       "description": "Explain radiology reports in patient-friendly language without medical jargon",
-      "category": "medical",
+      "category": "clinical",
       "icon": "🩺",
       "prompt": {
         "role": "You are a patient care navigator helping someone understand their medical imaging results.",
@@ -205,7 +205,7 @@
       "id": "rrs",
       "name": "Radiology Report Summarizer",
       "description": "Analyze radiology reports and extract key medical information",
-      "category": "medical",
+      "category": "clinical",
       "icon": "🔍",
       "prompt": {
         "role": "You are a medical expert analyzing radiology reports.",
@@ -290,7 +290,7 @@
       "id": "sde",
       "name": "Structured Data Extractor",
       "description": "Convert unstructured text or documents into structured JSON, YAML, XML, HTML, or Markdown formats",
-      "category": "general",
+      "category": "content_processing",
       "icon": "📊",
       "prompt": {
         "role": "You are a data extraction API.",
@@ -587,7 +587,7 @@
       "id": "soap",
       "name": "SOAP Note Generator",
       "description": "Convert medical transcripts into structured SOAP (Subjective, Objective, Assessment, Plan) notes",
-      "category": "medical",
+      "category": "clinical",
       "icon": "📋",
       "prompt": {
         "role": "You are a clinical documentation assistant.",
@@ -679,7 +679,7 @@
       "id": "dsn",
       "name": "Decision Support Navigator",
       "description": "Provide non-diagnostic guidance about clinical findings and possible care pathways",
-      "category": "medical",
+      "category": "clinical",
       "icon": "🧭",
       "prompt": {
         "role": "You are a patient care navigator providing non-diagnostic guidance.",
@@ -775,7 +775,7 @@
       "id": "dps",
       "name": "Discharge Paper Summarizer",
       "description": "Analyze patient discharge papers to extract radiology-relevant information",
-      "category": "medical",
+      "category": "medical_admin",
       "icon": "📋",
       "prompt": {
         "role": "You are a medical assistant analyzing patient discharge papers for radiology relevance.",
@@ -867,7 +867,7 @@
       "id": "hda",
       "name": "Hospital Discharge Analyzer",
       "description": "Comprehensive analysis of hospital discharge papers with structured medical information extraction",
-      "category": "medical",
+      "category": "medical_admin",
       "icon": "🏥",
       "prompt": {
         "role": "You are a medical assistant analyzing hospital discharge papers.",
@@ -1067,7 +1067,7 @@
       "id": "rdd",
       "name": "Radiology Differential Diagnosis",
       "description": "Generate ranked differential diagnoses from radiology reports with supporting evidence",
-      "category": "medical",
+      "category": "clinical",
       "icon": "🩺",
       "prompt": {
         "role": "You are a radiology expert specializing in differential diagnosis.",
@@ -1177,7 +1177,7 @@
       "id": "pre",
       "name": "Prescription Analyzer",
       "description": "Extract medication information from prescriptions with detailed dosage and administration instructions",
-      "category": "medical",
+      "category": "medical_admin",
       "icon": "💊",
       "prompt": {
         "role": "You are a medical AI assistant specializing in prescription analysis.",
@@ -1269,7 +1269,7 @@
       "id": "rdg",
       "name": "Reader's Digest",
       "description": "Convert long papers and articles into short, easily digestible summaries",
-      "category": "general",
+      "category": "content_processing",
       "icon": "📖",
       "prompt": {
         "role": "You are an editorial assistant trained in the Reader's Digest style",
@@ -1358,7 +1358,7 @@
       "id": "pec",
       "name": "Patient Education Content",
       "description": "Convert complex medical information into patient-friendly educational content",
-      "category": "medical",
+      "category": "clinical",
       "icon": "🤓",
       "prompt": {
         "role": "You are a medical education specialist.",
@@ -1434,7 +1434,7 @@
       "id": "chat",
       "name": "Medical Chat Assistant",
       "description": "Interact directly with an AI medical assistant for real-time medical queries",
-      "category": "medical",
+      "category": "clinical",
       "icon": "💬",
       "form": {
         "title": "Medical Chat",
@@ -1477,7 +1477,7 @@
       "id": "ocr",
       "name": "Image OCR Tool",
       "description": "Perform OCR on uploaded images and extract text in Markdown format",
-      "category": "general",
+      "category": "development",
       "icon": "📷",
       "form": {
         "title": "OCR Form",
@@ -1509,7 +1509,7 @@
       "id": "wpc",
       "name": "Web Page Converter",
       "description": "Scrape web pages and convert them to clean Markdown format using AI processing",
-      "category": "general",
+      "category": "content_processing",
       "icon": "🔗",
       "prompt": {
         "role": "You are a content extraction assistant.",
@@ -1595,7 +1595,7 @@
       "id": "wps",
       "name": "Web Page Summarizer",
       "description": "Scrape web pages and return a structured summary of the most important points",
-      "category": "general",
+      "category": "content_processing",
       "icon": "📝",
       "prompt": {
         "role": "You are a content summarization assistant.",
@@ -1990,7 +1990,7 @@
       "id": "sbar",
       "name": "SBAR Nursing Note",
       "description": "Generate structured SBAR (Situation, Background, Assessment, Recommendation) notes for clinical communication",
-      "category": "medical",
+      "category": "clinical",
       "icon": "📞",
       "prompt": {
         "role": "You are a clinical documentation assistant.",
@@ -2085,7 +2085,7 @@
       "id": "cpn",
       "name": "Care Plan",
       "description": "Generate structured nursing care plans based on clinical observations",
-      "category": "medical",
+      "category": "clinical",
       "icon": "📋",
       "prompt": {
         "role": "You are a clinical nursing specialist.",
@@ -2174,7 +2174,7 @@
       "id": "mex",
       "name": "Medication Explainer",
       "description": "Provide patient-friendly medication explanations in simple terms",
-      "category": "medical",
+      "category": "clinical",
       "icon": "💊",
       "prompt": {
         "role": "You are a friendly healthcare assistant explaining medications to patients.",

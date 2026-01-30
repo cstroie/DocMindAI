@@ -1,24 +1,29 @@
 {
   "categories": {
-    "medical": {
-      "name": "Medical",
+    "clinical": {
+      "name": "Clinical",
       "icon": "🏥",
-      "description": "Specialized tools for healthcare professionals to process and analyze medical documents."
+      "description": "Tools for direct clinical use and patient care"
     },
-    "general": {
-      "name": "General",
-      "icon": "📄",
-      "description": "Tools for general document processing and information extraction."
+    "medical_admin": {
+      "name": "Medical Administration",
+      "icon": "📋",
+      "description": "Tools for processing medical documentation and administrative tasks"
     },
     "research": {
-      "name": "Research",
+      "name": "Research & Academia",
       "icon": "📚",
-      "description": "Specialized tools for academic research and literature analysis."
+      "description": "Tools for academic research and literature analysis"
+    },
+    "content_processing": {
+      "name": "Content Processing",
+      "icon": "📄",
+      "description": "Tools for document processing and content transformation"
     },
     "development": {
-      "name": "Development",
+      "name": "Development & Testing",
       "icon": "🧪",
-      "description": "Tools for testing AI models and experimenting with prompts."
+      "description": "Tools for AI model testing and experimentation"
     }
   }
 }
