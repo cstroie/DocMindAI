@@ -2084,6 +2084,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('menuToggle')?.addEventListener('click', toggleMenu);
     // Set up copy results button
     document.getElementById('copyResultsBtn')?.addEventListener('click', copyResultsToClipboard);
+    // Set up show form button
+    document.getElementById('showFormBtn')?.addEventListener('click', () => {
+        switchView('form');
+        document.getElementById('toolForm').scrollIntoView({ behavior: 'smooth' });
+    });
     // Set up clear history button (only if it exists)
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     if (clearHistoryBtn) {
