@@ -6,6 +6,34 @@ let commonData = null;
 let languagesData = null;
 let promptsData = null;
 
+/**
+ * Populate top menu with categories
+ * 
+ * This creates clickable menu items for each category in the main navigation bar
+ */
+function populateCategoriesMenu() {
+    const menuContainer = document.getElementById('categoriesMenu');
+    if (!menuContainer || !categoriesData) return;
+    
+    menuContainer.innerHTML = '';
+    
+    for (const [categoryId, categoryData] of Object.entries(categoriesData)) {
+        const menuItem = document.createElement('li');
+        const menuLink = document.createElement('a');
+        menuLink.href = '#';
+        menuLink.dataset.view = `tools-${categoryId}`;
+        menuLink.innerHTML = `${categoryData.icon || '📁'} ${categoryData.name}`;
+        
+        menuLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchView(`tools-${categoryId}`);
+        });
+        
+        menuItem.appendChild(menuLink);
+        menuContainer.appendChild(menuItem);
+    }
+}
+
 // Register Handlebars helpers
 if (typeof Handlebars !== 'undefined') {
     Handlebars.registerHelper('eq', (a, b) => a === b);
@@ -2045,6 +2073,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         populateToolSelect(toolSelect);
         populateCategoryCards();
         createCategoriesViews(categoriesData);
+        populateCategoriesMenu();
     }
 
     // Set up form submission
