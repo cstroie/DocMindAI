@@ -40,7 +40,7 @@ if (typeof Handlebars !== 'undefined') {
  */
 function toggleTheme() {
     // Get current theme from localStorage or use system preference
-    const currentTheme = localStorage.getItem('docmind-theme') || 'system';
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'auto';
     let newTheme;
 
     // Determine new theme based on current theme
@@ -58,7 +58,7 @@ function toggleTheme() {
     saveToLocalStorage('docmind-theme', newTheme);
 
     // Update theme icon immediately
-    const themeIcon = document.getElementById('themeIcon');
+    const themeIcon = document.getElementById('themeToggle');
     if (themeIcon) {
         themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
     }
@@ -579,6 +579,16 @@ function populateToolSelect(toolSelect) {
         // Append optgroup to select
         toolSelect.appendChild(optgroup);
     }
+        
+    // Add tool selection handler
+    toolSelect.addEventListener('change', function() {
+        const toolId = this.value;
+        if (toolId) {
+            displayToolForm(toolId);
+        } else {
+            switchView('home');
+        }
+    });
 }
 
 /**
@@ -603,7 +613,7 @@ function populateToolSelect(toolSelect) {
  */
 function displayToolForm(toolId) {
     // Clear the page
-    document.querySelector('.tool-selector').style.display = 'none';
+    //document.querySelector('.tool-selector').style.display = 'none';
     // Use the global toolsData if available
     if (!toolsData) {
         showError('No tools data available');
@@ -1967,19 +1977,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Create category views and buttons after loading data
     if (categoriesData) {
-        createCategoriesViews(categoriesData);
+        //createCategoriesViews(categoriesData);
         const toolSelect = document.getElementById('toolSelect');
         populateToolSelect(toolSelect);
-        
-        // Add tool selection handler
-        toolSelect.addEventListener('change', function() {
-            const toolId = this.value;
-            if (toolId) {
-                displayToolForm(toolId);
-            } else {
-                switchView('home');
-            }
-        });
     }
 
     // Set up form submission
