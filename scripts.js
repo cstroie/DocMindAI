@@ -395,6 +395,7 @@ function createCategoriesViews(categories) {
         // Populate the category view with tools
         loadToolsInCategory(categoryId);
 
+        /*
         // Create category button for sidebar
         const categoryButton = document.createElement('button');
         categoryButton.className = 'nav-item';
@@ -429,6 +430,7 @@ function createCategoriesViews(categories) {
         } else {
             sidebarNav.appendChild(categoryButton);
         }
+            */
     }
 }
 
@@ -441,7 +443,7 @@ function createCategoriesViews(categories) {
  * 
  * @return {void}
  * 
- * @note Uses the category card template (#categoryCardTemplate)
+ * @note Uses the category card template (#cardTemplate)
  * @note Dynamically creates cards for each category with click handlers
  * @see Document.addEventListener('DOMContentLoaded') - Calls this function
  */
@@ -456,7 +458,7 @@ function populateCategoryCards() {
     categoriesGrid.innerHTML = '';
 
     // Get category card template
-    const template = document.getElementById('categoryCardTemplate');
+    const template = document.getElementById('cardTemplate');
     if (!template) {
         console.error('Category card template not found');
         return;
@@ -467,16 +469,16 @@ function populateCategoryCards() {
         const clone = template.content.cloneNode(true);
         
         // Populate card elements
-        const iconElement = clone.querySelector('.category-icon');
-        const titleElement = clone.querySelector('.category-title');
-        const descriptionElement = clone.querySelector('.category-description');
+        const iconElement = clone.querySelector('.card-icon');
+        const titleElement = clone.querySelector('.card-title');
+        const descriptionElement = clone.querySelector('.card-description');
         
         if (iconElement) iconElement.textContent = categoryData.icon || '📁';
         if (titleElement) titleElement.textContent = categoryData.name;
         if (descriptionElement) descriptionElement.textContent = categoryData.description || '';
         
         // Add click handler to show category tools
-        const card = clone.querySelector('.category-card');
+        const card = clone.querySelector('.card');
         if (card) {
             card.addEventListener('click', () => {
                 switchView('tools-' + categoryId);
@@ -541,9 +543,8 @@ function loadToolsInCategory(category) {
 
     // Add tools to the grid
     categoryTools.forEach(tool => {
-        const toolCard = document.createElement('a');
+        const toolCard = document.createElement('article');
         toolCard.className = 'tool-card';
-        toolCard.href = '#';
         toolCard.onclick = (e) => {
             e.preventDefault();
             displayToolForm(tool.id);
@@ -2032,10 +2033,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Create category views and buttons after loading data
     if (categoriesData) {
-        //createCategoriesViews(categoriesData);
         const toolSelect = document.getElementById('toolSelect');
         populateToolSelect(toolSelect);
         populateCategoryCards();
+        createCategoriesViews(categoriesData);
     }
 
     // Set up form submission
