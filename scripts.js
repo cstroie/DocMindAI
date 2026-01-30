@@ -1970,6 +1970,16 @@ document.addEventListener('DOMContentLoaded', async function() {
         createCategoriesViews(categoriesData);
         const toolSelect = document.getElementById('toolSelect');
         populateToolSelect(toolSelect);
+        
+        // Add tool selection handler
+        toolSelect.addEventListener('change', function() {
+            const toolId = this.value;
+            if (toolId) {
+                displayToolForm(toolId);
+            } else {
+                switchView('home');
+            }
+        });
     }
 
     // Set up form submission
