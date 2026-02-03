@@ -727,6 +727,17 @@ function displayToolForm(toolId) {
     if (formTitle) formTitle.textContent = tool.icon + ' ' + tool.name;
     if (formSubtitle) formSubtitle.textContent = tool.description || '';
 
+    // Update page title and subtitle with category info
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
+    if (pageTitle && pageSubtitle && tool.category && categoriesData) {
+        const category = categoriesData[tool.category];
+        if (category) {
+            pageTitle.textContent = category.icon + ' ' + category.name;
+            pageSubtitle.textContent = category.description;
+        }
+    }
+
     // Populate the form fields
     const toolForm = document.getElementById('toolForm');
     const formFields = document.getElementById('formFields');
