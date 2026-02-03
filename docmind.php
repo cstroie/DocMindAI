@@ -261,6 +261,15 @@ function handleToolAction($tool_id) {
         sendJsonResponse(['error' => 'Missing required fields: ' . implode(', ', $required_fields)], true);
     }
 
+    // Check if tool has a helper specification
+    if (isset($tool['helper']) && !empty($tool['helper'])) {
+        $helper_output = executeHelper($tool['helper'], $form_data);
+        if ($helper_output !== false) {
+            // Add helper output to form data as 'content' field
+            $form_data['content'] = $helper_output;
+        }
+    }
+
     // Build the prompt based on tool type
     $prompt = buildToolPrompt($tool_id, $form_data);
 
@@ -428,15 +437,6 @@ function buildToolPrompt($tool_id, $form_data) {
     // Check if tool has a prompt field, otherwise look for it in form_data
     if (!$tool) {
         return "Analyze the following input: " . json_encode($form_data);
-    }
-
-    // Check if tool has a helper specification
-    if (isset($tool['helper']) && !empty($tool['helper'])) {
-        $helper_output = executeHelper($tool['helper'], $form_data);
-        if ($helper_output !== false) {
-            // Add helper output to form data as 'content' field
-            $form_data['content'] = $helper_output;
-        }
     }
 
     // Handle case where tool has 'prompts' key (multiple prompts)
