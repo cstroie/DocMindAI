@@ -722,11 +722,11 @@ function runLynxCommand($url) {
         return false;
     }
     $url = $processed_url['data'];
-
+    $chromeUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
     if (file_exists('/usr/bin/lynx')) {
-        return shell_exec('lynx -dump -force_html -width=80 -nolist -nobold -nocolor ' . escapeshellarg($url) . ' 2>&1');
+        return shell_exec('lynx -dump -force_html -width=80 -nolist -nobold -nocolor -user-agent="' . $chromeUA . '" ' . escapeshellarg($url) . ' 2>&1');
     } elseif (file_exists('/usr/local/bin/lynx')) {
-        return shell_exec('lynx -dump -force_html -width=80 -nolist -nobold -nocolor ' . escapeshellarg($url) . ' 2>&1');
+        return shell_exec('lynx -dump -force_html -width=80 -nolist -nobold -nocolor -user-agent="' . $chromeUA . '" ' . escapeshellarg($url) . ' 2>&1');
     }
     
     return false;
