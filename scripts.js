@@ -1419,6 +1419,9 @@ function displayResults(results, fromHistory = false) {
         console.error('Results content is empty');
     }
 
+    // Store the original raw response data (for copy functionality)
+    resultsContent.dataset.raw = responseContent;
+
     // Scroll to results
     resultsArea.scrollIntoView({ behavior: 'smooth' });
 
