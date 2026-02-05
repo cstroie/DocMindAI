@@ -2084,6 +2084,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('menuToggle')?.addEventListener('click', toggleMenu);
     // Set up copy results button
     document.getElementById('copyResultsBtn')?.addEventListener('click', copyResultsToClipboard);
+    // Set up download results button
+    document.getElementById('downloadResultsBtn')?.addEventListener('click', downloadResults);
     // Set up show form button
     document.getElementById('showFormBtn')?.addEventListener('click', () => {
         switchView('form');
