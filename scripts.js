@@ -175,18 +175,14 @@ async function copyResultsToClipboard() {
     }
 
     try {
-        // Get the text content to copy
-        let textToCopy;
-
-        // Check if the content is in a code block (pre > code)
+        // Get the text content to copy - prioritize raw original data if available
+        const rawData = resultsContent.dataset.raw;
         const codeBlock = resultsContent.querySelector('pre code');
-        if (codeBlock) {
-            // For code blocks, get the text content
-            textToCopy = codeBlock.textContent;
-        } else {
-            // For regular content, get the text content
-            textToCopy = resultsContent.textContent;
-        }
+        let textToCopy = rawData || (
+            codeBlock ? 
+                codeBlock.textContent :   // Use code block text if exists 
+                resultsContent.textContent  // Fallback to regular content
+        );
 
         // Use the Clipboard API if available
         if (navigator.clipboard && navigator.clipboard.writeText) {
