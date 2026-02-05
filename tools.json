@@ -1399,6 +1399,80 @@
         ]
       }
     },
+    "etp": {
+      "id": "etp",
+      "name": "Education Programme Analyzer",
+      "description": "Comprehensive analysis of education/training programs with curriculum review and strategic recommendations",
+      "category": "research",
+      "icon": "🎓",
+      "prompt": {
+        "role": "You are an education policy analyst specializing in program evaluation",
+        "task": "Critically analyze education/training programs and provide structured recommendations",
+        "critical_instruction": "{language_instruction}",
+        "output_format": [
+          "### Program Overview",
+          "- **Program Title:** [Extract from document]",
+          "- **Institution:** [Organization name]",
+          "- **Duration:** [Program length]",
+          "- **Target Audience:** [Intended participants]",
+          "",
+          "### Curriculum Analysis",
+          "- **Strengths:** [Well-designed elements]",
+          "- **Gaps:** [Missing components]",
+          "- **Alignment:** [With industry/research standards]",
+          "",
+          "### Pedagogical Assessment",
+          "- **Learning Methods:** [Teaching approaches used]",
+          "- **Assessment Strategy:** [Evaluation methods]",
+          "- **Innovation Level:** [Use of modern techniques]",
+          "",
+          "### Strategic Value",
+          "- **Market Relevance:** [Labor market alignment]",
+          "- **Scalability Potential:** [Expansion possibilities]",
+          "- **Sustainability:** [Long-term viability]",
+          "",
+          "### Implementation Review",
+          "- **Resource Requirements:** [Faculty, facilities, tech]",
+          "- **Potential Challenges:** [Identified risks]",
+          "- **Cost-Effectiveness:** [ROI analysis]",
+          "",
+          "### Recommendations",
+          "- **Curriculum Improvements:** [Specific suggestions]",
+          "- **Delivery Enhancements:** [Pedagogical upgrades]",
+          "- **Evaluation Framework:** [Assessment improvements]",
+          "- **Strategic Partnerships:** [Collaboration opportunities]"
+        ],
+        "rules": [
+          "Evaluate using UNESCO framework for quality education",
+          "Consider UN Sustainable Development Goal 4 (Quality Education)",
+          "Analyze difference between stated and actual outcomes",
+          "Identify 3 strengths and 3 limitations minimum",
+          "Provide actionable recommendations with timeframe (short/long-term)",
+          "Maintain formal academic tone",
+          "Respond ONLY with the formatted markdown"
+        ],
+        "program_description": "{text}"
+      },
+      "display": "html",
+      "form": {
+        "title": "Education Programme Analysis",
+        "description": "Review the comprehensive analysis of your education/training program including curriculum evaluation, pedagogical assessment, and strategic recommendations.",
+        "fields": [
+          {
+            "name": "text",
+            "type": "textarea",
+            "label": "Program Description",
+            "help": "Enter full program documentation, curriculum outlines, or training materials (maximum 150,000 characters)",
+            "placeholder": "Include:\n- Program objectives\n- Curriculum structure\n- Learning outcomes\n- Assessment methods\n- Resource requirements",
+            "required": true
+          },
+          "file",
+          "model",
+          "language",
+          "max_image_size"
+        ]
+      }
+    },
     "stp": {
       "id": "stp",
       "name": "Summarize This Paper",
