@@ -1,7 +1,7 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "metadata": {
-    "last_updated": "2026-01-30",
+    "last_updated": "2026-02-05",
     "author": "Costin Stroie",
     "description": "Configuration file for DocMindAI tool profiles",
     "license": "GPLv3",
