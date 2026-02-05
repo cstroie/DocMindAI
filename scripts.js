@@ -449,6 +449,63 @@ function createCategoriesViews(categories) {
 }
 
 /**
+ * Download results content as text file
+ *
+ * This function handles downloading the results as a text file using the raw original content
+ * when available. It generates a filename containing the tool ID and current date.
+ *
+ * @return {void}
+ *
+ * @note Uses dataset.raw from resultsContent when available
+ * @note Falls back to text content when raw data isn't available
+ * @note Shows success/error notifications using showNotification()
+ */
+function downloadResults() {
+    const resultsContent = document.getElementById('resultsContent');
+    if (!resultsContent) {
+        showError('Results content not found');
+        return;
+    }
+
+    // Get tool ID for filename
+    const toolId = document.getElementById('toolId')?.value || 'analysis';
+    const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const filename = `${toolId.replace(/[^a-z0-9]/gi, '_')}-${date}.txt`;
+
+    // Get content - same logic as copy functionality
+    const rawData = resultsContent.dataset.raw;
+    const textContent = rawData || resultsContent.textContent;
+
+    if (!textContent) {
+        showError('No content available to download');
+        return;
+    }
+
+    try {
+        // Create Blob and download
+        const blob = new Blob([textContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        
+        // Create temporary link
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Cleanup
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }, 100);
+        
+        showNotification('Download started!', 'success');
+    } catch (error) {
+        showError('Failed to download: ' + error.message);
+    }
+}
+
+/**
  * Populate home page with category cards
  * 
  * This function creates category cards for the home page using the template
