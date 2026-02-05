@@ -2010,6 +2010,89 @@
           "language"
         ]
       }
+    },
+    "pld": {
+      "id": "pld",
+      "name": "Plagiarism Detector",
+      "description": "Analyze text for potential plagiarism by comparing against LLM's vast knowledge base",
+      "category": "research",
+      "icon": "🔍",
+      "prompt": {
+        "role": "You are an academic integrity analysis tool.",
+        "task": "Scan text for potential plagiarism against academic sources.",
+        "critical_instruction": "{language_instruction}",
+        "output_format": [
+          "```json",
+          "{",
+          "  \"plagiarism_score\": 0-100,",
+          "  \"potential_sources\": [\"source1\", \"source2\"],",
+          "  \"matched_passages\": [",
+          "    {\"text\": \"matched text\", \"confidence\": 0-100}, ",
+          "    {\"text\": \"another match\", \"confidence\": 0-100}",
+          "  ]",
+          "}",
+          "```"
+        ],
+        "rules": [
+          "Calculate plagiarism_score (0 = original, 100 = exact copy)",
+          "Detect passages that match known academic/public works",
+          "List up to 3 most relevant potential_sources",
+          "Include matched_passages with confidence levels",
+          "Use strict academic standards",
+          "Consider both exact matches and paraphrased content",
+          "Respond ONLY with the JSON"
+        ],
+        "analyzed_text": "{text}"
+      },
+      "display": "html",
+      "form": {
+        "title": "Plagiarism Analysis",
+        "description": "These are the plagiarism detection results. The AI has analyzed the text against known sources and calculated similarity scores.",
+        "fields": [
+          {
+            "name": "text",
+            "type": "textarea",
+            "label": "Text to Analyze",
+            "help": "Enter the text you want to check for plagiarism. Maximum 10,000 characters.",
+            "placeholder": "Paste your text here...",
+            "required": true
+          },
+          "model",
+          "language"
+        ]
+      },
+      "template": [
+        "<article>",
+        "  <header>",
+        "    <h3>Plagiarism Score: {{plagiarism_score}}%</h3>",
+        "    <p><strong>Interpretation:</strong>",
+        "      {{#if (gte plagiarism_score 80)}}High probability of unoriginal content{{/if}}",
+        "      {{#if (and (gte plagiarism_score 40) (lt plagiarism_score 80))}}Moderate similarity detected{{/if}}",
+        "      {{#if (lt plagiarism_score 40)}}Mostly original content{{/if}}",
+        "    </p>",
+        "  </header>",
+        "  <section>",
+        "    <h4>Potential Sources</h4>",
+        "    <ul>",
+        "      {{#each potential_sources}}<li>{{this}}</li>{{/each}}",
+        "    </ul>",
+        "  </section>",
+        "  {{#if matched_passages}}",
+        "  <section>",
+        "    <h4>Matched Passages</h4>",
+        "    {{#each matched_passages}}",
+        "    <div class=\"match\" style=\"margin-bottom: 1.5em;\">",
+        "      <div style=\"background-color: #f5f5f5; padding: 0.5em; border-radius: 4px; margin-bottom: 0.5em;\">{{text}}</div>",
+        "      <div>Confidence: {{confidence}}%</div>",
+        "    </div>",
+        "    {{/each}}",
+        "  </section>",
+        "  {{/if}}",
+        "  <footer style=\"margin-top: 2em; font-size: 0.9em; color: #666;\">",
+        "    <p><em>Note: This analysis compares text against general knowledge patterns and does not scan specific documents. Always verify with dedicated plagiarism detection software.</em></p>",
+        "  </footer>",
+        "</article>"
+      ]
     }
   }
 }
