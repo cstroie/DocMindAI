@@ -285,9 +285,23 @@ function resizeImage($image, $max_size = 1000) {
  * @note Used in handleProfileAction() for image uploads
  */
 function processUploadedImage($file, $max_size = '500') {
+    // Validate file parameters
+    if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+        return ['error' => 'Invalid file upload'];
+    }
+    
     // Validate file size
-    if ($file['size'] > MAX_FILE_SIZE) {
+    if ($file['size'] > MAX_FILE_SIZE || $file['size'] <= 0) {
         return ['error' => 'The file is too large. Maximum ' . (MAX_FILE_SIZE / 1024 / 1024) . 'MB allowed.'];
+    }
+    
+    // Additional MIME type validation
+    $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $detected_type = $finfo->file($file['tmp_name']);
+    
+    if (!in_array($detected_type, $allowed_types)) {
+        return ['error' => 'Unsupported file type detected: ' . $detected_type];
     }
 
     // Check if it's an image
@@ -1122,9 +1136,17 @@ function setCommonCookies($cookies, $expire_time = 2592000) { // 30 days default
  */
 function sendJsonResponse($data, $is_api_request = false) {
     if ($is_api_request) {
-        header('Access-Control-Allow-Origin: *');
+        // Security headers
+        header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN'] ?? '*');
         header('Content-Type: application/json');
-        echo json_encode($data);
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: DENY');
+        
+        // Prevent caching of sensitive data
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
         exit;
     }
 }

@@ -657,9 +657,20 @@ function handleGetPrompts() {
  * @note The CSRF token helps prevent cross-site request forgery attacks
  */
 function displayWebInterface() {
-    // Start or resume session
+    // Secure session configuration
+    $session_name = 'SECURE_SESSION_ID';
+    session_name($session_name);
+    session_set_cookie_params([
+        'lifetime' => 86400, // 1 day
+        'path' => '/',
+        'domain' => $_SERVER['HTTP_HOST'],
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'Strict'
+    ]);
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
+        session_regenerate_id(true);
     }
 
     // Generate CSRF token if not exists
