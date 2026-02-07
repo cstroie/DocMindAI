@@ -3,47 +3,64 @@
 ## System Architecture
 ### Core Components
 1. **Application Controller (docmind.php)**
-   - `handleApiRequest()` - Routes API actions (get_models, suggestions, etc)
-   - `handleToolAction()` - Processes form submissions and file uploads
-   - `buildToolPrompt()` - Constructs dynamic prompts from tools.json configs
-   - REST API endpoints for all tool operations
+   - `handleApiRequest()` - Main API router for all tools
+   - `handleToolAction()` - Processes tool-specific requests
+   - `buildToolPrompt()` - Merges tools.json configs with user inputs
+   - `executeHelper()` - Runs web scraping/literature search helpers
 
 2. **Tool Configuration (tools.json)**
-   - JSON definitions for clinical/document processing tools
-   - Form field specifications with validation rules
-   - Prompt templates with {placeholder} substitutions
-   - Output formats (JSON/HTML/Markdown) and display templates
+   - Structured JSON with complete tool definitions
+   - Form fields with type-specific rendering rules
+   - Multi-part prompts with dynamic slot filling
+   - Output templates with Handlebars.js support
+   - Helper configurations (OCR, web scrapers, etc)
 
 3. **Shared Services (common.php)**
-   - File processing (images/documents/OCR)
-   - Medical utilities (severity, SOAP notes, literature search)
-   - API communication (callLLMApi, getAvailableModels)
-   - Security/validation helpers
+   - File processing pipeline (`processUploadedImage`, `extractTextFromDocument`)
+   - Medical analysis (`getSeverityLabel`, `searchPubMed`)
+   - API communication (`callLLMApi`, `getAvailableModels`)
+   - Content processing (`extractJsonFromResponse`, `markdownToHtml`)
 
 4. **UI Framework (scripts.js)**
-   - View management (switchView, applyTheme)
-   - Dynamic form rendering (createFormField)
-   - Result processing (displayResults, history system)
+   - View management with smooth transitions
+   - Dynamic form generation from JSON configs
+   - Result display with syntax highlighting
+   - History persistence with localStorage
+   - Theme management with OS preference detection
 
 ## Key Workflows
 
 ### Tool Execution Pipeline
 ```mermaid
 graph TD
-    UI[User Form] -->|POST| docmind.php
-    docmind.php -->|get config| tools.json
-    docmind.php -->|process files| common.php
-    common.php -->|API call| LLM
-    LLM -->|JSON response| scripts.js
-    scripts.js -->|display| ResultsView
+    UI[User Form - scripts.js] -->|POST| docmind.php
+    docmind.php -->|Validate| tools.json[Load tool config]
+    docmind.php -->|Preprocess| common.php[File/Text processing]
+    docmind.php -->|Build| Prompts[Template engine]
+    docmind.php -->|Call| LLM[AI API]
+    LLM -->|Response| docmind.php[Process output]
+    docmind.php -->|Finalize| scripts.js[Render results]
 ```
 
 ### Data Flow Patterns
-1. **File Upload:**
-   `scripts.js → docmind.php → common.php → (docx2txt/pdftotext) → LLM API`
+1. **Document Processing:**
+   ```mermaid
+   flowchart LR
+       UI[Form Submit] --> Tools[docmind.php]
+       Tools --> Loader[tools.json]
+       Tools --> Processor[common.php: extractTextFromDocument]
+       Processor --> API[callLLMApi]
+       API --> Output[ProcessToolResponse]
+   ```
    
-2. **Clinical Analysis:**
-   `SOAP note → common.php → HL7 processing → docmind.php → templated prompts`
+2. **Web Scraping:**
+   ```mermaid
+   flowchart LR
+       URL[URL Input] --> Helper[common.php: scrapeUrl]
+       Helper --> Content[Clean HTML]
+       Content --> Prompt[Build prompt with tools.json]
+       Prompt --> LLM[Analysis]
+   ```
 
 ## Modification Hotspots
 ### Adding New Tool (Example: Lab Report Analyzer)
@@ -93,13 +110,32 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
 
 ## Core Integration Points
 1. **Prompt Construction Flow**
-   tools.json → docmind.php::buildToolPrompt() → {placeholder} replacement
+   ```mermaid
+   flowchart LR
+       tools.json --> Slot1[Field Definitions]
+       UserForm --> Slot2[User Inputs]
+       common.php --> Slot3[Language/Personality]
+       docmind.php --> Merge[buildToolPrompt]
+       Merge --> FullPrompt[Final Prompt]
+   ```
 
-2. **File Processing Chain**
-   script.js upload → $_FILES → common.php::processUploadedImage() → API
+2. **Form Rendering Process**
+   ```mermaid
+   flowchart LR
+       tools.json --> scripts.js
+       scripts.js --> createFormField
+       createFormField --> DOM[Live Form]
+       DOM --> HandleSubmit[API Call]
+   ```
 
-3. **Result Handling Pipeline**
-   JSON/HTML → scripts.js::displayResults() → Handlebars → syntax highlighting
+3. **Medical Processing**
+   ```mermaid
+   flowchart LR
+       Input[Medical Text] --> common.php
+       common.php --> searchPubMed
+       searchPubMed --> Analysis[Results Processing]
+       Analysis --> Output[Structured Data]
+   ```
 
 ## Agent Work Patterns
 ### Natural Language Requests
