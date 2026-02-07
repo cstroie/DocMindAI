@@ -51,8 +51,8 @@ displayWebInterface();
  * @see loadResourceFromJson() - Loads tool configuration
  */
 function handleApiRequest() {
-    // Extract action from request parameters
-    $action = $_REQUEST['action'] ?? null;
+    // Extract and sanitize action from request parameters
+    $action = isset($_REQUEST['action']) ? preg_replace('/[^a-zA-Z0-9_]/', '', $_REQUEST['action']) : null;
     $method = $_SERVER['REQUEST_METHOD'];
 
     // Validate action - load valid actions dynamically from tools.json
@@ -124,12 +124,13 @@ function handleApiRequest() {
  * @note If API call fails, returns default models for fallback functionality
  */
 function handleGetModels() {
-    global $LLM_API_ENDPOINT, $LLM_API_KEY, $LLM_API_FILTER;
-
-    // Use server-side configured values
-    $api_endpoint = $LLM_API_ENDPOINT;
-    $api_key = $LLM_API_KEY;
-    $filter = $LLM_API_FILTER;
+    // Check for constants instead of globals for security
+    if (!defined('LLM_API_ENDPOINT') || !defined('LLM_API_KEY')) {
+        sendJsonResponse(['error' => 'API configuration missing'], true);
+    }
+    $api_endpoint = LLM_API_ENDPOINT; 
+    $api_key = LLM_API_KEY; 
+    $filter = defined('LLM_API_FILTER') ? LLM_API_FILTER : '';
 
     // Validate required parameters
     if (empty($api_endpoint)) {
@@ -346,11 +347,11 @@ function executeHelper($helper_name, $form_data) {
     switch ($helper_name) {
         case 'web_scraper':
             // Check if URL is provided
-            if (empty($form_data['url'])) {
-                return false;
-            }
-            // Validate URL format
-            if (!filter_var($form_data['url'], FILTER_VALIDATE_URL)) {
+            // Validate URL format, length, and protocol
+            if (empty($form_data['url']) || 
+                strlen($form_data['url']) > 2048 || 
+                !filter_var($form_data['url'], FILTER_VALIDATE_URL) || 
+                !in_array(parse_url($form_data['url'], PHP_URL_SCHEME), ['http','https'])) {
                 return false;
             }
             // Scrape the URL content
@@ -620,10 +621,11 @@ function handleGetPrompts() {
         foreach ($files as $file) {
             // Check for .txt, .md, or .xml extensions
             if (preg_match('/\.(txt|md|xml)$/i', $file)) {
-                $file_path = 'prompts/' . $file;
+                // Prevent path traversal
+                $file_path = 'prompts/' . basename($file);
 
                 // Use filename (without extension) as the key
-                $key = pathinfo($file, PATHINFO_FILENAME);
+                $key = pathinfo(basename($file), PATHINFO_FILENAME);
 
                 // Use filename as label (clean up for display)
                 $label = ucwords(str_replace(['_', '-'], ' ', $key));
@@ -644,17 +646,30 @@ function handleGetPrompts() {
 }
 
 /**
- * Display web interface
+ * Display web interface with CSRF protection
  * 
- * This function serves the main web interface by including the index.html file.
- * It acts as a simple wrapper for the web interface presentation layer.
+ * This function serves the main web interface with security measures including:
+ * - Generating a CSRF token for form submissions
+ * - Ensuring proper session handling
  * 
- * @return void Includes and executes index.html content
+ * @return void Includes and executes index.html content with security token
  * 
- * @note The index.html file should contain the complete web interface markup
- * @note This function is called when the request is not an API request
+ * @note The CSRF token helps prevent cross-site request forgery attacks
  */
 function displayWebInterface() {
+    // Start or resume session
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    // Generate CSRF token if not exists
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+
+    // Store token in constant for frontend
+    define('CSRF_TOKEN', $_SESSION['csrf_token']);
+    
     include 'index.html';
 }
 ?>
