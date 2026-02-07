@@ -14,8 +14,14 @@
  */
 define('MAX_FILE_SIZE', 10 * 1024 * 1024);
 
+// =========================================================================
+// Language & Personality Configuration
+// =========================================================================
+
 /**
  * Available output languages
+ * 
+ * Maps language codes to human-readable language names
  */
 $AVAILABLE_LANGUAGES = [
     'ro' => 'Română',
@@ -28,10 +34,6 @@ $AVAILABLE_LANGUAGES = [
 
 /**
  * Get language instruction for the AI model
- * 
- * This function returns the appropriate language instruction for the AI model
- * based on the provided language code. It serves as a centralized language
- * instruction provider for consistent responses across the application.
  * 
  * @param string $language Language code (e.g., 'ro', 'en', 'es', 'fr', 'de', 'it')
  * @return string Language instruction for the AI model
@@ -55,11 +57,6 @@ function getLanguageInstruction($language) {
 
 /**
  * Get personality instruction for the AI model
- * 
- * This function returns personality-specific instructions for the AI model
- * based on the provided personality type and language. It supports multiple
- * personality profiles including medical professionals and the fictional
- * character Skippy from the Expeditionary Force series.
  * 
  * @param string $personality Personality type (e.g., 'medical_assistant', 'general_practitioner', 'specialist', 'medical_researcher', 'skippy')
  * @param string $language Language code (e.g., 'ro', 'en', 'es', 'fr', 'de', 'it')
@@ -124,12 +121,12 @@ function getPersonalityInstruction($personality, $language) {
     }
 }
 
+// =========================================================================
+// UI Helper Functions
+// =========================================================================
+
 /**
  * Get the color associated with a severity level
- * 
- * This function returns a color code based on the severity level of a medical
- * condition or alert. The color scale progresses from green (normal) to red
- * (critical) based on the severity value.
  * 
  * @param int $severity Severity level (0-10), where:
  *        0 = Normal (green)
@@ -178,10 +175,6 @@ function getSeverityLabel($severity) {
 
 /**
  * Format file size in human readable format
- * 
- * This function converts a file size in bytes to a human-readable format
- * with appropriate units (B, KB, MB, GB). It automatically selects the
- * most appropriate unit based on the magnitude of the file size.
  * 
  * @param int $bytes File size in bytes
  * @return string Human readable file size with unit (e.g., "1.5 MB")

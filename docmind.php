@@ -9,6 +9,10 @@
  * @license GPL 3
  */
 
+// =========================================================================
+// Initialization & Configuration
+// =========================================================================
+
 include 'common.php';
 
 // Load configuration if available
@@ -18,6 +22,10 @@ if (file_exists('config.php')) {
 
 // Create chat endpoint URL by appending the chat completions path
 $LLM_API_ENDPOINT_CHAT = $LLM_API_ENDPOINT . '/chat/completions';
+
+// =========================================================================
+// Main Request Router
+// =========================================================================
 
 // Determine if this is an API request
 // Check for: 1) action parameter in GET/POST, 2) JSON Accept header
@@ -32,6 +40,10 @@ if ($is_api_request) {
 
 // Default web interface
 displayWebInterface();
+
+// =========================================================================
+// Core API Functions
+// =========================================================================
 
 /**
  * Handle incoming API requests by validating and routing to appropriate handlers
@@ -49,6 +61,9 @@ displayWebInterface();
  * @see handleToolAction() - Handles tool-specific actions
  * @see sendJsonResponse() - Sends JSON responses
  * @see loadResourceFromJson() - Loads tool configuration
+ */
+/**
+ * Main API request router
  */
 function handleApiRequest() {
     // Extract and sanitize action from request parameters
@@ -123,6 +138,9 @@ function handleApiRequest() {
  * 
  * @note If API call fails, returns default models for fallback functionality
  */
+/**
+ * Handle model fetching from LLM API
+ */
 function handleGetModels() {
     // Check for constants instead of globals for security
     if (!defined('LLM_API_ENDPOINT') || !defined('LLM_API_KEY')) {
@@ -185,6 +203,9 @@ function handleGetModels() {
  * @note Supports both text documents and images
  * @note Includes debug information in response
  * @note Sets CORS headers for cross-origin requests
+ */
+/**
+ * Process tool-specific actions through complete pipeline
  */
 function handleToolAction($tool_id) {
     global $LLM_API_ENDPOINT_CHAT, $LLM_API_KEY;
@@ -342,6 +363,9 @@ function handleToolAction($tool_id) {
  *       - 'web_scraper': Scrapes content from a URL
  *       - 'medical_literature_search': Searches PubMed for medical articles
  * @note All helpers validate their required parameters before execution
+ */
+/**
+ * Execute helper functions for specialized processing
  */
 function executeHelper($helper_name, $form_data) {
     switch ($helper_name) {
@@ -608,6 +632,9 @@ function processToolResponse($tool_id, $api_response) {
  * @note Supported file extensions: .txt, .md, .xml
  * @note Prompts are loaded from the 'prompts' subdirectory
  * @note File names are converted to readable labels (e.g., 'medical_report' -> 'Medical Report')
+ */
+/**
+ * Retrieve available prompt templates from filesystem
  */
 function handleGetPrompts() {
     // Load prompts from files in the prompts directory
