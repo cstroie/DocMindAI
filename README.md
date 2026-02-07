@@ -308,6 +308,10 @@ Content-Type: application/json
 - Access to compatible AI API (e.g., Ollama, MedGemma)
 - [highlight.js](https://highlightjs.org/) for syntax highlighting (included in the repository)
 
+## Agent Guidance
+
+For developers extending or modifying DocMind AI, see [AGENTS.md](AGENTS.md) for architecture documentation and common development patterns.
+
 ## 🔧 Configuration
 
 Create a `config.php` file from the example:
