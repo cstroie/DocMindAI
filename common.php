@@ -1499,8 +1499,8 @@ function markdownToHtml($markdown) {
     // Normalize line endings
     $markdown = str_replace(["\r\n", "\r"], "\n", $markdown);
     
-    // Escape HTML entities first
-    $markdown = htmlspecialchars($markdown, ENT_QUOTES, 'UTF-8');
+    // Sanitize potentially dangerous content
+    $markdown = htmlspecialchars($markdown, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     
     // Split into lines for processing
     $lines = explode("\n", $markdown);
