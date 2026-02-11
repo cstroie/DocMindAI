@@ -2032,12 +2032,13 @@ function displayHistory() {
             historyList.appendChild(emptyState);
         } else {
             // Fallback if template not found
-            const emptyState = document.createElement('div');
+            const emptyState = document.createElement('section');
             emptyState.className = 'history-empty-state';
             emptyState.innerHTML = `
-                <div class="empty-state-icon">📄</div>
-                <h3 class="empty-state-title">No history yet</h3>
-                <p class="empty-state-description">Your analysis history will appear here</p>
+                <hgroup>
+                    <h3 class="empty-state-title"><span class="empty-state-icon">📄</span> No history yet</h3>
+                    <p class="empty-state-description">Your analysis history will appear here</p>
+                </hgroup>
             `;
             historyList.appendChild(emptyState);
         }
@@ -2046,7 +2047,7 @@ function displayHistory() {
 
     // Create history items
     results.forEach(result => {
-        const historyItem = document.createElement('div');
+        const historyItem = document.createElement('section');
         historyItem.className = 'history-item';
         historyItem.dataset.resultId = result.id;
 
@@ -2055,13 +2056,14 @@ function displayHistory() {
         const formattedDate = date.toLocaleString();
 
         historyItem.innerHTML = `
-            <div class="history-icon">📄</div>
-            <div class="history-info">
-                <h3 class="history-title">${result.title}</h3>
+            <hgroup class="history-info">
+                <h3 class="history-title"><span class="history-icon">📄</span> ${result.title}</h3>
                 <p class="history-date">${formattedDate}</p>
                 ${result.tool ? `<p class="history-tool">Tool: ${result.tool}</p>` : ''}
-            </div>
-            <button class="btn btn-small history-view-btn">View</button>
+            </hgroup>
+            <footer>
+                <button class="btn btn-small history-view-btn">View</button>
+            </footer>
         `;
 
         // Add click handler to view button
