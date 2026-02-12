@@ -1130,7 +1130,7 @@ function setCommonCookies($cookies, $expire_time = 2592000) { // 30 days default
 function sendJsonResponse($data, $is_api_request = false) {
     if ($is_api_request) {
         // Security headers
-        header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN'] ?? '*');
+        header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
         header('Content-Type: application/json');
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: DENY');
