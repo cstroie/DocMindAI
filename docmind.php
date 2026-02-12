@@ -144,7 +144,7 @@ function handleApiRequest() {
 function handleGetModels() {
     // Check for constants instead of globals for security
     if (!defined('LLM_API_ENDPOINT') || !defined('LLM_API_KEY')) {
-        sendJsonResponse(['error' => 'API configuration missing'], true);
+        sendJsonResponse(['error' => 'API configuration missing', 'API_ENDPOINT' => defined('LLM_API_ENDPOINT') ? LLM_API_ENDPOINT : null, 'API_KEY' => defined('LLM_API_KEY') ? LLM_API_KEY : null], true);
     }
     $api_endpoint = LLM_API_ENDPOINT; 
     $api_key = LLM_API_KEY; 
