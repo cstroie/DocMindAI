@@ -543,9 +543,9 @@ function populateCategoryCards() {
         const clone = template.content.cloneNode(true);
         
         // Populate card elements
-        const iconElement = clone.querySelector('.card-icon');
-        const titleElement = clone.querySelector('.card-title');
-        const descriptionElement = clone.querySelector('.card-description');
+        const iconElement = clone.querySelector('aside');
+        const titleElement = clone.querySelector('h4');
+        const descriptionElement = clone.querySelector('p');
         
         if (iconElement) iconElement.textContent = categoryData.icon || '📁';
         if (titleElement) titleElement.textContent = categoryData.name;
@@ -626,9 +626,9 @@ function loadToolsInCategory(category) {
         const clone = template.content.cloneNode(true);
         
         // Populate card elements
-        const iconElement = clone.querySelector('.card-icon');
-        const titleElement = clone.querySelector('.card-title');
-        const descriptionElement = clone.querySelector('.card-description');
+        const iconElement = clone.querySelector('aside');
+        const titleElement = clone.querySelector('h4');
+        const descriptionElement = clone.querySelector('p');
         
         if (iconElement) iconElement.textContent = tool.icon || '📄';
         if (titleElement) titleElement.textContent = tool.name;

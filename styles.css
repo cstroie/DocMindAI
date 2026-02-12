@@ -1,3 +1,32 @@
+:root {
+    --pico-font-family-emoji: "Noto Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --pico-font-family-sans-serif: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, var(--pico-font-family-emoji);
+    --pico-font-family-monospace: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace, var(--pico-font-family-emoji);
+    --pico-font-family: var(--pico-font-family-sans-serif);
+    --pico-line-height: 1.5;
+    --pico-font-weight: 400;
+    --pico-font-size: 100%;
+    --pico-text-underline-offset: .1rem;
+    --pico-border-radius: .375rem;
+    --pico-border-width: .0625rem;
+    --pico-outline-width: .125rem;
+    --pico-transition: .2s ease-in-out;
+    --pico-spacing: 1rem;
+    --pico-typography-spacing-vertical: 1rem;
+    --pico-block-spacing-vertical: calc(var(--pico-spacing)* 1.5);
+    --pico-block-spacing-horizontal: calc(var(--pico-spacing)* 1.5);
+    --pico-form-element-spacing-vertical: .75rem;
+    --pico-form-element-spacing-horizontal: 1rem;
+    --pico-icon-chevron: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(136, 145, 164)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+
+nav li :where(a,[role=link]) {
+    text-decoration: none;
+    color: var(--pico-color);
+}
+
+
 
 .hero-section {
     display: flex;
@@ -6,44 +35,53 @@
     gap: 2rem;
     margin-bottom: 3rem;
     padding: 2rem;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    border-radius: var(--radius-lg);
+    background: var(--pico-card-background-color);
+    border-radius: var(--pico-border-radius);
 }
 
-.hero-content {
-    flex: 1;
+.hero-section main {
+    flex: 2;
 }
 
-.hero-title {
+.hero-section hgroup h2 {
     font-size: 2.25rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--pico-primary);
     margin-bottom: 1rem;
 }
 
-.hero-subtitle {
+.hero-section hgroup p {
     font-size: 1.125rem;
-    color: var(--text-secondary);
+    color: var(--pico-secondary);
     margin-bottom: 2rem;
     max-width: 500px;
 }
 
-.hero-actions {
-    display: flex;
-    gap: 1rem;
-}
-
-.hero-illustration {
+.hero-section aside {
     flex: 1;
     display: flex;
     justify-content: center;
 }
 
-.illustration-content {
+.hero-section aside div {
     font-size: 4rem;
-    color: var(--primary-color);
+    color: var(--pico-primary);
     opacity: 0.8;
 }
+
+
+.card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  font-size: 200%;
+}
+
+.card hgroup {
+  flex: 1;
+  margin-bottom: 0;
+}
+
 
 pre code {
     white-space: pre-wrap;

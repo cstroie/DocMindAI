@@ -132,7 +132,7 @@
       "name": "Radiology Report Explainer",
       "description": "Explain radiology reports in patient-friendly language without medical jargon",
       "category": "clinical",
-      "icon": "🩺",
+      "icon": "🩻",
       "prompt": {
         "role": "You are a patient care navigator helping someone understand their medical imaging results.",
         "task": "Explain the findings in simple, empathetic terms following all critical rules.",
@@ -193,7 +193,7 @@
       "name": "Radiology Report Summarizer",
       "description": "Analyze radiology reports and extract key medical information",
       "category": "clinical",
-      "icon": "🔍",
+      "icon": "⚡",
       "prompt": {
         "role": "You are a medical expert analyzing radiology reports.",
         "task": "Read the report and extract the main pathological information in JSON format.",
@@ -476,7 +476,7 @@
       "name": "SOAP Note Generator",
       "description": "Convert medical transcripts into structured SOAP (Subjective, Objective, Assessment, Plan) notes",
       "category": "clinical",
-      "icon": "📋",
+      "icon": "📑",
       "prompt": {
         "role": "You are a clinical documentation assistant.",
         "task": "Your task is to read medical transcripts (dialogues between clinicians and patients) and convert them into structured clinical notes using the SOAP format.",
@@ -859,7 +859,7 @@
       "name": "Radiology Differential Diagnosis",
       "description": "Generate ranked differential diagnoses from radiology reports with supporting evidence",
       "category": "clinical",
-      "icon": "🩺",
+      "icon": "🕵️‍♂️",
       "prompt": {
         "role": "You are a radiology expert specializing in differential diagnosis.",
         "task": "Your task is to analyze radiology reports and provide a ranked list of differential diagnoses with supporting information.",
@@ -1688,7 +1688,7 @@
       "name": "Care Plan",
       "description": "Generate structured nursing care plans based on clinical observations",
       "category": "clinical",
-      "icon": "📋",
+      "icon": "❤️‍🩹",
       "prompt": {
         "role": "You are a clinical nursing specialist.",
         "task": "Read clinical observations and create a comprehensive nursing care plan.",

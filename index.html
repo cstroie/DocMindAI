@@ -34,10 +34,10 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
         </ul>
         <ul>
             <li>
-                <a data-view="history" data-tooltip="View history" data-placement="bottom" aria-label="View history" onclick="switchView('history')">📜</a>
+                <a href="#" data-view="history" data-tooltip="View history" data-placement="bottom" aria-label="View history" onclick="switchView('history')">📜</a>
             </li>
             <li>
-                <a id="themeToggle" class="outline" data-tooltip="Toggle theme" data-placement="bottom" aria-label="Toggle theme" onclick="toggleTheme()">🌙</a>
+                <a href="#" id="themeToggle" class="outline" data-tooltip="Toggle theme" data-placement="bottom" aria-label="Toggle theme" onclick="toggleTheme()">🌙</a>
             </li>
         </ul>
     </nav>
@@ -58,19 +58,16 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
         <!-- Home View -->
         <section class="view home-view active-view">
             <article class="hero-section">
-                <main class="hero-content">
+                <main>
                     <hgroup>
-                        <h2 class="hero-title">Intelligent Document Processing</h2>
-                        <p class="hero-subtitle">Transform your documents with AI-powered analysis and extraction tools</p>
+                        <h2>Intelligent Document Processing</h2>
+                        <p>Transform documents into actionable insights with our AI-powered toolkit. Extract text, analyze content, and  
+process medical literature with advanced OCR, web scraping, and AI analysis tools.</p>
                     </hgroup>
-                    <aside class="hero-illustration">
-                        <div class="illustration-content">📄🔍🤖</div>
-                    </aside>
-                    <div class="hero-actions">
-                        <button class="primary" id="getStartedBtn">Get Started</button>
-                        <button class="secondary" id="learnMoreBtn">Learn More</button>
-                    </div>
                 </main>
+                    <aside>
+                        <div>📄🔍🤖</div>
+                    </aside>
             </article>
 
             <div class="grid" id="categoriesGrid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
@@ -155,9 +152,11 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
 
     <template id="cardTemplate">
         <article class="card">
-            <div class="card-icon"></div>
-            <h4 class="card-title"></h4>
-            <p class="card-description"></p>
+            <aside></aside>
+            <hgroup>
+                <h4></h4>
+                <p></p>
+            </hgroup>
         </article>
     </template>
 

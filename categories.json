@@ -17,7 +17,7 @@
     },
     "content_processing": {
       "name": "Content Processing",
-      "icon": "📄",
+      "icon": "🧠",
       "description": "Tools for document processing and content transformation"
     },
     "development": {
