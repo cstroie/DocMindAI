@@ -1,7 +1,7 @@
 {
-  "version": "2.1",
+  "version": "2.3",
   "metadata": {
-    "last_updated": "2026-02-05",
+    "last_updated": "2026-02-12",
     "author": "Costin Stroie",
     "description": "Configuration file for DocMindAI tool profiles",
     "license": "GPLv3",
@@ -963,9 +963,7 @@
         "task": "Analyze prescription content and extract all medication information with dosing details.",
         "critical_instruction": "{language_instruction}",
         "output_format": [
-          "### Prescription Analysis",
-          "",
-          "#### Extracted Medications",
+          "### Extracted Medications",
           "1. **Drug Name:** Generic (Brand if available)",
           "   - Dosage: ",
           "   - Frequency: ",
@@ -973,7 +971,7 @@
           "   - Route: ",
           "   - Special Instructions: ",
           "",
-          "#### Additional Notes",
+          "### Additional Notes",
           "- [Any clarifications about unclear information]",
           "- [Prescriber details if available]",
           "- [Important warnings or cautions]"
@@ -994,6 +992,7 @@
         ],
         "prescription_text": "{text}"
       },
+      "display": "html",
       "form": {
         "title": "Prescription Analysis",
         "description": "This is the structured analysis of the medical prescription. The AI has extracted patient information, doctor details, medications, treatment schema, and other relevant data in YAML format.",
@@ -1109,7 +1108,8 @@
         "example": [
           "Input: \"The patient presents with acute myocardial infarction secondary to coronary artery occlusion. Percutaneous coronary intervention was performed with stent placement.\"",
           "",
-          "Output: \"### Heart Attack Treatment\"",
+          "Output:",
+          "### Heart Attack Treatment",
           "",
           "You had a heart attack, which happens when blood flow to part of your heart muscle is blocked.",
           "",
@@ -1754,18 +1754,17 @@
         "output_format": [
           "### [Medication Name] Explanation",
           "",
-          "**Purpose:**",
-          "[What this medication is for in simple terms]",
+          "**Purpose:** [What this medication is for in simple terms]",
           "",
-          "**How to Take:** ",
+          "#### How to Take:",
           "- [Dosage instructions]",
           "- [Special timing instructions]",
           "",
-          "**Important Reminders:** ",
+          "#### Important Reminders",
           "- [Key safety information]",
           "- [Important interactions or warnings]",
           "",
-          "**Possible Side Effects:**",
+          "#### Possible Side Effects",
           "- [Common side effects to watch for]",
           "",
           "Always consult your doctor or pharmacist if you have questions!"

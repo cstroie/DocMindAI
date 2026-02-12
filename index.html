@@ -21,24 +21,23 @@ font-size='90'%3E%F0%9F%92%AB%3C/text%3E%3C/svg%3E">
     <nav class="container-fluid">
         <ul>
             <li>
-                <span class="logo-icon">🏥</span>
-                <strong class="logo-text">
-                    <span class="logo-text-first">DocMind</span>
-                    <span class="logo-text-second">AI</span>
-                </strong>
+                <a href="#" class="logo" onclick="switchView('home')" data-tooltip="Home" data-placement="bottom">
+                    <span class="logo-icon">🏥</span>
+                    <strong class="logo-text">
+                        <span class="logo-text-first">DocMind</span>
+                        <span class="logo-text-second">AI</span>
+                    </strong>
+                </a>
             </li>
         </ul>
         <ul class="menu" id="categoriesMenu">
-            <li>
-                <a data-view="home" aria-label="Home" onclick="switchView('home')">🏠</a>
-            </li>
         </ul>
         <ul>
             <li>
-                <a data-view="history" aria-label="View history" onclick="switchView('history')">📜</a>
+                <a data-view="history" data-tooltip="View history" data-placement="bottom" aria-label="View history" onclick="switchView('history')">📜</a>
             </li>
             <li>
-                <a id="themeToggle" class="outline" aria-label="Toggle theme" onclick="toggleTheme()">🌙</a>
+                <a id="themeToggle" class="outline" data-tooltip="Toggle theme" data-placement="bottom" aria-label="Toggle theme" onclick="toggleTheme()">🌙</a>
             </li>
         </ul>
     </nav>

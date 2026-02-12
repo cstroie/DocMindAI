@@ -165,7 +165,7 @@ ul.keywords li {
 }
 
 .article li {
-    margin-bottom: 0.5em;
+    margin-bottom: 0;
 }
 
 .article hr {
@@ -267,24 +267,15 @@ ul.keywords li {
 }
 
 .diagnosis-item h3 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #111827;
-    text-transform: none;
     flex: 1;
-    font-family: 'Roboto', sans-serif;
 }
 
 .diagnosis-item .diagnosis-header {
     display: flex;
-    align-items: center;
-    margin-bottom: 12px;
 }
 
 .diagnosis-item .probability-score {
-    font-weight: 600;
-    margin-left: auto;
-    font-family: 'Roboto', sans-serif;
+    font-size: 1.5rem;
 }
 
 

@@ -20,6 +20,9 @@ function populateCategoriesMenu() {
         const menuLink = document.createElement('a');
         menuLink.href = '#';
         menuLink.dataset.view = `tools-${categoryId}`;
+        //menuLink.title = categoryData.name;
+        menuLink.dataset.tooltip = categoryData.name || '';
+        menuLink.dataset.placement = "bottom";
         menuLink.innerHTML = `${categoryData.icon || '📁'}`;
         
         menuLink.addEventListener('click', (e) => {
