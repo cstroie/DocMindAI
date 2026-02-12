@@ -1,5 +1,5 @@
 {
-  "version": "2.4",
+  "version": "2.5",
   "metadata": {
     "last_updated": "2026-02-12",
     "author": "Costin Stroie",
@@ -309,7 +309,7 @@
       "name": "Academic Paper Analyzer",
       "description": "Analyze and summarize research papers using a structured academic review framework",
       "category": "research",
-      "icon": "📑",
+      "icon": "🔬",
       "prompt": {
         "role": "You are an expert academic reviewer specializing in analyzing research papers.",
         "task": "Your goal is to extract key information and present it in a clear, structured format that allows reviewers to quickly understand the paper's contributions, methodology, and significance.",
@@ -602,7 +602,7 @@
       "name": "Discharge Paper Summarizer",
       "description": "Analyze patient discharge papers to extract radiology-relevant information",
       "category": "medical_admin",
-      "icon": "📋",
+      "icon": "⚡",
       "prompt": {
         "role": "You are a medical assistant analyzing patient discharge papers for radiology relevance.",
         "task": "Read the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation. Do not exceed 50 words.",
@@ -1162,7 +1162,7 @@
       "name": "Web Page Converter",
       "description": "Scrape web pages and convert them to clean Markdown format using AI processing",
       "category": "content_processing",
-      "icon": "🔗",
+      "icon": "🕸️",
       "prompt": {
         "role": "You are a content extraction assistant.",
         "task": "Your task is to identify the main content of a web page and convert it to clean, well-formatted {format} document.",
@@ -1236,7 +1236,7 @@
       "name": "Web Page Summarizer",
       "description": "Scrape web pages and return a structured summary of the most important points",
       "category": "content_processing",
-      "icon": "📝",
+      "icon": "🌐",
       "prompt": {
         "role": "You are a content summarization assistant.",
         "task": "Your task is to identify the main content of a web page and create a structured summary of the most important points.",
@@ -1478,7 +1478,7 @@
       "name": "Summarize This Paper",
       "description": "AI-powered academic paper summarization with structured approaches",
       "category": "research",
-      "icon": "📄",
+      "icon": "🪄",
       "prompts": {
         "three_pass": {
           "role": "You are an academic paper analyzer.",
@@ -1806,7 +1806,7 @@
       "name": "Survey Tool Analyzer",
       "description": "Analyze research questionnaires and surveys for structural validity, question quality and response bias",
       "category": "research",
-      "icon": "📋",
+      "icon": "🗳️",
       "prompt": {
         "role": "You are a research methods specialist analyzing survey instruments.",
         "task": "Critically evaluate surveys/questionnaires using established research methodology frameworks.",
@@ -2015,7 +2015,7 @@
       "name": "Plagiarism Detector",
       "description": "Analyze text for potential plagiarism and AI-generated content",
       "category": "research",
-      "icon": "🔍",
+      "icon": "🚩",
       "prompt": {
         "role": "You are an academic integrity analysis tool.",
         "task": "Scan text for potential plagiarism and evaluate likelihood of AI-generated content.",
@@ -2108,7 +2108,7 @@
       "name": "Anamnesis Structurer",
       "description": "Structure doctor-patient anamnestic transcripts according to medical standards",
       "category": "clinical",
-      "icon": "📋",
+      "icon": "💬",
       "prompt": {
         "role": "You are a medical documentation specialist specializing in anamnesis structuring.",
         "task": "Transform unstructured doctor-patient conversation transcripts into standardized medical anamnesis format.",

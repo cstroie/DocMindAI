@@ -1854,7 +1854,7 @@ function switchView(viewName) {
                 pageSubtitle.textContent = 'Welcome to DocMind AI - Intelligent Document Processing';
                 break;
             case 'history':
-                pageTitle.textContent = '🕒 History';
+                pageTitle.textContent = '⏳ History';
                 pageSubtitle.textContent = 'View your previous analysis sessions and results';
                 // Load and display history when switching to history view
                 displayHistory();
@@ -2039,7 +2039,7 @@ function displayHistory() {
             emptyState.className = 'history-empty-state';
             emptyState.innerHTML = `
                 <hgroup>
-                    <h3 class="empty-state-title"><span class="empty-state-icon">📄</span> No history yet</h3>
+                    <h3 class="empty-state-title"><span class="empty-state-icon">⏳</span> No history yet</h3>
                     <p class="empty-state-description">Your analysis history will appear here</p>
                 </hgroup>
             `;
@@ -2060,7 +2060,7 @@ function displayHistory() {
 
         historyItem.innerHTML = `
             <hgroup class="history-info">
-                <h3 class="history-title"><span class="history-icon">📄</span> ${result.title}</h3>
+                <h3 class="history-title"><span class="history-icon">⏳</span> ${result.title}</h3>
                 <p class="history-date">${formattedDate}</p>
                 ${result.tool ? `<p class="history-tool">Tool: ${result.tool}</p>` : ''}
             </hgroup>
