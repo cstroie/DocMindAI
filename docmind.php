@@ -142,13 +142,12 @@ function handleApiRequest() {
  * Handle model fetching from LLM API
  */
 function handleGetModels() {
-    // Check for constants instead of globals for security
-    if (!defined('LLM_API_ENDPOINT') || !defined('LLM_API_KEY')) {
-        sendJsonResponse(['error' => 'API configuration missing', 'API_ENDPOINT' => defined('LLM_API_ENDPOINT') ? LLM_API_ENDPOINT : null, 'API_KEY' => defined('LLM_API_KEY') ? LLM_API_KEY : null], true);
-    }
-    $api_endpoint = LLM_API_ENDPOINT; 
-    $api_key = LLM_API_KEY; 
-    $filter = defined('LLM_API_FILTER') ? LLM_API_FILTER : '';
+    global $LLM_API_ENDPOINT, $LLM_API_KEY, $LLM_API_FILTER;
+
+    // Use server-side configured values
+    $api_endpoint = $LLM_API_ENDPOINT;
+    $api_key = $LLM_API_KEY;
+    $filter = $LLM_API_FILTER;
 
     // Validate required parameters
     if (empty($api_endpoint)) {
