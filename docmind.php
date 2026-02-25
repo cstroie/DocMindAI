@@ -234,9 +234,18 @@ function handleToolAction($tool_id) {
     $is_image = false;
     $image_data = null;
     $mime_type = null;
+    $file_info = null;
 
     if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['file'];
+        
+        // Store file metadata for debug
+        $file_info = [
+            'name' => $file['name'],
+            'type' => $file['type'],
+            'size' => $file['size'],
+            'error' => $file['error']
+        ];
 
         // Check if it's an image
         $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -253,6 +262,8 @@ function handleToolAction($tool_id) {
             } else {
                 $image_data = $image_processing_result['image_data'];
                 $mime_type = $image_processing_result['mime_type'];
+                $file_info['processed_mime_type'] = $mime_type;
+                $file_info['extracted_length'] = strlen($image_data);
             }
         } else {
             // Text document - try to extract text
@@ -266,6 +277,7 @@ function handleToolAction($tool_id) {
                 $file_content = preg_replace('/^\xEF\xBB\xBF/', '', $file_content);
                 // Normalize line endings
                 $file_content = str_replace(["\r\n", "\r"], "\n", $file_content);
+                $file_info['extracted_length'] = strlen($file_content);
             }
         }
     }
@@ -335,6 +347,10 @@ function handleToolAction($tool_id) {
     // Add form data and API data to the response
     $result['debug']['form_data'] = $form_data;
     $result['debug']['api_data'] = $api_data;
+    // Add file_info to debug if file was uploaded
+    if ($file_info !== null) {
+        $result['debug']['file_info'] = $file_info;
+    }
 
     // Set CORS headers
     header('Access-Control-Allow-Origin: *');
