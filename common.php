@@ -592,7 +592,8 @@ function extractTextFromDocument($file_path, $mime_type) {
                 $text = shell_exec('catdoc -a -dutf-8 -w ' . escapeshellarg($file_path) . ' 2>&1');
             }
             break;
-
+        
+        // FIXME let's optimize this, remove the redundance
         case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': // .docx
             if (file_exists('/usr/bin/docx2txt')) {
                 $text = shell_exec('docx2txt < ' . escapeshellarg($file_path) . ' 2>&1');
