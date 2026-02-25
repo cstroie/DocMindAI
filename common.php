@@ -579,42 +579,52 @@ function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dil
 function extractTextFromDocument($file_path, $mime_type) {
     // Try specific tools based on file type
     $text = false;
+    // Common binary paths to check
+    $bin_paths = ['/usr/bin/', '/usr/local/bin/'];
 
+    // Attempt to extract text based on MIME type
     switch ($mime_type) {
         case 'application/msword': // .doc
-            if (file_exists('/usr/bin/antiword')) {
-                $text = shell_exec('antiword -f -w 0 ' . escapeshellarg($file_path) . ' 2>&1');
-            } elseif (file_exists('/usr/local/bin/antiword')) {
-                $text = shell_exec('antiword -f -w 0 ' . escapeshellarg($file_path) . ' 2>&1');
-            } elseif (file_exists('/usr/bin/catdoc')) {
-                $text = shell_exec('catdoc -a -dutf-8 -w ' . escapeshellarg($file_path) . ' 2>&1');
-            } elseif (file_exists('/usr/local/bin/catdoc')) {
-                $text = shell_exec('catdoc -a -dutf-8 -w ' . escapeshellarg($file_path) . ' 2>&1');
+            // Check for antiword or catdoc in common locations
+            for ($i = 0; $i < count($bin_paths); $i++) {
+                $bin_path = $bin_paths[$i];
+                if (file_exists($bin_path . 'antiword')) {
+                    $text = shell_exec($bin_path . 'antiword -f -w 0 ' . escapeshellarg($file_path) . ' 2>&1');
+                    break;
+                } elseif (file_exists($bin_path . 'catdoc')) {
+                    $text = shell_exec($bin_path . 'catdoc -a -dutf-8 -w ' . escapeshellarg($file_path) . ' 2>&1');
+                    break;
+                }
             }
             break;
         
-        // FIXME let's optimize this, remove the redundance
         case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': // .docx
-            if (file_exists('/usr/bin/docx2txt')) {
-                $text = shell_exec('docx2txt < ' . escapeshellarg($file_path) . ' 2>&1');
-            } elseif (file_exists('/usr/local/bin/docx2txt')) {
-                $text = shell_exec('docx2txt < ' . escapeshellarg($file_path) . ' 2>&1');
+            for ($i = 0; $i < count($bin_paths); $i++) {
+                $bin_path = $bin_paths[$i];
+                if (file_exists($bin_path . 'docx2txt')) {
+                    $text = shell_exec($bin_path . 'docx2txt < ' . escapeshellarg($file_path) . ' 2>&1');
+                    break;
+                }
             }
             break;
 
         case 'application/pdf': // .pdf
-            if (file_exists('/usr/bin/pdftotext')) {
-                $text = shell_exec('pdftotext -layout ' . escapeshellarg($file_path) . ' - 2>&1');
-            } elseif (file_exists('/usr/local/bin/pdftotext')) {
-                $text = shell_exec('pdftotext -layout ' . escapeshellarg($file_path) . ' - 2>&1');
+            for ($i = 0; $i < count($bin_paths); $i++) {
+                $bin_path = $bin_paths[$i];
+                if (file_exists($bin_path . 'pdftotext')) {
+                    $text = shell_exec($bin_path . 'pdftotext -layout ' . escapeshellarg($file_path) . ' - 2>&1');
+                    break;
+                }
             }
             break;
 
         case 'application/vnd.oasis.opendocument.text': // .odt
-            if (file_exists('/usr/bin/odt2txt')) {
-                $text = shell_exec('odt2txt --encoding=UTF-8 ' . escapeshellarg($file_path) . ' 2>&1');
-            } elseif (file_exists('/usr/local/bin/odt2txt')) {
-                $text = shell_exec('odt2txt --encoding=UTF-8 ' . escapeshellarg($file_path) . ' 2>&1');
+            for ($i = 0; $i < count($bin_paths); $i++) {
+                $bin_path = $bin_paths[$i];
+                if (file_exists($bin_path . 'odt2txt')) {
+                    $text = shell_exec($bin_path . 'odt2txt --encoding=UTF-8 ' . escapeshellarg($file_path) . ' 2>&1');
+                    break;
+                }
             }
             break;
 
@@ -624,23 +634,7 @@ function extractTextFromDocument($file_path, $mime_type) {
             break;
     }
 
-    // Fallback to pandoc if specific tools failed
-    if (empty($text) && file_exists('/usr/bin/pandoc')) {
-        $text = shell_exec('pandoc -t plain ' . escapeshellarg($file_path) . ' 2>&1');
-    } elseif (empty($text) && file_exists('/usr/local/bin/pandoc')) {
-        $text = shell_exec('pandoc -t plain ' . escapeshellarg($file_path) . ' 2>&1');
-    }
-
-    // Clean up the extracted text
-    if ($text !== false) {
-        $text = trim($text);
-        // Remove error messages from stderr
-        $text = preg_replace('/^.*error.*$/im', '', $text);
-        $text = preg_replace('/^.*warning.*$/im', '', $text);
-        $text = preg_replace('/^.*not found.*$/im', '', $text);
-        $text = trim($text);
-    }
-
+    // Return text if successfully extracted
     return $text;
 }
 
