@@ -375,7 +375,7 @@ function createCategoriesViews(categories) {
     const sidebarNav = document.querySelector('.sidebar-nav');
     const homeButton = document.querySelector('.nav-item[data-view="home"]');
 
-    // Create a view for each category (in reverse order)
+    // Create a view for each category
     const categoryEntries = Object.entries(categories);
     for (let i = categoryEntries.length - 1; i >= 0; i--) {
         const [categoryId, categoryData] = categoryEntries[i];
@@ -405,10 +405,12 @@ function createCategoriesViews(categories) {
             toolsGrid.id = `${categoryId}ToolsGrid`;
         }
 
-        // Append the category view to the container
+        // Append the category view to the container BEFORE populating tools
         viewContainer.appendChild(categoryView);
-
-        // Populate the category view with tools
+    }
+    
+    // After all views are appended to DOM, populate tools for each category
+    for (const categoryId of Object.keys(categories)) {
         loadToolsInCategory(categoryId);
     }
 }
@@ -513,11 +515,12 @@ function populateCategoryCards() {
         if (titleElement) titleElement.textContent = categoryData.name;
         if (descriptionElement) descriptionElement.textContent = categoryData.description || '';
         
-        // Add click handler to show category tools
+        // Add click handler to show category tools with lazy loading
         const card = clone.querySelector('.card');
         if (card) {
             card.addEventListener('click', () => {
                 switchView('tools-' + categoryId);
+                loadToolsInCategory(categoryId);
             });
         }
 
@@ -640,8 +643,8 @@ function populateToolSelect(toolSelect) {
     toolSelect.innerHTML = '<option selected disabled value="">Select a tool</option>';
 
     // Check if toolsData is available
-    if (!toolsData) {
-        console.error('No tools data available');
+    if (!toolsData || Object.keys(toolsData).length === 0) {
+        console.warn('No tools data available');
         return;
     }
 
@@ -721,9 +724,11 @@ function displayToolForm(toolId) {
     }
 
     // Get the selected tool
-    const tool = toolsData[toolId];
+    let tool = toolsData[toolId];
+    
+    // If tool is not found, it might not be loaded yet
     if (!tool) {
-        showError(`Tool ${toolId} not found`);
+        showError(`Tool ${toolId} not found. Please try again.`);
         return;
     }
 
@@ -2018,15 +2023,45 @@ document.addEventListener('DOMContentLoaded', async function() {
     categoriesData = configData.categories || {};
     // Load languages data
     languagesData = configData.languages || {};
-    // Load tools and common data from config
-    for (const category in configData.tools) {
+    // Load tools from individual files in their categories
+    toolsData = {};
+    commonData = configData.common || {};
+    
+    // Load all tools from individual files
+    const toolCategories = configData.tools || {};
+    let totalTools = 0;
+    let successfulTools = 0;
+    
+    for (const category in toolCategories) {
         console.log(`Loading tools for category: ${category}`);
-        for (const [toolId, toolData] of Object.entries(configData.tools[category])) {
-            //console.log(`Loading tool: ${toolData} in category: ${category}`);
-            toolsData[toolData] = await loadJSONResource('tools/' + category + '/' + toolData + '.json');
+        const categoryTools = toolCategories[category];
+        
+        for (const [toolId, toolFile] of Object.entries(categoryTools)) {
+            totalTools++;
+            const toolPath = `tools/${category}/${toolFile}.json`;
+            try {
+                const tool = await loadJSONResource(toolPath);
+                
+                // Verify tool has required properties
+                if (!tool.id) {
+                    console.warn(`Tool at ${toolPath} is missing 'id' property`);
+                    continue;
+                }
+                if (!tool.category) {
+                    console.warn(`Tool ${toolId} at ${toolPath} is missing 'category' property`);
+                    tool.category = category;
+                }
+                
+                toolsData[toolId] = tool;
+                successfulTools++;
+                console.log(`✓ Loaded tool: ${toolId} (${tool.name}) from ${toolPath}`);
+            } catch (error) {
+                console.error(`✗ Failed to load tool ${toolId} from ${toolPath}:`, error);
+            }
         }
     }
-    commonData = configData.common || {};
+    
+    console.log(`Tool loading summary: ${successfulTools}/${totalTools} tools loaded successfully`);
 
     // Create category views and buttons after loading data
     if (categoriesData) {
@@ -2080,6 +2115,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             // If no submenu or submenu is empty, proceed with view switching
             const viewName = this.dataset.view;
             if (viewName) {
+                // Render tools for category views
+                if (viewName.startsWith('tools-')) {
+                    const category = viewName.replace('tools-', '');
+                    loadToolsInCategory(category);
+                }
+                
                 switchView(viewName);
                 // Close sidebar on mobile after selecting a view
                 const sidebar = document.querySelector('.sidebar');
@@ -2122,3 +2163,36 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 });
+
+/**
+ * Set up lazy loading for tools when categories are accessed
+ * 
+ * This function is no longer needed as tools are loaded on page initialization.
+ * Kept for backward compatibility.
+ * 
+ * @return {void}
+ */
+async function setupLazyToolLoading() {
+    console.log('Tools already loaded on page initialization.');
+}
+
+/**
+ * Load all tools from all categories (deprecated - tools now load on page init)
+ * 
+ * @deprecated Tools are loaded during DOMContentLoaded in the initialization section
+ * @return {Promise<void>}
+ */
+async function loadAllTools() {
+    console.warn('loadAllTools() is deprecated. Tools are loaded on page initialization.');
+}
+
+/**
+ * Load tools for a specific category (deprecated - tools now load on page init)
+ * 
+ * @deprecated Tools are loaded during DOMContentLoaded in the initialization section
+ * @param {string} category - The category name to load tools for
+ * @return {Promise<void>}
+ */
+async function loadToolsForCategory(category) {
+    console.warn('loadToolsForCategory() is deprecated. Tools are loaded on page initialization.');
+}

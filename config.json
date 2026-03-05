@@ -130,42 +130,43 @@
     }
   },
   "tools": {
-    "clinical": [
-      "dqc",
-      "rex",
-      "rrs",
-      "rdd",
-      "soap",
-      "dsn",
-      "pec",
-      "sbar",
-      "mex",
-      "anm"
-    ],
-    "content_processing": [
-      "sde",
-      "rdg",
-      "wpc",
-      "wps",
-      "cta"
-    ],
-    "research": [
-      "apa",
-      "etp",
-      "stp",
-      "sta",
-      "sml",
-      "pld"
-    ],
-    "development": [
-      "exp",
-      "eml",
-      "ocr"
-    ],
-    "medical_admin": [
-      "dps",
-      "hda",
-      "pre"
-    ]
+    "clinical": {
+      "dqc": "dqc",
+      "rex": "rex",
+      "rrs": "rrs",
+      "rdd": "rdd",
+      "soap": "soap",
+      "dsn": "dsn",
+      "pec": "pec",
+      "sbar": "sbar",
+      "mex": "mex",
+      "anm": "anm",
+      "cpn": "cpn"
+    },
+    "content_processing": {
+      "sde": "sde",
+      "rdg": "rdg",
+      "wpc": "wpc",
+      "wps": "wps",
+      "cta": "cta"
+    },
+    "research": {
+      "apa": "apa",
+      "etp": "etp",
+      "stp": "stp",
+      "sta": "sta",
+      "sml": "sml",
+      "pld": "pld"
+    },
+    "development": {
+      "exp": "exp",
+      "eml": "eml",
+      "ocr": "ocr"
+    },
+    "medical_admin": {
+      "dps": "dps",
+      "hda": "hda",
+      "pre": "pre"
+    }
   }
 }
