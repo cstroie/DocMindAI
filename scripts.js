@@ -1,8 +1,8 @@
 // Global variables to store categories, tools, languages, and prompts
-let categoriesData = null;
-let toolsData = null;
-let commonData = null;
-let languagesData = null;
+let categoriesData = {};
+let toolsData = {};
+let commonData = {};
+let languagesData = {}
 let promptsData = null;
 
 /**
@@ -410,43 +410,6 @@ function createCategoriesViews(categories) {
 
         // Populate the category view with tools
         loadToolsInCategory(categoryId);
-
-        /*
-        // Create category button for sidebar
-        const categoryButton = document.createElement('button');
-        categoryButton.className = 'nav-item';
-        categoryButton.dataset.view = 'tools-' + categoryId;
-        categoryButton.innerHTML = `
-            <div class="nav-item-content">
-                <span class="nav-icon">${categoryData.icon || '📄'}</span>
-                <span class="nav-text">${categoryData.name}</span>
-                <span class="nav-arrow">▼</span>
-            </div>
-            <div class="nav-submenu"></div>
-        `;
-
-        // Add tools as submenu items
-        const submenu = categoryButton.querySelector('.nav-submenu');
-        for (const [toolId, toolData] of Object.entries(toolsData)) {
-            if (toolData.category === categoryId) {
-                const toolButton = document.createElement('button');
-                toolButton.className = 'sub-nav-item';
-                toolButton.dataset.toolId = toolId;
-                toolButton.innerHTML = `
-                    <span class="sub-nav-icon">${toolData.icon || '📄'}</span>
-                    <span class="sub-nav-text">${toolData.name}</span>
-                `;
-                submenu.appendChild(toolButton);
-            }
-        }
-
-        // Insert category button after the home button
-        if (homeButton && homeButton.nextSibling) {
-            sidebarNav.insertBefore(categoryButton, homeButton.nextSibling);
-        } else {
-            sidebarNav.appendChild(categoryButton);
-        }
-            */
     }
 }
 
@@ -2053,7 +2016,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     categoriesData = await loadJSONResource('categories.json', 'categories');
     // Load tools data
     configData = await loadJSONResource('tools.json');
-    toolsData = configData.tools || {};
+    // Load tools and common data from config
+    for (const category in configData.tools) {
+        console.log(`Loading tools for category: ${category}`);
+        for (const [toolId, toolData] of Object.entries(configData.tools[category])) {
+            //console.log(`Loading tool: ${toolData} in category: ${category}`);
+            toolsData[toolData] = await loadJSONResource('tools/' + category + '/' + toolData + '.json');
+        }
+    }
     commonData = configData.common || {};
     // Load languages data
     languagesData = await loadJSONResource('languages.json', 'languages');
