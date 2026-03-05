@@ -1099,62 +1099,6 @@ async function fetchModels(selectElement, cookies = {}) {
 }
 
 /**
- * Fetch languages from JSON and populate select element
- * 
- * This function populates a select element with available languages from the
- * global languagesData variable. It's currently not used since languagesData
- * is loaded globally and used directly in createFormField().
- * 
- * @param {HTMLSelectElement} selectElement - The select element to populate
- * @return {Promise<void>}
- * 
- * @note This function is currently not used in the codebase
- * @note Languages are loaded globally and used directly in createFormField()
- * @note Kept for potential future use or refactoring
- * @see createFormField() - Uses global languagesData directly
- */
-async function fetchLanguages(selectElement) {
-    try {
-        // Use the global languagesData if available
-        if (!languagesData) {
-            console.error('No languages data available');
-            // Clear loading option and add error option
-            selectElement.innerHTML = '';
-            const errorOption = document.createElement('option');
-            errorOption.value = '';
-            errorOption.textContent = 'Failed to load languages';
-            selectElement.appendChild(errorOption);
-            return;
-        }
-
-        // Clear loading option
-        selectElement.innerHTML = '';
-
-        // Add default option
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = 'Select a language';
-        selectElement.appendChild(defaultOption);
-
-        // Add languages from global data
-        for (const [langCode, langData] of Object.entries(languagesData)) {
-            const option = document.createElement('option');
-            option.value = langCode;
-            option.textContent = (langData.flag ? ' ' + langData.flag : '') + langData.name;
-            selectElement.appendChild(option);
-        }
-    } catch (error) {
-        console.error('Failed to load languages:', error.message);
-        // Clear loading option and add error option
-        selectElement.innerHTML = '';
-        const errorOption = document.createElement('option');
-        errorOption.value = '';
-        errorOption.textContent = 'Failed to load languages';
-        selectElement.appendChild(errorOption);
-    }
-}
-
-/**
  * Fetch prompts from API and populate select element
  * 
  * This function fetches available prompt templates from the server API and
