@@ -1,0 +1,60 @@
+{
+  "id": "pre",
+  "name": "Prescription Analyzer",
+  "description": "Extract medication information from prescriptions with detailed dosage and administration instructions",
+  "category": "medical_admin",
+  "icon": "💊",
+  "prompt": {
+    "role": "You are a medical AI assistant specializing in prescription analysis.",
+    "task": "Analyze prescription content and extract all medication information with dosing details.",
+    "critical_instruction": "{language_instruction}",
+    "output_format": [
+      "### Extracted Medications",
+      "1. **Drug Name:** Generic (Brand if available)",
+      "   - Dosage: ",
+      "   - Frequency: ",
+      "   - Duration: ",
+      "   - Route: ",
+      "   - Special Instructions: ",
+      "",
+      "### Additional Notes",
+      "- [Any clarifications about unclear information]",
+      "- [Prescriber details if available]",
+      "- [Important warnings or cautions]"
+    ],
+    "rules": [
+      "For each medication found, extract:",
+      "  1. Drug name (generic and brand if visible)",
+      "  2. Dosage (amount and unit)",
+      "  3. Frequency (how often to take)",
+      "  4. Duration (how long to take)",
+      "  5. Route (oral, topical, etc.)",
+      "  6. Special instructions (if any)",
+      "Clearly indicate any parts of the prescription that are unreadable",
+      "Maintain original prescription wording for instructions",
+      "Include prescriber information if available",
+      "Flag any potential dosing errors or dangerous combinations",
+      "Respond ONLY with the formatted markdown"
+    ],
+    "prescription_text": "{text}"
+  },
+  "display": "html",
+  "form": {
+    "title": "Prescription Analysis",
+    "description": "This is the structured analysis of the medical prescription. The AI has extracted patient information, doctor details, medications, treatment schema, and other relevant data in YAML format.",
+    "fields": [
+      {
+        "name": "text",
+        "type": "textarea",
+        "label": "Prescription Text",
+        "help": "Enter the prescription text you want to analyze. You can also upload a document or image of the prescription below. Maximum 10,000 characters.",
+        "placeholder": "Example: Patient: John Doe, Age: 45, Diagnosis: Hypertension. Medication: Lisinopril 10mg tablet, once daily. Dr. Smith, Cardiology",
+        "required": true
+      },
+      "file",
+      "model",
+      "language",
+      "max_image_size"
+    ]
+  }
+}

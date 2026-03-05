@@ -1,0 +1,17 @@
+{
+  "id": "ocr",
+  "name": "Image OCR Tool",
+  "description": "Perform OCR on uploaded images and extract text in Markdown format",
+  "category": "development",
+  "icon": "📷",
+  "form": {
+    "title": "OCR Form",
+    "description": "Review the extracted text from your uploaded image. The OCR tool has processed the image and converted it to editable text format.",
+    "fields": [
+      "file",
+      "model",
+      "language",
+      "max_image_size"
+    ]
+  }
+}

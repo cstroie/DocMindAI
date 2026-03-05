@@ -1,0 +1,43 @@
+{
+  "id": "sde",
+  "name": "Structured Data Extractor",
+  "description": "Convert unstructured text or documents into structured JSON, YAML, XML, HTML, or Markdown formats",
+  "category": "content_processing",
+  "icon": "📊",
+  "prompt": {
+    "role": "You are a data extraction API.",
+    "task": "Extract structured data from the following. If a file is provided, extract data from the file content as well.",
+    "output_format": "{output}",
+    "text": "{text}"
+  },
+  "form": {
+    "title": "Structured Data Extraction",
+    "description": "Review the extracted structured data from your input. The AI has processed the text and converted it into the requested format (JSON, YAML, XML, HTML, or Markdown).",
+    "fields": [
+      {
+        "name": "text",
+        "type": "textarea",
+        "label": "Input Text",
+        "help": "Enter the text you want to extract structured data from. Maximum 10,000 characters.",
+        "placeholder": "Example: Patient: John Doe, Age: 45, Diagnosis: Type 2 Diabetes, Treatment: Metformin 500mg twice daily",
+        "required": true
+      },
+      "file",
+      {
+        "name": "output",
+        "type": "select",
+        "label": "Output Format",
+        "help": "Select the output format for the extracted data.",
+        "options": [
+          {"value": "json", "label": "JSON"},
+          {"value": "yaml", "label": "YAML"},
+          {"value": "xml", "label": "XML"},
+          {"value": "html", "label": "HTML"},
+          {"value": "markdown", "label": "Markdown"}
+        ]
+      },
+      "model",
+      "max_image_size"
+    ]
+  }
+}

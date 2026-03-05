@@ -1,0 +1,33 @@
+{
+  "id": "exp",
+  "name": "Experiment Tool",
+  "description": "Test and experiment with different AI models using custom or predefined prompts",
+  "category": "development",
+  "icon": "🧪",
+  "form": {
+    "title": "AI Model Experimentation",
+    "description": "Review the AI model's response to your custom prompt. This output shows how the selected model processes your input and generates a response.",
+    "fields": [
+      {
+        "name": "prompts",
+        "type": "select",
+        "label": "Available Prompts",
+        "help": "Select a predefined prompt type or choose \"Current prompt\" to use the last submitted prompt.",
+        "options": []
+      },
+      {
+        "name": "prompt",
+        "type": "textarea",
+        "rows": 20,
+        "label": "Prompt Text",
+        "help": "Enter the prompt text you want to test with the AI model. You can select from predefined prompts or enter your own. Maximum 10,000 characters.",
+        "placeholder": "Example: Explain quantum computing in simple terms",
+        "required": true
+      },
+      "file",
+      "model",
+      "language",
+      "max_image_size"
+    ]
+  }
+}

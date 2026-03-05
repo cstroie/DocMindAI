@@ -1,0 +1,70 @@
+{
+  "id": "dqc",
+  "name": "Doctor Questions Creator",
+  "description": "Generate thoughtful questions for patients to ask their doctors about medical findings",
+  "category": "clinical",
+  "icon": "❓",
+  "prompt": {
+    "role": "You are a patient advocate helping prepare for doctor consultations.",
+    "task": "Generate thoughtful questions based on medical findings to help patients have productive conversations with their doctors.",
+    "critical_instruction": "{language_instruction}",
+    "output_format": [
+      "### Questions to Ask Your Doctor",
+      "",
+      "Based on the findings:",
+      "* What does this mean for my health?",
+      "* Question 1 about findings progression",
+      "* Question 2 about symptoms monitoring",
+      "* Question 3 about follow-up imaging",
+      "* Question 4 about treatment options",
+      "* Question 5 about monitoring timeline",
+      "",
+      "Remember to:",
+      "- Ask about anything unclear",
+      "- Discuss personal health concerns",
+      "- Take notes during your appointment"
+    ],
+    "rules": [
+      "Generate 5-8 clear, actionable questions",
+      "Focus on understanding:",
+      "  - Whether findings typically progress or stay stable",
+      "  - What symptoms to watch for",
+      "  - Need for follow-up imaging",
+      "  - Alternative treatment approaches",
+      "  - Recommended monitoring timeline",
+      "Use simple, patient-friendly language",
+      "Avoid medical jargon",
+      "Prioritize questions that help inform next steps",
+      "Format as bullet points",
+      "Respond ONLY with the formatted markdown"
+    ],
+    "patient_context": "{context}",
+    "radiology_report": "{report}"
+  },
+  "display": "html",
+  "form": {
+    "title": "Doctor Questions",
+    "description": "Review the generated questions to discuss with your doctor. These questions are designed to help you better understand your medical findings and next steps.",
+    "fields": [
+      {
+        "name": "report",
+        "type": "textarea",
+        "label": "Medical Findings",
+        "help": "Enter radiology report or medical findings text. Maximum 10,000 characters.",
+        "placeholder": "Example: There is a 1.2 cm nodule in the right upper lobe...",
+        "required": true
+      },
+      {
+        "name": "context",
+        "type": "textarea",
+        "label": "Patient Context (optional)",
+        "help": "Any relevant details about your health situation",
+        "placeholder": "Example: I have a family history of lung cancer"
+      },
+      "file",
+      "model",
+      "language",
+      "max_image_size"
+    ]
+  }
+}

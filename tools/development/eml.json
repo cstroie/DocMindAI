@@ -1,0 +1,77 @@
+{
+  "id": "eml",
+  "name": "Email Generator",
+  "description": "Generate professional email replies based on email content and context",
+  "category": "development",
+  "icon": "✉️",
+  "prompt": {
+    "role": "You are a professional email assistant.",
+    "task": "Your task is to help draft {response_style}, polite, and effective email responses based on the original email and the user's response idea.",
+    "critical_instruction": "{language_instruction}",
+    "guidelines": [
+      "1. Tone:",
+      "- Maintain a {response_style} tone throughout the email.",
+      "- Use clear and proper language.",
+      "- Be concise and to the point.",
+      "",
+      "2. Structure:",
+      "- Start with a polite greeting (e.g., \"Hi [Recipient's Name],\").",
+      "- Acknowledge the original email and summarize the main points if necessary.",
+      "- Present the response idea in a clear and structured manner.",
+      "- End with a polite closing (e.g., \"Best regards,\") and your name or appropriate signature.",
+      "",
+      "3. Content:",
+      "- Address all points mentioned in the original email.",
+      "- Incorporate the user's response idea naturally into the email.",
+      "- Provide any necessary details or explanations.",
+      "- If additional information or action is required, clearly state what is needed.",
+      "",
+      "4. Formatting:",
+      "- Use proper paragraph breaks for readability.",
+      "- Use bullet points or numbered lists if it helps clarify the information.",
+      "- Ensure the email is well-organized and easy to follow."
+    ],
+    "orginal email": "{orginal_email}",
+    "response idea": "{response_idea}"
+  },
+  "display": "markdown",
+  "form": {
+    "title": "Email Generator",
+    "description": "Generate professional email replies based on email content and context",
+    "fields": [
+      {
+        "name": "response_style",
+        "type": "select",
+        "label": "Response Style",
+        "help": "Select the desired tone and style for the email response",
+        "options": [
+          {"value": "formal", "label": "Formal"},
+          {"value": "casual", "label": "Casual"},
+          {"value": "professional but friendly", "label": "Professional"},
+          {"value": "empathetic", "label": "Empathetic"},
+          {"value": "assertive", "label": "Assertive"},
+          {"value": "persuasive", "label": "Persuasive"},
+          {"value": "concise", "label": "Concise"}
+        ]
+      },
+      {
+        "name": "orginal_email",
+        "type": "textarea",
+        "label": "Original Email",
+        "help": "Enter the original email content you want to generate a reply for.",
+        "placeholder": "Example:\nHi Team,\n\nI wanted to check in on the status of the project deliverables. We are approaching the deadline and I want to ensure everything is on track. Please provide an update on your progress and let me know if there are any blockers.\n\nBest,\nManager",
+        "required": true
+      },
+      {
+        "name": "response_idea",
+        "type": "textarea",
+        "label": "Response Idea",
+        "help": "Enter your idea for how you'd like to respond to the original email.",
+        "placeholder": "Example:\nI've reviewed the deliverables and they look good. I'll be sending the final version to the client by Friday.",
+        "required": true
+      },
+      "model",
+      "language"
+    ]
+  }
+}

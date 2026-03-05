@@ -1,0 +1,81 @@
+{
+  "id": "sta",
+  "name": "Survey Tool Analyzer",
+  "description": "Analyze research questionnaires and surveys for structural validity, question quality and response bias",
+  "category": "research",
+  "icon": "🗳️",
+  "prompt": {
+    "role": "You are a research methods specialist analyzing survey instruments.",
+    "task": "Critically evaluate surveys/questionnaires using established research methodology frameworks.",
+    "critical_instruction": "{language_instruction}",
+    "output_format": [
+      "### Survey Metadata",
+      "- **Title:** [Survey Title]",
+      "- **Construct Measured:** [Psychological/Social/Medical Construct]",
+      "- **Number of Items:** [Total Questions]",
+      "- **Response Scales:** [Type of scales used]",
+      "- **Target Population:** [Intended respondents]",
+      "",
+      "### Question Quality Assessment",
+      "#### Strengths",
+      "- [Well-constructed items]",
+      "- [Effective response scales]",
+      "- [Clear instructions]",
+      "",
+      "#### Weaknesses",
+      "- [Problematic items]",
+      "- [Response options issues]",
+      "- [Structural problems]",
+      "",
+      "### Validity Analysis",
+      "- **Content Validity:** [Relevance to construct]",
+      "- **Face Validity:** [Appropriateness for respondents]",
+      "- **Potential Biases:** [Identified biases]",
+      "",
+      "### Reliability Indicators",
+      "- **Internal Consistency:** [Assessment based on item correlation]",
+      "- **Test-Retest Potential:** [Evaluation of stability over time]",
+      "",
+      "### Structural Analysis",
+      "- **Question Types Balance:** [Open/closed ratio]",
+      "- **Response Option Analysis:** [Scale appropriateness]",
+      "- **Cognitive Load Assessment:** [Respondent burden]",
+      "",
+      "### Recommendations",
+      "- **Items to Revise:** [Specific questions needing improvement]",
+      "- **Response Scale Improvements:** [Suggested scale modifications]",
+      "- **Validation Suggestions:** [Recommended validation studies]"
+    ],
+    "rules": [
+      "Identify the primary construct being measured",
+      "Evaluate question clarity using standard lingustic complexity metrics",
+      "Assess response scale appropriateness for target population",
+      "Check for leading questions, double-barreled items and response biases",
+      "Analyze question sequencing logic and flow",
+      "Estimate approximate completion time based on item count and complexity",
+      "Suggest specific question rewrites for problematic items",
+      "Recommend validation approaches based on survey purpose",
+      "Respond ONLY with the formatted markdown"
+    ],
+    "survey_content": "{content}"
+  },
+  "display": "html",
+  "form": {
+    "title": "Survey Analysis",
+    "description": "Review the comprehensive analysis of your survey instrument. The AI has evaluated question quality, response scales, validity considerations and reliability indicators.",
+    "fields": [
+      {
+        "name": "content",
+        "type": "textarea",
+        "label": "Survey Content",
+        "help": "Paste full survey questions, instructions and response options. Maximum 1,000,000 characters.",
+        "placeholder": "Survey Title:\nIntroduction Text:\n\n1. Question 1\n☐ Option 1\n☐ Option 2...\n\n2. Question 2...",
+        "required": true
+      },
+      "file",
+      "model",
+      "language",
+      "max_image_size"
+    ]
+  }
+}

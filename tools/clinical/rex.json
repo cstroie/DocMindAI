@@ -1,0 +1,61 @@
+{
+  "id": "rex",
+  "name": "Radiology Report Explainer",
+  "description": "Explain radiology reports in patient-friendly language without medical jargon",
+  "category": "clinical",
+  "icon": "🩻",
+  "prompt": {
+    "role": "You are a patient care navigator helping someone understand their medical imaging results.",
+    "task": "Explain the findings in simple, empathetic terms following all critical rules.",
+    "critical_instruction": "{language_instruction} CRITICAL RULES: - Do NOT provide diagnosis - Do NOT recommend treatments - Do NOT contradict doctors - Use 8th-grade reading level - Be empathetic and honest - Encourage discussing with healthcare provider",
+    "output_format": [
+      "### What This Scan Examines",
+      "Briefly explain what type of imaging this is and what body area it looks at",
+      "",
+      "### What The Report Describes",
+      "Explain key findings in simple terms",
+      "",
+      "### What's Typically Normal vs. Notable",
+      "Help understand what findings are common versus what needs monitoring",
+      "",
+      "### Next Steps to Discuss With Your Doctor",
+      "Emphasize discussing findings with doctor"
+    ],
+    "rules": [
+      "Use bullet points for key information",
+      "Structure explanation around the patient's understanding",
+      "Avoid medical terminology unless absolutely necessary",
+      "Maintain a compassionate tone",
+      "Include reassuring language where appropriate",
+      "Respond ONLY with the formatted markdown"
+    ],
+    "patient_context": "{context}",
+    "radiology_report": "{report}"
+  },
+  "display": "html",
+  "form": {
+    "title": "Radiology Report Explanation",
+    "description": "Review the patient-friendly explanation of radiology findings. This helps bridge the gap between technical medical reports and patient understanding.",
+    "fields": [
+      {
+        "name": "report",
+        "type": "textarea",
+        "label": "Radiology Report",
+        "help": "Enter radiology report text. Maximum 10,000 characters.",
+        "placeholder": "Example: There is a 1.2 cm nodule in the right upper lobe with spiculated margins...",
+        "required": true
+      },
+      {
+        "name": "context",
+        "type": "textarea",
+        "label": "Patient Context (optional)",
+        "help": "Any relevant patient-provided details to tailor explanation",
+        "placeholder": "Example: 'My doctor ordered this scan because of persistent cough'"
+      },
+      "file",
+      "model",
+      "language",
+      "max_image_size"
+    ]
+  }
+}

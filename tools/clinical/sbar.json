@@ -1,0 +1,64 @@
+{
+  "id": "sbar",
+  "name": "SBAR Nursing Note",
+  "description": "Generate structured SBAR (Situation, Background, Assessment, Recommendation) notes for clinical communication",
+  "category": "clinical",
+  "icon": "📞",
+  "prompt": {
+    "role": "You are a clinical documentation assistant.",
+    "task": "Read medical transcripts or notes and structure them into professional SBAR notes.",
+    "critical_instruction": "{language_instruction}",
+    "output_format": [
+      "### Situation",
+      "* Patient name: [Name]",
+      "* Location: [Unit/Room]",
+      "* Time of event: [Time]",
+      "* Current condition: [Explain issue]",
+      "",
+      "### Background",
+      "* Relevant medical history:",
+      "* Admission date/diagnosis:",
+      "* Current treatment plan:",
+      "* Recent vital signs/labs:",
+      "",
+      "### Assessment",
+      "* Current clinical observations:",
+      "* Analysis of the situation:",
+      "* Changes from baseline:",
+      "",
+      "### Recommendation",
+      "* Immediate actions requested:",
+      "* Monitoring requirements:",
+      "* Follow-up needed:"
+    ],
+    "rules": [
+      "Use bullet points for each component",
+      "Maintain clinical accuracy",
+      "Include all relevant information",
+      "Be concise but comprehensive",
+      "Prioritize urgent issues first",
+      "Use professional medical terminology",
+      "Respond ONLY with the formatted markdown"
+    ],
+    "clinical_transcript": "{text}"
+  },
+  "display": "html",
+  "form": {
+    "title": "SBAR Report",
+    "description": "Review the generated SBAR report. The AI has structured clinical information using Situation-Background-Assessment-Recommendation framework.",
+    "fields": [
+      {
+        "name": "text",
+        "type": "textarea",
+        "label": "Clinical Notes/Transcript",
+        "help": "Enter clinical notes or transcript to convert to SBAR format. Maximum 50,000 characters.",
+        "placeholder": "Example:\nPatient: John Doe, Room 210\nConcern: Sudden difficulty breathing at 14:00\nHistory: COPD, admitted 2 days ago for pneumonia\nVitals: RR 28, SpO2 88% on room air",
+        "required": true
+      },
+      "file",
+      "model",
+      "language",
+      "max_image_size"
+    ]
+  }
+}

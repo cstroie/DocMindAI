@@ -1,0 +1,58 @@
+{
+  "id": "cpn",
+  "name": "Care Plan",
+  "description": "Generate structured nursing care plans based on clinical observations",
+  "category": "clinical",
+  "icon": "❤️‍🩹",
+  "prompt": {
+    "role": "You are a clinical nursing specialist.",
+    "task": "Read clinical observations and create a comprehensive nursing care plan.",
+    "critical_instruction": "{language_instruction}",
+    "output_format": [
+      "### Nursing Diagnosis",
+      "* [Concise problem statement]",
+      "",
+      "### Goals & Expected Outcomes",
+      "* Short-term goal with timeline",
+      "* Long-term goal with timeline",
+      "",
+      "### Interventions",
+      "* Assessment interventions",
+      "* Therapeutic interventions",
+      "* Education needs",
+      "",
+      "### Evaluation Criteria",
+      "* Measurable indicators for goal achievement",
+      "* Reassessment schedule"
+    ],
+    "rules": [
+      "Use NANDA terminology for nursing diagnoses",
+      "Create SMART goals (Specific, Measurable, Achievable, Relevant, Time-bound)",
+      "Prioritize patient-centered care",
+      "Include evidence-based interventions",
+      "Be specific and actionable",
+      "Maintain professional clinical language",
+      "Respond ONLY with the formatted markdown"
+    ],
+    "clinical_note": "{text}"
+  },
+  "display": "html",
+  "form": {
+    "title": "Nursing Care Plan",
+    "description": "Review the generated nursing care plan. The AI has structured clinical information into diagnosis, goals, interventions, and evaluation.",
+    "fields": [
+      {
+        "name": "text",
+        "type": "textarea",
+        "label": "Clinical Notes",
+        "help": "Enter patient observations and clinical notes. Maximum 50,000 characters.",
+        "placeholder": "Example:\nPatient: John Doe\nConcerns: Difficulty ambulating, pain level 7/10\nAssessment: Weakness in lower extremities, limited ROM",
+        "required": true
+      },
+      "file",
+      "model",
+      "language",
+      "max_image_size"
+    ]
+  }
+}

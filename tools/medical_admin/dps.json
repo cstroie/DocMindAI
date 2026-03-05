@@ -1,0 +1,74 @@
+{
+  "id": "dps",
+  "name": "Discharge Paper Summarizer",
+  "description": "Analyze patient discharge papers to extract radiology-relevant information",
+  "category": "medical_admin",
+  "icon": "⚡",
+  "prompt": {
+    "role": "You are a medical assistant analyzing patient discharge papers for radiology relevance.",
+    "task": "Read the discharge paper and summarize its content for radiology use. Focus on any findings that would be important for radiological evaluation. Do not exceed 50 words.",
+    "critical_instruction": "{language_instruction}",
+    "output_format": [
+      "```json",
+      "{",
+      "  \"pathologic\": \"yes/no\",",
+      "  \"severity\": 0-10,",
+      "  \"summary\": \"summary paragraph\",",
+      "  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\"]",
+      "}",
+      "```"
+    ],
+    "rules": [
+      "\"pathologic\": \"yes\" if the discharge paper contains any findings relevant to radiology",
+      "\"severity\": 0=normal, 1=minimal, 5=moderate, 10=critical/urgent",
+      "\"summary\": maximum 50 words summarizing radiology-relevant information",
+      "\"keywords\": exactly 3 relevant medical keywords from the discharge paper",
+      "Focus on findings, conditions, treatments affecting radiology",
+      "Ignore non-radiology relevant information",
+      "Respond ONLY with the JSON, without additional text"
+    ],
+    "discharge_paper": "{text}"
+  },
+  "display": "html",
+  "form": {
+    "title": "Discharge Paper Summary",
+    "description": "This is the radiology-focused analysis of the discharge paper. The AI has extracted key information including pathological status, severity, summary, and relevant keywords.",
+    "fields": [
+      {
+        "name": "text",
+        "type": "textarea",
+        "label": "Patient Discharge Paper",
+        "help": "Enter the patient discharge paper you want to analyze. Maximum 10,000 characters.",
+        "placeholder": "Example: Patient discharged after treatment for pneumonia. Chest X-ray shows resolved infiltrate."
+      },
+      "file",
+      "model",
+      "language",
+      "max_image_size"
+    ]
+  },
+  "template": [
+    "<article>",
+    "  <header>",
+    "    <h3>{{summary}}</h3>",
+    "  </header>",
+    "  <section>",
+    "    <h4>Severity level</h4>",
+    "    <div style=\"display: flex; align-items: center; gap: 16px;\">",
+    "      <span style=\"font-weight: 600; color: {{getSeverityColor severity}}\">",
+    "        {{getSeverityLabel severity}} ({{severity}}/10)",
+    "      </span>",
+    "      <progress class=\"severity-bar\" value=\"{{severity}}\" max=\"10\" data-severity=\"{{severity}}\" style=\"flex: 1;\"></progress>",
+    "    </div>",
+    "  </section>",
+    "  <footer>",
+    "    <h4>Keywords</h4>",
+    "    <ul class=\"keywords\">",
+    "      {{#each keywords}}",
+    "        <li>{{this}}</li>",
+    "      {{/each}}",
+    "    </ul>",
+    "  </footer>",
+    "</article>"
+  ]
+}

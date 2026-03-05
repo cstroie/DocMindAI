@@ -1,0 +1,146 @@
+{
+  "id": "stp",
+  "name": "Summarize This Paper",
+  "description": "AI-powered academic paper summarization with structured approaches",
+  "category": "research",
+  "icon": "🪄",
+  "prompts": {
+    "three_pass": {
+      "role": "You are an academic paper analyzer.",
+      "task": "Your task is to analyze research papers using a three-pass approach.",
+      "critical_instruction": "{language_instruction}",
+      "output_format": [
+        "```json",
+        "{",
+        "  \"pass1\": \"quick skim\",",
+        "  \"pass2\": \"main ideas\",",
+        "  \"pass3\": \"deeper details\"",
+        "}",
+        "```"
+      ],
+      "rules": [
+        "\"pass1\": A quick skim of what the paper is about (1-2 sentences)",
+        "\"pass2\": The main ideas and why they matter (2-3 sentences)",
+        "\"pass3\": The deeper details you should pay attention to (3-4 sentences)",
+        "Focus on the most important information at each level",
+        "Be concise but comprehensive",
+        "Respond ONLY with the JSON, without additional text"
+      ],
+      "example": [
+        "Input: Research paper about a new cancer treatment...",
+        "Response:",
+        "```json",
+        "{",
+        "  \"pass1\": \"This paper presents a novel immunotherapy approach for treating pancreatic cancer using modified T-cells.\",",
+        "  \"pass2\": \"The main contribution is a new method for engineering T-cells to better target pancreatic cancer cells while minimizing side effects. This matters because pancreatic cancer has poor survival rates and current treatments are limited.\",",
+        "  \"pass3\": \"The authors used CRISPR technology to modify T-cell receptors, conducted in vitro experiments on 50 cell lines, and performed mouse model trials. Key results show 75% reduction in tumor growth with minimal off-target effects.\"",
+        "}",
+        "```"
+      ],
+      "paper_content": "{content}"
+    },
+    "problem_idea_evidence": {
+      "role": "You are an academic paper analyzer.",
+      "task": "Your task is to analyze research papers and extract key information using a structured approach.",
+      "critical_instruction": "{language_instruction}",
+      "output_format": [
+        "```json",
+        "{",
+        "  \"problem\": \"problem description\",",
+        "  \"idea\": \"main idea\",",
+        "  \"evidence\": \"supporting evidence\",",
+        "  \"results\": \"meaning of results\"",
+        "}",
+        "```"
+      ],
+      "rules": [
+        "\"problem\": What problem the paper tries to solve",
+        "\"idea\": The main idea or approach they use",
+        "\"evidence\": How they support their idea (methods, data, experiments)",
+        "\"results\": What the results mean and their implications",
+        "Focus on the most important information",
+        "Be concise but comprehensive",
+        "Respond ONLY with the JSON, without additional text"
+      ],
+      "example": [
+        "Input: Research paper about a new machine learning algorithm...",
+        "Response:",
+        "```json",
+        "{",
+        "  \"problem\": \"Current machine learning algorithms struggle with noisy data and require extensive preprocessing.\",",
+        "  \"idea\": \"The paper proposes a novel noise-resistant neural network architecture that can handle raw data directly.\",",
+        "  \"evidence\": \"They tested their approach on 5 benchmark datasets with varying noise levels and compared performance against 3 state-of-the-art methods.\",",
+        "  \"results\": \"The new algorithm achieved 15% better accuracy on average and reduced preprocessing time by 80%.\"",
+        "}",
+        "```"
+      ],
+      "paper_content": "{content}"
+    }
+  },
+  "display": "html",
+  "form": {
+    "title": "Academic Paper Summarization",
+    "description": "Review the structured summary of the academic paper. The AI has analyzed the paper using the selected approach (three-pass or problem-idea-evidence) and extracted key information.",
+    "fields": [
+      {
+        "name": "content",
+        "type": "textarea",
+        "label": "Paper Content",
+        "help": "Enter the paper content you want to analyze, or upload a file below. Maximum 1,000,000 characters.",
+        "placeholder": "Example: The patient presents with acute myocardial infarction secondary to coronary artery occlusion. Percutaneous coronary intervention was performed with stent placement.\n\nTip: You can also upload a text or markdown file below.",
+        "required": true
+      },
+      "file",
+      {
+        "name": "prompt",
+        "type": "select",
+        "label": "Prompt Template",
+        "help": "Select a predefined prompt template.",
+        "options": [
+          {"value": "three_pass", "label": "Three-Pass Summary"},
+          {"value": "problem_idea_evidence", "label": "Problem-Idea-Evidence"}
+        ]
+      },
+      "model",
+      "language",
+      "max_image_size"
+    ]
+  },
+  "template": [
+    "<article>",
+    "  {{#if pass1}}",
+    "  <section>",
+    "    <h3>Quick Skim</h3>",
+    "    <p>{{pass1}}</p>",
+    "  </section>",
+    "  <section>",
+    "    <h3>Main Ideas</h3>",
+    "    <p>{{pass2}}</p>",
+    "  </section>",
+    "  <section>",
+    "    <h3>Deeper Details</h3>",
+    "    <p>{{pass3}}</p>",
+    "  </section>",
+    "  {{else if problem}}",
+    "  <section>",
+    "    <h3>Problem</h3>",
+    "    <p>{{problem}}</p>",
+    "  </section>",
+    "  <section>",
+    "    <h3>Main Idea</h3>",
+    "    <p>{{idea}}</p>",
+    "  </section>",
+    "  <section>",
+    "    <h3>Evidence</h3>",
+    "    <p>{{evidence}}</p>",
+    "  </section>",
+    "  <section>",
+    "    <h3>Results Meaning</h3>",
+    "    <p>{{results}}</p>",
+    "  </section>",
+    "  {{else}}",
+    "  <pre>{{this}}</pre>",
+    "  {{/if}}",
+    "</article>"
+  ]
+}

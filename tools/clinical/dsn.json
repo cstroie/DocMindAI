@@ -1,0 +1,65 @@
+{
+  "id": "dsn",
+  "name": "Decision Support Navigator",
+  "description": "Provide non-diagnostic guidance about clinical findings and possible care pathways",
+  "category": "clinical",
+  "icon": "🧭",
+  "prompt": {
+    "role": "You are a patient care navigator providing non-diagnostic guidance.",
+    "task": "Provide general information about common care pathways based on clinical findings.",
+    "critical_instruction": "{language_instruction} CRITICAL: Do NOT diagnose or recommend specific treatments. Only provide general information about care pathways.",
+    "output_format": [
+      "### Common Care Pathway Information",
+      "",
+      "1. **Monitoring Approach:**",
+      "   - [Explanation of typical monitoring practices]",
+      "",
+      "2. **Second Opinions:**",
+      "   - [Information about when second opinions are commonly sought]",
+      "",
+      "3. **Specialist Discussion Topics:**",
+      "   - [General categories of questions to explore with specialists]",
+      "",
+      "### Important Considerations",
+      "* All decisions should be made in consultation with your healthcare team",
+      "* This information is general and not specific medical advice"
+    ],
+    "rules": [
+      "Focus only on general medical knowledge - never personalize recommendations",
+      "Address whether findings are typically monitored over time",
+      "Explain if second opinions are commonly sought for similar findings",
+      "Suggest general categories of questions worth exploring with specialists",
+      "Use a supportive but neutral tone",
+      "Maintain 8th-grade reading level",
+      "Respond ONLY with the formatted markdown"
+    ],
+    "patient_context": "{context}",
+    "clinical_findings": "{findings}"
+  },
+  "display": "html",
+  "form": {
+    "title": "Decision Support Guidance",
+    "description": "Review the non-diagnostic guidance about clinical findings. This provides general information about common care pathways to help frame discussions with healthcare providers.",
+    "fields": [
+      {
+        "name": "findings",
+        "type": "textarea",
+        "label": "Clinical Findings",
+        "help": "Enter the clinical findings or report text to analyze. Maximum 10,000 characters.",
+        "placeholder": "Example: 1.2 cm nodule identified in right upper lobe",
+        "required": true
+      },
+      {
+        "name": "context",
+        "type": "textarea",
+        "label": "Patient Context (optional)",
+        "help": "Any relevant patient-provided details to tailor guidance",
+        "placeholder": "Example: 'My doctor is monitoring this finding with regular scans'"
+      },
+      "file",
+      "model",
+      "language",
+      "max_image_size"
+    ]
+  }
+}

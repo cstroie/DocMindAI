@@ -1,0 +1,74 @@
+{
+  "id": "wpc",
+  "name": "Web Page Converter",
+  "description": "Scrape web pages and convert them to clean Markdown format using AI processing",
+  "category": "content_processing",
+  "icon": "🕸️",
+  "prompt": {
+    "role": "You are a content extraction assistant.",
+    "task": "Your task is to identify the main content of a web page and convert it to clean, well-formatted {format} document.",
+    "critical_instruction": "{language_instruction}",
+    "instructions": [
+      "1. Extract ONLY the primary article content (main text, key information)",
+      "2. IGNORE navigation menus, sidebars, footers, ads, related articles, and other secondary content",
+      "3. IGNORE links, comments, and social media elements",
+      "4. Convert the main content to clean {format} format with proper headings, lists, etc.",
+      "5. Preserve important formatting like bold, italics, links",
+      "6. Do not include any explanations or extra text",
+      "7. Return ONLY the {format} content"
+    ],
+    "format_guide": {
+      "markdown": [
+        "Headings: Use # for h1, ## for h2, ### for h3, etc.",
+        "Bold: Use **bold text**",
+        "Italic: Use *italic text*",
+        "Links: Use [link text](url)",
+        "Bullet lists: Use * or - for each item",
+        "Numbered lists: Use 1. 2. 3. for each item",
+        "Code blocks: Use ```language\\ncode\\n```"
+      ],
+      "dokuwiki": [
+        "Headings: Use ====== for h1, ===== for h2, ==== for h3, etc.",
+        "Bold: Use **bold text**",
+        "Italic: Use //italic text//",
+        "Links: Use [[url|link text]] or [[url]]",
+        "Bullet lists: Use * for each item",
+        "Numbered lists: Use # for each item",
+        "Code blocks: Use <code>...</code> or <file>...</file>"
+      ]
+    },
+    "example": [
+      "Input HTML might contain a full web page with headers, nav bars, sidebars, etc.",
+      "Output should be just the main article content in clean {format} format."
+    ],
+    "page_content": "{content}"
+  },
+  "display": "markdown",
+  "helper": "web_scraper",
+  "form": {
+    "title": "Web Page Conversion",
+    "description": "Review the converted web page content in Markdown format. The AI has processed the web page and extracted the main content, removing ads and navigation elements.",
+    "fields": [
+      {
+        "name": "url",
+        "type": "url",
+        "label": "Web Page URL",
+        "help": "Enter the full URL of the web page you want to convert.",
+        "required": true,
+        "placeholder": "https://example.com/article"
+      },
+      {
+        "name": "format",
+        "type": "select",
+        "label": "Output Format",
+        "help": "Select the output format for the converted content.",
+        "options": [
+          {"value": "markdown", "label": "Markdown"},
+          {"value": "dokuwiki", "label": "DokuWiki"}
+        ]
+      },
+      "model",
+      "language"
+    ]
+  }
+}
