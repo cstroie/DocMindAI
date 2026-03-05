@@ -1,4 +1,3 @@
-
 // Global variables to store categories, tools, languages, and prompts
 let categoriesData = null;
 let toolsData = null;
@@ -1562,54 +1561,49 @@ function showError(message) {
 }
 
 /**
- * Convert structured JSON objects to markdown for better human readability
+ * Convert data to Markdown format
  * 
- * This function converts JSON data structures into human-readable markdown
- * format. It handles strings, arrays, and objects differently:
- * - Strings: Returned as-is
- * - Arrays of objects: Converted to markdown tables
- * - Arrays of primitives: Converted to markdown lists
- * - Objects: Converted to markdown headings and paragraphs
+ * This function acts as a central handler for converting various data types
+ * (objects, arrays, primitives) into Markdown format. It delegates specific
+ * conversions to helper functions based on the data type.
  * 
- * @param {Object|Array|string} data - The JSON data to convert
+ * @param {Object|Array|string} data - The data to convert
+ * @param {number} [level=3] - The heading level for objects (1-6)
  * @return {string} Markdown representation of the data
- * 
- * @note Uses arrayOfObjectsToTable() for arrays of objects
- * @note Uses arrayToList() for arrays of primitives
- * @note Uses objectToMarkdown() for objects
- * @note Falls back to String() for other types
- * @see displayResults() - Calls this function for JSON content conversion
- * @see arrayOfObjectsToTable() - Called for table conversion
- * @see arrayToList() - Called for list conversion
- * @see objectToMarkdown() - Called for object conversion
  */
-function jsonToMarkdown(data) {
-    // If data is already a string, return it as-is (could be markdown or HTML)
+function dataToMarkdown(data, level = 3) {
     if (typeof data === 'string') {
         return data;
+    } else if (Array.isArray(data)) {
+        return arrayToMarkdown(data);
+    } else if (typeof data === 'object' && data !== null) {
+        return objectToMarkdown(data, level);
+    } else {
+        return String(data);
     }
-
-    // If data is an array, process it as a list or table
-    if (Array.isArray(data)) {
-        // Check if array contains objects (convert to table)
-        if (data.length > 0 && typeof data[0] === 'object' && !Array.isArray(data[0])) {
-            return arrayOfObjectsToTable(data);
-        }
-        // Otherwise convert to list
-        return arrayToList(data);
-    }
-
-    // If data is an object, process it as headings and paragraphs
-    if (typeof data === 'object') {
-        return objectToMarkdown(data);
-    }
-
-    // Fallback for other types
-    return String(data);
 }
 
 /**
- * Convert an object to markdown headings and paragraphs
+ * Convert an array to Markdown format
+ * 
+ * This function converts an array into a Markdown list or table, depending
+ * on whether the array contains objects or primitive values.
+ * 
+ * @param {Array} arr - The array to convert
+ * @return {string} Markdown representation of the array
+ */
+function arrayToMarkdown(arr) {
+    if (arr.length === 0) {
+        return '';
+    } else if (typeof arr[0] === 'object' && arr[0] !== null) {
+        return arrayOfObjectsToTable(arr);
+    } else {
+        return arrayToList(arr);
+    }
+}
+
+/**
+ * Convert an object to Markdown headings and paragraphs
  * 
  * This function converts a JavaScript object into markdown format with
  * headings and paragraphs. Each key becomes a heading, and each value
@@ -1772,8 +1766,7 @@ function switchView(viewName) {
     if (selectedView) {
         selectedView.classList.add('active-view');
         selectedView.style.display = 'block';
-    }
-    else {
+    } else {
         console.error(`View not found: ${viewName}`);
         return;
     }
