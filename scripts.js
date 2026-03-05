@@ -1815,14 +1815,6 @@ function switchView(viewName) {
 }
 
 /**
- * Saves a value to localStorage
- * @deprecated Use localStorage directly instead
- */
-function saveToLocalStorage(key, value) {                                                                         
-    localStorage.setItem(key, value);                                                                             
-}                                                                                                                 
-
-/**
  * Save result to localStorage
  *
  * This function saves a result to localStorage with a timestamp.
