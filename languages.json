@@ -29,6 +29,21 @@
       "name": "Italiano",
       "instruction": "Rispondi in italiano.",
       "flag": "🇮🇹"
+    },
+    "el": {
+      "name": "Ελληνικά",
+      "instruction": "Απαντήστε στα ελληνικά.",
+      "flag": "🇬🇷"
+    },
+    "hu": {
+      "name": "Magyar",
+      "instruction": "Válaszoljon magyarul.",
+      "flag": "🇭🇺"
+    },
+    "ru": {
+      "name": "Русский",
+      "instruction": "Ответьте на русском.",
+      "flag": "🇷🇺"
     }
   }
 }
