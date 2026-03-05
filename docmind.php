@@ -51,7 +51,7 @@ displayWebInterface();
  * This function acts as the main API router. It:
  * 1. Determines the requested action from GET/POST parameters
  * 2. Validates the action against a whitelist of available actions
- * 3. Dynamically loads valid actions from tools.json
+ * 3. Dynamically loads valid actions from config.json
  * 4. Routes to the appropriate handler function based on the action
  *
  * @return void Terminates script execution after sending response
@@ -70,15 +70,17 @@ function handleApiRequest() {
     $action = isset($_REQUEST['action']) ? preg_replace('/[^a-zA-Z0-9_]/', '', $_REQUEST['action']) : null;
     $method = $_SERVER['REQUEST_METHOD'];
 
-    // Validate action - load valid actions dynamically from tools.json
+    // Validate action - load valid actions dynamically from config.json
     $valid_actions = ['get_models', 'get_form', 'get_prompts', 'get_tools'];
 
     // Load tools to get additional valid actions
     // This allows new tools to be added without modifying this code
-    $tools_data = loadResourceFromJson('tools.json');
-    if (!isset($tools_data['error']) && isset($tools_data['tools'])) {
-        foreach ($tools_data['tools'] as $tool_id => $tool_data) {
-            $valid_actions[] = $tool_id;
+    $config_data = loadResourceFromJson('config.json');
+    if (!isset($config_data['error']) && isset($config_data['tools'])) {
+        foreach ($config_data['tools'] as $category => $tools) {
+            foreach ($tools as $tool_id => $tool_config) {
+                $valid_actions[] = $tool_id;
+            }
         }
     }
 
@@ -86,9 +88,13 @@ function handleApiRequest() {
     if ($action === null) {
         // If no action specified, check for 'tool' parameter
         $tool_id = $_REQUEST['tool'] ?? null;
-        if ($tool_id && isset($tools_data['tools'][$tool_id])) {
-            $action = $tool_id;
-        } else {
+        foreach ($config_data['tools'] as $category => $tools) {
+            if (isset($tools[$tool_id])) {
+                $action = $tool_id;
+                break;
+            }
+        }
+        if ($action === null) {
             sendJsonResponse(['error' => 'No action or tool specified'], true);
         }
     }
@@ -111,7 +117,7 @@ function handleApiRequest() {
         default:
             // Handle tool-specific actions
             // Check if action corresponds to a valid tool
-            if (in_array($action, array_keys($tools_data['tools'] ?? []))) {
+            if (in_array($action, array_keys($config_data['tools'] ?? []))) {
                 handleToolAction($action);
             } else {
                 sendJsonResponse(['error' => 'Unhandled action'], true);
@@ -215,16 +221,16 @@ function handleToolAction($tool_id) {
     }
 
     // Load tool configuration
-    $tools_data = loadResourceFromJson('tools.json');
-    if (isset($tools_data['error'])) {
-        sendJsonResponse(['error' => $tools_data['error']], true);
+    $config_data = loadResourceFromJson('config.json');
+    if (isset($config_data['error'])) {
+        sendJsonResponse(['error' => $config_data['error']], true);
     }
 
-    if (!isset($tools_data['tools'][$tool_id])) {
+    if (!isset($config_data['tools'][$tool_id])) {
         sendJsonResponse(['error' => 'Invalid tool'], true);
     }
 
-    $tool = $tools_data['tools'][$tool_id];
+    $tool = $config_data['tools'][$tool_id];
 
     // Get form data
     $form_data = $_POST;
@@ -461,20 +467,23 @@ function executeHelper($helper_name, $form_data) {
  * @note Falls back to generic analysis prompt if no valid prompt found
  */
 function buildToolPrompt($tool_id, $form_data) {
-    // Load tools from JSON
-    $tools_data = loadResourceFromJson('tools.json');
+    // Load config from JSON
+    $config_data = loadResourceFromJson('config.json');
 
-    if (isset($tools_data['error'])) {
+    if (isset($config_data['error'])) {
         return "Analyze the following input: " . json_encode($form_data);
     }
 
-    // Load languages from JSON
-    $languages_data = loadResourceFromJson('languages.json');
+    // Identify the tool in category
+    foreach ($config_data['categories'] as $category) {
+        if (isset($config_data['tools'][$category][$tool_id])) {
+            // Get the tool configuration
+            $tool = loadResourceFromJson('tools' . DIRECTORY_SEPARATOR . $category . DIRECTORY_SEPARATOR . $tool_id . '.json');
+            break;
+        }
+    }
 
-    // Get the tool configuration
-    $tool = $tools_data['tools'][$tool_id] ?? null;
-
-    // Check if tool has a prompt field, otherwise look for it in form_data
+    // Check if the tool has a prompt field, otherwise look for it in form_data
     if (!$tool) {
         return "Analyze the following input: " . json_encode($form_data);
     }
@@ -516,7 +525,7 @@ function buildToolPrompt($tool_id, $form_data) {
     
     // Replace {language_instruction} placeholder if present
     $language = $form_data['language'] ?? 'en';
-    $language_instruction = $languages_data['languages'][$language]['instruction'] ?? 'Respond in English.';
+    $language_instruction = $config_data['languages'][$language]['instruction'] ?? 'Respond in English.';
     $prompt = str_replace('{language_instruction}', $language_instruction, $prompt);
 
     // Replace other placeholders with form data
@@ -611,11 +620,11 @@ function processToolResponse($tool_id, $api_response) {
         'response' => $api_response
     ];
 
-    // Load tools from JSON
-    $tools_data = loadResourceFromJson('tools.json');
+    // Load config from JSON
+    $config_data = loadResourceFromJson('config.json');
 
-    if (!isset($tools_data['error']) && isset($tools_data['tools'][$tool_id])) {
-        $tool = $tools_data['tools'][$tool_id];
+    if (!isset($config_data['error']) && isset($config_data['tools'][$tool_id])) {
+        $tool = $config_data['tools'][$tool_id];
 
         // Check if tool has 'output' key set to 'json'
         if (isset($tool['output']) && $tool['output'] === 'json') {
