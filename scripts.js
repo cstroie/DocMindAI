@@ -317,7 +317,7 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
  * It handles errors gracefully and can extract a specific root key from the
  * JSON data if provided.
  * 
- * @param {string} filename - The JSON file to load (e.g., 'tools.json')
+ * @param {string} filename - The JSON file to load (e.g., 'config.json')
  * @param {string} rootKey - The root key to extract from the JSON data (e.g., 'tools')
  * @returns {Promise<Object|null>} Promise resolving to the extracted data or null on error
  * 
@@ -2012,10 +2012,12 @@ function displayHistory() {
 document.addEventListener('DOMContentLoaded', async function() {
     // Apply theme preference
     applyTheme();
+    // Load config data
+    configData = await loadJSONResource('config.json');
     // Load categories data
-    categoriesData = await loadJSONResource('categories.json', 'categories');
-    // Load tools data
-    configData = await loadJSONResource('tools.json');
+    categoriesData = configData.categories || {};
+    // Load languages data
+    languagesData = configData.languages || {};
     // Load tools and common data from config
     for (const category in configData.tools) {
         console.log(`Loading tools for category: ${category}`);
@@ -2025,8 +2027,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
     commonData = configData.common || {};
-    // Load languages data
-    languagesData = await loadJSONResource('languages.json', 'languages');
 
     // Create category views and buttons after loading data
     if (categoriesData) {

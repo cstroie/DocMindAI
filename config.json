@@ -6,6 +6,80 @@
     "description": "Configuration file for DocMindAI tool profiles",
     "license": "GPLv3"
   },
+  "languages": {
+    "ro": {
+      "name": "Română",
+      "instruction": "Respond in Romanian.",
+      "flag": "🇷🇴"
+    },
+    "en": {
+      "name": "English",
+      "instruction": "Respond in English.",
+      "flag": "🇬🇧"
+    },
+    "es": {
+      "name": "Español",
+      "instruction": "Responde en español.",
+      "flag": "🇪🇸"
+    },
+    "fr": {
+      "name": "Français",
+      "instruction": "Répondez en français.",
+      "flag": "🇫🇷"
+    },
+    "de": {
+      "name": "Deutsch",
+      "instruction": "Antworte auf Deutsch.",
+      "flag": "🇩🇪"
+    },
+    "it": {
+      "name": "Italiano",
+      "instruction": "Rispondi in italiano.",
+      "flag": "🇮🇹"
+    },
+    "el": {
+      "name": "Ελληνικά",
+      "instruction": "Απαντήστε στα ελληνικά.",
+      "flag": "🇬🇷"
+    },
+    "hu": {
+      "name": "Magyar",
+      "instruction": "Válaszoljon magyarul.",
+      "flag": "🇭🇺"
+    },
+    "ru": {
+      "name": "Русский",
+      "instruction": "Ответьте на русском.",
+      "flag": "🇷🇺"
+    }
+  },
+  "categories": {
+    "clinical": {
+      "name": "Clinical",
+      "icon": "🏥",
+      "description": "Tools for direct clinical use and patient care"
+    },
+    "medical_admin": {
+      "name": "Medical Administration",
+      "icon": "📋",
+      "description": "Tools for processing medical documentation and administrative tasks"
+    },
+    "research": {
+      "name": "Research & Academia",
+      "icon": "📚",
+      "description": "Tools for academic research and literature analysis"
+    },
+    "content_processing": {
+      "name": "Content Processing",
+      "icon": "🧠",
+      "description": "Tools for document processing and content transformation"
+    },
+    "development": {
+      "name": "Development & Testing",
+      "icon": "🧪",
+      "description": "Tools for AI model testing and experimentation"
+    }
+  },
   "common": {
     "form": {
       "fields": [
