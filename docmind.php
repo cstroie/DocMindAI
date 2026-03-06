@@ -181,6 +181,72 @@ function handleGetModels() {
 }
 
 
+
+/**
+ * Verify that a tool identifier exists within a given category
+ * according to config.json.
+ *
+ * @param string $category_id Category key (e.g., "clinical")
+ * @param string $tool_id     Tool key (e.g., "soap")
+ *
+ * @return bool True if the tool is defined in the category, false otherwise
+ */
+function toolExistsInCategory(string $category_id, string $tool_id): bool {
+    // Load the configuration (reuse existing helper if available)
+    $config = loadResourceFromJson('config.json');
+    if (isset($config['error'])) {
+        // If the config cannot be read, treat as non‑existent
+        return false;
+    }
+
+    // Ensure the category exists and contains a tools map
+    if (!isset($config['tools'][$category_id]) || !is_array($config['tools'][$category_id])) {
+        return false;
+    }
+
+    // Check if the tool identifier is present in the category's tool list
+    return array_key_exists($tool_id, $config['tools'][$category_id]);
+}
+
+
+/**
+ * Load a tool definition JSON file.
+ *
+ * @param string $category_id The category identifier (e.g., "clinical")
+ * @param string $tool_id     The tool identifier (e.g., "soap")
+ *
+ * @return array Decoded JSON as an associative array, or an error array:
+ *               ['error' => 'description']
+ */
+function getToolConfig(string $category_id, string $tool_id): array {
+    // Build the expected file path
+    $file_path = __DIR__ . DIRECTORY_SEPARATOR . 'tools' .
+                 DIRECTORY_SEPARATOR . $category_id .
+                 DIRECTORY_SEPARATOR . $tool_id . '.json';
+
+    // Verify the file exists and is readable
+    if (!is_file($file_path) || !is_readable($file_path)) {
+        return ['error' => "Tool configuration file not found: $category_id/$tool_id.json"];
+    }
+
+    // Read the file contents
+    $json = file_get_contents($file_path);
+    if ($json === false) {
+        return ['error' => "Failed to read tool configuration file: $category_id/$tool_id.json"];
+    }
+
+    // Decode JSON
+    $data = json_decode($json, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return [
+            'error' => 'Invalid JSON in tool configuration: ' .
+                       json_last_error_msg()
+        ];
+    }
+
+    return $data;
+}
+
 /**
  * Handle tool-specific API actions - main processing pipeline
  * 
