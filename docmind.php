@@ -447,11 +447,17 @@ function handleToolAction($category_tool_id) {
     // Process and return the response
     $result = processToolResponse($tool, $response);
 
-    // Add API data to the response
-    $result['debug']['api_data'] = $api_data;
-    // Add file_info to debug if file was uploaded
-    if ($file_info !== null) {
-        $result['debug']['file_info'] = $file_info;
+    // ------------------------------------------------------------
+    // DEBUG INFORMATION – only added when DEBUG_MODE is enabled
+    // ------------------------------------------------------------
+    if (defined('DEBUG_MODE') && DEBUG_MODE) {
+        // Add API request payload to debug output
+        $result['debug']['api_data'] = $api_data;
+
+        // Add uploaded file metadata to debug output (if a file was provided)
+        if ($file_info !== null) {
+            $result['debug']['file_info'] = $file_info;
+        }
     }
 
     // Set CORS headers

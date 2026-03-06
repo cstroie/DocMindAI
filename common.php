@@ -1130,11 +1130,13 @@ function sendJsonResponse($data, $is_api_request = false) {
         header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         header('Pragma: no-cache');
 
-        // Add form data to debug output if available
-        if (!empty($_POST)) {
-            $data['debug']['form_data'] = $_POST;
+        if (defined('DEBUG_MODE') && DEBUG_MODE) {
+            // Add form data to debug output if available
+            if (!empty($_POST)) {
+                $data['debug']['form_data'] = $_POST;
+            }
         }
-        
+
         echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
         exit;
     }
