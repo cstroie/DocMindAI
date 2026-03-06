@@ -310,9 +310,10 @@ function handleToolAction($category_tool_id) {
         // If no category specified, treat the entire identifier as tool_id and search across all categories
         $tool_id = $category_tool_id;
         $found = false;
-        foreach ($config_data['categories'] as $category) {
-            if (toolExistsInCategory($category, $tool_id)) {
-                $category_id = $category;
+        // Iterate over category keys to find the tool
+        foreach (array_keys($config_data['categories']) as $cat_key) {
+            if (toolExistsInCategory($cat_key, $tool_id)) {
+                $category_id = $cat_key;
                 $found = true;
                 break;
             }
