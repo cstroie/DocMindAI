@@ -1130,7 +1130,8 @@ function sendJsonResponse($data, $is_api_request = false) {
         header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         header('Pragma: no-cache');
 
-        if (defined('DEBUG_MODE') && DEBUG_MODE) {
+        global $DEBUG_MODE;
+        if ($DEBUG_MODE) {
             // Add form data to debug output if available
             if (!empty($_POST)) {
                 $data['debug']['form_data'] = $_POST;

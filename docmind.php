@@ -13,12 +13,12 @@
 // Initialization & Configuration
 // =========================================================================
 
-include 'common.php';
-
 // Load configuration if available
 if (file_exists('config.php')) {
     include 'config.php';
 }
+
+include 'common.php';
 
 // Create chat endpoint URL by appending the chat completions path
 $LLM_API_ENDPOINT_CHAT = $LLM_API_ENDPOINT . '/chat/completions';
@@ -202,10 +202,9 @@ function handleGetPrompts() {
  * @return bool True if the tool is defined in the category, false otherwise
  */
 function toolExistsInCategory(string $category_id, string $tool_id): bool {
-    // Load the configuration (reuse existing helper if available)
-    $config = loadResourceFromJson('config.json');
+    // Use the cached config
+    $config = getConfigData();
     if (isset($config['error'])) {
-        // If the config cannot be read, treat as non‑existent
         return false;
     }
 
@@ -217,7 +216,6 @@ function toolExistsInCategory(string $category_id, string $tool_id): bool {
     // Check if the tool identifier is present in the category's tool list
     return array_key_exists($tool_id, $config['tools'][$category_id]);
 }
-
 
 /**
  * Load a tool definition JSON file.
@@ -450,7 +448,8 @@ function handleToolAction($category_tool_id) {
     // ------------------------------------------------------------
     // DEBUG INFORMATION – only added when DEBUG_MODE is enabled
     // ------------------------------------------------------------
-    if (defined('DEBUG_MODE') && DEBUG_MODE) {
+    global $DEBUG_MODE;
+    if ($DEBUG_MODE) {
         // Add API request payload to debug output
         $result['debug']['api_data'] = $api_data;
 
@@ -571,34 +570,6 @@ function getConfigData(): array {
     return $cached_config;
 }
 
-// ------------------------------------------------------------
-// 2️⃣  Update functions that previously called loadResourceFromJson('config.json')
-// ------------------------------------------------------------
-
-/**
- * Verify that a tool identifier exists within a given category
- * according to config.json.
- *
- * @param string $category_id Category key (e.g., "clinical")
- * @param string $tool_id     Tool key (e.g., "soap")
- *
- * @return bool True if the tool is defined in the category, false otherwise
- */
-function toolExistsInCategory(string $category_id, string $tool_id): bool {
-    // Use the cached config
-    $config = getConfigData();
-    if (isset($config['error'])) {
-        return false;
-    }
-
-    // Ensure the category exists and contains a tools map
-    if (!isset($config['tools'][$category_id]) || !is_array($config['tools'][$category_id])) {
-        return false;
-    }
-
-    // Check if the tool identifier is present in the category's tool list
-    return array_key_exists($tool_id, $config['tools'][$category_id]);
-}
 
 /**
  * Build the final prompt for a tool, now using the cached config for language instructions.
