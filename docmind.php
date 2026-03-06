@@ -560,6 +560,22 @@ function executeHelper($helper_name, $form_data) {
  * @note Falls back to generic analysis prompt if no valid prompt found
  */
 function buildToolPrompt($tool, $form_data) {
+    // ------------------------------------------------------------
+    // Ensure we have access to the full configuration (languages, etc.)
+    // ------------------------------------------------------------
+    $config_data = loadResourceFromJson('config.json');
+    if (isset($config_data['error'])) {
+        // If the config cannot be loaded, fall back to a minimal language instruction
+        $language_instruction = 'Respond in English.';
+    } else {
+        // Determine language instruction based on the selected language (default to English)
+        $language = $form_data['language'] ?? 'en';
+        $language_instruction = $config_data['languages'][$language]['instruction'] ?? 'Respond in English.';
+    }
+
+    // ------------------------------------------------------------
+    // Existing prompt‑building logic (unchanged apart from using $language_instruction)
+    // ------------------------------------------------------------
     // Handle case where tool has 'prompts' key (multiple prompts)
     if (isset($tool['prompts']) && is_array($tool['prompts'])) {
         // Get the selected prompt from form data
@@ -594,10 +610,8 @@ function buildToolPrompt($tool, $form_data) {
 
     // Ensure prompt is a string
     $prompt = (string)$prompt;
-    
+
     // Replace {language_instruction} placeholder if present
-    $language = $form_data['language'] ?? 'en';
-    $language_instruction = $config_data['languages'][$language]['instruction'] ?? 'Respond in English.';
     $prompt = str_replace('{language_instruction}', $language_instruction, $prompt);
 
     // Replace other placeholders with form data
