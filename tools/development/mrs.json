@@ -1,0 +1,334 @@
+{
+  "id": "mrs",
+  "name": "Pediatric MRS Brain Lesion Analyser",
+  "description": "Analyse MR Spectroscopy data combined with conventional MRI findings in paediatric patients to generate a spectro-imaging synthesis, most probable diagnosis, and top 3 differential diagnoses.",
+  "category": "radiology",
+  "icon": "🧠",
+  "prompt": {
+    "role": "You are a specialist radiologist with expertise in paediatric neuroradiology and MR spectroscopy (MRS).",
+    "task": "Analyse the MRS spectroscopic data and conventional MRI findings provided below for a brain lesion in a paediatric patient. Integrate the patient's age and clinical context and generate a structured report in {language} containing: (1) a spectro-imaging synthesis, (2) the most probable diagnosis with supporting arguments, and (3) a top 3 differential diagnosis table with supporting and excluding criteria.",
+    "critical_instruction": "{language_instruction}",
+    "guidelines": [
+      "### Spectro-Imaging Synthesis:",
+      "- Write a concise paragraph (5–8 sentences).",
+      "- Metabolite values are provided as peak areas from spectroscopy software (not absolute concentrations). Evaluate them in relative terms and via the provided ratios.",
+      "- Correlate the MRS profile (metabolite peak areas, Cho/Cr and NAA/Cr ratios) with conventional MRI appearance (T1, T2, FLAIR, DWI, SWI, contrast enhancement, mass effect).",
+      "- IMPORTANT — Paediatric age-dependent interpretation:",
+      "  In neonates and infants (<2 years): NAA is physiologically low and rises with brain maturation; Cho and mI are physiologically elevated; these normal developmental patterns must not be misinterpreted as pathological.",
+      "  In children (2–10 years): metabolite ratios approach adult values but remain slightly different; always compare to age-matched references.",
+      "  In adolescents (>10 years): adult reference ranges are largely applicable.",
+      "- State the clinical significance of each abnormal metabolite:",
+      "  ↑Cho = increased membrane turnover (tumour, active demyelination, repair);",
+      "  ↓NAA = neuronal loss, dysfunction, or immaturity (age-dependent);",
+      "  Lac = anaerobic metabolism (high-grade tumour, infarct, mitochondrial disease, abscess);",
+      "  Lip = necrosis or contamination from adjacent tissue;",
+      "  ↑mI = gliosis, glial proliferation, or normal in infants;",
+      "  Tau (3.3–3.4 ppm) = CRITICAL marker in paediatric patients — strongly associated with medulloblastoma, AT/RT, and other embryonal tumours; should be prominently weighted in diagnosis.",
+      "- Integrate patient age and clinical context throughout. Paediatric tumour spectrum differs fundamentally from adults: consider medulloblastoma, ependymoma, pilocytic astrocytoma, DIPG, AT/RT, craniopharyngioma, and ganglioglioma as primary considerations before adult-type neoplasms.",
+      "- Highlight spectral combinations with high diagnostic value in the paediatric context.",
+      "",
+      "### Most Probable Diagnosis:",
+      "- State the diagnosis (nosological entity), using current WHO CNS tumour classification terminology where applicable.",
+      "- State the degree of probability: highly probable / probable / possible.",
+      "- List the main supporting arguments (spectral + imaging + clinical + age), concisely.",
+      "",
+      "### Top 3 Differential Diagnoses:",
+      "- Present as a markdown table with columns: #, Diagnosis, Supporting criteria, Against criteria.",
+      "- Prioritise paediatric-relevant entities in the differential.",
+      "- After the table, add one sentence on recommended further investigations to narrow the diagnosis (e.g. biopsy with molecular profiling, PET-CT, MRI perfusion, multi-voxel MRS, spine staging MRI, follow-up at 6–8 weeks).",
+      "",
+      "### Age-adjusted reference ranges for internal use (peak area ratios, short TE):",
+      "- Neonates / infants <2y: Cho/Cr may be up to 2.0 (normal); NAA/Cr may be as low as 0.8–1.0 (normal maturation); mI prominent.",
+      "- Children 2–10y: Cho/Cr normal <1.5; NAA/Cr normal >1.2.",
+      "- Adolescents >10y: Cho/Cr normal <1.2; NAA/Cr normal >1.5.",
+      "- Taurine (3.3–3.4 ppm): absent in normal brain at any age — presence is always pathological and strongly suggests embryonal tumour.",
+      "- Lac/Lip overlap at short TE — confirm Lac with TE 135ms inversion.",
+      "",
+      "### Disclaimer:",
+      "- End the report with: 'This analysis is a decision-support tool. Final diagnosis remains the responsibility of the attending specialist.'"
+    ],
+    "patient_data": "Age: {age} | Sex: {sex} | Clinical context: {clinical_context}",
+    "lesion_mri": "Location: {lesion_location} | Size: {lesion_size} | T1: {lesion_t1} | T2: {lesion_t2} | FLAIR: {lesion_flair} | DWI/ADC: {lesion_dwi} | SWI: {lesion_swi} | Contrast: {lesion_contrast} | Mass effect: {lesion_mass_effect} | Margins: {lesion_margins} | Other: {lesion_other}",
+    "mrs_data": "TE: {mrs_te} | Voxel: {mrs_voxel} | Software: {mrs_software} | NAA area: {mrs_naa} | Cho area: {mrs_cho} | Cr area: {mrs_cr} | Lac: {mrs_lac} | Lip: {mrs_lip} | mI area: {mrs_mi} | Tau: {mrs_tau} | Cho/Cr: {mrs_cho_cr} | NAA/Cr: {mrs_naa_cr} | Cho/NAA: {mrs_cho_naa}"
+  },
+  "display": "markdown",
+  "form": {
+    "title": "Pediatric MRS Brain Lesion Analyser",
+    "description": "Enter MRS spectroscopic peak areas and MRI lesion characteristics to generate a paediatric-oriented synthesis, primary diagnosis, and differential diagnosis.",
+    "fields": [
+      {
+        "name": "age",
+        "type": "text",
+        "label": "Patient Age",
+        "help": "Patient age — be precise, as metabolite reference ranges are highly age-dependent in children (e.g. '8 months', '3 years', '14 years').",
+        "placeholder": "e.g. 7 years",
+        "required": true
+      },
+      {
+        "name": "sex",
+        "type": "select",
+        "label": "Patient Sex",
+        "help": "Biological sex of the patient.",
+        "options": [
+          {"value": "M", "label": "Male"},
+          {"value": "F", "label": "Female"}
+        ],
+        "required": true
+      },
+      {
+        "name": "clinical_context",
+        "type": "textarea",
+        "label": "Clinical Context",
+        "help": "Main symptoms, onset, relevant history, neurological status, and indication for MRI. Include any known syndromic or oncological history.",
+        "placeholder": "e.g. 7-year-old boy presenting with 6-week history of morning headaches, vomiting, and progressive gait ataxia. No prior oncological history. Neurologically: bilateral papilloedema.",
+        "required": true
+      },
+      {
+        "name": "lesion_location",
+        "type": "text",
+        "label": "Lesion Location",
+        "help": "Anatomical location: lobe, region, structure. In children, specify infra- vs supratentorial and midline vs hemispheric.",
+        "placeholder": "e.g. Posterior fossa, midline cerebellar vermis",
+        "required": true
+      },
+      {
+        "name": "lesion_size",
+        "type": "text",
+        "label": "Lesion Size",
+        "help": "Approximate dimensions in mm or cm.",
+        "placeholder": "e.g. 42 x 38 x 35 mm"
+      },
+      {
+        "name": "lesion_t1",
+        "type": "select",
+        "label": "T1 Signal",
+        "help": "Signal intensity of the lesion on T1-weighted sequence.",
+        "options": [
+          {"value": "hypointense", "label": "Hypointense"},
+          {"value": "isointense", "label": "Isointense"},
+          {"value": "hyperintense", "label": "Hyperintense"},
+          {"value": "heterogeneous", "label": "Heterogeneous"},
+          {"value": "N/A", "label": "Not available"}
+        ],
+        "required": true
+      },
+      {
+        "name": "lesion_t2",
+        "type": "select",
+        "label": "T2 Signal",
+        "help": "Signal intensity of the lesion on T2-weighted sequence.",
+        "options": [
+          {"value": "hypointense", "label": "Hypointense"},
+          {"value": "isointense", "label": "Isointense"},
+          {"value": "hyperintense", "label": "Hyperintense"},
+          {"value": "heterogeneous", "label": "Heterogeneous"},
+          {"value": "N/A", "label": "Not available"}
+        ],
+        "required": true
+      },
+      {
+        "name": "lesion_flair",
+        "type": "select",
+        "label": "FLAIR Signal",
+        "help": "Signal intensity on FLAIR. Note: FLAIR is unreliable under 18–24 months due to incomplete myelination.",
+        "options": [
+          {"value": "hypointense", "label": "Hypointense"},
+          {"value": "isointense", "label": "Isointense"},
+          {"value": "hyperintense", "label": "Hyperintense"},
+          {"value": "suppressed", "label": "Suppressed"},
+          {"value": "heterogeneous", "label": "Heterogeneous"},
+          {"value": "N/A — patient under 2 years", "label": "N/A — patient under 2 years"},
+          {"value": "N/A", "label": "Not available"}
+        ],
+        "required": true
+      },
+      {
+        "name": "lesion_dwi",
+        "type": "text",
+        "label": "DWI / ADC",
+        "help": "Diffusion restriction: yes / no / partial. ADC: low / high / normal. Restricted diffusion is common in embryonal tumours (medulloblastoma, AT/RT) due to high cellularity.",
+        "placeholder": "e.g. Marked restricted diffusion, ADC low (~500 µm²/s)"
+      },
+      {
+        "name": "lesion_swi",
+        "type": "text",
+        "label": "SWI",
+        "help": "Susceptibility-weighted findings: haemorrhage, calcifications, vascular structures. AT/RT often shows haemorrhagic foci.",
+        "placeholder": "e.g. Scattered haemorrhagic foci, no calcifications"
+      },
+      {
+        "name": "lesion_contrast",
+        "type": "select",
+        "label": "Contrast Enhancement",
+        "help": "Pattern of gadolinium contrast enhancement.",
+        "options": [
+          {"value": "absent", "label": "Absent"},
+          {"value": "ring", "label": "Ring-enhancing"},
+          {"value": "nodular", "label": "Nodular"},
+          {"value": "homogeneous", "label": "Homogeneous"},
+          {"value": "heterogeneous", "label": "Heterogeneous"},
+          {"value": "leptomeningeal", "label": "Leptomeningeal / drop metastases"},
+          {"value": "N/A", "label": "Not performed"}
+        ]
+      },
+      {
+        "name": "lesion_mass_effect",
+        "type": "select",
+        "label": "Mass Effect",
+        "help": "Degree of mass effect and peritumoral oedema. Include hydrocephalus if present.",
+        "options": [
+          {"value": "absent", "label": "Absent"},
+          {"value": "mild", "label": "Mild"},
+          {"value": "moderate", "label": "Moderate"},
+          {"value": "significant with hydrocephalus", "label": "Significant — with obstructive hydrocephalus"},
+          {"value": "significant without hydrocephalus", "label": "Significant — without hydrocephalus"}
+        ],
+        "required": true
+      },
+      {
+        "name": "lesion_margins",
+        "type": "select",
+        "label": "Lesion Margins",
+        "help": "Appearance of the lesion borders.",
+        "options": [
+          {"value": "well-defined", "label": "Well-defined"},
+          {"value": "ill-defined", "label": "Ill-defined"},
+          {"value": "infiltrative", "label": "Infiltrative"},
+          {"value": "N/A", "label": "Not assessable"}
+        ]
+      },
+      {
+        "name": "lesion_other",
+        "type": "textarea",
+        "label": "Other MRI Features",
+        "help": "Additional relevant findings: cysts, necrosis, calcifications, leptomeningeal spread, spinal metastases, vascular anomalies, brainstem involvement, etc.",
+        "placeholder": "e.g. Small cystic component at superior pole. No evidence of leptomeningeal dissemination on spine MRI."
+      },
+      {
+        "name": "mrs_te",
+        "type": "select",
+        "label": "MRS Echo Time (TE)",
+        "help": "Short TE (35ms) is preferred in paediatric imaging — it captures mI and Tau, which are critical for paediatric tumour diagnosis. Long TE better isolates Lac via doublet inversion.",
+        "options": [
+          {"value": "35ms (short TE)", "label": "Short TE — 35 ms (preferred in paediatrics)"},
+          {"value": "135ms (long TE)", "label": "Long TE — 135 ms"},
+          {"value": "144ms (long TE)", "label": "Long TE — 144 ms"},
+          {"value": "288ms (long TE)", "label": "Long TE — 288 ms"}
+        ],
+        "required": true
+      },
+      {
+        "name": "mrs_voxel",
+        "type": "select",
+        "label": "Voxel Placement",
+        "help": "Location of the MRS voxel relative to the lesion.",
+        "options": [
+          {"value": "centred on lesion", "label": "Centred on lesion"},
+          {"value": "solid peripheral zone", "label": "Solid peripheral zone (avoiding necrosis/cyst)"},
+          {"value": "peritumoral region", "label": "Peritumoral region"},
+          {"value": "normal-appearing white matter", "label": "Normal-appearing white matter (reference)"},
+          {"value": "brainstem", "label": "Brainstem (e.g. DIPG)"},
+          {"value": "other", "label": "Other"}
+        ]
+      },
+      {
+        "name": "mrs_software",
+        "type": "text",
+        "label": "Spectroscopy Software",
+        "help": "Name of the post-processing software used to extract peak areas (e.g. LCModel, jMRUI, syngo.MR, GE FuncTool). This helps contextualise the area values.",
+        "placeholder": "e.g. syngo.MR Spectroscopy (Siemens)"
+      },
+      {
+        "name": "mrs_naa",
+        "type": "text",
+        "label": "NAA — Peak Area",
+        "help": "Peak area of N-acetylaspartate as reported by your spectroscopy software. Do NOT enter the ppm chemical shift position (1.98–2.02 ppm). Enter the area value only (e.g. 153).",
+        "placeholder": "e.g. 153",
+        "required": true
+      },
+      {
+        "name": "mrs_cho",
+        "type": "text",
+        "label": "Cho — Peak Area",
+        "help": "Peak area of Choline as reported by your spectroscopy software. Do NOT enter the ppm chemical shift position (3.2 ppm). Enter the area value only (e.g. 210).",
+        "placeholder": "e.g. 210",
+        "required": true
+      },
+      {
+        "name": "mrs_cr",
+        "type": "text",
+        "label": "Cr — Peak Area",
+        "help": "Peak area of Creatine as reported by your spectroscopy software. Do NOT enter the ppm chemical shift position (3.0 ppm). Enter the area value only (e.g. 98). Used as denominator for Cho/Cr and NAA/Cr ratios.",
+        "placeholder": "e.g. 98",
+        "required": true
+      },
+      {
+        "name": "mrs_cho_cr",
+        "type": "text",
+        "label": "Cho/Cr Ratio",
+        "help": "Choline-to-Creatine ratio calculated from peak areas. Age-adjusted normals: <2y up to 2.0; 2–10y <1.5; >10y <1.2. Values above these thresholds suggest neoplasm.",
+        "placeholder": "e.g. 2.14",
+        "required": true
+      },
+      {
+        "name": "mrs_naa_cr",
+        "type": "text",
+        "label": "NAA/Cr Ratio",
+        "help": "NAA-to-Creatine ratio calculated from peak areas. Age-adjusted normals: <2y as low as 0.8 (normal maturation); 2–10y >1.2; >10y >1.5. Reduced values indicate neuronal loss.",
+        "placeholder": "e.g. 0.82",
+        "required": true
+      },
+      {
+        "name": "mrs_cho_naa",
+        "type": "text",
+        "label": "Cho/NAA Ratio (optional)",
+        "help": "Optional. Values >1.0 correlate with tumour aggressiveness. Particularly elevated in high-grade and embryonal tumours.",
+        "placeholder": "e.g. 1.6"
+      },
+      {
+        "name": "mrs_lac",
+        "type": "select",
+        "label": "Lac (Lactate)",
+        "help": "Lactate peak presence. In paediatrics: Lac may be seen in high-grade tumours, mitochondrial disease, hypoxic-ischaemic injury, and some low-grade tumours. Inverted doublet at TE 135ms confirms Lac vs Lip.",
+        "options": [
+          {"value": "absent", "label": "Absent"},
+          {"value": "present — not confirmed", "label": "Present — not confirmed"},
+          {"value": "confirmed — inverted doublet at TE 135ms", "label": "Confirmed — inverted doublet at TE 135ms"},
+          {"value": "N/A", "label": "Not assessed"}
+        ]
+      },
+      {
+        "name": "mrs_lip",
+        "type": "select",
+        "label": "Lip (Lipids)",
+        "help": "Lipid peaks at 0.9 and 1.3 ppm. Prominent lipids indicate necrosis — common in AT/RT and high-grade glioma. May overlap with Lac at short TE.",
+        "options": [
+          {"value": "absent", "label": "Absent"},
+          {"value": "present — mild", "label": "Present — mild"},
+          {"value": "present — prominent", "label": "Present — prominent (necrosis likely)"},
+          {"value": "N/A", "label": "Not assessed"}
+        ]
+      },
+      {
+        "name": "mrs_mi",
+        "type": "text",
+        "label": "mI — Peak Area (optional)",
+        "help": "Peak area of Myo-inositol as reported by your spectroscopy software. Only visible at short TE. Note: mI is physiologically elevated in infants — interpret with caution under 2 years.",
+        "placeholder": "e.g. 74"
+      },
+      {
+        "name": "mrs_tau",
+        "type": "select",
+        "label": "Tau (Taurine)",
+        "help": "Taurine peak at 3.3–3.4 ppm. Only visible at short TE. KEY paediatric marker — presence is always pathological and strongly suggests an embryonal tumour (medulloblastoma, AT/RT, PNET). Absent in normal brain at any age.",
+        "options": [
+          {"value": "absent", "label": "Absent"},
+          {"value": "present", "label": "Present ⚠️ — consider embryonal tumour"},
+          {"value": "N/A — long TE used", "label": "N/A — long TE used (Tau not assessable)"}
+        ]
+      },
+      "model",
+      "language"
+    ]
+  }
+}

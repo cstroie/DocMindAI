@@ -161,7 +161,8 @@
     "development": {
       "exp": "exp",
       "eml": "eml",
-      "ocr": "ocr"
+      "ocr": "ocr",
+      "mrs": "mrs"
     },
     "medical_admin": {
       "dps": "dps",
