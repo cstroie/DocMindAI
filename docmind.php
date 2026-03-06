@@ -293,8 +293,8 @@ function handleToolAction($category_tool_id) {
         sendJsonResponse(['error' => 'API endpoint not configured'], true);
     }
 
-    // Load configuration
-    $config_data = loadResourceFromJson('config.json');
+    // Load configuration (cached)
+    $config_data = getConfigData();
     if (isset($config_data['error'])) {
         sendJsonResponse(['error' => $config_data['error']], true);
     }
@@ -536,85 +536,112 @@ function executeHelper($helper_name, $form_data) {
     }
 }
 
+// ------------------------------------------------------------
+// 1️⃣  Cached config getter – loads config.json only once per request
+// ------------------------------------------------------------
 /**
- * Build prompt based on tool configuration with placeholder replacement
- * 
- * This function constructs the final prompt by:
- * 1. Loading tool and language configurations
- * 2. Executing helpers if specified by the tool
- * 3. Selecting the appropriate prompt template
- * 4. Converting array-based prompts to text format
- * 5. Replacing placeholders with actual form data
- * 6. Handling language-specific instructions
- * 
- * @param array $tool The tool configuration array
- * @param array $form_data User-submitted form data containing values for placeholders
- * @return string The constructed prompt ready for LLM processing
- * 
- * @see loadResourceFromJson() - Loads configuration files
- * @see executeHelper() - Executes tool helpers
- * @see convertPromptArrayToText() - Converts array prompts to text
- * 
- * @note Supported placeholders: {language_instruction}, {language}, and any form field name
- * @note If tool has 'helper' specification, helper output is added to form_data['content']
- * @note Falls back to generic analysis prompt if no valid prompt found
+ * Retrieve the parsed config.json data.
+ * The JSON file is read and decoded only on the first call;
+ * subsequent calls return the cached array.
+ *
+ * @return array Config data (or ['error'=>...] on failure)
  */
-function buildToolPrompt($tool, $form_data) {
-    // ------------------------------------------------------------
-    // Ensure we have access to the full configuration (languages, etc.)
-    // ------------------------------------------------------------
-    $config_data = loadResourceFromJson('config.json');
-    if (isset($config_data['error'])) {
-        // If the config cannot be loaded, fall back to a minimal language instruction
-        $language_instruction = 'Respond in English.';
-    } else {
-        // Determine language instruction based on the selected language (default to English)
-        $language = $form_data['language'] ?? 'en';
-        $language_instruction = $config_data['languages'][$language]['instruction'] ?? 'Respond in English.';
+function getConfigData(): array {
+    static $cached_config = null;
+
+    // If we already have it, return immediately
+    if ($cached_config !== null) {
+        return $cached_config;
     }
 
-    // ------------------------------------------------------------
+    // Load and decode the file (reuse existing helper)
+    $cached_config = loadResourceFromJson('config.json');
+
+    // Ensure we always return an array
+    if (!is_array($cached_config)) {
+        $cached_config = ['error' => 'Failed to load config.json'];
+    }
+
+    return $cached_config;
+}
+
+// ------------------------------------------------------------
+// 2️⃣  Update functions that previously called loadResourceFromJson('config.json')
+// ------------------------------------------------------------
+
+/**
+ * Verify that a tool identifier exists within a given category
+ * according to config.json.
+ *
+ * @param string $category_id Category key (e.g., "clinical")
+ * @param string $tool_id     Tool key (e.g., "soap")
+ *
+ * @return bool True if the tool is defined in the category, false otherwise
+ */
+function toolExistsInCategory(string $category_id, string $tool_id): bool {
+    // Use the cached config
+    $config = getConfigData();
+    if (isset($config['error'])) {
+        return false;
+    }
+
+    // Ensure the category exists and contains a tools map
+    if (!isset($config['tools'][$category_id]) || !is_array($config['tools'][$category_id])) {
+        return false;
+    }
+
+    // Check if the tool identifier is present in the category's tool list
+    return array_key_exists($tool_id, $config['tools'][$category_id]);
+}
+
+/**
+ * Build the final prompt for a tool, now using the cached config for language instructions.
+ *
+ * @param array $tool      Tool definition (from tools/<cat>/<tool>.json)
+ * @param array $form_data User‑submitted form data
+ *
+ * @return string Fully‑rendered prompt
+ */
+function buildToolPrompt($tool, $form_data) {
+    // --------------------------------------------------------
+    // Load config (cached) to get language instructions, etc.
+    // --------------------------------------------------------
+    $config_data = getConfigData();
+    if (isset($config_data['error'])) {
+        // Fallback to English if config cannot be read
+        $language_instruction = 'Respond in English.';
+    } else {
+        $lang_key = $form_data['language'] ?? 'en';
+        $language_instruction = $config_data['languages'][$lang_key]['instruction']
+                               ?? 'Respond in English.';
+    }
+
+    // --------------------------------------------------------
     // Existing prompt‑building logic (unchanged apart from using $language_instruction)
-    // ------------------------------------------------------------
-    // Handle case where tool has 'prompts' key (multiple prompts)
+    // --------------------------------------------------------
+    // Determine which prompt to use
     if (isset($tool['prompts']) && is_array($tool['prompts'])) {
-        // Get the selected prompt from form data
-        $selected_prompt_key = $form_data['prompt'] ?? '';
-        // Check if the selected prompt exists
-        if (!empty($selected_prompt_key) && isset($tool['prompts'][$selected_prompt_key])) {
-            // Use the selected prompt
-            $prompt = $tool['prompts'][$selected_prompt_key];
-        } else {
-            // If no specific prompt selected or invalid, use the first available prompt
-            $first_prompt = reset($tool['prompts']);
-            $prompt = $first_prompt;
-        }
-    }
-    // Handle case where tool has a 'prompt' field
-    elseif (!empty($tool['prompt'])) {
+        $selected_key = $form_data['prompt'] ?? '';
+        $prompt = (!empty($selected_key) && isset($tool['prompts'][$selected_key]))
+                ? $tool['prompts'][$selected_key]
+                : reset($tool['prompts']);
+    } elseif (!empty($tool['prompt'])) {
         $prompt = $tool['prompt'];
-    }
-    // If no prompt found in tool, check form_data
-    elseif (isset($form_data['prompt']) && !empty($form_data['prompt'])) {
+    } elseif (isset($form_data['prompt']) && !empty($form_data['prompt'])) {
         $prompt = $form_data['prompt'];
-    }
-    // Fallback case - no prompt found
-    else {
+    } else {
         return "Analyze the following input: " . json_encode($form_data);
     }
 
-    // If prompt is an array (JSON object), convert to formatted text
+    // Convert array prompts to text if needed
     if (is_array($prompt)) {
         $prompt = convertPromptArrayToText($prompt);
     }
 
-    // Ensure prompt is a string
-    $prompt = (string)$prompt;
-
-    // Replace {language_instruction} placeholder if present
+    // Replace language placeholder
     $prompt = str_replace('{language_instruction}', $language_instruction, $prompt);
 
-    // Replace other placeholders with form data
+    // Replace any other {field} placeholders with submitted values
     foreach ($form_data as $key => $value) {
         $placeholder = '{' . $key . '}';
         if (strpos($prompt, $placeholder) !== false) {
@@ -622,7 +649,6 @@ function buildToolPrompt($tool, $form_data) {
         }
     }
 
-    // Return the final prompt
     return $prompt;
 }
 
