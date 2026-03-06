@@ -62,46 +62,14 @@ displayWebInterface();
  * @see sendJsonResponse() - Sends JSON responses
  * @see loadResourceFromJson() - Loads tool configuration
  */
-/**
- * Main API request router
- */
 function handleApiRequest() {
     // Extract and sanitize action from request parameters
-    $action = isset($_REQUEST['action']) ? preg_replace('/[^a-zA-Z0-9_]/', '', $_REQUEST['action']) : null;
+    $action = isset($_REQUEST['action']) ? preg_replace('/[^a-zA-Z0-9_.]/', '', $_REQUEST['action']) : null;
     $method = $_SERVER['REQUEST_METHOD'];
 
-    // Validate action - load valid actions dynamically from config.json
-    $valid_actions = ['get_models', 'get_form', 'get_prompts', 'get_tools'];
-
-    // Load tools to get additional valid actions
-    // This allows new tools to be added without modifying this code
-    $config_data = loadResourceFromJson('config.json');
-    if (!isset($config_data['error']) && isset($config_data['tools'])) {
-        foreach ($config_data['tools'] as $category => $tools) {
-            foreach ($tools as $tool_id => $tool_config) {
-                $valid_actions[] = $tool_id;
-            }
-        }
-    }
-
-    // Check if action is specified
+    // If action is not specified, return an error response
     if ($action === null) {
-        // If no action specified, check for 'tool' parameter
-        $tool_id = $_REQUEST['tool'] ?? null;
-        foreach ($config_data['tools'] as $category => $tools) {
-            if (isset($tools[$tool_id])) {
-                $action = $tool_id;
-                break;
-            }
-        }
-        if ($action === null) {
-            sendJsonResponse(['error' => 'No action or tool specified'], true);
-        }
-    }
-
-    // Reject invalid actions with error response
-    if (!in_array($action, $valid_actions)) {
-        sendJsonResponse(['error' => 'Invalid action'], true);
+        sendJsonResponse(['error' => 'No action specified'], true);
     }
 
     // Route to appropriate handler based on action
@@ -115,13 +83,8 @@ function handleApiRequest() {
             handleGetPrompts();
             break;
         default:
-            // Handle tool-specific actions
-            // Check if action corresponds to a valid tool
-            if (in_array($action, array_keys($config_data['tools'] ?? []))) {
-                handleToolAction($action);
-            } else {
-                sendJsonResponse(['error' => 'Unhandled action'], true);
-            }
+            // For other actions, treat them as tool-specific actions
+            handleToolAction($action);
             break;
     }
 }
@@ -143,9 +106,6 @@ function handleApiRequest() {
  * @see sendJsonResponse() - Sends the final response
  * 
  * @note If API call fails, returns default models for fallback functionality
- */
-/**
- * Handle model fetching from LLM API
  */
 function handleGetModels() {
     global $LLM_API_ENDPOINT, $LLM_API_KEY, $LLM_API_FILTER;
@@ -180,6 +140,56 @@ function handleGetModels() {
     sendJsonResponse(['models' => $models], true);
 }
 
+/**
+ * Handle the 'get_prompts' API action - retrieve available prompt templates
+ * 
+ * This function scans the 'prompts' directory for prompt template files and
+ * returns them as a structured list. It supports multiple file formats and
+ * provides clean labels for display.
+ * 
+ * @return void Sends JSON response with prompts list
+ * 
+ * @see sendJsonResponse() - Sends the final response
+ * 
+ * @note Supported file extensions: .txt, .md, .xml
+ * @note Prompts are loaded from the 'prompts' subdirectory
+ * @note File names are converted to readable labels (e.g., 'medical_report' -> 'Medical Report')
+ */
+function handleGetPrompts() {
+    // Load prompts from files in the prompts directory
+    $prompts = [];
+
+    // Check if prompts directory exists
+    if (is_dir('prompts')) {
+        // Get all files in the prompts directory
+        $files = scandir('prompts');
+
+        foreach ($files as $file) {
+            // Check for .txt, .md, or .xml extensions
+            if (preg_match('/\.(txt|md|xml)$/i', $file)) {
+                // Prevent path traversal
+                $file_path = 'prompts/' . basename($file);
+
+                // Use filename (without extension) as the key
+                $key = pathinfo(basename($file), PATHINFO_FILENAME);
+
+                // Use filename as label (clean up for display)
+                $label = ucwords(str_replace(['_', '-'], ' ', $key));
+
+                // Read file content as prompt
+                $content = file_get_contents($file_path);
+                if ($content !== false) {
+                    $prompts[$key] = [
+                        'label' => $label,
+                        'prompt' => $content
+                    ];
+                }
+            }
+        }
+    }
+
+    sendJsonResponse(['prompts' => $prompts], true);
+}
 
 
 /**
@@ -257,7 +267,7 @@ function getToolConfig(string $category_id, string $tool_id): array {
  * 4. Prepares and sends API request to LLM
  * 5. Processes and returns the response
  * 
- * @param string $tool_id The identifier of the tool to process
+ * @param string $category_tool_id The identifier of the tool to process
  * @global string $LLM_API_ENDPOINT_CHAT The chat completion API endpoint
  * @global string $LLM_API_KEY The API authentication key
  * 
@@ -275,10 +285,7 @@ function getToolConfig(string $category_id, string $tool_id): array {
  * @note Includes debug information in response
  * @note Sets CORS headers for cross-origin requests
  */
-/**
- * Process tool-specific actions through complete pipeline
- */
-function handleToolAction($tool_id) {
+function handleToolAction($category_tool_id) {
     global $LLM_API_ENDPOINT_CHAT, $LLM_API_KEY;
 
     // Validate required parameters
@@ -286,17 +293,40 @@ function handleToolAction($tool_id) {
         sendJsonResponse(['error' => 'API endpoint not configured'], true);
     }
 
-    // Load tool configuration
+    // Load configuration
     $config_data = loadResourceFromJson('config.json');
     if (isset($config_data['error'])) {
         sendJsonResponse(['error' => $config_data['error']], true);
     }
 
-    if (!isset($config_data['tools'][$tool_id])) {
-        sendJsonResponse(['error' => 'Invalid tool'], true);
+    // Process category_tool_id to extract category and tool identifiers
+    if (strpos($category_tool_id, '.') !== false) {
+        list($category_id, $tool_id) = explode('.', $category_tool_id, 2);
+        // Validate that the tool exists in the specified category
+        if (!toolExistsInCategory($category_id, $tool_id)) {
+            sendJsonResponse(['error' => 'Invalid category or tool specified'], true);
+        }
+    } else {
+        // If no category specified, treat the entire identifier as tool_id and search across all categories
+        $tool_id = $category_tool_id;
+        $found = false;
+        foreach ($config_data['categories'] as $category) {
+            if (toolExistsInCategory($category, $tool_id)) {
+                $category_id = $category;
+                $found = true;
+                break;
+            }
+        }
+        if (!$found) {
+            sendJsonResponse(['error' => 'Invalid category or tool specified'], true);
+        }
     }
 
-    $tool = $config_data['tools'][$tool_id];
+    // Load the tool configuration
+    $tool = getToolConfig($category_id, $tool_id);
+    if (isset($tool['error'])) {
+        sendJsonResponse(['error' => $tool['error']], true);
+    }
 
     // Get form data
     $form_data = $_POST;
@@ -376,7 +406,7 @@ function handleToolAction($tool_id) {
     }
 
     // Build the prompt based on tool type
-    $prompt = buildToolPrompt($tool_id, $form_data);
+    $prompt = buildToolPrompt($tool, $form_data);
 
     // Prepare API request data
     // TODO: use a default model if not specified in form_data
@@ -414,10 +444,9 @@ function handleToolAction($tool_id) {
     }
 
     // Process and return the response
-    $result = processToolResponse($tool_id, $response);
+    $result = processToolResponse($tool, $response);
 
-    // Add form data and API data to the response
-    $result['debug']['form_data'] = $form_data;
+    // Add API data to the response
     $result['debug']['api_data'] = $api_data;
     // Add file_info to debug if file was uploaded
     if ($file_info !== null) {
@@ -425,8 +454,8 @@ function handleToolAction($tool_id) {
     }
 
     // Set CORS headers
-    header('Access-Control-Allow-Origin: *');
-    header('Content-Type: application/json');
+    //header('Access-Control-Allow-Origin: *');
+    //header('Content-Type: application/json');
 
     // Send the final JSON response
     sendJsonResponse($result, true);
@@ -450,9 +479,6 @@ function handleToolAction($tool_id) {
  *       - 'web_scraper': Scrapes content from a URL
  *       - 'medical_literature_search': Searches PubMed for medical articles
  * @note All helpers validate their required parameters before execution
- */
-/**
- * Execute helper functions for specialized processing
  */
 function executeHelper($helper_name, $form_data) {
     switch ($helper_name) {
@@ -520,7 +546,7 @@ function executeHelper($helper_name, $form_data) {
  * 5. Replacing placeholders with actual form data
  * 6. Handling language-specific instructions
  * 
- * @param string $tool_id The tool identifier
+ * @param array $tool The tool configuration array
  * @param array $form_data User-submitted form data containing values for placeholders
  * @return string The constructed prompt ready for LLM processing
  * 
@@ -532,28 +558,7 @@ function executeHelper($helper_name, $form_data) {
  * @note If tool has 'helper' specification, helper output is added to form_data['content']
  * @note Falls back to generic analysis prompt if no valid prompt found
  */
-function buildToolPrompt($tool_id, $form_data) {
-    // Load config from JSON
-    $config_data = loadResourceFromJson('config.json');
-
-    if (isset($config_data['error'])) {
-        return "Analyze the following input: " . json_encode($form_data);
-    }
-
-    // Identify the tool in category
-    foreach ($config_data['categories'] as $category) {
-        if (isset($config_data['tools'][$category][$tool_id])) {
-            // Get the tool configuration
-            $tool = loadResourceFromJson('tools' . DIRECTORY_SEPARATOR . $category . DIRECTORY_SEPARATOR . $tool_id . '.json');
-            break;
-        }
-    }
-
-    // Check if the tool has a prompt field, otherwise look for it in form_data
-    if (!$tool) {
-        return "Analyze the following input: " . json_encode($form_data);
-    }
-
+function buildToolPrompt($tool, $form_data) {
     // Handle case where tool has 'prompts' key (multiple prompts)
     if (isset($tool['prompts']) && is_array($tool['prompts'])) {
         // Get the selected prompt from form data
@@ -670,7 +675,7 @@ function convertPromptArrayToText($prompt_array, $indent_level = 0) {
  * It can optionally extract JSON data from the response content if the tool
  * specifies JSON output format.
  * 
- * @param string $tool_id The tool identifier
+ * @param array $tool The tool configuration array containing output specifications
  * @param array $api_response The raw API response from the LLM
  * @return array Processed result containing tool info, response, and optional JSON data
  * 
@@ -680,86 +685,25 @@ function convertPromptArrayToText($prompt_array, $indent_level = 0) {
  * @note If tool has 'output' => 'json', attempts to extract JSON from response
  * @note Returns array with keys: 'tool', 'response', and optionally 'json'
  */
-function processToolResponse($tool_id, $api_response) {
+function processToolResponse($tool, $api_response) {
     $result = [
-        'tool' => $tool_id,
+        'tool' => $tool['id'],
+        'category' => $tool['category'] ?? '',
         'response' => $api_response
     ];
 
-    // Load config from JSON
-    $config_data = loadResourceFromJson('config.json');
-
-    if (!isset($config_data['error']) && isset($config_data['tools'][$tool_id])) {
-        $tool = $config_data['tools'][$tool_id];
-
-        // Check if tool has 'output' key set to 'json'
-        if (isset($tool['output']) && $tool['output'] === 'json') {
-            // Try to extract JSON if present
-            $content = $api_response['choices'][0]['message']['content'] ?? '';
-            $json_data = extractJsonFromResponse($content);
-
-            if ($json_data) {
-                $result['json'] = $json_data;
-            }
+    // Check if tool has 'output' key set to 'json'
+    if (isset($tool['output']) && $tool['output'] === 'json') {
+        // Try to extract JSON if present
+        $content = $api_response['choices'][0]['message']['content'] ?? '';
+        $json_data = extractJsonFromResponse($content);
+        if ($json_data) {
+            $result['json'] = $json_data;
         }
     }
 
     // Return the processed result
     return $result;
-}
-
-/**
- * Handle the 'get_prompts' API action - retrieve available prompt templates
- * 
- * This function scans the 'prompts' directory for prompt template files and
- * returns them as a structured list. It supports multiple file formats and
- * provides clean labels for display.
- * 
- * @return void Sends JSON response with prompts list
- * 
- * @see sendJsonResponse() - Sends the final response
- * 
- * @note Supported file extensions: .txt, .md, .xml
- * @note Prompts are loaded from the 'prompts' subdirectory
- * @note File names are converted to readable labels (e.g., 'medical_report' -> 'Medical Report')
- */
-/**
- * Retrieve available prompt templates from filesystem
- */
-function handleGetPrompts() {
-    // Load prompts from files in the prompts directory
-    $prompts = [];
-
-    // Check if prompts directory exists
-    if (is_dir('prompts')) {
-        // Get all files in the prompts directory
-        $files = scandir('prompts');
-
-        foreach ($files as $file) {
-            // Check for .txt, .md, or .xml extensions
-            if (preg_match('/\.(txt|md|xml)$/i', $file)) {
-                // Prevent path traversal
-                $file_path = 'prompts/' . basename($file);
-
-                // Use filename (without extension) as the key
-                $key = pathinfo(basename($file), PATHINFO_FILENAME);
-
-                // Use filename as label (clean up for display)
-                $label = ucwords(str_replace(['_', '-'], ' ', $key));
-
-                // Read file content as prompt
-                $content = file_get_contents($file_path);
-                if ($content !== false) {
-                    $prompts[$key] = [
-                        'label' => $label,
-                        'prompt' => $content
-                    ];
-                }
-            }
-        }
-    }
-
-    sendJsonResponse(['prompts' => $prompts], true);
 }
 
 /**

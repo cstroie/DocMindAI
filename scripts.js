@@ -13,7 +13,7 @@ let promptsData = null;
 function populateCategoriesMenu() {
     const menuContainer = document.getElementById('categoriesMenu');
     if (!menuContainer || !categoriesData) return;
-    
+
     for (const [categoryId, categoryData] of Object.entries(categoriesData)) {
         const menuItem = document.createElement('li');
         const menuLink = document.createElement('a');
@@ -23,12 +23,12 @@ function populateCategoriesMenu() {
         menuLink.dataset.tooltip = categoryData.name || '';
         menuLink.dataset.placement = "bottom";
         menuLink.innerHTML = `${categoryData.icon || '📁'}`;
-        
+
         menuLink.addEventListener('click', (e) => {
             e.preventDefault();
             switchView(`tools-${categoryId}`);
         });
-        
+
         menuItem.appendChild(menuLink);
         menuContainer.appendChild(menuItem);
     }
@@ -70,7 +70,7 @@ function toggleTheme() {
     // Get current preference from localStorage                                                                                          
     const currentPreference = localStorage.getItem('docmind-theme') || 'system';                                                         
     let newPreference;                                                                                                                   
-                                                                                                                                         
+
     // Cycle through theme preferences                                                                                                   
     if (currentPreference === 'light') {                                                                                                 
         newPreference = 'dark';                                                                                                          
@@ -79,14 +79,14 @@ function toggleTheme() {
     } else {                                                                                                                             
         newPreference = 'light';                                                                                                         
     }                                                                                                                                    
-                                                                                                                                         
+
     // Save theme preference                                                                                                             
     localStorage.setItem('docmind-theme', newPreference);                                                                                
-                                                                                                                                         
+
     // Apply the new theme                                                                                                               
     applyTheme();                                                                                                                        
 }                                                                                                                                        
-                                                                                                                                         
+
 /**
  * Apply theme based on user preference
  *
@@ -106,7 +106,7 @@ function applyTheme() {
     // Get theme preference from localStorage                                                                                            
     const preference = localStorage.getItem('docmind-theme') || 'system';                                                                
     let actualTheme, themeIconChar;                                                                                                      
-                                                                                                                                         
+
     // Determine the actual theme to apply and icon to show                                                                              
     if (preference === 'light') {                                                                                                        
         actualTheme = 'light';                                                                                                           
@@ -119,13 +119,13 @@ function applyTheme() {
         actualTheme = systemPrefersDark ? 'dark' : 'light';                                                                              
         themeIconChar = systemPrefersDark ? '☀️' : '🌙';                                                                                  
     }                                                                                                                                    
-                                                                                                                                         
+
     // Update theme button icon                                                                                                          
     const themeButton = document.getElementById('themeToggle');                                                                          
     if (themeButton) {                                                                                                                   
         themeButton.textContent = themeIconChar;                                                                                         
     }                                                                                                                                    
-                                                                                                                                         
+
     // Apply the theme                                                                                                                   
     document.documentElement.setAttribute('data-theme', actualTheme);                                                                    
 }                                                                                                                                        
@@ -408,7 +408,7 @@ function createCategoriesViews(categories) {
         // Append the category view to the container BEFORE populating tools
         viewContainer.appendChild(categoryView);
     }
-    
+
     // After all views are appended to DOM, populate tools for each category
     for (const categoryId of Object.keys(categories)) {
         loadToolsInCategory(categoryId);
@@ -452,20 +452,20 @@ function downloadResults() {
         // Create Blob and download
         const blob = new Blob([textContent], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
-        
+
         // Create temporary link
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
-        
+
         // Cleanup
         setTimeout(() => {
             URL.revokeObjectURL(url);
             document.body.removeChild(a);
         }, 100);
-        
+
         showNotification('Download started!', 'success');
     } catch (error) {
         showError('Failed to download: ' + error.message);
@@ -505,16 +505,16 @@ function populateCategoryCards() {
     // Add a card for each category
     for (const [categoryId, categoryData] of Object.entries(categoriesData)) {
         const clone = template.content.cloneNode(true);
-        
+
         // Populate card elements
         const iconElement = clone.querySelector('aside');
         const titleElement = clone.querySelector('h4');
         const descriptionElement = clone.querySelector('p');
-        
+
         if (iconElement) iconElement.textContent = categoryData.icon || '📁';
         if (titleElement) titleElement.textContent = categoryData.name;
         if (descriptionElement) descriptionElement.textContent = categoryData.description || '';
-        
+
         // Add click handler to show category tools with lazy loading
         const card = clone.querySelector('.card');
         if (card) {
@@ -589,16 +589,16 @@ function loadToolsInCategory(category) {
     // Add a card for each tool
     categoryTools.forEach(tool => {
         const clone = template.content.cloneNode(true);
-        
+
         // Populate card elements
         const iconElement = clone.querySelector('aside');
         const titleElement = clone.querySelector('h4');
         const descriptionElement = clone.querySelector('p');
-        
+
         if (iconElement) iconElement.textContent = tool.icon || '📄';
         if (titleElement) titleElement.textContent = tool.name;
         if (descriptionElement) descriptionElement.textContent = tool.description || '';
-        
+
         // Add click handler to show tool form
         const card = clone.querySelector('.card');
         if (card) {
@@ -682,7 +682,7 @@ function populateToolSelect(toolSelect) {
         // Append optgroup to select
         toolSelect.appendChild(optgroup);
     }
-        
+
     // Add tool selection handler
     toolSelect.addEventListener('change', function() {
         const toolId = this.value;
@@ -723,9 +723,10 @@ function displayToolForm(toolId) {
         return;
     }
 
-    // Get the selected tool
+    // Get the selected tool and category information
     let tool = toolsData[toolId];
-    
+    const category = categoriesData[tool.category];
+
     // If tool is not found, it might not be loaded yet
     if (!tool) {
         showError(`Tool ${toolId} not found. Please try again.`);
@@ -754,7 +755,6 @@ function displayToolForm(toolId) {
     const pageTitle = document.getElementById('pageTitle');
     const pageSubtitle = document.getElementById('pageSubtitle');
     if (pageTitle && pageSubtitle && tool.category && categoriesData) {
-        const category = categoriesData[tool.category];
         if (category) {
             pageTitle.textContent = category.icon + ' ' + category.name;
             pageSubtitle.textContent = category.description;
@@ -764,9 +764,13 @@ function displayToolForm(toolId) {
     // Populate the form fields
     const toolForm = document.getElementById('toolForm');
     const formFields = document.getElementById('formFields');
-    const toolIdInput = document.getElementById('toolId');
+    const actionInput = document.getElementById('action');
 
-    toolIdInput.value = tool.id;
+    if (category) {
+        actionInput.value = tool.category + '.' + tool.id;
+    } else {
+        actionInput.value = tool.id;
+    }
     formFields.innerHTML = '';
 
     // Get preferences from localStorage
@@ -797,7 +801,7 @@ function displayToolForm(toolId) {
                 }                                                                                                 
                 field = commonField;                                                                              
             }                                                                                                     
-                                                                                                                  
+
             const fieldElement = createFormField(field, cookies);                                                 
             if (fieldElement) {                                                                                   
                 formFields.appendChild(fieldElement);                                                             
@@ -1226,7 +1230,6 @@ async function handleFormSubmit(event) {
             showError(`Unexpected response format: ${text}`);
             return;
         }
-
     } catch (error) {
         showError('Failed to submit form: ' + error.message);
     } finally {
@@ -1284,9 +1287,9 @@ function displayResults(results, fromHistory = false) {
         console.log('HTML content found:\n', results.html);
         responseContent = results.html;
     } else if (results.response && results.response.choices && results.response.choices[0] && results.response.choices[0].message && results.response.choices[0].message.content) {
-        // Extract content from OpenAI chat completion response
-        console.log('OpenAI response found:\n', results.response.choices[0].message.content);
+        // Extract content from LLM chat completion response
         responseContent = results.response.choices[0].message.content;
+        console.log('LLM response found:\n', responseContent);
     } else {
         console.error('No valid response content found');
         showError('No response content available');
@@ -2026,22 +2029,22 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load tools from individual files in their categories
     toolsData = {};
     commonData = configData.common || {};
-    
+
     // Load all tools from individual files
     const toolCategories = configData.tools || {};
     let totalTools = 0;
     let successfulTools = 0;
-    
+
     for (const category in toolCategories) {
         console.log(`Loading tools for category: ${category}`);
         const categoryTools = toolCategories[category];
-        
+
         for (const [toolId, toolFile] of Object.entries(categoryTools)) {
             totalTools++;
             const toolPath = `tools/${category}/${toolFile}.json`;
             try {
                 const tool = await loadJSONResource(toolPath);
-                
+
                 // Verify tool has required properties
                 if (!tool.id) {
                     console.warn(`Tool at ${toolPath} is missing 'id' property`);
@@ -2051,7 +2054,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     console.warn(`Tool ${toolId} at ${toolPath} is missing 'category' property`);
                     tool.category = category;
                 }
-                
+
                 toolsData[toolId] = tool;
                 successfulTools++;
                 console.log(`✓ Loaded tool: ${toolId} (${tool.name}) from ${toolPath}`);
@@ -2060,7 +2063,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         }
     }
-    
+
     console.log(`Tool loading summary: ${successfulTools}/${totalTools} tools loaded successfully`);
 
     // Create category views and buttons after loading data
@@ -2120,7 +2123,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     const category = viewName.replace('tools-', '');
                     loadToolsInCategory(category);
                 }
-                
+
                 switchView(viewName);
                 // Close sidebar on mobile after selecting a view
                 const sidebar = document.querySelector('.sidebar');
