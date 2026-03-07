@@ -764,12 +764,8 @@ function displayToolForm(toolId) {
     const toolForm = document.getElementById('toolForm');
     const formFields = document.getElementById('formFields');
     const actionInput = document.getElementById('action');
+    actionInput.value = tool.id;
 
-    if (category) {
-        actionInput.value = tool.category + '.' + tool.id;
-    } else {
-        actionInput.value = tool.id;
-    }
     formFields.innerHTML = '';
 
     // Get preferences from localStorage

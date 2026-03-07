@@ -191,42 +191,27 @@ function handleGetPrompts() {
     sendJsonResponse(['prompts' => $prompts], true);
 }
 
-
-/**
- * Verify that a tool identifier exists within a given category
- * according to config.json.
- *
- * @param string $category_id Category key (e.g., "clinical")
- * @param string $tool_id     Tool key (e.g., "soap")
- *
- * @return bool True if the tool is defined in the category, false otherwise
- */
-function toolExistsInCategory(string $category_id, string $tool_id): bool {
-    // Use the cached config
-    $config = getConfigData();
-    if (isset($config['error'])) {
-        return false;
-    }
-
-    // Ensure the category exists and contains a tools map
-    if (!isset($config['tools'][$category_id]) || !is_array($config['tools'][$category_id])) {
-        return false;
-    }
-
-    // Check if the tool identifier is present in the category's tool list
-    return array_key_exists($tool_id, $config['tools'][$category_id]);
-}
-
 /**
  * Load a tool definition JSON file.
  *
- * @param string $category_id The category identifier (e.g., "clinical")
  * @param string $tool_id     The tool identifier (e.g., "soap")
  *
  * @return array Decoded JSON as an associative array, or an error array:
  *               ['error' => 'description']
  */
-function getToolConfig(string $category_id, string $tool_id): array {
+function getToolConfig(string $tool_id): array {
+    // Use the cached config to find the category for this tool
+    $config = getConfigData();
+    if (isset($config['error'])) {
+        return ['error' => 'Failed to load configuration: ' . $config['error']];
+    }
+    if (!isset($config['tools'][$tool_id])) {
+        return ['error' => "Tool '$tool_id' not found in configuration"];
+    }
+    $category_id = $config['tools'][$tool_id] ?? null;
+    if ($category_id === null) {
+        return ['error' => "Category not found for tool '$tool_id' in configuration"];
+    }
     // Build the expected file path
     $file_path = __DIR__ . DIRECTORY_SEPARATOR . 'tools' .
                  DIRECTORY_SEPARATOR . $category_id .
@@ -246,12 +231,18 @@ function getToolConfig(string $category_id, string $tool_id): array {
     // Decode JSON
     $data = json_decode($json, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
-        return [
-            'error' => 'Invalid JSON in tool configuration: ' .
-                       json_last_error_msg()
-        ];
+        return ['error' => 'Invalid JSON in tool configuration: ' . json_last_error_msg()];
     }
 
+    // Ensure the tool ID and category are included in the returned data if not set
+    if (!isset($data['id'])) {
+        $data['id'] = $tool_id;
+    }
+    if (!isset($data['category'])) {
+        $data['category'] = $category_id;
+    }
+
+    // Return the decoded tool configuration
     return $data;
 }
 
@@ -265,7 +256,7 @@ function getToolConfig(string $category_id, string $tool_id): array {
  * 4. Prepares and sends API request to LLM
  * 5. Processes and returns the response
  * 
- * @param string $category_tool_id The identifier of the tool to process
+ * @param string $tool_id The identifier of the tool to process
  * @global string $LLM_API_ENDPOINT_CHAT The chat completion API endpoint
  * @global string $LLM_API_KEY The API authentication key
  * 
@@ -283,8 +274,9 @@ function getToolConfig(string $category_id, string $tool_id): array {
  * @note Includes debug information in response
  * @note Sets CORS headers for cross-origin requests
  */
-function handleToolAction($category_tool_id) {
+function handleToolAction($tool_id) {
     global $LLM_API_ENDPOINT_CHAT, $LLM_API_KEY;
+    global $DEBUG_MODE;
 
     // Validate required parameters
     if (empty($LLM_API_ENDPOINT_CHAT)) {
@@ -297,32 +289,8 @@ function handleToolAction($category_tool_id) {
         sendJsonResponse(['error' => $config_data['error']], true);
     }
 
-    // Process category_tool_id to extract category and tool identifiers
-    if (strpos($category_tool_id, '.') !== false) {
-        list($category_id, $tool_id) = explode('.', $category_tool_id, 2);
-        // Validate that the tool exists in the specified category
-        if (!toolExistsInCategory($category_id, $tool_id)) {
-            sendJsonResponse(['error' => 'Invalid category or tool specified'], true);
-        }
-    } else {
-        // If no category specified, treat the entire identifier as tool_id and search across all categories
-        $tool_id = $category_tool_id;
-        $found = false;
-        // Iterate over category keys to find the tool
-        foreach (array_keys($config_data['categories']) as $cat_key) {
-            if (toolExistsInCategory($cat_key, $tool_id)) {
-                $category_id = $cat_key;
-                $found = true;
-                break;
-            }
-        }
-        if (!$found) {
-            sendJsonResponse(['error' => 'Invalid category or tool specified'], true);
-        }
-    }
-
     // Load the tool configuration
-    $tool = getToolConfig($category_id, $tool_id);
+    $tool = getToolConfig($tool_id);
     if (isset($tool['error'])) {
         sendJsonResponse(['error' => $tool['error']], true);
     }
@@ -415,18 +383,19 @@ function handleToolAction($category_tool_id) {
         'stream' => false
     ];
 
-    // Add user message with prompt and file content
-    $user_content = $prompt;
+    // Add file content
     if (!empty($file_content)) {
-        $user_content .= $file_content;
+        $prompt .= $file_content;
     }
-    $api_data['messages'][] = ['role' => 'user', 'content' => $user_content];
+    $api_data['messages'][] = [
+        'role' => 'user',
+        'content' => $prompt
+        ];
 
     // If it's an image, add it as a separate message with image data
     if ($is_image && $image_data !== null) {
         // Convert image to base64
         $base64_image = base64_encode($image_data);
-
         $api_data['messages'][] = [
             'role' => 'user',
             'content' => [
@@ -438,17 +407,20 @@ function handleToolAction($category_tool_id) {
     // Call LLM API
     $response = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY);
 
-    if (isset($response['error'])) {
-        sendJsonResponse(['error' => $response['error']], true);
+    if (!isset($response['error'])) {
+        // Process and return the response
+        $result = processToolResponse($tool, $response);
+    } else {
+        // If there was an error, include the prompt and raw response for debugging
+        $result = [
+            'error' => $response['error']
+        ];
+        if ($DEBUG_MODE) {
+            $result['debug']['prompt'] = $prompt;
+            $result['debug']['response'] = $response;
+        }
     }
 
-    // Process and return the response
-    $result = processToolResponse($tool, $response);
-
-    // ------------------------------------------------------------
-    // DEBUG INFORMATION – only added when DEBUG_MODE is enabled
-    // ------------------------------------------------------------
-    global $DEBUG_MODE;
     if ($DEBUG_MODE) {
         // Add API request payload to debug output
         $result['debug']['api_data'] = $api_data;
@@ -580,9 +552,7 @@ function getConfigData(): array {
  * @return string Fully‑rendered prompt
  */
 function buildToolPrompt($tool, $form_data) {
-    // --------------------------------------------------------
     // Load config (cached) to get language instructions, etc.
-    // --------------------------------------------------------
     $config_data = getConfigData();
     if (isset($config_data['error'])) {
         // Fallback to English if config cannot be read
@@ -593,9 +563,6 @@ function buildToolPrompt($tool, $form_data) {
                                ?? 'Respond in English.';
     }
 
-    // --------------------------------------------------------
-    // Existing prompt‑building logic (unchanged apart from using $language_instruction)
-    // --------------------------------------------------------
     // Determine which prompt to use
     if (isset($tool['prompts']) && is_array($tool['prompts'])) {
         $selected_key = $form_data['prompt'] ?? '';
@@ -626,6 +593,7 @@ function buildToolPrompt($tool, $form_data) {
         }
     }
 
+    // Return the final prompt
     return $prompt;
 }
 
@@ -706,7 +674,6 @@ function convertPromptArrayToText($prompt_array, $indent_level = 0) {
 function processToolResponse($tool, $api_response) {
     $result = [
         'tool' => $tool['id'],
-        'category' => $tool['category'] ?? '',
         'response' => $api_response
     ];
 
