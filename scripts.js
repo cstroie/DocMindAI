@@ -515,12 +515,11 @@ function populateCategoryCards() {
         if (titleElement) titleElement.textContent = categoryData.name;
         if (descriptionElement) descriptionElement.textContent = categoryData.description || '';
 
-        // Add click handler to show category tools with lazy loading
+        // Add click handler to show category tools
         const card = clone.querySelector('.card');
         if (card) {
             card.addEventListener('click', () => {
                 switchView('tools-' + categoryId);
-                loadToolsInCategory(categoryId);
             });
         }
 
@@ -548,7 +547,7 @@ function loadToolsInCategory(category) {
     // Get the category tools grid
     const toolsGrid = document.getElementById(`${category}ToolsGrid`);
     if (!toolsGrid) {
-        showError(`Category tools grid not found for category: ${category}`);
+        console.error(`Category tools grid not found for category: ${category}`);
         return;
     }
 
@@ -556,7 +555,7 @@ function loadToolsInCategory(category) {
 
     // Check if toolsData is available
     if (!toolsData) {
-        showError('No tools data available');
+        console.error('No tools data available');
         return;
     }
 
@@ -2035,32 +2034,25 @@ document.addEventListener('DOMContentLoaded', async function() {
     let totalTools = 0;
     let successfulTools = 0;
 
-    for (const category in toolCategories) {
-        console.log(`Loading tools for category: ${category}`);
-        const categoryTools = toolCategories[category];
+    for (const [toolId, categoryId] of Object.entries(configData.tools)) {
+        totalTools++;
+        const toolPath = `tools/${categoryId}/${toolId}.json`;
+        try {
+            const tool = await loadJSONResource(toolPath);
 
-        for (const [toolId, toolFile] of Object.entries(categoryTools)) {
-            totalTools++;
-            const toolPath = `tools/${category}/${toolFile}.json`;
-            try {
-                const tool = await loadJSONResource(toolPath);
-
-                // Verify tool has required properties
-                if (!tool.id) {
-                    console.warn(`Tool at ${toolPath} is missing 'id' property`);
-                    continue;
-                }
-                if (!tool.category) {
-                    console.warn(`Tool ${toolId} at ${toolPath} is missing 'category' property`);
-                    tool.category = category;
-                }
-
-                toolsData[toolId] = tool;
-                successfulTools++;
-                console.log(`✓ Loaded tool: ${toolId} (${tool.name}) from ${toolPath}`);
-            } catch (error) {
-                console.error(`✗ Failed to load tool ${toolId} from ${toolPath}:`, error);
+            // Verify tool has required properties
+            if (!tool.id) {
+                tool.id = toolId;
             }
+            if (!tool.category) {
+                tool.category = categoryId;
+            }
+
+            toolsData[toolId] = tool;
+            successfulTools++;
+            console.log(`✓ Loaded tool: ${toolId} (${tool.name}) from ${toolPath}`);
+        } catch (error) {
+            console.error(`✗ Failed to load tool ${toolId} from ${toolPath}:`, error);
         }
     }
 
@@ -2114,27 +2106,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                 });
                 return;
             }
-
-            // If no submenu or submenu is empty, proceed with view switching
-            const viewName = this.dataset.view;
-            if (viewName) {
-                // Render tools for category views
-                if (viewName.startsWith('tools-')) {
-                    const category = viewName.replace('tools-', '');
-                    loadToolsInCategory(category);
-                }
-
-                switchView(viewName);
-                // Close sidebar on mobile after selecting a view
-                const sidebar = document.querySelector('.sidebar');
-                if (sidebar && window.innerWidth <= 768) {
-                    sidebar.classList.remove('active');
-                    const menuToggle = document.getElementById('menuToggle');
-                    if (menuToggle) {
-                        menuToggle.innerHTML = '☰';
-                    }
-                }
-            }
         });
     });
 
@@ -2166,36 +2137,3 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 });
-
-/**
- * Set up lazy loading for tools when categories are accessed
- * 
- * This function is no longer needed as tools are loaded on page initialization.
- * Kept for backward compatibility.
- * 
- * @return {void}
- */
-async function setupLazyToolLoading() {
-    console.log('Tools already loaded on page initialization.');
-}
-
-/**
- * Load all tools from all categories (deprecated - tools now load on page init)
- * 
- * @deprecated Tools are loaded during DOMContentLoaded in the initialization section
- * @return {Promise<void>}
- */
-async function loadAllTools() {
-    console.warn('loadAllTools() is deprecated. Tools are loaded on page initialization.');
-}
-
-/**
- * Load tools for a specific category (deprecated - tools now load on page init)
- * 
- * @deprecated Tools are loaded during DOMContentLoaded in the initialization section
- * @param {string} category - The category name to load tools for
- * @return {Promise<void>}
- */
-async function loadToolsForCategory(category) {
-    console.warn('loadToolsForCategory() is deprecated. Tools are loaded on page initialization.');
-}
