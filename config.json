@@ -54,30 +54,40 @@
     }
   },
   "categories": {
-    "clinical": {
+    "cli": {
       "name": "Clinical",
       "icon": "🏥",
       "description": "Tools for direct clinical use and patient care"
     },
-    "medical_admin": {
+    "adm": {
       "name": "Medical Administration",
       "icon": "📋",
       "description": "Tools for processing medical documentation and administrative tasks"
     },
-    "research": {
+    "res": {
       "name": "Research & Academia",
       "icon": "📚",
       "description": "Tools for academic research and literature analysis"
     },
-    "content_processing": {
+    "cpr": {
       "name": "Content Processing",
       "icon": "🧠",
       "description": "Tools for document processing and content transformation"
     },
-    "development": {
+    "dev": {
       "name": "Development & Testing",
       "icon": "🧪",
       "description": "Tools for AI model testing and experimentation"
+    },
+    "rad": {
+      "name": "Radiology",
+      "icon": "🔬",
+      "description": "Tools for radiology decision support and imaging data extraction"
+    },
+    "ccr": {
+      "name": "Content Creation",
+      "icon": "✍️",
+      "description": "Tools for generating and composing content including emails and more"
     }
   },
   "common": {
@@ -130,44 +140,35 @@
     }
   },
   "tools": {
-    "clinical": {
-      "dqc": "dqc",
-      "rex": "rex",
-      "rrs": "rrs",
-      "rdd": "rdd",
-      "soap": "soap",
-      "dsn": "dsn",
-      "pec": "pec",
-      "sbar": "sbar",
-      "mex": "mex",
-      "anm": "anm",
-      "cpn": "cpn"
-    },
-    "content_processing": {
-      "sde": "sde",
-      "rdg": "rdg",
-      "wpc": "wpc",
-      "wps": "wps",
-      "cta": "cta"
-    },
-    "research": {
-      "apa": "apa",
-      "etp": "etp",
-      "stp": "stp",
-      "sta": "sta",
-      "sml": "sml",
-      "pld": "pld"
-    },
-    "development": {
-      "exp": "exp",
-      "eml": "eml",
-      "ocr": "ocr",
-      "mrs": "mrs"
-    },
-    "medical_admin": {
-      "dps": "dps",
-      "hda": "hda",
-      "pre": "pre"
+      "dqc": "cli",
+      "rex": "cli",
+      "rrs": "cli",
+      "rdd": "cli",
+      "soap": "cli",
+      "dsn": "cli",
+      "pec": "cli",
+      "sbar": "cli",
+      "mex": "cli",
+      "anm": "cli",
+      "cpn": "cli",
+      "sde": "cpr",
+      "rdg": "cpr",
+      "wpc": "cpr",
+      "wps": "cpr",
+      "cta": "cpr",
+      "apa": "res",
+      "etp": "res",
+      "stp": "res",
+      "sta": "res",
+      "sml": "res",
+      "pld": "res",
+      "exp": "dev",
+      "eml": "ccr",
+      "ocr": "dev",
+      "mrs": "rad",
+      "dps": "adm",
+      "hda": "adm",
+      "pre": "adm"
     }
   }
 }
