@@ -2,7 +2,6 @@
   "id": "dps",
   "name": "Discharge Paper Summarizer",
   "description": "Analyze patient discharge papers to extract radiology-relevant information",
-  "category": "medical_admin",
   "icon": "⚡",
   "prompt": {
     "role": "You are a medical assistant analyzing patient discharge papers for radiology relevance.",

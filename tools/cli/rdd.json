@@ -2,7 +2,6 @@
   "id": "rdd",
   "name": "Radiology Differential Diagnosis",
   "description": "Generate ranked differential diagnoses from radiology reports with supporting evidence",
-  "category": "clinical",
   "icon": "🕵️‍♂️",
   "prompt": {
     "role": "You are a radiology expert specializing in differential diagnosis.",

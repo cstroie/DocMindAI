@@ -2,7 +2,6 @@
   "id": "pec",
   "name": "Patient Education Content",
   "description": "Convert complex medical information into patient-friendly educational content",
-  "category": "clinical",
   "icon": "🤓",
   "prompt": {
     "role": "You are a medical education specialist.",

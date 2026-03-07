@@ -2,7 +2,6 @@
   "id": "wps",
   "name": "Web Page Summarizer",
   "description": "Scrape web pages and return a structured summary of the most important points",
-  "category": "content_processing",
   "icon": "🌐",
   "prompt": {
     "role": "You are a content summarization assistant.",

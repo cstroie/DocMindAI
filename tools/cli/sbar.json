@@ -2,7 +2,6 @@
   "id": "sbar",
   "name": "SBAR Nursing Note",
   "description": "Generate structured SBAR (Situation, Background, Assessment, Recommendation) notes for clinical communication",
-  "category": "clinical",
   "icon": "📞",
   "prompt": {
     "role": "You are a clinical documentation assistant.",

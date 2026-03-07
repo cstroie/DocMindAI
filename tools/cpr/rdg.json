@@ -2,7 +2,6 @@
   "id": "rdg",
   "name": "Reader's Digest",
   "description": "Convert long papers and articles into short, easily digestible summaries",
-  "category": "content_processing",
   "icon": "📖",
   "prompt": {
     "role": "You are an editorial assistant trained in the Reader's Digest style",

@@ -2,7 +2,6 @@
   "id": "apa",
   "name": "Academic Paper Analyzer",
   "description": "Analyze and summarize research papers using a structured academic review framework",
-  "category": "research",
   "icon": "🔬",
   "prompt": {
     "role": "You are an expert academic reviewer specializing in analyzing research papers.",

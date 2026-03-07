@@ -2,7 +2,6 @@
   "id": "pre",
   "name": "Prescription Analyzer",
   "description": "Extract medication information from prescriptions with detailed dosage and administration instructions",
-  "category": "medical_admin",
   "icon": "💊",
   "prompt": {
     "role": "You are a medical AI assistant specializing in prescription analysis.",

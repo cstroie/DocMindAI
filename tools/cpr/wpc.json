@@ -2,7 +2,6 @@
   "id": "wpc",
   "name": "Web Page Converter",
   "description": "Scrape web pages and convert them to clean Markdown format using AI processing",
-  "category": "content_processing",
   "icon": "🕸️",
   "prompt": {
     "role": "You are a content extraction assistant.",

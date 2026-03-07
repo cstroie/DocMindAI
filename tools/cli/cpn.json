@@ -2,7 +2,6 @@
   "id": "cpn",
   "name": "Care Plan",
   "description": "Generate structured nursing care plans based on clinical observations",
-  "category": "clinical",
   "icon": "❤️‍🩹",
   "prompt": {
     "role": "You are a clinical nursing specialist.",

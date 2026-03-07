@@ -1,8 +1,7 @@
 {
-"id": "hda",
-"name": "Hospital Discharge Analyzer",
-"description": "Comprehensive analysis of hospital discharge papers with structured medical information extraction",
-"category": "medical_admin",
+  "id": "hda",
+  "name": "Hospital Discharge Analyzer",
+  "description": "Comprehensive analysis of hospital discharge papers with structured medical information extraction",
   "icon": "🏥",
   "prompt": {
     "role": "You are a medical assistant analyzing hospital discharge papers.",

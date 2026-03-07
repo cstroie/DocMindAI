@@ -2,7 +2,6 @@
   "id": "sta",
   "name": "Survey Tool Analyzer",
   "description": "Analyze research questionnaires and surveys for structural validity, question quality and response bias",
-  "category": "research",
   "icon": "🗳️",
   "prompt": {
     "role": "You are a research methods specialist analyzing survey instruments.",

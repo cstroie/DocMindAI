@@ -2,7 +2,6 @@
   "id": "mrs",
   "name": "Pediatric MRS Brain Lesion Analyser",
   "description": "Analyse MR Spectroscopy data combined with conventional MRI findings in paediatric patients to generate a spectro-imaging synthesis, most probable diagnosis, and top 3 differential diagnoses.",
-  "category": "development",
   "icon": "🧠",
   "prompt": {
     "role": "You are a specialist radiologist with expertise in paediatric neuroradiology and MR spectroscopy (MRS).",

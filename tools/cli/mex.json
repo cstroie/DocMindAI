@@ -2,7 +2,6 @@
   "id": "mex",
   "name": "Medication Explainer",
   "description": "Provide patient-friendly medication explanations in simple terms",
-  "category": "clinical",
   "icon": "💊",
   "prompt": {
     "role": "You are a friendly healthcare assistant explaining medications to patients.",

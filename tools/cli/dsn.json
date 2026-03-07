@@ -2,7 +2,6 @@
   "id": "dsn",
   "name": "Decision Support Navigator",
   "description": "Provide non-diagnostic guidance about clinical findings and possible care pathways",
-  "category": "clinical",
   "icon": "🧭",
   "prompt": {
     "role": "You are a patient care navigator providing non-diagnostic guidance.",

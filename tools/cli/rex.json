@@ -2,7 +2,6 @@
   "id": "rex",
   "name": "Radiology Report Explainer",
   "description": "Explain radiology reports in patient-friendly language without medical jargon",
-  "category": "clinical",
   "icon": "🩻",
   "prompt": {
     "role": "You are a patient care navigator helping someone understand their medical imaging results.",

@@ -2,7 +2,6 @@
   "id": "stp",
   "name": "Summarize This Paper",
   "description": "AI-powered academic paper summarization with structured approaches",
-  "category": "research",
   "icon": "🪄",
   "prompts": {
     "three_pass": {

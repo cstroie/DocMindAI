@@ -2,7 +2,6 @@
   "id": "rrs",
   "name": "Radiology Report Summarizer",
   "description": "Analyze radiology reports and extract key medical information",
-  "category": "clinical",
   "icon": "⚡",
   "prompt": {
     "role": "You are a medical expert analyzing radiology reports.",

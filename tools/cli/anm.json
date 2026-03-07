@@ -2,7 +2,6 @@
   "id": "anm",
   "name": "Anamnesis Structurer",
   "description": "Structure doctor-patient anamnestic transcripts according to medical standards",
-  "category": "clinical",
   "icon": "💬",
   "prompt": {
     "role": "You are a medical documentation specialist specializing in anamnesis structuring.",

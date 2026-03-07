@@ -2,7 +2,6 @@
   "id": "eml",
   "name": "Email Generator",
   "description": "Generate professional email replies based on email content and context",
-  "category": "development",
   "icon": "✉️",
   "prompt": {
     "role": "You are a professional email assistant.",

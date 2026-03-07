@@ -2,7 +2,6 @@
   "id": "pld",
   "name": "Plagiarism Detector",
   "description": "Analyze text for potential plagiarism and AI-generated content",
-  "category": "research",
   "icon": "🚩",
   "prompt": {
     "role": "You are an academic integrity analysis tool.",

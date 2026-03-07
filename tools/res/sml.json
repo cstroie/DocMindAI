@@ -2,7 +2,6 @@
   "id": "sml",
   "name": "Search Medical Literature",
   "description": "Search medical literature databases and get AI-summarized research papers",
-  "category": "research",
   "icon": "📚",
   "prompt": {
     "role": "You are a medical research assistant specializing in summarizing scientific literature.",

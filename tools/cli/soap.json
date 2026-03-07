@@ -2,7 +2,6 @@
   "id": "soap",
   "name": "SOAP Note Generator",
   "description": "Convert medical transcripts into structured SOAP (Subjective, Objective, Assessment, Plan) notes",
-  "category": "clinical",
   "icon": "📑",
   "prompt": {
     "role": "You are a clinical documentation assistant.",

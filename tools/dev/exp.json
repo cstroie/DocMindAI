@@ -2,7 +2,6 @@
   "id": "exp",
   "name": "Experiment Tool",
   "description": "Test and experiment with different AI models using custom or predefined prompts",
-  "category": "development",
   "icon": "🧪",
   "form": {
     "title": "AI Model Experimentation",

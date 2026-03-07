@@ -2,7 +2,6 @@
   "id": "ocr",
   "name": "Image OCR Tool",
   "description": "Perform OCR on uploaded images and extract text in Markdown format",
-  "category": "development",
   "icon": "📷",
   "form": {
     "title": "OCR Form",

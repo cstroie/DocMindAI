@@ -2,7 +2,6 @@
   "id": "dqc",
   "name": "Doctor Questions Creator",
   "description": "Generate thoughtful questions for patients to ask their doctors about medical findings",
-  "category": "clinical",
   "icon": "❓",
   "prompt": {
     "role": "You are a patient advocate helping prepare for doctor consultations.",
