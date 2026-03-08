@@ -1259,9 +1259,6 @@ function displayResults(results, fromHistory = false) {
     // Extract the actual response content from the API response
     let responseContent = '';
     
-    // Store the original form data for details view
-    let currentResponse = '';
-    
     // Check if backend returned the prompt in debug/prompt
     if (results.debug && results.debug.prompt && detailsPrompt) {
         detailsPrompt.textContent = results.debug.prompt;
@@ -1272,13 +1269,8 @@ function displayResults(results, fromHistory = false) {
         console.error('Error found:\n', results.error);
         showError(results.error);
         return;
-    //} else if (results.json) {
-    //    // If results contain 'json' key, return it as object
-    //    // TODO Do we need it?
-    //    responseContent = results.json;
     } else if (results.html) {
         // If results contain HTML, return it directly
-        // TODO Do we need it?
         console.log('HTML content found:\n', results.html);
         responseContent = results.html;
     } else if (results.response && results.response.choices && results.response.choices[0] && results.response.choices[0].message && results.response.choices[0].message.content) {
@@ -1295,7 +1287,63 @@ function displayResults(results, fromHistory = false) {
     const toolId = results.tool || '';
     const tool = toolsData[toolId] || null;
 
-    // Update page title and subtitle if tool has form.title and form.description
+    // Update results title and subtitle
+    updateResultsTitle(tool, resultsTitle, resultsSubtitle);
+
+    // Check if the result contains markdown code fences
+    const resultsInfo = extractCodeFenceInfo(responseContent, 'markdown');
+    console.log('Code fence info:\n', resultsInfo);
+
+    // Check the desired display format from tool
+    const displayFormat = tool && tool.display ? tool.display.toLowerCase() : resultsInfo.type;
+    console.log('Display format requested: ', displayFormat);
+
+    // Render content based on type and format
+    renderContent(resultsContent, resultsInfo, displayFormat, tool);
+
+    // Check if resultsContent is not empty
+    if (resultsContent.innerHTML.trim() !== '') {
+        // Show results area
+        resultsArea.style.display = 'block';
+        // Switch to results view
+        switchView('results');
+        // Apply syntax highlighting
+        applySyntaxHighlighting();
+    } else {
+        console.error('Results content is empty');
+    }
+
+    // Store the original raw response data (for copy functionality)
+    resultsContent.dataset.raw = responseContent;
+    if (detailsResponse) {
+        detailsResponse.textContent = responseContent;
+    }
+
+    // Scroll to results
+    resultsArea.scrollIntoView({ behavior: 'smooth' });
+
+    // Save result to history only if it's not from history
+    if (!fromHistory) {
+        saveResultToHistory(results);
+    }
+}
+
+/**
+ * Update results title and subtitle based on tool
+ *
+ * This function updates the results title and subtitle based on the tool configuration.
+ *
+ * @param {Object} tool - The tool configuration object
+ * @param {HTMLElement} resultsTitle - The results title element
+ * @param {HTMLElement} resultsSubtitle - The results subtitle element
+ * @return {void}
+ *
+ * @note Updates title and subtitle based on tool.form.title and tool.form.description
+ * @note Called by displayResults() when rendering results
+ */
+function updateResultsTitle(tool, resultsTitle, resultsSubtitle) {
+    if (!resultsTitle || !resultsSubtitle) return;
+
     if (tool && tool.form && tool.form.title) {
         resultsTitle.textContent = tool.form.title;
     } else {
@@ -1306,16 +1354,26 @@ function displayResults(results, fromHistory = false) {
     } else {
         resultsSubtitle.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
     }
+}
 
-    // Check if the result contains markdown code fences
-    const resultsInfo = extractCodeFenceInfo(responseContent, 'markdown');
-    console.log('Code fence info:\n', resultsInfo);
-
-    // Check the desired display format from tool
-    const displayFormat = tool && tool.display ? tool.display.toLowerCase() : resultsInfo.type;
-    console.log('Display format requested: ', displayFormat);
-
-    // Check if the response need conversion based on resultsInfo format and display format
+/**
+ * Render content based on type and format
+ *
+ * This function renders content based on the content type and display format.
+ *
+ * @param {HTMLElement} resultsContent - The results content element
+ * @param {Object} resultsInfo - The extracted code fence info
+ * @param {string} displayFormat - The desired display format
+ * @param {Object} tool - The tool configuration object
+ * @return {void}
+ *
+ * @note Handles JSON, markdown, and plain text content
+ * @note Uses marked.js for markdown to HTML conversion
+ * @note Uses highlight.js for syntax highlighting
+ * @note Calls jsonToMarkdown() for JSON content conversion
+ * @see displayResults() - Calls this function for content rendering
+ */
+function renderContent(resultsContent, resultsInfo, displayFormat, tool) {
     if (resultsInfo.type === 'json') {
         // If the result is JSON, parse it
         try {
@@ -1374,32 +1432,6 @@ function displayResults(results, fromHistory = false) {
         // For other types, use the original response content, with syntax highlighting
         console.log(`Displaying as ${resultsInfo.type} type\n`, resultsInfo.text);
         resultsContent.innerHTML = `<pre><code class="${resultsInfo.type}">${escapeHtml(resultsInfo.text)}</code></pre>`;
-    }
-
-    // Check if resultsContent is not empty
-    if (resultsContent.innerHTML.trim() !== '') {
-        // Show results area
-        resultsArea.style.display = 'block';
-        // Switch to results view
-        switchView('results');
-        // Apply syntax highlighting
-        applySyntaxHighlighting();
-    } else {
-        console.error('Results content is empty');
-    }
-
-    // Store the original raw response data (for copy functionality)
-    resultsContent.dataset.raw = responseContent;
-    if (detailsResponse) {
-        detailsResponse.textContent = responseContent;
-    }
-
-    // Scroll to results
-    resultsArea.scrollIntoView({ behavior: 'smooth' });
-
-    // Save result to history only if it's not from history
-    if (!fromHistory) {
-        saveResultToHistory(results);
     }
 }
 
