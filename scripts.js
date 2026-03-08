@@ -812,11 +812,18 @@ function displayToolForm(toolId) {
     // Show the form and hide results area
     showForm();
 
-    // Set up cancel button to go back to tools view
+    // Set up cancel button to go back to category view
     const cancelBtn = document.getElementById('cancelBtn');
     if (cancelBtn) {
         cancelBtn.onclick = function() {
-            switchView('tools');
+            // Get the current tool's category
+            const currentTool = toolsData[toolId];
+            if (currentTool && currentTool.category) {
+                switchView('tools-' + currentTool.category);
+            } else {
+                // Fallback to tools view if category not found
+                switchView('tools');
+            }
         };
     }
 
