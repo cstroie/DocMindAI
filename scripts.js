@@ -2160,6 +2160,7 @@ function displayHistory(maxItems = 10) {
         const toolElement = clone.querySelector('.history-tool');
         const toolIconElement = clone.querySelector('.tool-icon');
         const toolNameElement = clone.querySelector('.tool-name');
+        const previewElement = clone.querySelector('.history-preview');
 
         if (titleElement) titleElement.textContent = result.title;
         
@@ -2184,6 +2185,29 @@ function displayHistory(maxItems = 10) {
             } else {
                 toolElement.style.display = 'none';
             }
+        }
+
+        // Add preview text
+        if (previewElement) {
+            let previewText = '';
+            
+            // Try to get preview from different sources
+            if (result.response && result.response.choices && result.response.choices[0] && result.response.choices[0].message && result.response.choices[0].message.content) {
+                previewText = result.response.choices[0].message.content;
+            } else if (result.content && result.content.response && result.content.response.choices && result.content.response.choices[0] && result.content.response.choices[0].message && result.content.response.choices[0].message.content) {
+                previewText = result.content.response.choices[0].message.content;
+            } else if (result.content) {
+                previewText = String(result.content);
+            } else {
+                previewText = String(result);
+            }
+            
+            // Take first 200 characters and add ellipsis if truncated
+            if (previewText.length > 200) {
+                previewText = previewText.substring(0, 200) + '...';
+            }
+            
+            previewElement.textContent = previewText;
         }
 
         // Add click handler to view button
