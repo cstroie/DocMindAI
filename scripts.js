@@ -476,15 +476,16 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
 }
 
 /**
- * Load JSON resource from file with comprehensive error handling
+ * Load JSON resource from file with comprehensive error handling and loading states
  * 
  * This function fetches and parses a JSON configuration file from the server.
- * It provides robust error handling and can extract a specific root key from the
- * JSON data if provided. The function validates inputs and provides detailed
- * error messages for debugging.
+ * It provides robust error handling, loading states, and can extract a specific 
+ * root key from the JSON data if provided. The function validates inputs and 
+ * provides detailed error messages for debugging.
  * 
  * @param {string} filename - The JSON file to load (e.g., 'config.json', 'tools/category/tool.json')
  * @param {string} [rootKey] - Optional root key to extract from the JSON data (e.g., 'tools')
+ * @param {boolean} [showLoading=false] - Whether to show loading overlay during operation
  * @returns {Promise<Object|null>} Promise resolving to the extracted data or null on error
  * 
  * @throws {Error} If filename is invalid or network request fails
@@ -492,6 +493,7 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
  * @note Handles network errors, JSON parsing errors, and missing data gracefully
  * @note If rootKey is provided, returns data[rootKey] if it exists, otherwise returns entire data
  * @note Logs detailed error messages to console for debugging
+ * @note Can optionally show loading overlay during operation
  * @note Used for loading configuration, tools, languages, categories, and prompts
  * @see displayTools() - Uses this to load tools data
  * @see populateToolSelect() - Uses this to load tools data
@@ -503,14 +505,19 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
  * // Load only tools section
  * const tools = await loadJSONResource('config.json', 'tools');
  * 
- * // Load individual tool file
- * const tool = await loadJSONResource('tools/category/tool.json');
+ * // Load individual tool file with loading state
+ * const tool = await loadJSONResource('tools/category/tool.json', null, true);
  */
-async function loadJSONResource(filename, rootKey) {
+async function loadJSONResource(filename, rootKey, showLoading = false) {
     try {
         // Validate input
         if (!filename || typeof filename !== 'string') {
             throw new Error('Invalid filename provided');
+        }
+
+        // Show loading state if requested
+        if (showLoading) {
+            showGlobalLoading(`Loading ${filename}...`);
         }
 
         // Load data from JSON file
@@ -529,10 +536,21 @@ async function loadJSONResource(filename, rootKey) {
             return null;
         }
 
+        // Hide loading state if shown
+        if (showLoading) {
+            hideGlobalLoading();
+        }
+
         // Return the specified root key if it exists, otherwise return the entire data
         return data[rootKey] ?? data;
     } catch (error) {
         console.error(`Failed to load ${filename}:`, error.message);
+        
+        // Hide loading state if shown
+        if (showLoading) {
+            hideGlobalLoading();
+        }
+        
         return null;
     }
 }
