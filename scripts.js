@@ -1800,6 +1800,7 @@ function switchView(viewName) {
  * @note Stores results as JSON strings
  * @note Maintains a maximum of 10 results
  * @note Each result is stored with a timestamp for sorting
+ * @note Stores form data, prompt, and API response for detailed history
  * @see displayResults() - Calls this function after displaying results
  */
 function saveResultToHistory(result) {
@@ -1807,13 +1808,20 @@ function saveResultToHistory(result) {
         // Get existing results from localStorage
         const existingResults = JSON.parse(localStorage.getItem('docmind-results')) || [];
 
-        // Create result object with timestamp
+        // Get form data
+        const form = document.getElementById('apiForm');
+        const formData = form ? new FormData(form) : new FormData();
+
+        // Create result object with timestamp and additional data
         const resultToSave = {
             id: Date.now().toString(),
             timestamp: Date.now(),
             title: result.tool ? toolsData[result.tool]?.name || 'Analysis Result' : 'Analysis Result',
             tool: result.tool || '',
-            content: result
+            content: result,
+            formData: Object.fromEntries(formData),
+            prompt: result.debug?.prompt || '',
+            response: result.response?.choices?.[0]?.message?.content || ''
         };
 
         // Add new result to the beginning of the array
