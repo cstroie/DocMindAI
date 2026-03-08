@@ -108,6 +108,7 @@ function showGlobalLoading(text = "Loading...") {
         const template = document.getElementById('globalLoadingTemplate');
         if (template) {
             overlay = template.content.cloneNode(true).querySelector('.global-loading-overlay');
+            overlay.setAttribute("id", "globalLoadingOverlay");
             document.body.appendChild(overlay);
         } else {
             console.error('Global loading template not found');
@@ -135,59 +136,6 @@ function showGlobalLoading(text = "Loading...") {
  */
 function hideGlobalLoading() {
     const overlay = document.getElementById('globalLoadingOverlay');
-    if (overlay) {
-        overlay.classList.remove('active');
-    }
-}
-
-/**
- * Show form loading overlay
- *
- * This function displays a loading overlay specifically for form operations.
- * It's used when loading tool forms and processing form submissions.
- *
- * @param {string} [text="Loading form..."] - Loading text to display
- * @return {void}
- *
- * @note Creates and appends loading overlay if it doesn't exist
- * @note Shows overlay with fade-in animation
- * @see hideFormLoading() - Hides the overlay
- * @see displayToolForm() - Uses this when loading forms
- */
-function showFormLoading(text = "Loading form...") {
-    let overlay = document.getElementById('formLoadingOverlay');
-    
-    if (!overlay) {
-        const template = document.getElementById('formLoadingTemplate');
-        if (template) {
-            overlay = template.content.cloneNode(true).querySelector('.form-loading-overlay');
-            document.body.appendChild(overlay);
-        } else {
-            console.error('Form loading template not found');
-            return;
-        }
-    }
-    
-    const loadingText = overlay.querySelector('.form-loading-text');
-    if (loadingText) {
-        loadingText.textContent = text;
-    }
-    
-    overlay.classList.add('active');
-}
-
-/**
- * Hide form loading overlay
- *
- * This function hides the form loading overlay with a fade-out animation.
- *
- * @return {void}
- *
- * @note Removes active class to trigger fade-out animation
- * @see showFormLoading() - Shows the overlay
- */
-function hideFormLoading() {
-    const overlay = document.getElementById('formLoadingOverlay');
     if (overlay) {
         overlay.classList.remove('active');
     }
@@ -943,7 +891,7 @@ async function displayToolForm(toolId) {
     }
 
     // Show form loading state
-    showFormLoading('Loading tool form...');
+    showGlobalLoading('Loading tool form...');
 
     try {
         // Get the selected tool and category information
@@ -953,7 +901,7 @@ async function displayToolForm(toolId) {
         // If tool is not found, it might not be loaded yet
         if (!tool) {
             showError(`Tool ${toolId} not found. Please try again.`);
-            hideFormLoading();
+            hideGlobalLoading();
             return;
         }
 
@@ -992,7 +940,7 @@ async function displayToolForm(toolId) {
         
         if (!toolForm || !formFields || !actionInput) {
             showError('Required form elements not found');
-            hideFormLoading();
+            hideGlobalLoading();
             return;
         }
 
@@ -1063,7 +1011,7 @@ async function displayToolForm(toolId) {
         showError('Failed to load tool form: ' + error.message);
     } finally {
         // Hide form loading state
-        hideFormLoading();
+        hideGlobalLoading();
     }
 }
 
