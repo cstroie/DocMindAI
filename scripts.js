@@ -2127,16 +2127,7 @@ function displayHistory(maxItems = 10) {
             const emptyState = emptyTemplate.content.cloneNode(true);
             historyContent.appendChild(emptyState);
         } else {
-            // Fallback if template not found
-            const emptyState = document.createElement('section');
-            emptyState.className = 'history-empty-state';
-            emptyState.innerHTML = `
-                <hgroup>
-                    <h3 class="empty-state-title"><span class="empty-state-icon">⏳</span> No history yet</h3>
-                    <p class="empty-state-description">Your analysis history will appear here</p>
-                </hgroup>
-            `;
-            historyContent.appendChild(emptyState);
+            historyContent.innerHTML = "<p>No history yet.</p>";
         }
         return;
     }
@@ -2156,35 +2147,28 @@ function displayHistory(maxItems = 10) {
 
         // Populate template elements
         const titleElement = clone.querySelector('.history-title-text');
+        const iconElement = clone.querySelector('.history-icon');
         const dateElement = clone.querySelector('.history-date');
-        const toolElement = clone.querySelector('.history-tool');
-        const toolIconElement = clone.querySelector('.tool-icon');
-        const toolNameElement = clone.querySelector('.tool-name');
         const previewElement = clone.querySelector('.history-preview');
 
-        if (titleElement) titleElement.textContent = result.title;
-        
         // Format date
         const date = new Date(result.timestamp);
         const formattedDate = date.toLocaleString();
         if (dateElement) dateElement.textContent = formattedDate;
         
-        if (toolElement) {
-            if (result.tool) {
-                // Get tool data from toolsData
-                const tool = toolsData[result.tool];
-                if (tool) {
-                    if (toolIconElement) toolIconElement.textContent = tool.icon || '📄';
-                    if (toolNameElement) toolNameElement.textContent = tool.name;
-                    toolElement.style.display = 'block';
-                } else {
-                    // Fallback if tool not found in toolsData
-                    toolElement.textContent = `Tool: ${result.tool}`;
-                    toolElement.style.display = 'block';
-                }
+        if (result.tool) {
+            // Get tool data from toolsData
+            const tool = toolsData[result.tool];
+            if (tool) {
+                iconElement.textContent = tool.icon || '📄';
+                titleElement.textContent = tool.name || result.title;
             } else {
-                toolElement.style.display = 'none';
+                iconElement.textContent = '📄';
+                titleElement.textContent = result.title;
             }
+        } else {
+            iconElement.textContent = '📄';
+            titleElement.textContent = result.title;
         }
 
         // Add preview text
@@ -2209,20 +2193,6 @@ function displayHistory(maxItems = 10) {
             
             previewElement.textContent = previewText;
         }
-
-        // Add click handler to view button
-        const viewButton = clone.querySelector('.history-view-btn');
-        viewButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            displayHistoryResult(result.id);
-        });
-
-        // Add click handler to form button
-        const formButton = clone.querySelector('.history-form-btn');
-        formButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            loadHistoryForm(result.id);
-        });
 
         // Add click handler to entire item
         historyItem.addEventListener('click', () => {
