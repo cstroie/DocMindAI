@@ -234,10 +234,10 @@ async function copyResultsToClipboard() {
  * @note Uses the hljs global object for highlighting
  * @see displayResults() - Calls this function after rendering content
  */
-function applySyntaxHighlighting() {
+function applySyntaxHighlighting(element) {
     // Initialize highlight.js
     if (typeof hljs !== 'undefined') {
-        document.querySelectorAll('pre code').forEach((block) => {
+        element.querySelectorAll('pre code').forEach((block) => {
             hljs.highlightElement(block);
         });
     }
@@ -1308,7 +1308,7 @@ function displayResults(results, fromHistory = false) {
         // Switch to results view
         switchView('results');
         // Apply syntax highlighting
-        applySyntaxHighlighting();
+        applySyntaxHighlighting(resultsArea);
     } else {
         console.error('Results content is empty');
     }
@@ -2089,11 +2089,7 @@ function toggleDetails() {
         document.getElementById('detailsBtn').textContent = 'Hide Details';
         
         // Apply syntax highlighting to code blocks in details section
-        if (typeof hljs !== 'undefined') {
-            detailsSection.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block);
-            });
-        }
+        applySyntaxHighlighting(detailsSection);
     } else {
         // Hide details section
         detailsSection.style.display = 'none';
