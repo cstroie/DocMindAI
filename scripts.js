@@ -1927,17 +1927,20 @@ function saveResultToHistory(result) {
  *
  * This function loads saved results from localStorage and returns them.
  *
+ * @param {number} [maxItems=10] - Maximum number of results to return
  * @return {Array} Array of saved results, sorted by timestamp (newest first)
  *
  * @note Returns empty array if no results are found or on error
  * @note Sorts results by timestamp (newest first)
  * @see displayHistory() - Uses this function to show history
  */
-function loadResultsFromHistory() {
+function loadResultsFromHistory(maxItems = 10) {
     try {
         const results = JSON.parse(localStorage.getItem('docmind-results')) || [];
         // Sort by timestamp (newest first)
-        return results.sort((a, b) => b.timestamp - a.timestamp);
+        const sortedResults = results.sort((a, b) => b.timestamp - a.timestamp);
+        // Return only the specified number of items
+        return sortedResults.slice(0, maxItems);
     } catch (error) {
         console.error('Failed to load results from history:', error);
         return [];
