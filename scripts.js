@@ -2343,4 +2343,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     });
+
+    // Load last 3 items from history on page load
+    const recentResults = loadResultsFromHistory(3);
+    if (recentResults.length > 0) {
+        console.log(`Loaded ${recentResults.length} recent results from history`);
+        // Store recent results globally for potential use
+        window.recentResults = recentResults;
+    }
 });
