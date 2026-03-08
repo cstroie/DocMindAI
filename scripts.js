@@ -6,6 +6,59 @@ let languagesData = {}
 let promptsData = null;
 
 /**
+ * Setup global error handling for uncaught errors and promise rejections
+ * 
+ * This function sets up global error handlers to catch uncaught JavaScript errors
+ * and unhandled promise rejections. It uses the global errorHandler instance to
+ * categorize and display user-friendly error messages.
+ * 
+ * @return {void}
+ * 
+ * @note Sets up window.onerror for uncaught synchronous errors
+ * @note Sets up window.onunhandledrejection for unhandled promise rejections
+ * @note Uses errorHandler.categorizeError to categorize and display errors
+ * @see errorHandler - Global error handler instance
+ */
+function setupGlobalErrorHandling() {
+    // Handle uncaught synchronous errors
+    window.onerror = function(message, source, lineno, colno, error) {
+        const errorInfo = errorHandler.categorizeError(error || new Error(message), {
+            operation: 'global',
+            source: source,
+            line: lineno,
+            column: colno,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Log the error for debugging
+        errorHandler.logError(errorInfo);
+        
+        // Show user-friendly error message
+        errorHandler.showError(errorInfo);
+        
+        // Prevent default error handling
+        return true;
+    };
+
+    // Handle unhandled promise rejections
+    window.onunhandledrejection = function(event) {
+        const errorInfo = errorHandler.categorizeError(event.reason, {
+            operation: 'promise',
+            timestamp: new Date().toISOString()
+        });
+        
+        // Log the error for debugging
+        errorHandler.logError(errorInfo);
+        
+        // Show user-friendly error message
+        errorHandler.showError(errorInfo);
+        
+        // Prevent default error handling
+        return true;
+    };
+}
+
+/**
  * Populate top menu with categories
  * 
  * This creates clickable menu items for each category in the main navigation bar
