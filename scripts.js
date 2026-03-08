@@ -6,6 +6,309 @@ let languagesData = {}
 let promptsData = null;
 
 /**
+ * Application state management system
+ * 
+ * This system manages the application's current state including active views,
+ * form data, navigation history, and view-specific parameters. It provides
+ * methods to save, restore, and transition between different application states.
+ */
+class AppState {
+    constructor() {
+        this.currentView = 'home';
+        this.previousView = null;
+        this.viewHistory = [];
+        this.formData = {};
+        this.viewState = {};
+        this.maxHistory = 10;
+    }
+
+    /**
+     * Switch to a new view with state preservation
+     * @param {string} viewName - The view to switch to
+     * @param {Object} params - Optional parameters for the view
+     */
+    switchView(viewName, params = {}) {
+        // Save current view state before switching
+        if (this.currentView) {
+            this.saveViewState(this.currentView);
+        }
+
+        // Add current view to history if it's not the same as new view
+        if (this.currentView && this.currentView !== viewName) {
+            this.addToHistory(this.currentView);
+        }
+
+        // Update view tracking
+        this.previousView = this.currentView;
+        this.currentView = viewName;
+
+        // Restore view state if available
+        if (this.viewState[viewName]) {
+            this.restoreViewState(viewName);
+        }
+
+        // Store view parameters
+        if (Object.keys(params).length > 0) {
+            this.viewState[`${viewName}_params`] = params;
+        }
+
+        // Trigger view transition
+        this.transitionToView(viewName, params);
+    }
+
+    /**
+     * Add view to history
+     * @param {string} viewName - The view to add to history
+     */
+    addToHistory(viewName) {
+        this.viewHistory.unshift({
+            view: viewName,
+            timestamp: Date.now()
+        });
+
+        // Keep only the most recent views
+        if (this.viewHistory.length > this.maxHistory) {
+            this.viewHistory = this.viewHistory.slice(0, this.maxHistory);
+        }
+    }
+
+    /**
+     * Save current view state
+     * @param {string} viewName - The view to save state for
+     */
+    saveViewState(viewName) {
+        const state = {};
+        
+        // Save form data for form views
+        if (viewName === 'form') {
+            const form = document.getElementById('apiForm');
+            if (form) {
+                const formData = new FormData(form);
+                state.formData = Object.fromEntries(formData);
+            }
+        }
+
+        // Save scroll position
+        state.scrollPosition = window.scrollY;
+
+        // Save any view-specific state
+        switch (viewName) {
+            case 'results':
+                state.resultsContent = document.getElementById('resultsContent')?.innerHTML;
+                break;
+            case 'history':
+                state.historyItems = document.getElementById('historyContent')?.innerHTML;
+                break;
+        }
+
+        this.viewState[viewName] = state;
+    }
+
+    /**
+     * Restore view state
+     * @param {string} viewName - The view to restore state for
+     */
+    restoreViewState(viewName) {
+        const state = this.viewState[viewName];
+        if (!state) return;
+
+        // Restore form data
+        if (state.formData && viewName === 'form') {
+            const form = document.getElementById('apiForm');
+            if (form) {
+                for (const [key, value] of Object.entries(state.formData)) {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input) {
+                        if (input.type === 'checkbox' || input.type === 'radio') {
+                            input.checked = value;
+                        } else {
+                            input.value = value;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Restore scroll position
+        if (state.scrollPosition !== undefined) {
+            window.scrollTo(0, state.scrollPosition);
+        }
+
+        // Restore view-specific state
+        switch (viewName) {
+            case 'results':
+                const resultsContent = document.getElementById('resultsContent');
+                if (resultsContent && state.resultsContent) {
+                    resultsContent.innerHTML = state.resultsContent;
+                }
+                break;
+            case 'history':
+                const historyContent = document.getElementById('historyContent');
+                if (historyContent && state.historyItems) {
+                    historyContent.innerHTML = state.historyItems;
+                }
+                break;
+        }
+    }
+
+    /**
+     * Transition to a new view
+     * @param {string} viewName - The view to transition to
+     * @param {Object} params - Optional parameters for the transition
+     */
+    transitionToView(viewName, params = {}) {
+        // Hide all views
+        const views = document.querySelectorAll('.view');
+        views.forEach(view => {
+            view.classList.remove('active-view');
+            view.style.display = 'none';
+        });
+
+        // Show the selected view
+        const selectedView = document.querySelector(`.${viewName}-view`);
+        if (selectedView) {
+            selectedView.classList.add('active-view');
+            selectedView.style.display = 'block';
+        }
+
+        // Update navigation state
+        this.updateNavigationState(viewName);
+
+        // Update page title
+        this.updatePageTitle(viewName);
+
+        // Handle view-specific transitions
+        this.handleViewTransition(viewName, params);
+    }
+
+    /**
+     * Update navigation state
+     * @param {string} viewName - The current view name
+     */
+    updateNavigationState(viewName) {
+        const navButtons = document.querySelectorAll('.nav-item');
+        navButtons.forEach(button => {
+            button.classList.remove('active');
+            if (button.dataset.view === viewName) {
+                button.classList.add('active');
+            }
+        });
+    }
+
+    /**
+     * Update page title based on current view
+     * @param {string} viewName - The current view name
+     */
+    updatePageTitle(viewName) {
+        const pageTitle = document.getElementById('pageTitle');
+        const pageSubtitle = document.getElementById('pageSubtitle');
+
+        if (!pageTitle || !pageSubtitle) return;
+
+        const titles = {
+            'home': {
+                title: '🏠 Home',
+                subtitle: 'Welcome to DocMind AI - Intelligent Document Processing'
+            },
+            'history': {
+                title: '⏳ History',
+                subtitle: 'View your previous analysis sessions and results'
+            },
+            'settings': {
+                title: '⚙️ Settings',
+                subtitle: 'Configure your preferences and account settings'
+            }
+        };
+
+        const viewTitle = titles[viewName];
+        if (viewTitle) {
+            pageTitle.textContent = viewTitle.title;
+            pageSubtitle.textContent = viewTitle.subtitle;
+        }
+    }
+
+    /**
+     * Handle view-specific transitions
+     * @param {string} viewName - The view name
+     * @param {Object} params - Transition parameters
+     */
+    handleViewTransition(viewName, params) {
+        switch (viewName) {
+            case 'history':
+                // Load history data with a small delay to allow view to be displayed
+                setTimeout(() => {
+                    displayHistory(params.maxItems || 10);
+                }, 100);
+                break;
+            case 'form':
+                // Handle form-specific transitions
+                if (params.toolId) {
+                    displayToolForm(params.toolId);
+                }
+                break;
+            case 'results':
+                // Handle results-specific transitions
+                if (params.resultId) {
+                    displayHistoryResult(params.resultId);
+                }
+                break;
+        }
+    }
+
+    /**
+     * Go back to the previous view
+     */
+    goBack() {
+        if (this.previousView) {
+            this.switchView(this.previousView);
+        } else {
+            // Fallback to home if no previous view
+            this.switchView('home');
+        }
+    }
+
+    /**
+     * Clear all saved state
+     */
+    clearState() {
+        this.currentView = 'home';
+        this.previousView = null;
+        this.viewHistory = [];
+        this.formData = {};
+        this.viewState = {};
+    }
+
+    /**
+     * Get current state as a serializable object
+     * @returns {Object} Current state
+     */
+    getState() {
+        return {
+            currentView: this.currentView,
+            previousView: this.previousView,
+            viewHistory: this.viewHistory,
+            formData: this.formData,
+            viewState: this.viewState
+        };
+    }
+
+    /**
+     * Restore state from a serialized object
+     * @param {Object} state - The state to restore
+     */
+    restoreState(state) {
+        this.currentView = state.currentView || 'home';
+        this.previousView = state.previousView || null;
+        this.viewHistory = state.viewHistory || [];
+        this.formData = state.formData || {};
+        this.viewState = state.viewState || {};
+    }
+}
+
+// Global application state instance
+const appState = new AppState();
+
+/**
  * Setup global error handling for uncaught errors and promise rejections
  * 
  * This function sets up global error handlers to catch uncaught JavaScript errors
@@ -2412,85 +2715,47 @@ function arrayOfObjectsToTable(arr) {
 }
 
 /**
- * Switch between application views with comprehensive state management
+ * Switch between application views using the application state management system
  *
- * This function manages the complete view switching lifecycle including hiding all inactive views,
- * showing the selected view, updating navigation states, and handling special view-specific
- * actions. It provides a centralized way to manage application state and user navigation.
+ * This function delegates view switching to the application state management system,
+ * providing a clean interface for view transitions while maintaining state preservation
+ * and proper navigation history.
  *
  * @param {string} viewName - The name of the view to show (e.g., 'home', 'tools', 'history', 'form', 'results')
+ * @param {Object} [params] - Optional parameters for the view transition
  * @returns {void}
  *
  * @throws {Error} If viewName is invalid or target view element is not found
- * @note Hides all views with class 'view' and shows only the selected view
- * @note Updates active state of navigation buttons based on data-view attribute
- * @note Updates page title and subtitle using updatePageTitle() function
- * @note Special handling for history view that calls displayHistory() automatically
- * @note Handles view-specific actions like loading history data when switching to history view
- * @note Maintains proper view state for mobile navigation and responsive design
- * @note Logs errors to console if view element is not found
- * @see Document.addEventListener('DOMContentLoaded') - Sets up view switching handlers on navigation buttons
- * @see updatePageTitle() - Updates page title and subtitle based on current view
- * @see displayHistory() - Called automatically when switching to history view
+ * @note Delegates to appState.switchView() for comprehensive state management
+ * @note Supports optional parameters for view-specific configurations
+ * @see appState - Global application state management instance
+ * @see appState.switchView() - Core view switching logic with state preservation
  * @example
  * // Switch to home view
  * switchView('home');
  * 
- * // Switch to results view (typically called after form submission)
- * switchView('results');
+ * // Switch to results view with parameters
+ * switchView('results', { resultId: '123' });
  * 
- * // Switch to history view (automatically loads history data)
- * switchView('history');
+ * // Switch to history view with custom item limit
+ * switchView('history', { maxItems: 5 });
  */
-function switchView(viewName) {
-    // Hide all views
-    const views = document.querySelectorAll('.view');
-    views.forEach(view => {
-        view.classList.remove('active-view');
-        view.style.display = 'none';
-    });
-
-    // Show the selected view
-    const selectedView = document.querySelector(`.${viewName}-view`);
-    if (selectedView) {
-        selectedView.classList.add('active-view');
-        selectedView.style.display = 'block';
-    } else {
-        console.error(`View not found: ${viewName}`);
-        return;
-    }
-
-    // Update active state of navigation buttons
-    const navButtons = document.querySelectorAll('.nav-item');
-    navButtons.forEach(button => {
-        button.classList.remove('active');
-        if (button.dataset.view === viewName) {
-            button.classList.add('active');
-        }
-    });
-
-    // Update page title and subtitle based on view
-    updatePageTitle(viewName);
-
-    // Special handling for history view
-    if (viewName === 'history') {
-        // Use setTimeout to allow the view to be displayed before loading history
-        setTimeout(() => {
-            displayHistory();
-        }, 100);
-    }
+function switchView(viewName, params = {}) {
+    appState.switchView(viewName, params);
 }
 
 /**
  * Update page title and subtitle based on view
  *
  * This function updates the page title and subtitle based on the current view.
+ * It's now part of the application state management system.
  *
  * @param {string} viewName - The name of the current view
  * @return {void}
  *
  * @note Updates pageTitle and pageSubtitle elements
- * @note Called by switchView() when changing views
+ * @note Now called by appState.updatePageTitle() as part of state management
+ * @see appState.updatePageTitle() - Core title update logic in state management
  */
 function updatePageTitle(viewName) {
     const pageTitle = document.getElementById('pageTitle');
@@ -3021,6 +3286,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                 });
                 return;
             }
+
+            // Handle regular navigation
+            const viewName = this.dataset.view;
+            if (viewName) {
+                appState.switchView(viewName);
+            }
         });
     });
 
@@ -3031,7 +3302,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             e.stopPropagation();
             const toolId = this.dataset.toolId;
             if (toolId) {
-                displayToolForm(toolId);
+                // Switch to form view with tool parameter
+                appState.switchView('form', { toolId: toolId });
 
                 // Close the parent submenu
                 const parentNavItem = this.closest('.nav-item');
@@ -3052,6 +3324,38 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 
+    // Set up back button functionality (if exists)
+    const backButton = document.getElementById('backButton');
+    if (backButton) {
+        backButton.addEventListener('click', () => {
+            appState.goBack();
+        });
+    }
+
     // Load last 3 items from history on page load
     displayHistory(3);
+
+    // Save application state to localStorage before page unload
+    window.addEventListener('beforeunload', () => {
+        try {
+            localStorage.setItem('docmind-app-state', JSON.stringify(appState.getState()));
+        } catch (error) {
+            console.error('Failed to save application state:', error);
+        }
+    });
+
+    // Restore application state from localStorage on page load
+    try {
+        const savedState = localStorage.getItem('docmind-app-state');
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            appState.restoreState(state);
+            // Restore the current view
+            appState.switchView(appState.currentView);
+        }
+    } catch (error) {
+        console.error('Failed to restore application state:', error);
+        // Clear corrupted state and start fresh
+        appState.clearState();
+    }
 });
