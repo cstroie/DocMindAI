@@ -1261,7 +1261,7 @@ function displayResults(results, fromHistory = false) {
     
     // Check if backend returned the prompt in debug/prompt
     if (results.debug && results.debug.prompt && detailsPrompt) {
-        detailsPrompt.textContent = results.debug.prompt;
+        detailsPrompt.innerHTML = `<code>${results.debug.prompt}</code>`;
     }
     
     if (results.error) {
@@ -1316,7 +1316,7 @@ function displayResults(results, fromHistory = false) {
     // Store the original raw response data (for copy functionality)
     resultsContent.dataset.raw = responseContent;
     if (detailsResponse) {
-        detailsResponse.textContent = responseContent;
+        detailsResponse.innerHTML = `<code>${responseContent}</code>`;
     }
 
     // Scroll to results
@@ -1866,7 +1866,7 @@ function showForm() {
     if (resultsArea) {
         resultsArea.style.display = 'none';
     }
-    
+
     switchView('form');
 }
 

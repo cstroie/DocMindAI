@@ -28,7 +28,7 @@ nav li :where(a,[role=link]) {
 
 
 
-.hero-section {
+.hero {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -39,31 +39,31 @@ nav li :where(a,[role=link]) {
     border-radius: var(--pico-border-radius);
 }
 
-.hero-section main {
+.hero main {
     flex: 2;
 }
 
-.hero-section hgroup h2 {
+.hero hgroup h2 {
     font-size: 2.25rem;
     font-weight: 700;
     color: var(--pico-primary);
     margin-bottom: 1rem;
 }
 
-.hero-section hgroup p {
+.hero hgroup p {
     font-size: 1.125rem;
     color: var(--pico-secondary);
     margin-bottom: 2rem;
     max-width: 500px;
 }
 
-.hero-section aside {
+.hero aside {
     flex: 1;
     display: flex;
     justify-content: center;
 }
 
-.hero-section aside div {
+.hero aside div {
     font-size: 4rem;
     color: var(--pico-primary);
     opacity: 0.8;

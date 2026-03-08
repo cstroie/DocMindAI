@@ -57,16 +57,16 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
 
         <!-- Home View -->
         <section class="view home-view active-view">
-            <article class="hero-section">
+            <article class="hero">
                 <main>
                     <hgroup>
                         <h2>Intelligent Document Processing</h2>
                         <p>Transform documents into actionable insights with our AI-powered toolkit. Extract text, analyze content, and process medical literature with advanced OCR, web scraping, and AI analysis tools.</p>
                     </hgroup>
                 </main>
-                    <aside>
-                        <div>📄🔍🤖</div>
-                    </aside>
+                <aside>
+                    <div>📄🔍🤖</div>
+                </aside>
             </article>
 
             <div class="grid" id="categoriesGrid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
@@ -75,69 +75,66 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
         </section>
 
         <!-- Results View -->
-        <section class="view results-view" style="display: none;">
-            <article id="resultsArea">
+        <article id="resultsArea" class="view results-view" style="display: none;">
+            <header>
                 <hgroup>
                     <h2 id="resultsTitle"></h2>
                     <p id="resultsSubtitle"></p>
                 </hgroup>
-                <main id="resultsContent">
-                    <!-- Results will be displayed here -->
-                </main>
-                <secton class="details-section" id="detailsSection" style="display: none;">
-                    <h3>Details</h3>
-                    <pre id="detailsPrompt"></pre>
-                    <pre id="detailsResponse"></pre>
-                </secton> 
-                <footer class="grid">
-                    <button class="primary" id="copyResultsBtn">Copy Results</button>
-                    <button class="primary" id="downloadResultsBtn">Download</button>
-                    <button class="secondary" id="showFormBtn">Show Form</button>
-                    <button class="secondary" id="detailsBtn">Details</button>
-                </footer>
-            </article>
-        </section>
+            </header>
+            <main id="resultsContent">
+                <!-- Results will be displayed here -->
+            </main>
+            <details class="details-section" id="detailsSection" style="display: none;">
+                <summary>Details</summary>
+                <h3>Details</h3>
+                <pre id="detailsPrompt"></pre>
+                <pre id="detailsResponse"></pre>
+            </details> 
+            <footer class="grid">
+                <button class="primary" id="copyResultsBtn">Copy Results</button>
+                <button class="primary" id="downloadResultsBtn">Download</button>
+                <button class="secondary" id="showFormBtn">Show Form</button>
+                <button class="secondary" id="detailsBtn">Details</button>
+            </footer>
+        </article>
 
         <!-- Form View -->
-        <section class="view form-view" style="display: none;">
-            <article id="toolForm">
-                <hgroup>
-                    <h2 id="formTitle"></h2>
-                    <p id="formSubtitle"></p>
-                </hgroup>
-                <form id="apiForm" enctype="multipart/form-data">
-                    <input type="hidden" name="action" id="action">
-                    <fieldset class="form-fields" id="formFields">
-                        <!-- Will be populated by JavaScript -->
-                    </fieldset>
-                </form>
-                <footer class="grid">
-                    <button type="submit" form="apiForm" class="primary" id="submitBtn">
-                        <span class="btn-text">Submit</span>
-                        <span class="btn-loading" style="display: none;">
-                            <span class="loading-spinner"></span>
-                            Processing...
-                        </span>
-                    </button>
-                    <button type="button" class="secondary" id="cancelBtn">Cancel</button>
-                </footer>
-            </article>
-        </section>
+        <article id="toolForm" class="view form-view" style="display: none;">
+            <hgroup>
+                <h2 id="formTitle"></h2>
+                <p id="formSubtitle"></p>
+            </hgroup>
+            <form id="apiForm" enctype="multipart/form-data">
+                <input type="hidden" name="action" id="action">
+                <fieldset class="form-fields" id="formFields">
+                    <!-- Will be populated by JavaScript -->
+                </fieldset>
+            </form>
+            <footer class="grid">
+                <button type="submit" form="apiForm" class="primary" id="submitBtn">
+                    <span class="btn-text">Submit</span>
+                    <span class="btn-loading" style="display: none;">
+                        <span class="loading-spinner"></span>
+                        Processing...
+                    </span>
+                </button>
+                <button type="button" class="secondary" id="cancelBtn">Cancel</button>
+            </footer>
+        </article>
 
         <!-- History View -->
-        <section class="view history-view">
-            <article class="history-container">
-                <hgroup class="history-header">
-                    <h2 class="history-title">Analysis History</h2>
-                </hgroup>
-                <main class="history-list">
-                    <!-- History items will be displayed here -->
-                </main>
-                <footer class="grid">
-                    <button class="btn btn-secondary btn-small" id="clearHistoryBtn">Clear History</button>
-                </footer>
-            </article>
-        </section>
+        <article class="history-container view history-view">
+            <hgroup class="history-header">
+                <h2 class="history-title">Analysis History</h2>
+            </hgroup>
+            <main class="history-list">
+                <!-- History items will be displayed here -->
+            </main>
+            <footer class="grid">
+                <button class="btn btn-secondary btn-small" id="clearHistoryBtn">Clear History</button>
+            </footer>
+        </article>
     </main>
 
     <!-- Notifications -->
