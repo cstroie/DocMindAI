@@ -390,7 +390,7 @@ function populateCategoriesMenu() {
     }
 }
 
-// Register Handlebars helpers
+// Register Handlebars helpers immediately to ensure they're available when templates are rendered
 if (typeof Handlebars !== 'undefined') {
     Handlebars.registerHelper('eq', (a, b) => a === b);
     Handlebars.registerHelper('getSeverityColor', severity => {
