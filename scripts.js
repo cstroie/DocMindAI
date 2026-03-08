@@ -2855,6 +2855,7 @@ async function displayHistory(maxItems = 10) {
  * 6. Sets up view switching for sidebar navigation
  * 7. Sets up category buttons in the sidebar
  * 8. Applies the user's theme preference
+ * 9. Sets up global error handling
  *
  * @note This is the main entry point for the application
  * @note Uses async/await for sequential data loading
@@ -2865,7 +2866,6 @@ async function displayHistory(maxItems = 10) {
  * @note Sets up theme toggle button click handler
  * @note Sets up sidebar navigation click handlers
  * @note Sets up category button click handlers
- * @note Applies theme preference on page load
  * @see loadJSONResource() - Used to load configuration data
  * @see createCategoryViews() - Creates category view sections
  * @see displayTools() - Renders tool cards
@@ -2873,8 +2873,12 @@ async function displayHistory(maxItems = 10) {
  * @see toggleTheme() - Handles theme toggling
  * @see switchView() - Handles view switching
  * @see applyTheme() - Applies theme preference
+ * @see errorHandler - Global error handling system
  */
 document.addEventListener('DOMContentLoaded', async function() {
+    // Set up global error handling
+    setupGlobalErrorHandling();
+
     // Apply theme preference
     applyTheme();
     // Load config data
