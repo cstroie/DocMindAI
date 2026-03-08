@@ -2107,7 +2107,7 @@ function toggleDetails() {
  * @note Shows a message if no history is available
  * @see switchView() - Calls this function when history view is selected
  */
-function displayHistory() {
+function displayHistory(maxItems = 10) {
     const historyContent = document.getElementById('historyContent');
     if (!historyContent) {
         console.error('History content element not found');
@@ -2118,7 +2118,7 @@ function displayHistory() {
     historyContent.innerHTML = '';
 
     // Load results from history
-    const results = loadResultsFromHistory();
+    const results = loadResultsFromHistory(maxItems = maxItems);
 
     if (results.length === 0) {
         // Show empty state using template
@@ -2345,10 +2345,5 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     // Load last 3 items from history on page load
-    const recentResults = loadResultsFromHistory(3);
-    if (recentResults.length > 0) {
-        console.log(`Loaded ${recentResults.length} recent results from history`);
-        // Store recent results globally for potential use
-        window.recentResults = recentResults;
-    }
+    displayHistory(3);
 });

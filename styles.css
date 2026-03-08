@@ -442,6 +442,7 @@ ul.keywords li {
 .hljs-punctuation,
 .hljs-tag {
   /* purposely ignored */
+  background: inherit;
 }
 
 
@@ -571,4 +572,5 @@ ul.keywords li {
 [data-theme="dark"] .hljs-punctuation,
 [data-theme="dark"] .hljs-tag {
   /* purposely ignored */
+  background: inherit;
 }
