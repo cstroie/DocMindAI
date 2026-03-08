@@ -1893,6 +1893,66 @@ function displayHistoryResult(resultId) {
 }
 
 /**
+ * Load and populate form with history data
+ *
+ * This function loads a saved result from history and populates the form
+ * with the saved form data, then displays the form.
+ *
+ * @param {string} resultId - The ID of the result to load
+ * @return {void}
+ *
+ * @note Finds the result by ID in localStorage
+ * @note Populates the form with saved formData
+ * @note Displays the tool form
+ * @note Shows error if result is not found
+ * @see displayHistory() - Calls this function when "Show Form" is clicked
+ */
+function loadHistoryForm(resultId) {
+    try {
+        const results = loadResultsFromHistory();
+        const result = results.find(r => r.id === resultId);
+
+        if (result) {
+            // Get the tool ID from the saved result
+            const toolId = result.tool;
+            if (!toolId) {
+                showError('Tool ID not found in saved result');
+                return;
+            }
+
+            // Display the tool form first
+            displayToolForm(toolId);
+
+            // Populate the form fields with saved data
+            const savedFormData = result.formData;
+            if (savedFormData && typeof savedFormData === 'object') {
+                // Wait for form to be populated, then set values
+                setTimeout(() => {
+                    const form = document.getElementById('apiForm');
+                    if (form) {
+                        // Set form values from saved data
+                        for (const [key, value] of Object.entries(savedFormData)) {
+                            const input = form.querySelector(`[name="${key}"]`);
+                            if (input) {
+                                if (input.type === 'checkbox' || input.type === 'radio') {
+                                    input.checked = value;
+                                } else {
+                                    input.value = value;
+                                }
+                            }
+                        }
+                    }
+                }, 100); // Small delay to ensure form is populated
+            }
+        } else {
+            showError('Result not found in history');
+        }
+    } catch (error) {
+        showError('Failed to load form from history: ' + error.message);
+    }
+}
+
+/**
  * Clear all saved results from history
  *
  * This function removes all saved results from localStorage and refreshes the history view.
@@ -2013,6 +2073,7 @@ function displayHistory() {
             </hgroup>
             <footer>
                 <button class="btn btn-small history-view-btn">View</button>
+                <button class="btn btn-small history-form-btn">Show Form</button>
             </footer>
         `;
 
@@ -2021,6 +2082,13 @@ function displayHistory() {
         viewButton.addEventListener('click', (e) => {
             e.stopPropagation();
             displayHistoryResult(result.id);
+        });
+
+        // Add click handler to form button
+        const formButton = historyItem.querySelector('.history-form-btn');
+        formButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            loadHistoryForm(result.id);
         });
 
         // Add click handler to entire item
