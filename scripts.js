@@ -2105,14 +2105,14 @@ function toggleDetails() {
  * @see switchView() - Calls this function when history view is selected
  */
 function displayHistory() {
-    const historyList = document.querySelector('.history-list');
-    if (!historyList) {
-        console.error('History list element not found');
+    const historyContent = document.getElementById('historyContent');
+    if (!historyContent) {
+        console.error('History content element not found');
         return;
     }
 
     // Clear existing history items
-    historyList.innerHTML = '';
+    historyContent.innerHTML = '';
 
     // Load results from history
     const results = loadResultsFromHistory();
@@ -2122,7 +2122,7 @@ function displayHistory() {
         const emptyTemplate = document.getElementById('historyEmptyTemplate');
         if (emptyTemplate) {
             const emptyState = emptyTemplate.content.cloneNode(true);
-            historyList.appendChild(emptyState);
+            historyContent.appendChild(emptyState);
         } else {
             // Fallback if template not found
             const emptyState = document.createElement('section');
@@ -2133,7 +2133,7 @@ function displayHistory() {
                     <p class="empty-state-description">Your analysis history will appear here</p>
                 </hgroup>
             `;
-            historyList.appendChild(emptyState);
+            historyContent.appendChild(emptyState);
         }
         return;
     }
@@ -2179,7 +2179,7 @@ function displayHistory() {
             displayHistoryResult(result.id);
         });
 
-        historyList.appendChild(historyItem);
+        historyContent.appendChild(historyItem);
     });
 }
 
