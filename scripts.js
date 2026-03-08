@@ -2072,6 +2072,7 @@ function clearHistory() {
  * @return {void}
  *
  * @note Toggles the display of detailsSection
+ * @note Applies syntax highlighting to code blocks in details section
  * @see displayResults() - Stores prompt and response data
  */
 function toggleDetails() {
@@ -2086,6 +2087,13 @@ function toggleDetails() {
         // Show details section
         detailsSection.style.display = 'block';
         document.getElementById('detailsBtn').textContent = 'Hide Details';
+        
+        // Apply syntax highlighting to code blocks in details section
+        if (typeof hljs !== 'undefined') {
+            detailsSection.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+        }
     } else {
         // Hide details section
         detailsSection.style.display = 'none';
