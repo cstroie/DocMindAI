@@ -84,10 +84,16 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
                 <main id="resultsContent">
                     <!-- Results will be displayed here -->
                 </main>
+                <secton class="details-section" id="detailsSection" style="display: none;">
+                    <h3>Details</h3>
+                    <pre id="detailsPrompt"></pre>
+                    <pre id="detailsResponse"></pre>
+                </secton> 
                 <footer class="grid">
                     <button class="primary" id="copyResultsBtn">Copy Results</button>
                     <button class="primary" id="downloadResultsBtn">Download</button>
                     <button class="secondary" id="showFormBtn">Show Form</button>
+                    <button class="secondary" id="detailsBtn">Details</button>
                 </footer>
             </article>
         </section>
@@ -139,14 +145,20 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
 
     <!-- Templates -->
     <template id="errorTemplate">
-        <div class="notification error-notification">
-            <div class="notification-icon">⚠️</div>
-            <div class="notification-content">
-                <strong>Error:</strong>
-                <div class="error-message"></div>
-            </div>
-            <button class="notification-close">×</button>
-        </div>
+        <article class="notification error-notification">
+            <main>
+                <div class="notification-icon">⚠️</div>
+                <div class="notification-content">
+                    <strong>Error:</strong>
+                    <div class="error-message"></div>
+                </div>
+            </main>
+            <footer class="grid">
+                <button class="primary">×</button>
+                <button class="secondary">Show Form</button>
+                <button class="secondary">Details</button>
+            </footer>
+        </article>
     </template>
 
     <template id="cardTemplate">

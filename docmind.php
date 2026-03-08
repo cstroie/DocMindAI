@@ -416,7 +416,6 @@ function handleToolAction($tool_id) {
             'error' => $response['error']
         ];
         if ($DEBUG_MODE) {
-            $result['debug']['prompt'] = $prompt;
             $result['debug']['response'] = $response;
         }
     }
@@ -430,6 +429,10 @@ function handleToolAction($tool_id) {
             $result['debug']['file_info'] = $file_info;
         }
     }
+
+    // Add the final prompt to debug output for reference
+    $result['debug']['prompt'] = $prompt;
+
 
     // Set CORS headers
     //header('Access-Control-Allow-Origin: *');

@@ -4,8 +4,6 @@ let toolsData = {};
 let commonData = {};
 let languagesData = {}
 let promptsData = null;
-let currentPrompt = ''; // Store current prompt
-let currentResponse = ''; // Store current response
 
 /**
  * Populate top menu with categories
@@ -1266,17 +1264,18 @@ function displayResults(results, fromHistory = false) {
     const resultsContent = document.getElementById('resultsContent');
     const resultsTitle = document.getElementById('resultsTitle');
     const resultsSubtitle = document.getElementById('resultsSubtitle');
+    const detailsPrompt = document.getElementById('detailsPrompt');
+    const detailsResponse = document.getElementById('detailsResponse');
 
     // Extract the actual response content from the API response
     let responseContent = '';
     
     // Store the original form data for details view
-    currentPrompt = '';
-    currentResponse = '';
+    let currentResponse = '';
     
     // Check if backend returned the prompt in debug/prompt
-    if (results.debug && results.debug.prompt) {
-        currentPrompt = results.debug.prompt;
+    if (results.debug && results.debug.prompt && detailsPrompt) {
+        detailsPrompt.textContent = results.debug.prompt;
     }
     
     if (results.error) {
@@ -1402,20 +1401,12 @@ function displayResults(results, fromHistory = false) {
 
     // Store the original raw response data (for copy functionality)
     resultsContent.dataset.raw = responseContent;
+    if (detailsResponse) {
+        detailsResponse.textContent = responseContent;
+    }
 
     // Scroll to results
     resultsArea.scrollIntoView({ behavior: 'smooth' });
-
-    // Store prompt and response for details view
-    if (!fromHistory) {
-        // Get the form data to store the prompt
-        const form = document.getElementById('apiForm');
-        if (form) {
-            const formData = new FormData(form);
-            currentPrompt = Object.fromEntries(formData);
-        }
-        currentResponse = responseContent;
-    }
 
     // Save result to history only if it's not from history
     if (!fromHistory) {
@@ -1926,24 +1917,19 @@ function clearHistory() {
  *
  * @return {void}
  *
- * @note Fills detailsPrompt and detailsResponse elements with stored data
  * @note Toggles the display of detailsSection
  * @see displayResults() - Stores prompt and response data
  */
 function toggleDetails() {
     const detailsSection = document.getElementById('detailsSection');
-    const detailsPrompt = document.getElementById('detailsPrompt');
-    const detailsResponse = document.getElementById('detailsResponse');
     
-    if (!detailsSection || !detailsPrompt || !detailsResponse) {
+    if (!detailsSection) {
         console.error('Details section elements not found');
         return;
     }
     
     if (detailsSection.style.display === 'none' || !detailsSection.style.display) {
         // Show details section
-        detailsPrompt.textContent = JSON.stringify(currentPrompt, null, 2);
-        detailsResponse.textContent = currentResponse;
         detailsSection.style.display = 'block';
         document.getElementById('detailsBtn').textContent = 'Hide Details';
     } else {
