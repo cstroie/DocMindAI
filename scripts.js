@@ -2158,6 +2158,8 @@ function displayHistory(maxItems = 10) {
         const titleElement = clone.querySelector('.history-title-text');
         const dateElement = clone.querySelector('.history-date');
         const toolElement = clone.querySelector('.history-tool');
+        const toolIconElement = clone.querySelector('.tool-icon');
+        const toolNameElement = clone.querySelector('.tool-name');
 
         if (titleElement) titleElement.textContent = result.title;
         
@@ -2167,9 +2169,19 @@ function displayHistory(maxItems = 10) {
         if (dateElement) dateElement.textContent = formattedDate;
         
         if (toolElement) {
-            toolElement.textContent = result.tool ? `Tool: ${result.tool}` : '';
-            // Hide tool element if no tool info
-            if (!result.tool) {
+            if (result.tool) {
+                // Get tool data from toolsData
+                const tool = toolsData[result.tool];
+                if (tool) {
+                    if (toolIconElement) toolIconElement.textContent = tool.icon || '📄';
+                    if (toolNameElement) toolNameElement.textContent = tool.name;
+                    toolElement.style.display = 'block';
+                } else {
+                    // Fallback if tool not found in toolsData
+                    toolElement.textContent = `Tool: ${result.tool}`;
+                    toolElement.style.display = 'block';
+                }
+            } else {
                 toolElement.style.display = 'none';
             }
         }
