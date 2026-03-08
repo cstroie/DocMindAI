@@ -13,7 +13,7 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="scripts.js" defer></script>
-    <script src="handlebars.min.js"></script>
+    <script src="handlebars.min.js" defer></script>
     <script src="marked.js" defer></script>
     <script src="highlight.min.js" defer></script>
 </head>
@@ -85,16 +85,19 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
             <main id="resultsContent">
                 <!-- Results will be displayed here -->
             </main>
-            <details class="details-section" id="detailsSection" style="display: none;">
-                <summary>Details</summary>
+            <details name="detailsPrompt">
+                <summary>Prompt</summary>
                 <pre id="detailsPrompt"></pre>
+            </details> 
+            <details name="detailsResponse">
+                <summary>Raw response</summary>
+
                 <pre id="detailsResponse"></pre>
             </details> 
             <footer class="grid">
                 <button class="primary" id="copyResultsBtn">Copy Results</button>
                 <button class="primary" id="downloadResultsBtn">Download</button>
                 <button class="secondary" id="showFormBtn">Show Form</button>
-                <button class="secondary" id="detailsBtn">Details</button>
             </footer>
         </article>
 
