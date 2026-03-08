@@ -88,6 +88,273 @@ function toggleTheme() {
 }                                                                                                                                        
 
 /**
+ * Error handling system with comprehensive categorization
+ * 
+ * This system categorizes errors into different types and provides user-friendly
+ * messages. It includes retry mechanisms and detailed logging for debugging.
+ */
+
+/**
+ * Error types with severity levels
+ */
+const ErrorTypes = {
+    NETWORK: {
+        code: 'NETWORK_ERROR',
+        severity: 'high',
+        message: 'Network connection error',
+        description: 'Unable to connect to the server. Please check your internet connection.'
+    },
+    VALIDATION: {
+        code: 'VALIDATION_ERROR',
+        severity: 'medium',
+        message: 'Validation error',
+        description: 'Please check your input and try again.'
+    },
+    API: {
+        code: 'API_ERROR',
+        severity: 'high',
+        message: 'Server error',
+        description: 'The server encountered an error. Please try again later.'
+    },
+    AUTH: {
+        code: 'AUTH_ERROR',
+        severity: 'high',
+        message: 'Authentication error',
+        description: 'Please log in again to continue.'
+    },
+    TIMEOUT: {
+        code: 'TIMEOUT_ERROR',
+        severity: 'medium',
+        message: 'Request timeout',
+        description: 'The request took too long to complete. Please try again.'
+    },
+    UNKNOWN: {
+        code: 'UNKNOWN_ERROR',
+        severity: 'low',
+        message: 'Unexpected error',
+        description: 'An unexpected error occurred. Please try again.'
+    }
+};
+
+/**
+ * Error handler class
+ */
+class ErrorHandler {
+    constructor() {
+        this.errorCount = 0;
+        this.maxRetries = 3;
+        this.retryDelay = 1000;
+    }
+
+    /**
+     * Categorize error based on error type
+     * @param {Error} error - The error to categorize
+     * @param {Object} context - Additional context about the error
+     * @returns {Object} Categorized error information
+     */
+    categorizeError(error, context = {}) {
+        let errorType = ErrorTypes.UNKNOWN;
+        let userMessage = errorType.message;
+        let userDescription = errorType.description;
+        let suggestions = [];
+
+        // Network errors
+        if (error.name === 'NetworkError' || 
+            error.message.includes('NetworkError') ||
+            error.message.includes('fetch failed') ||
+            error.message.includes('ERR_CONNECTION')) {
+            errorType = ErrorTypes.NETWORK;
+            suggestions = [
+                'Check your internet connection',
+                'Try refreshing the page',
+                'Contact your network administrator'
+            ];
+        }
+        // Validation errors
+        else if (error.message.includes('validation') ||
+                 error.message.includes('required') ||
+                 error.message.includes('invalid')) {
+            errorType = ErrorTypes.VALIDATION;
+            suggestions = [
+                'Check all required fields',
+                'Ensure file format is correct',
+                'Verify input values'
+            ];
+        }
+        // API errors
+        else if (error.message.includes('HTTP') ||
+                 error.message.includes('API') ||
+                 error.message.includes('server')) {
+            errorType = ErrorTypes.API;
+            suggestions = [
+                'Try again in a few moments',
+                'Check if the service is available',
+                'Contact support if the problem persists'
+            ];
+        }
+        // Authentication errors
+        else if (error.message.includes('auth') ||
+                 error.message.includes('unauthorized') ||
+                 error.message.includes('forbidden')) {
+            errorType = ErrorTypes.AUTH;
+            suggestions = [
+                'Log in again',
+                'Check your session',
+                'Clear browser cache and try again'
+            ];
+        }
+        // Timeout errors
+        else if (error.message.includes('timeout') ||
+                 error.message.includes('ETIMEDOUT')) {
+            errorType = ErrorTypes.TIMEOUT;
+            suggestions = [
+                'Try again with smaller files',
+                'Check your internet speed',
+                'Try a different time'
+            ];
+        }
+
+        // Add context-specific suggestions
+        if (context.operation) {
+            switch (context.operation) {
+                case 'upload':
+                    suggestions.push('Ensure file size is within limits');
+                    break;
+                case 'api':
+                    suggestions.push('Check server status');
+                    break;
+                case 'network':
+                    suggestions.push('Try switching networks');
+                    break;
+            }
+        }
+
+        return {
+            type: errorType,
+            originalError: error,
+            userMessage,
+            userDescription,
+            suggestions,
+            timestamp: new Date().toISOString(),
+            context
+        };
+    }
+
+    /**
+     * Show user-friendly error message
+     * @param {Object} errorInfo - Categorized error information
+     * @param {HTMLElement} [container] - Container to show error in
+     */
+    showError(errorInfo, container = null) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = `error-message ${errorInfo.type.severity}`;
+        errorDiv.innerHTML = `
+            <div class="error-header">
+                <span class="error-icon">⚠️</span>
+                <h3>${errorInfo.userMessage}</h3>
+            </div>
+            <div class="error-description">
+                ${errorInfo.userDescription}
+            </div>
+            <div class="error-suggestions">
+                <h4>Suggestions:</h4>
+                <ul>
+                    ${errorInfo.suggestions.map(s => `<li>${s}</li>`).join('')}
+                </ul>
+            </div>
+            <div class="error-actions">
+                <button class="retry-btn">Retry</button>
+                <button class="dismiss-btn">Dismiss</button>
+            </div>
+        `;
+
+        // Add event listeners
+        const retryBtn = errorDiv.querySelector('.retry-btn');
+        const dismissBtn = errorDiv.querySelector('.dismiss-btn');
+
+        retryBtn.addEventListener('click', () => {
+            this.retryOperation(errorInfo.context);
+        });
+
+        dismissBtn.addEventListener('click', () => {
+            errorDiv.remove();
+        });
+
+        // Show error in container or in main content area
+        if (container) {
+            container.appendChild(errorDiv);
+        } else {
+            const mainContent = document.querySelector('.main-content') || document.body;
+            mainContent.appendChild(errorDiv);
+        }
+
+        // Auto-dismiss after 30 seconds
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
+            }
+        }, 30000);
+    }
+
+    /**
+     * Retry operation with exponential backoff
+     * @param {Object} context - Context for the operation to retry
+     */
+    async retryOperation(context) {
+        this.errorCount++;
+        
+        if (this.errorCount >= this.maxRetries) {
+            this.showError({
+                type: ErrorTypes.API,
+                userMessage: 'Maximum retries exceeded',
+                userDescription: 'The operation failed after multiple attempts. Please try again later.',
+                suggestions: ['Check your internet connection', 'Try again in a few minutes'],
+                context
+            });
+            return;
+        }
+
+        const delay = this.retryDelay * Math.pow(2, this.errorCount - 1);
+        
+        setTimeout(async () => {
+            try {
+                if (context.operation === 'fetch') {
+                    await context.fn();
+                } else if (context.operation === 'submit') {
+                    await context.fn();
+                }
+            } catch (error) {
+                const errorInfo = this.categorizeError(error, context);
+                this.showError(errorInfo);
+            }
+        }, delay);
+    }
+
+    /**
+     * Log error for debugging
+     * @param {Object} errorInfo - Categorized error information
+     */
+    logError(errorInfo) {
+        console.error('DocMind AI Error:', {
+            type: errorInfo.type.code,
+            message: errorInfo.userMessage,
+            description: errorInfo.userDescription,
+            timestamp: errorInfo.timestamp,
+            context: errorInfo.context,
+            stack: errorInfo.originalError.stack
+        });
+
+        // Send error to monitoring service if available
+        if (typeof trackJs !== 'undefined') {
+            trackJs.track(errorInfo.originalError);
+        }
+    }
+}
+
+// Global error handler instance
+const errorHandler = new ErrorHandler();
+
+/**
  * Show global loading overlay
  *
  * This function displays a global loading overlay that covers the entire screen.
@@ -492,7 +759,18 @@ async function loadJSONResource(filename, rootKey, showLoading = false) {
         // Return the specified root key if it exists, otherwise return the entire data
         return data[rootKey] ?? data;
     } catch (error) {
-        console.error(`Failed to load ${filename}:`, error.message);
+        // Categorize and handle the error
+        const errorInfo = errorHandler.categorizeError(error, {
+            operation: 'fetch',
+            filename: filename,
+            rootKey: rootKey
+        });
+        
+        // Log the error for debugging
+        errorHandler.logError(errorInfo);
+        
+        // Show user-friendly error message
+        errorHandler.showError(errorInfo);
         
         // Hide loading state if shown
         if (showLoading) {
@@ -880,13 +1158,23 @@ function populateToolSelect(toolSelect) {
 async function displayToolForm(toolId) {
     // Validate input
     if (!toolId || typeof toolId !== 'string') {
-        showError('Invalid tool ID provided');
+        const errorInfo = errorHandler.categorizeError(new Error('Invalid tool ID provided'), {
+            operation: 'load_form',
+            toolId: toolId,
+            timestamp: new Date().toISOString()
+        });
+        errorHandler.showError(errorInfo);
         return;
     }
 
     // Use the global toolsData if available
     if (!toolsData || Object.keys(toolsData).length === 0) {
-        showError('No tools data available');
+        const errorInfo = errorHandler.categorizeError(new Error('No tools data available'), {
+            operation: 'load_form',
+            toolId: toolId,
+            timestamp: new Date().toISOString()
+        });
+        errorHandler.showError(errorInfo);
         return;
     }
 
@@ -900,7 +1188,12 @@ async function displayToolForm(toolId) {
 
         // If tool is not found, it might not be loaded yet
         if (!tool) {
-            showError(`Tool ${toolId} not found. Please try again.`);
+            const errorInfo = errorHandler.categorizeError(new Error(`Tool ${toolId} not found`), {
+                operation: 'load_form',
+                toolId: toolId,
+                timestamp: new Date().toISOString()
+            });
+            errorHandler.showError(errorInfo);
             hideGlobalLoading();
             return;
         }
@@ -939,7 +1232,12 @@ async function displayToolForm(toolId) {
         const actionInput = document.getElementById('action');
         
         if (!toolForm || !formFields || !actionInput) {
-            showError('Required form elements not found');
+            const errorInfo = errorHandler.categorizeError(new Error('Required form elements not found'), {
+                operation: 'load_form',
+                toolId: toolId,
+                timestamp: new Date().toISOString()
+            });
+            errorHandler.showError(errorInfo);
             hideGlobalLoading();
             return;
         }
@@ -960,12 +1258,22 @@ async function displayToolForm(toolId) {
                 // If field is a string, get the field definition from common/form/fields                             
                 if (typeof field === 'string') {                                                                      
                     if (!commonData?.form?.fields) { 
-                        console.error('No common data available or common form fields not found');                     
+                        const errorInfo = errorHandler.categorizeError(new Error('No common data available'), {
+                            operation: 'load_form',
+                            toolId: toolId,
+                            timestamp: new Date().toISOString()
+                        });
+                        errorHandler.showError(errorInfo);
                         return;                                                                                       
                     }                                                                                                 
                     const commonField = commonData.form.fields.find(f => f.name === field);                     
                     if (!commonField) {                                                                               
-                        console.error(`Field "${field}" not found in common form fields`);                            
+                        const errorInfo = errorHandler.categorizeError(new Error(`Field "${field}" not found`), {
+                            operation: 'load_form',
+                            toolId: toolId,
+                            timestamp: new Date().toISOString()
+                        });
+                        errorHandler.showError(errorInfo);
                         return;                                                                                       
                     }                                                                                                 
                     field = commonField;                                                                              
@@ -1008,7 +1316,17 @@ async function displayToolForm(toolId) {
             toolForm.scrollIntoView({ behavior: 'smooth' });
         }
     } catch (error) {
-        showError('Failed to load tool form: ' + error.message);
+        const errorInfo = errorHandler.categorizeError(error, {
+            operation: 'load_form',
+            toolId: toolId,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Log the error for debugging
+        errorHandler.logError(errorInfo);
+        
+        // Show user-friendly error message
+        errorHandler.showError(errorInfo);
     } finally {
         // Hide form loading state
         hideGlobalLoading();
@@ -1362,10 +1680,10 @@ async function fetchExpPrompts(selectElement) {
  * @note Saves user preferences (model, language, max_image_size) to localStorage
  * @note Handles network errors, HTTP errors, and API errors with appropriate messages
  * @note Calls displayResults() for successful API responses
- * @note Calls showError() for validation errors and API errors
+ * @note Uses errorHandler for comprehensive error handling
  * @note Restores submit button state after processing completes
  * @see displayResults() - Called to render successful API responses
- * @see showError() - Called to display error messages to users
+ * @see errorHandler.showError() - Called to display user-friendly error messages
  * @see Document.addEventListener('DOMContentLoaded') - Sets up this handler on form elements
  * @example
  * // Form submission is automatically handled when form is submitted
@@ -1419,7 +1737,12 @@ async function handleFormSubmit(event) {
             const result = await response.json();
             // Check for errors
             if (result.error) {
-                showError(result.error);
+                const errorInfo = errorHandler.categorizeError(new Error(result.error), {
+                    operation: 'submit',
+                    formId: form.id,
+                    timestamp: new Date().toISOString()
+                });
+                errorHandler.showError(errorInfo);
                 return;
             }
             // Display results
@@ -1427,11 +1750,27 @@ async function handleFormSubmit(event) {
         } else {
             // Handle non-JSON response
             const text = await response.text();
-            showError(`Unexpected response format: ${text}`);
+            const errorInfo = errorHandler.categorizeError(new Error(`Unexpected response format: ${text}`), {
+                operation: 'submit',
+                formId: form.id,
+                timestamp: new Date().toISOString()
+            });
+            errorHandler.showError(errorInfo);
             return;
         }
     } catch (error) {
-        showError('Failed to submit form: ' + error.message);
+        // Categorize and handle the error
+        const errorInfo = errorHandler.categorizeError(error, {
+            operation: 'submit',
+            formId: form.id,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Log the error for debugging
+        errorHandler.logError(errorInfo);
+        
+        // Show user-friendly error message
+        errorHandler.showError(errorInfo);
     } finally {
         // Restore button state and hide loading
         hideLoadingState(submitBtn);
