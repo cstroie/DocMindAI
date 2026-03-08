@@ -88,16 +88,181 @@ function toggleTheme() {
 }                                                                                                                                        
 
 /**
+ * Show global loading overlay
+ *
+ * This function displays a global loading overlay that covers the entire screen.
+ * It's used during application initialization and other global operations.
+ *
+ * @param {string} [text="Loading..."] - Loading text to display
+ * @return {void}
+ *
+ * @note Creates and appends loading overlay if it doesn't exist
+ * @note Shows overlay with fade-in animation
+ * @see hideGlobalLoading() - Hides the overlay
+ * @see initializeApplication() - Uses this during app initialization
+ */
+function showGlobalLoading(text = "Loading...") {
+    let overlay = document.getElementById('globalLoadingOverlay');
+    
+    if (!overlay) {
+        const template = document.getElementById('globalLoadingTemplate');
+        if (template) {
+            overlay = template.content.cloneNode(true).querySelector('.global-loading-overlay');
+            document.body.appendChild(overlay);
+        } else {
+            console.error('Global loading template not found');
+            return;
+        }
+    }
+    
+    const loadingText = overlay.querySelector('.global-loading-text');
+    if (loadingText) {
+        loadingText.textContent = text;
+    }
+    
+    overlay.classList.add('active');
+}
+
+/**
+ * Hide global loading overlay
+ *
+ * This function hides the global loading overlay with a fade-out animation.
+ *
+ * @return {void}
+ *
+ * @note Removes active class to trigger fade-out animation
+ * @see showGlobalLoading() - Shows the overlay
+ */
+function hideGlobalLoading() {
+    const overlay = document.getElementById('globalLoadingOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+}
+
+/**
+ * Show form loading overlay
+ *
+ * This function displays a loading overlay specifically for form operations.
+ * It's used when loading tool forms and processing form submissions.
+ *
+ * @param {string} [text="Loading form..."] - Loading text to display
+ * @return {void}
+ *
+ * @note Creates and appends loading overlay if it doesn't exist
+ * @note Shows overlay with fade-in animation
+ * @see hideFormLoading() - Hides the overlay
+ * @see displayToolForm() - Uses this when loading forms
+ */
+function showFormLoading(text = "Loading form...") {
+    let overlay = document.getElementById('formLoadingOverlay');
+    
+    if (!overlay) {
+        const template = document.getElementById('formLoadingTemplate');
+        if (template) {
+            overlay = template.content.cloneNode(true).querySelector('.form-loading-overlay');
+            document.body.appendChild(overlay);
+        } else {
+            console.error('Form loading template not found');
+            return;
+        }
+    }
+    
+    const loadingText = overlay.querySelector('.form-loading-text');
+    if (loadingText) {
+        loadingText.textContent = text;
+    }
+    
+    overlay.classList.add('active');
+}
+
+/**
+ * Hide form loading overlay
+ *
+ * This function hides the form loading overlay with a fade-out animation.
+ *
+ * @return {void}
+ *
+ * @note Removes active class to trigger fade-out animation
+ * @see showFormLoading() - Shows the overlay
+ */
+function hideFormLoading() {
+    const overlay = document.getElementById('formLoadingOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+}
+
+/**
+ * Show loading state for a specific element
+ *
+ * This function adds a loading state to a specific element, typically a button
+ * or card. It adds loading classes and can optionally show a loading spinner.
+ *
+ * @param {HTMLElement} element - The element to show loading state for
+ * @param {string} [text="Processing..."] - Loading text to display
+ * @return {void}
+ *
+ * @note Adds 'loading' class to the element
+ * @note Can add loading spinner if element is a button
+ * @see hideLoadingState() - Removes loading state
+ * @see handleFormSubmit() - Uses this for submit button
+ */
+function showLoadingState(element, text = "Processing...") {
+    if (!element) return;
+    
+    element.classList.add('loading');
+    
+    if (element.tagName === 'BUTTON') {
+        const btnText = element.querySelector('.btn-text');
+        const btnLoading = element.querySelector('.btn-loading');
+        
+        if (btnText) btnText.style.display = 'none';
+        if (btnLoading) {
+            btnLoading.style.display = 'flex';
+            const loadingText = btnLoading.querySelector('.loading-text');
+            if (loadingText) loadingText.textContent = text;
+        }
+    }
+}
+
+/**
+ * Hide loading state for a specific element
+ *
+ * This function removes the loading state from a specific element.
+ *
+ * @param {HTMLElement} element - The element to hide loading state for
+ * @return {void}
+ *
+ * @note Removes 'loading' class from the element
+ * @note Restores button text and hides loading spinner
+ * @see showLoadingState() - Shows loading state
+ */
+function hideLoadingState(element) {
+    if (!element) return;
+    
+    element.classList.remove('loading');
+    
+    if (element.tagName === 'BUTTON') {
+        const btnText = element.querySelector('.btn-text');
+        const btnLoading = element.querySelector('.btn-loading');
+        
+        if (btnText) btnText.style.display = 'block';
+        if (btnLoading) btnLoading.style.display = 'none';
+    }
+}
+
+/**
  * Apply theme based on user preference
  *
- * This function applies the theme based on user preference stored in cookies
+ * This function applies the theme based on user preference stored in localStorage
  * or system preference. It updates the theme toggle button icon accordingly
  * and sets the data-theme attribute on the HTML element.
  *
  * @return {void}
  *
- * @note Reads theme preference from docmind-theme cookie
- * @note Falls back to system preference if no cookie is set
+ * @note Reads theme preference from docmind-theme localStorage
+ * @note Falls back to system preference if no localStorage is set
  * @note Updates the theme toggle button icon
  * @note Sets data-theme attribute on HTML element
  * @see Document.addEventListener('DOMContentLoaded') - Calls this function on page load
@@ -717,18 +882,19 @@ function populateToolSelect(toolSelect) {
 }
 
 /**
- * Display a tool form with comprehensive configuration handling
+ * Display a tool form with comprehensive configuration handling and loading states
  * 
  * This function renders the form for a specific tool based on its configuration.
  * It handles the complete form lifecycle including validation, population with saved preferences,
- * and proper error handling. The function supports both tool-specific fields and common fields
- * referenced by string names.
+ * loading states, and proper error handling. The function supports both tool-specific fields and 
+ * common fields referenced by string names.
  * 
  * @param {string} toolId - The ID of the tool to display
- * @returns {void}
+ * @returns {Promise<void>}
  * 
  * @throws {Error} If toolId is invalid or required form elements are missing
  * @note Validates toolId and checks for required form elements before proceeding
+ * @note Shows loading overlay during form population
  * @note Updates page title and subtitle with tool and category information
  * @note Retrieves user preferences from localStorage for model, language, and image size
  * @note Supports both direct field objects and string references to common fields
@@ -740,12 +906,12 @@ function populateToolSelect(toolSelect) {
  * @see categoriesData - Global object containing category information
  * @example
  * // Display a specific tool form
- * displayToolForm('text-extractor');
+ * await displayToolForm('text-extractor');
  * 
  * // Function handles missing tools gracefully
  * displayToolForm('nonexistent-tool'); // Shows error message
  */
-function displayToolForm(toolId) {
+async function displayToolForm(toolId) {
     // Validate input
     if (!toolId || typeof toolId !== 'string') {
         showError('Invalid tool ID provided');
@@ -758,116 +924,128 @@ function displayToolForm(toolId) {
         return;
     }
 
-    // Get the selected tool and category information
-    let tool = toolsData[toolId];
-    const category = categoriesData && tool?.category ? categoriesData[tool.category] : null;
+    // Show form loading state
+    showFormLoading('Loading tool form...');
 
-    // If tool is not found, it might not be loaded yet
-    if (!tool) {
-        showError(`Tool ${toolId} not found. Please try again.`);
-        return;
-    }
+    try {
+        // Get the selected tool and category information
+        let tool = toolsData[toolId];
+        const category = categoriesData && tool?.category ? categoriesData[tool.category] : null;
 
-    // Set the tool ID in the tool object
-    tool.id = toolId;
-
-    // Update language field if present and hidden
-    if (tool.form?.fields) {
-        tool.form.fields.forEach(field => {
-            if (field.name === 'language' && field.type === 'hidden') {
-                field.value = 'en';
-            }
-        });
-    }
-
-    // Update form title and description
-    const formTitle = document.getElementById('formTitle');
-    const formSubtitle = document.getElementById('formSubtitle');
-    if (formTitle) formTitle.textContent = (tool.icon || '📄') + ' ' + (tool.name || 'Unnamed Tool');
-    if (formSubtitle) formSubtitle.textContent = tool.description || '';
-
-    // Update page title and subtitle with category info
-    const pageTitle = document.getElementById('pageTitle');
-    const pageSubtitle = document.getElementById('pageSubtitle');
-    if (pageTitle && pageSubtitle && tool.category && categoriesData) {
-        if (category) {
-            pageTitle.textContent = category.icon + ' ' + category.name;
-            pageSubtitle.textContent = category.description;
+        // If tool is not found, it might not be loaded yet
+        if (!tool) {
+            showError(`Tool ${toolId} not found. Please try again.`);
+            hideFormLoading();
+            return;
         }
-    }
 
-    // Populate the form fields
-    const toolForm = document.getElementById('toolForm');
-    const formFields = document.getElementById('formFields');
-    const actionInput = document.getElementById('action');
-    
-    if (!toolForm || !formFields || !actionInput) {
-        showError('Required form elements not found');
-        return;
-    }
+        // Set the tool ID in the tool object
+        tool.id = toolId;
 
-    actionInput.value = tool.id;
-    formFields.innerHTML = '';
+        // Update language field if present and hidden
+        if (tool.form?.fields) {
+            tool.form.fields.forEach(field => {
+                if (field.name === 'language' && field.type === 'hidden') {
+                    field.value = 'en';
+                }
+            });
+        }
 
-    // Get preferences from localStorage
-    const preferences = {
-        'docmind-model': localStorage.getItem('docmind-model'),
-        'docmind-language': localStorage.getItem('docmind-language'),
-        'docmind-max_image_size': localStorage.getItem('docmind-max_image_size')
-    };
+        // Update form title and description
+        const formTitle = document.getElementById('formTitle');
+        const formSubtitle = document.getElementById('formSubtitle');
+        if (formTitle) formTitle.textContent = (tool.icon || '📄') + ' ' + (tool.name || 'Unnamed Tool');
+        if (formSubtitle) formSubtitle.textContent = tool.description || '';
 
-    // Create form fields based on formConfig                                                                         
-    if (tool.form?.fields) {                                                                          
-        tool.form.fields.forEach(field => {                                                                       
-            // If field is a string, get the field definition from common/form/fields                             
-            if (typeof field === 'string') {                                                                      
-                if (!commonData?.form?.fields) { 
-                    console.error('No common data available or common form fields not found');                     
-                    return;                                                                                       
-                }                                                                                                 
-                const commonField = commonData.form.fields.find(f => f.name === field);                     
-                if (!commonField) {                                                                               
-                    console.error(`Field "${field}" not found in common form fields`);                            
-                    return;                                                                                       
-                }                                                                                                 
-                field = commonField;                                                                              
-            }                                                                                                     
-
-            const fieldElement = createFormField(field, preferences);                                                 
-            if (fieldElement) {                                                                                   
-                formFields.appendChild(fieldElement);                                                             
-            } else if (field.type === 'hidden') {                                                                 
-                // Create and append hidden input directly to the form                                            
-                const hiddenInput = document.createElement('input');                                              
-                hiddenInput.type = 'hidden';                                                                      
-                hiddenInput.name = field.name;                                                                    
-                hiddenInput.value = field.value || '';                                                            
-                toolForm.appendChild(hiddenInput);                                                                
-            }                                                                                                     
-        });                                                                                                       
-    }
-
-    // Show the form and hide results area
-    showForm();
-
-    // Set up cancel button to go back to category view
-    const cancelBtn = document.getElementById('cancelBtn');
-    if (cancelBtn) {
-        cancelBtn.onclick = function() {
-            // Get the current tool's category
-            const currentTool = toolsData[toolId];
-            if (currentTool?.category) {
-                switchView('tools-' + currentTool.category);
-            } else {
-                // Fallback to tools view if category not found
-                switchView('tools');
+        // Update page title and subtitle with category info
+        const pageTitle = document.getElementById('pageTitle');
+        const pageSubtitle = document.getElementById('pageSubtitle');
+        if (pageTitle && pageSubtitle && tool.category && categoriesData) {
+            if (category) {
+                pageTitle.textContent = category.icon + ' ' + category.name;
+                pageSubtitle.textContent = category.description;
             }
-        };
-    }
+        }
 
-    // Scroll to form
-    if (toolForm.scrollIntoView) {
-        toolForm.scrollIntoView({ behavior: 'smooth' });
+        // Populate the form fields
+        const toolForm = document.getElementById('toolForm');
+        const formFields = document.getElementById('formFields');
+        const actionInput = document.getElementById('action');
+        
+        if (!toolForm || !formFields || !actionInput) {
+            showError('Required form elements not found');
+            hideFormLoading();
+            return;
+        }
+
+        actionInput.value = tool.id;
+        formFields.innerHTML = '';
+
+        // Get preferences from localStorage
+        const preferences = {
+            'docmind-model': localStorage.getItem('docmind-model'),
+            'docmind-language': localStorage.getItem('docmind-language'),
+            'docmind-max_image_size': localStorage.getItem('docmind-max_image_size')
+        };
+
+        // Create form fields based on formConfig                                                                         
+        if (tool.form?.fields) {                                                                          
+            tool.form.fields.forEach(field => {                                                                       
+                // If field is a string, get the field definition from common/form/fields                             
+                if (typeof field === 'string') {                                                                      
+                    if (!commonData?.form?.fields) { 
+                        console.error('No common data available or common form fields not found');                     
+                        return;                                                                                       
+                    }                                                                                                 
+                    const commonField = commonData.form.fields.find(f => f.name === field);                     
+                    if (!commonField) {                                                                               
+                        console.error(`Field "${field}" not found in common form fields`);                            
+                        return;                                                                                       
+                    }                                                                                                 
+                    field = commonField;                                                                              
+                }                                                                                                     
+
+                const fieldElement = createFormField(field, preferences);                                                 
+                if (fieldElement) {                                                                                   
+                    formFields.appendChild(fieldElement);                                                             
+                } else if (field.type === 'hidden') {                                                                 
+                    // Create and append hidden input directly to the form                                            
+                    const hiddenInput = document.createElement('input');                                              
+                    hiddenInput.type = 'hidden';                                                                      
+                    hiddenInput.name = field.name;                                                                    
+                    hiddenInput.value = field.value || '';                                                            
+                    toolForm.appendChild(hiddenInput);                                                                
+                }                                                                                                     
+            });                                                                                                       
+        }
+
+        // Show the form and hide results area
+        showForm();
+
+        // Set up cancel button to go back to category view
+        const cancelBtn = document.getElementById('cancelBtn');
+        if (cancelBtn) {
+            cancelBtn.onclick = function() {
+                // Get the current tool's category
+                const currentTool = toolsData[toolId];
+                if (currentTool?.category) {
+                    switchView('tools-' + currentTool.category);
+                } else {
+                    // Fallback to tools view if category not found
+                    switchView('tools');
+                }
+            };
+        }
+
+        // Scroll to form
+        if (toolForm.scrollIntoView) {
+            toolForm.scrollIntoView({ behavior: 'smooth' });
+        }
+    } catch (error) {
+        showError('Failed to load tool form: ' + error.message);
+    } finally {
+        // Hide form loading state
+        hideFormLoading();
     }
 }
 
@@ -1200,21 +1378,22 @@ async function fetchExpPrompts(selectElement) {
 }
 
 /**
- * Handle form submission with comprehensive error handling and user feedback
+ * Handle form submission with comprehensive error handling, user feedback, and loading states
  * 
  * This function manages the complete form submission lifecycle including data collection,
- * API communication, user preference saving, and proper error handling. It provides
- * visual feedback during processing and handles various response formats appropriately.
+ * API communication, user preference saving, loading states, and proper error handling. 
+ * It provides visual feedback during processing and handles various response formats appropriately.
  * 
  * @param {Event} event - The form submission event
  * @returns {Promise<void>}
  * 
  * @throws {Error} If form validation fails or API communication encounters errors
  * @note Prevents default form submission and uses FormData API for data collection
+ * @note Shows global loading overlay during API processing
+ * @note Shows button loading state during API processing
  * @note Makes POST request to docmind.php with Accept: application/json header
  * @note Validates response format and handles both JSON and non-JSON responses
  * @note Saves user preferences (model, language, max_image_size) to localStorage
- * @note Shows loading state on submit button during API processing
  * @note Handles network errors, HTTP errors, and API errors with appropriate messages
  * @note Calls displayResults() for successful API responses
  * @note Calls showError() for validation errors and API errors
@@ -1229,14 +1408,15 @@ async function fetchExpPrompts(selectElement) {
 async function handleFormSubmit(event) {
     // Prevent default form submission
     event.preventDefault();
+    
     // Get form data
     const form = event.target;
     const formData = new FormData(form);
 
-    // Show loading state
+    // Show loading states
+    showGlobalLoading('Processing your request...');
     const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+    showLoadingState(submitBtn, 'Processing...');
 
     // Save preferences to localStorage
     const model = formData.get('model');
@@ -1287,9 +1467,9 @@ async function handleFormSubmit(event) {
     } catch (error) {
         showError('Failed to submit form: ' + error.message);
     } finally {
-        // Restore button state
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit';
+        // Restore button state and hide loading
+        hideLoadingState(submitBtn);
+        hideGlobalLoading();
     }
 }
 
@@ -2214,50 +2394,18 @@ function clearHistory() {
 }
 
 /**
- * Toggle details section visibility
- *
- * This function shows or hides the details section and fills it with
- * the current prompt and response data.
- *
- * @return {void}
- *
- * @note Toggles the display of detailsSection
- * @note Applies syntax highlighting to code blocks in details section
- * @see displayResults() - Stores prompt and response data
- */
-function toggleDetails() {
-    const detailsSection = document.getElementById('detailsSection');
-    
-    if (!detailsSection) {
-        console.error('Details section elements not found');
-        return;
-    }
-    
-    if (detailsSection.style.display === 'none' || !detailsSection.style.display) {
-        // Show details section
-        detailsSection.style.display = 'block';
-        document.getElementById('detailsBtn').textContent = 'Hide Details';
-        
-        // Apply syntax highlighting to code blocks in details section
-        applySyntaxHighlighting(detailsSection);
-    } else {
-        // Hide details section
-        detailsSection.style.display = 'none';
-        document.getElementById('detailsBtn').textContent = 'Details';
-    }
-}
-
-/**
- * Display history of saved results with comprehensive item rendering and interaction
+ * Display history of saved results with comprehensive item rendering, interaction, and loading states
  *
  * This function populates the history view with saved results from localStorage,
  * providing a rich interactive interface for users to browse and restore previous
- * analysis sessions. It handles empty states, item rendering, and user interactions.
+ * analysis sessions. It handles empty states, item rendering, user interactions,
+ * and provides loading feedback during data processing.
  *
  * @param {number} [maxItems=10] - Maximum number of history items to display
- * @returns {void}
+ * @returns {Promise<void>}
  *
  * @throws {Error} If history content element is not found or template loading fails
+ * @note Shows loading overlay during history data processing
  * @note Loads results from localStorage using loadResultsFromHistory() with pagination
  * @note Uses historyItemTemplate for consistent item rendering across the application
  * @note Populates items with tool icons, names, timestamps, and content previews
@@ -2274,105 +2422,115 @@ function toggleDetails() {
  * @see historyEmptyTemplate - Template used for empty state display
  * @example
  * // Display default number of history items (10)
- * displayHistory();
+ * await displayHistory();
  * 
  * // Display specific number of history items
- * displayHistory(5);
+ * await displayHistory(5);
  */
-function displayHistory(maxItems = 10) {
+async function displayHistory(maxItems = 10) {
     const historyContent = document.getElementById('historyContent');
     if (!historyContent) {
         console.error('History content element not found');
         return;
     }
 
-    // Clear existing history items
-    historyContent.innerHTML = '';
+    // Show loading overlay
+    showGlobalLoading('Loading history...');
 
-    // Load results from history
-    const results = loadResultsFromHistory(maxItems = maxItems);
+    try {
+        // Clear existing history items
+        historyContent.innerHTML = '';
 
-    if (results.length === 0) {
-        // Show empty state using template
-        const emptyTemplate = document.getElementById('historyEmptyTemplate');
-        if (emptyTemplate) {
-            const emptyState = emptyTemplate.content.cloneNode(true);
-            historyContent.appendChild(emptyState);
-        } else {
-            historyContent.innerHTML = "<p>No history yet.</p>";
+        // Load results from history
+        const results = loadResultsFromHistory(maxItems = maxItems);
+
+        if (results.length === 0) {
+            // Show empty state using template
+            const emptyTemplate = document.getElementById('historyEmptyTemplate');
+            if (emptyTemplate) {
+                const emptyState = emptyTemplate.content.cloneNode(true);
+                historyContent.appendChild(emptyState);
+            } else {
+                historyContent.innerHTML = "<p>No history yet.</p>";
+            }
+            return;
         }
-        return;
-    }
 
-    // Get history item template
-    const template = document.getElementById('historyItemTemplate');
-    if (!template) {
-        console.error('History item template not found');
-        return;
-    }
+        // Get history item template
+        const template = document.getElementById('historyItemTemplate');
+        if (!template) {
+            console.error('History item template not found');
+            return;
+        }
 
-    // Create history items using template
-    results.forEach(result => {
-        const clone = template.content.cloneNode(true);
-        const historyItem = clone.querySelector('.history-item');
-        historyItem.dataset.resultId = result.id;
+        // Create history items using template
+        results.forEach(result => {
+            const clone = template.content.cloneNode(true);
+            const historyItem = clone.querySelector('.history-item');
+            historyItem.dataset.resultId = result.id;
 
-        // Populate template elements
-        const titleElement = clone.querySelector('.history-title-text');
-        const iconElement = clone.querySelector('.history-icon');
-        const dateElement = clone.querySelector('.history-date');
-        const previewElement = clone.querySelector('.history-preview');
+            // Populate template elements
+            const titleElement = clone.querySelector('.history-title-text');
+            const iconElement = clone.querySelector('.history-icon');
+            const dateElement = clone.querySelector('.history-date');
+            const previewElement = clone.querySelector('.history-preview');
 
-        // Format date
-        const date = new Date(result.timestamp);
-        const formattedDate = date.toLocaleString();
-        if (dateElement) dateElement.textContent = formattedDate;
-        
-        if (result.tool) {
-            // Get tool data from toolsData
-            const tool = toolsData[result.tool];
-            if (tool) {
-                iconElement.textContent = tool.icon || '📄';
-                titleElement.textContent = tool.name || result.title;
+            // Format date
+            const date = new Date(result.timestamp);
+            const formattedDate = date.toLocaleString();
+            if (dateElement) dateElement.textContent = formattedDate;
+            
+            if (result.tool) {
+                // Get tool data from toolsData
+                const tool = toolsData[result.tool];
+                if (tool) {
+                    iconElement.textContent = tool.icon || '📄';
+                    titleElement.textContent = tool.name || result.title;
+                } else {
+                    iconElement.textContent = '📄';
+                    titleElement.textContent = result.title;
+                }
             } else {
                 iconElement.textContent = '📄';
                 titleElement.textContent = result.title;
             }
-        } else {
-            iconElement.textContent = '📄';
-            titleElement.textContent = result.title;
-        }
 
-        // Add preview text
-        if (previewElement) {
-            let previewText = '';
-            
-            // Try to get preview from different sources
-            if (result.response && result.response.choices && result.response.choices[0] && result.response.choices[0].message && result.response.choices[0].message.content) {
-                previewText = result.response.choices[0].message.content;
-            } else if (result.content && result.content.response && result.content.response.choices && result.content.response.choices[0] && result.content.response.choices[0].message && result.content.response.choices[0].message.content) {
-                previewText = result.content.response.choices[0].message.content;
-            } else if (result.content) {
-                previewText = String(result.content);
-            } else {
-                previewText = String(result);
+            // Add preview text
+            if (previewElement) {
+                let previewText = '';
+                
+                // Try to get preview from different sources
+                if (result.response && result.response.choices && result.response.choices[0] && result.response.choices[0].message && result.response.choices[0].message.content) {
+                    previewText = result.response.choices[0].message.content;
+                } else if (result.content && result.content.response && result.content.response.choices && result.content.response.choices[0] && result.content.response.choices[0].message && result.content.response.choices[0].message.content) {
+                    previewText = result.content.response.choices[0].message.content;
+                } else if (result.content) {
+                    previewText = String(result.content);
+                } else {
+                    previewText = String(result);
+                }
+                
+                // Take first 200 characters and add ellipsis if truncated
+                if (previewText.length > 200) {
+                    previewText = previewText.substring(0, 200) + '...';
+                }
+                
+                previewElement.textContent = previewText;
             }
-            
-            // Take first 200 characters and add ellipsis if truncated
-            if (previewText.length > 200) {
-                previewText = previewText.substring(0, 200) + '...';
-            }
-            
-            previewElement.textContent = previewText;
-        }
 
-        // Add click handler to entire item
-        historyItem.addEventListener('click', () => {
-            displayHistoryResult(result.id);
+            // Add click handler to entire item
+            historyItem.addEventListener('click', () => {
+                displayHistoryResult(result.id);
+            });
+
+            historyContent.appendChild(clone);
         });
-
-        historyContent.appendChild(clone);
-    });
+    } catch (error) {
+        showError('Failed to load history: ' + error.message);
+    } finally {
+        // Hide loading overlay
+        hideGlobalLoading();
+    }
 }
 
 /**
@@ -2477,11 +2635,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     if (clearHistoryBtn) {
         clearHistoryBtn.addEventListener('click', clearHistory);
-    }
-    // Set up details button
-    const detailsBtn = document.getElementById('detailsBtn');
-    if (detailsBtn) {
-        detailsBtn.addEventListener('click', toggleDetails);
     }
     // Set up view switching for sidebar navigation
     const navButtons = document.querySelectorAll('.nav-item');

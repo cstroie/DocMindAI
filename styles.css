@@ -18,12 +18,177 @@
     --pico-form-element-spacing-vertical: .75rem;
     --pico-form-element-spacing-horizontal: 1rem;
     --pico-icon-chevron: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgb(136, 145, 164)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+
+    /* Loading state colors */
+    --loading-primary: var(--primary);
+    --loading-secondary: var(--secondary);
+    --loading-background: rgba(255, 255, 255, 0.9);
+    --loading-text: var(--text);
+}
+
+[data-theme="dark"] {
+    --loading-background: rgba(0, 0, 0, 0.9);
+    --loading-text: var(--text-inverse);
 }
 
 
 nav li :where(a,[role=link]) {
     text-decoration: none;
     color: var(--pico-color);
+}
+
+/* Loading States */
+.loading-overlay,
+.global-loading-overlay,
+.form-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--loading-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.loading-overlay.active,
+.global-loading-overlay.active,
+.form-loading-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loading-container,
+.global-loading-container,
+.form-loading-container {
+    text-align: center;
+    padding: 2rem;
+    border-radius: var(--pico-border-radius);
+    background: var(--card-background-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 90%;
+    width: 300px;
+}
+
+.loading-spinner,
+.global-loading-spinner,
+.form-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--loading-secondary);
+    border-top: 4px solid var(--loading-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+.global-loading-spinner {
+    width: 60px;
+    height: 60px;
+    border-width: 6px;
+}
+
+.form-loading-spinner {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
+}
+
+.loading-text,
+.global-loading-text,
+.form-loading-text {
+    color: var(--loading-text);
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.global-loading-text {
+    font-size: 1.125rem;
+}
+
+.form-loading-text {
+    font-size: 0.875rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Button loading states */
+.btn-loading {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn.loading .btn-text {
+    display: none;
+}
+
+.btn.loading .btn-loading {
+    display: flex;
+}
+
+.btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--secondary);
+    border-top: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Card loading states */
+.card.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.card.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Form field loading states */
+.form-field.loading {
+    position: relative;
+}
+
+.form-field.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--secondary);
+    border-top: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
 
