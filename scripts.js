@@ -699,23 +699,21 @@ function populateToolSelect(toolSelect) {
  * This function renders the form for a specific tool. It:
  * 1. Updates the top title and description with tool information
  * 2. Sets up the form action input with the tool ID
- * 3. Retrieves saved preferences from cookies
+ * 3. Retrieves saved preferences from localStorage
  * 4. Creates form fields based on the tool configuration
  * 5. Shows the form and hides the results area
  * 6. Scrolls to the form for better UX
  * 
- * @param {Object} tool - The tool configuration object
+ * @param {string} toolId - The ID of the tool to display
  * @return {void}
  * 
  * @note Uses the tool's form.fields array to create input elements
- * @note Retrieves saved model and language preferences from cookies
+ * @note Retrieves saved model and language preferences from localStorage
  * @note Hides the results area when displaying a new form
  * @note Uses smooth scrolling to bring the form into view
  * @see createFormField() - Called to create each form field
  */
 function displayToolForm(toolId) {
-    // Clear the page
-    //document.querySelector('.tool-selector').style.display = 'none';
     // Use the global toolsData if available
     if (!toolsData) {
         showError('No tools data available');
@@ -773,8 +771,8 @@ function displayToolForm(toolId) {
     const savedLanguage = localStorage.getItem('docmind-language');
     const savedMaxImageSize = localStorage.getItem('docmind-max_image_size');
 
-    // Create cookies object for compatibility (TODO: Remove after full transition)
-    const cookies = {
+    // Create preferences object for form field creation
+    const preferences = {
         'docmind-model': savedModel,
         'docmind-language': savedLanguage,
         'docmind-max_image_size': savedMaxImageSize
@@ -797,7 +795,7 @@ function displayToolForm(toolId) {
                 field = commonField;                                                                              
             }                                                                                                     
 
-            const fieldElement = createFormField(field, cookies);                                                 
+            const fieldElement = createFormField(field, preferences);                                                 
             if (fieldElement) {                                                                                   
                 formFields.appendChild(fieldElement);                                                             
             } else if (field.type === 'hidden') {                                                                 
@@ -812,13 +810,7 @@ function displayToolForm(toolId) {
     }
 
     // Show the form and hide results area
-    try {
-        if (toolForm.style) toolForm.style.display = 'block';
-        const resultsArea = document.getElementById('resultsArea');
-        if (resultsArea && resultsArea.style) resultsArea.style.display = 'none';
-    } catch (error) {
-        console.error('Failed to update form visibility:', error);
-    }
+    showForm();
 
     // Set up cancel button to go back to tools view
     const cancelBtn = document.getElementById('cancelBtn');
@@ -827,9 +819,6 @@ function displayToolForm(toolId) {
             switchView('tools');
         };
     }
-
-    // Switch to form view
-    switchView('form');
 
     // Scroll to form
     if (toolForm.scrollIntoView) {
@@ -1441,10 +1430,13 @@ function showNotification(message, type = 'info') {
     notification.className = `notification ${type}-notification`;
 
     // Set notification icon based on type
-    let icon = 'ℹ️';
-    if (type === 'success') icon = '✅';
-    else if (type === 'warning') icon = '⚠️';
-    else if (type === 'error') icon = '❌';
+    const icons = {
+        'info': 'ℹ️',
+        'success': '✅',
+        'warning': '⚠️',
+        'error': '❌'
+    };
+    const icon = icons[type] || 'ℹ️';
 
     // Set notification content
     notification.innerHTML = `
@@ -1527,16 +1519,29 @@ function showError(message) {
         resultsArea.innerHTML = `<div class="error-message">${escapeHtml(message)}</div>`;
     }
 
-    // Check if resultsArea.style exists before trying to access it
-    if (resultsArea.style) {
-        // Show results area
+    // Show results area and switch to results view
+    showResults();
+}
+
+/**
+ * Show the results area and switch to results view
+ *
+ * This function shows the results area and switches to the results view.
+ *
+ * @return {void}
+ *
+ * @note Shows the results area
+ * @note Switches to results view
+ * @note Scrolls to results
+ * @see showError() - Calls this function when showing errors
+ * @see displayResults() - Calls this function when displaying results
+ */
+function showResults() {
+    const resultsArea = document.getElementById('resultsArea');
+    if (resultsArea && resultsArea.style) {
         resultsArea.style.display = 'block';
-        // Switch to results view
         switchView('results');
-        // Scroll to error
         resultsArea.scrollIntoView({ behavior: 'smooth' });
-    } else {
-        console.error('Results area style property not available');
     }
 }
 
@@ -1761,29 +1766,73 @@ function switchView(viewName) {
     });
 
     // Update page title and subtitle based on view
+    updatePageTitle(viewName);
+
+    // Special handling for history view
+    if (viewName === 'history') {
+        displayHistory();
+    }
+}
+
+/**
+ * Update page title and subtitle based on view
+ *
+ * This function updates the page title and subtitle based on the current view.
+ *
+ * @param {string} viewName - The name of the current view
+ * @return {void}
+ *
+ * @note Updates pageTitle and pageSubtitle elements
+ * @note Called by switchView() when changing views
+ */
+function updatePageTitle(viewName) {
     const pageTitle = document.getElementById('pageTitle');
     const pageSubtitle = document.getElementById('pageSubtitle');
 
-    if (pageTitle && pageSubtitle) {
-        switch (viewName) {
-            case 'home':
-                pageTitle.textContent = '🏠 Home';
-                pageSubtitle.textContent = 'Welcome to DocMind AI - Intelligent Document Processing';
-                break;
-            case 'history':
-                pageTitle.textContent = '⏳ History';
-                pageSubtitle.textContent = 'View your previous analysis sessions and results';
-                // Load and display history when switching to history view
-                displayHistory();
-                break;
-            case 'settings':
-                pageTitle.textContent = '⚙️ Settings';
-                pageSubtitle.textContent = 'Configure your preferences and account settings';
-                break;
-            default:
-                // Don't change title for other views (tools, form, results)
-                break;
+    if (!pageTitle || !pageSubtitle) return;
+
+    const titles = {
+        'home': {
+            title: '🏠 Home',
+            subtitle: 'Welcome to DocMind AI - Intelligent Document Processing'
+        },
+        'history': {
+            title: '⏳ History',
+            subtitle: 'View your previous analysis sessions and results'
+        },
+        'settings': {
+            title: '⚙️ Settings',
+            subtitle: 'Configure your preferences and account settings'
         }
+    };
+
+    const viewTitle = titles[viewName];
+    if (viewTitle) {
+        pageTitle.textContent = viewTitle.title;
+        pageSubtitle.textContent = viewTitle.subtitle;
+    }
+}
+
+/**
+ * Show the form view and hide results
+ *
+ * This function shows the form view and hides the results area.
+ *
+ * @return {void}
+ *
+ * @note Shows the tool form
+ * @note Hides the results area
+ * @note Called by displayToolForm() when showing a form
+ */
+function showForm() {
+    const toolForm = document.getElementById('toolForm');
+    const resultsArea = document.getElementById('resultsArea');
+
+    if (toolForm) {
+        toolForm.style.display = 'block';
+    }
+    if (resultsArea) {
+        resultsArea.style.display = 'none';
     }
 }
 
