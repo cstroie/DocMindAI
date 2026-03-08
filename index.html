@@ -186,16 +186,17 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
     </template>
 
     <template id="historyItemTemplate">
-        <div>
+        <section class="history-item">
             <hgroup class="history-info">
-                <h3 class="history-title"><span class="history-icon">⏳</span> </h3>
+                <h3 class="history-title"><span class="history-icon">⏳</span> <span class="history-title-text"></span></h3>
                 <p class="history-date"></p>
+                <p class="history-tool"></p>
             </hgroup>
             <footer>
-                <button>View</button>
-                <button class="secondary">Show Form</button>
+                <button class="btn btn-small history-view-btn">View</button>
+                <button class="btn btn-small secondary history-form-btn">Show Form</button>
             </footer>
-        </div>
+        </section>
     </template>
 
     <!-- Tools View Template -->

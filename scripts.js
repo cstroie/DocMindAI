@@ -2141,37 +2141,48 @@ function displayHistory(maxItems = 10) {
         return;
     }
 
-    // Create history items
+    // Get history item template
+    const template = document.getElementById('historyItemTemplate');
+    if (!template) {
+        console.error('History item template not found');
+        return;
+    }
+
+    // Create history items using template
     results.forEach(result => {
-        const historyItem = document.createElement('section');
-        historyItem.className = 'history-item';
+        const clone = template.content.cloneNode(true);
+        const historyItem = clone.querySelector('.history-item');
         historyItem.dataset.resultId = result.id;
 
+        // Populate template elements
+        const titleElement = clone.querySelector('.history-title-text');
+        const dateElement = clone.querySelector('.history-date');
+        const toolElement = clone.querySelector('.history-tool');
+
+        if (titleElement) titleElement.textContent = result.title;
+        
         // Format date
         const date = new Date(result.timestamp);
         const formattedDate = date.toLocaleString();
-
-        historyItem.innerHTML = `
-            <hgroup class="history-info">
-                <h3 class="history-title"><span class="history-icon">⏳</span> ${result.title}</h3>
-                <p class="history-date">${formattedDate}</p>
-                ${result.tool ? `<p class="history-tool">Tool: ${result.tool}</p>` : ''}
-            </hgroup>
-            <footer>
-                <button class="btn btn-small history-view-btn">View</button>
-                <button class="btn btn-small history-form-btn">Show Form</button>
-            </footer>
-        `;
+        if (dateElement) dateElement.textContent = formattedDate;
+        
+        if (toolElement) {
+            toolElement.textContent = result.tool ? `Tool: ${result.tool}` : '';
+            // Hide tool element if no tool info
+            if (!result.tool) {
+                toolElement.style.display = 'none';
+            }
+        }
 
         // Add click handler to view button
-        const viewButton = historyItem.querySelector('.history-view-btn');
+        const viewButton = clone.querySelector('.history-view-btn');
         viewButton.addEventListener('click', (e) => {
             e.stopPropagation();
             displayHistoryResult(result.id);
         });
 
         // Add click handler to form button
-        const formButton = historyItem.querySelector('.history-form-btn');
+        const formButton = clone.querySelector('.history-form-btn');
         formButton.addEventListener('click', (e) => {
             e.stopPropagation();
             loadHistoryForm(result.id);
@@ -2182,7 +2193,7 @@ function displayHistory(maxItems = 10) {
             displayHistoryResult(result.id);
         });
 
-        historyContent.appendChild(historyItem);
+        historyContent.appendChild(clone);
     });
 }
 
