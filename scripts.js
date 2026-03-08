@@ -811,7 +811,6 @@ function displayToolForm(toolId) {
 
     // Show the form and hide results area
     showForm();
-    switchView('form');
 
     // Set up cancel button to go back to tools view
     const cancelBtn = document.getElementById('cancelBtn');
@@ -1867,6 +1866,8 @@ function showForm() {
     if (resultsArea) {
         resultsArea.style.display = 'none';
     }
+    
+    switchView('form');
 }
 
 /**
