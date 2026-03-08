@@ -332,8 +332,19 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
  */
 async function loadJSONResource(filename, rootKey) {
     try {
+        // Validate input
+        if (!filename || typeof filename !== 'string') {
+            throw new Error('Invalid filename provided');
+        }
+
         // Load data from JSON file
         const response = await fetch(filename);
+        
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
 
         // Check for errors
@@ -544,6 +555,12 @@ function populateCategoryCards() {
  * @see displayToolForm() - Called when a tool card is clicked
  */
 function loadToolsInCategory(category) {
+    // Validate input
+    if (!category || typeof category !== 'string') {
+        console.error('Invalid category provided');
+        return;
+    }
+
     // Get the category tools grid
     const toolsGrid = document.getElementById(`${category}ToolsGrid`);
     if (!toolsGrid) {
@@ -551,26 +568,21 @@ function loadToolsInCategory(category) {
         return;
     }
 
-    toolsGrid.innerHTML = '';
-
     // Check if toolsData is available
-    if (!toolsData) {
+    if (!toolsData || Object.keys(toolsData).length === 0) {
         console.error('No tools data available');
         return;
     }
 
     // Filter tools by category
-    const categoryTools = [];
-    for (const [tool_id, tool_data] of Object.entries(toolsData)) {
-        if (tool_data.category === category) {
-            categoryTools.push({
-                'id': tool_id,
-                'name': tool_data.name,
-                'description': tool_data.description,
-                'icon': tool_data.icon
-            });
-        }
-    }
+    const categoryTools = Object.entries(toolsData)
+        .filter(([_, tool_data]) => tool_data.category === category)
+        .map(([tool_id, tool_data]) => ({
+            'id': tool_id,
+            'name': tool_data.name || 'Unnamed Tool',
+            'description': tool_data.description || 'No description available',
+            'icon': tool_data.icon || '📄'
+        }));
 
     // Get category info from categories.json
     const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
@@ -594,9 +606,9 @@ function loadToolsInCategory(category) {
         const titleElement = clone.querySelector('h4');
         const descriptionElement = clone.querySelector('p');
 
-        if (iconElement) iconElement.textContent = tool.icon || '📄';
+        if (iconElement) iconElement.textContent = tool.icon;
         if (titleElement) titleElement.textContent = tool.name;
-        if (descriptionElement) descriptionElement.textContent = tool.description || '';
+        if (descriptionElement) descriptionElement.textContent = tool.description;
 
         // Add click handler to show tool form
         const card = clone.querySelector('.card');
@@ -714,15 +726,21 @@ function populateToolSelect(toolSelect) {
  * @see createFormField() - Called to create each form field
  */
 function displayToolForm(toolId) {
+    // Validate input
+    if (!toolId || typeof toolId !== 'string') {
+        showError('Invalid tool ID provided');
+        return;
+    }
+
     // Use the global toolsData if available
-    if (!toolsData) {
+    if (!toolsData || Object.keys(toolsData).length === 0) {
         showError('No tools data available');
         return;
     }
 
     // Get the selected tool and category information
     let tool = toolsData[toolId];
-    const category = categoriesData[tool.category];
+    const category = categoriesData && tool?.category ? categoriesData[tool.category] : null;
 
     // If tool is not found, it might not be loaded yet
     if (!tool) {
@@ -734,7 +752,7 @@ function displayToolForm(toolId) {
     tool.id = toolId;
 
     // Update language field if present and hidden
-    if (tool.form.fields) {
+    if (tool.form?.fields) {
         tool.form.fields.forEach(field => {
             if (field.name === 'language' && field.type === 'hidden') {
                 field.value = 'en';
@@ -745,7 +763,7 @@ function displayToolForm(toolId) {
     // Update form title and description
     const formTitle = document.getElementById('formTitle');
     const formSubtitle = document.getElementById('formSubtitle');
-    if (formTitle) formTitle.textContent = tool.icon + ' ' + tool.name;
+    if (formTitle) formTitle.textContent = (tool.icon || '📄') + ' ' + (tool.name || 'Unnamed Tool');
     if (formSubtitle) formSubtitle.textContent = tool.description || '';
 
     // Update page title and subtitle with category info
@@ -762,28 +780,28 @@ function displayToolForm(toolId) {
     const toolForm = document.getElementById('toolForm');
     const formFields = document.getElementById('formFields');
     const actionInput = document.getElementById('action');
-    actionInput.value = tool.id;
+    
+    if (!toolForm || !formFields || !actionInput) {
+        showError('Required form elements not found');
+        return;
+    }
 
+    actionInput.value = tool.id;
     formFields.innerHTML = '';
 
     // Get preferences from localStorage
-    const savedModel = localStorage.getItem('docmind-model');
-    const savedLanguage = localStorage.getItem('docmind-language');
-    const savedMaxImageSize = localStorage.getItem('docmind-max_image_size');
-
-    // Create preferences object for form field creation
     const preferences = {
-        'docmind-model': savedModel,
-        'docmind-language': savedLanguage,
-        'docmind-max_image_size': savedMaxImageSize
+        'docmind-model': localStorage.getItem('docmind-model'),
+        'docmind-language': localStorage.getItem('docmind-language'),
+        'docmind-max_image_size': localStorage.getItem('docmind-max_image_size')
     };
 
     // Create form fields based on formConfig                                                                         
-    if (tool.form && tool.form.fields) {                                                                          
+    if (tool.form?.fields) {                                                                          
         tool.form.fields.forEach(field => {                                                                       
             // If field is a string, get the field definition from common/form/fields                             
             if (typeof field === 'string') {                                                                      
-                if (!commonData || !commonData.form || !commonData.form.fields) { 
+                if (!commonData?.form?.fields) { 
                     console.error('No common data available or common form fields not found');                     
                     return;                                                                                       
                 }                                                                                                 
@@ -818,7 +836,7 @@ function displayToolForm(toolId) {
         cancelBtn.onclick = function() {
             // Get the current tool's category
             const currentTool = toolsData[toolId];
-            if (currentTool && currentTool.category) {
+            if (currentTool?.category) {
                 switchView('tools-' + currentTool.category);
             } else {
                 // Fallback to tools view if category not found
