@@ -603,7 +603,34 @@ function loadToolsInCategory(category) {
         if (card) {
             card.addEventListener('click', (e) => {
                 e.preventDefault();
-                displayToolForm(tool.id);
+                // Check if toolsData is available, if not reload it
+                if (!toolsData || Object.keys(toolsData).length === 0) {
+                    console.warn('Tools data not available, reloading...');
+                    // Reload tools data and then show the form
+                    loadJSONResource('config.json').then(config => {
+                        const toolCategories = config.tools || {};
+                        toolsData = {};
+                        
+                        // Load all tools from individual files
+                        for (const [toolId, categoryId] of Object.entries(toolCategories)) {
+                            const toolPath = `tools/${categoryId}/${toolId}.json`;
+                            loadJSONResource(toolPath).then(tool => {
+                                if (!tool.id) tool.id = toolId;
+                                if (!tool.category) tool.category = categoryId;
+                                toolsData[toolId] = tool;
+                                
+                                // Show the form if this is the tool we want
+                                if (toolId === tool.id) {
+                                    displayToolForm(tool.id);
+                                }
+                            }).catch(error => {
+                                console.error(`Failed to load tool ${toolId}:`, error);
+                            });
+                        }
+                    });
+                } else {
+                    displayToolForm(tool.id);
+                }
             });
         }
 
