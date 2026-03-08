@@ -1121,6 +1121,105 @@ async function loadJSONResource(filename, rootKey, showLoading = false) {
 }
 
 /**
+ * Load multiple JSON resources in parallel with comprehensive error handling
+ * 
+ * This function fetches multiple JSON files concurrently using Promise.allSettled,
+ * providing robust error handling and loading states. It's optimized for performance
+ * by loading resources in parallel rather than sequentially.
+ * 
+ * @param {Array<Object>} requests - Array of request objects with filename and optional rootKey
+ * @param {boolean} [showLoading=false] - Whether to show loading overlay during operation
+ * @returns {Promise<Object>} Promise resolving to an object with results keyed by filename
+ * 
+ * @throws {Error} If requests array is invalid
+ * @note Uses Promise.allSettled to handle all requests even if some fail
+ * @note Provides detailed error information for failed requests
+ * @note Can optionally show loading overlay during operation
+ * @note Optimized for performance by loading resources in parallel
+ * @see loadJSONResource() - Individual resource loading function
+ * @example
+ * // Load multiple resources in parallel
+ * const results = await loadJSONResources([
+ *     { filename: 'config.json', rootKey: 'categories' },
+ *     { filename: 'config.json', rootKey: 'languages' },
+ *     { filename: 'tools/category1/tool1.json' },
+ *     { filename: 'tools/category2/tool2.json' }
+ * ]);
+ */
+async function loadJSONResources(requests, showLoading = false) {
+    try {
+        // Validate input
+        if (!Array.isArray(requests) || requests.length === 0) {
+            throw new Error('Invalid requests array provided');
+        }
+
+        // Show loading state if requested
+        if (showLoading) {
+            showGlobalLoading('Loading resources...');
+        }
+
+        // Create array of promises for all requests
+        const promises = requests.map(async (request) => {
+            const { filename, rootKey } = request;
+            const data = await loadJSONResource(filename, rootKey, false);
+            return { filename, rootKey, data };
+        });
+
+        // Wait for all requests to complete
+        const results = await Promise.allSettled(promises);
+
+        // Process results
+        const successfulResults = {};
+        const failedResults = [];
+
+        results.forEach((result, index) => {
+            const request = requests[index];
+            if (result.status === 'fulfilled' && result.value.data !== null) {
+                successfulResults[request.filename] = result.value.data;
+            } else {
+                failedResults.push({
+                    filename: request.filename,
+                    rootKey: request.rootKey,
+                    error: result.reason?.message || 'Unknown error'
+                });
+            }
+        });
+
+        // Log failed requests for debugging
+        if (failedResults.length > 0) {
+            console.warn('Failed to load some resources:', failedResults);
+        }
+
+        // Hide loading state if shown
+        if (showLoading) {
+            hideGlobalLoading();
+        }
+
+        return successfulResults;
+    } catch (error) {
+        // Categorize and handle the error
+        const errorInfo = errorHandler.categorizeError(error, {
+            operation: 'parallel_fetch',
+            requests: requests,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Log the error for debugging
+        errorHandler.logError(errorInfo);
+        
+        // Show user-friendly error message
+        errorHandler.showError(errorInfo);
+        
+        // Hide loading state if shown
+        if (showLoading) {
+            hideGlobalLoading();
+        }
+        
+        return {};
+    }
+}
+
+/**
  * Create category views dynamically using the tools view template
  *
  * This function creates view sections for each category in the categories data.
@@ -3011,6 +3110,7 @@ function clearHistory() {
  * and provides loading feedback during data processing.
  *
  * @param {number} [maxItems=10] - Maximum number of history items to display
+ * @param {number} [page=1] - Page number for pagination (1-based)
  * @returns {Promise<void>}
  *
  * @throws {Error} If history content element is not found or template loading fails
@@ -3023,6 +3123,7 @@ function clearHistory() {
  * @note Shows empty state message when no history is available using historyEmptyTemplate
  * @note Truncates preview text to 200 characters with ellipsis for better display
  * @note Integrates with toolsData to display accurate tool information and icons
+ * @note Implements pagination for large history datasets
  * @see switchView() - Calls this function when history view is selected
  * @see loadResultsFromHistory() - Loads paginated results from localStorage
  * @see displayHistoryResult() - Called when history items are clicked
@@ -3035,8 +3136,11 @@ function clearHistory() {
  * 
  * // Display specific number of history items
  * await displayHistory(5);
+ * 
+ * // Display second page with 10 items per page
+ * await displayHistory(10, 2);
  */
-async function displayHistory(maxItems = 10) {
+async function displayHistory(maxItems = 10, page = 1) {
     const historyContent = document.getElementById('historyContent');
     if (!historyContent) {
         console.error('History content element not found');
@@ -3050,10 +3154,14 @@ async function displayHistory(maxItems = 10) {
         // Clear existing history items
         historyContent.innerHTML = '';
 
-        // Load results from history
-        const results = loadResultsFromHistory(maxItems);
+        // Load results from history with pagination
+        const results = loadResultsFromHistory(maxItems * page);
+        
+        // Apply pagination
+        const startIndex = (page - 1) * maxItems;
+        const paginatedResults = results.slice(startIndex, startIndex + maxItems);
 
-        if (results.length === 0) {
+        if (paginatedResults.length === 0) {
             // Show empty state using template
             const emptyTemplate = document.getElementById('historyEmptyTemplate');
             if (emptyTemplate) {
@@ -3072,68 +3180,84 @@ async function displayHistory(maxItems = 10) {
             return;
         }
 
-        // Create history items using template
-        results.forEach(result => {
-            const clone = template.content.cloneNode(true);
-            const historyItem = clone.querySelector('.history-item');
-            historyItem.dataset.resultId = result.id;
-
-            // Populate template elements
-            const titleElement = clone.querySelector('.history-title-text');
-            const iconElement = clone.querySelector('.history-icon');
-            const dateElement = clone.querySelector('.history-date');
-            const previewElement = clone.querySelector('.history-preview');
-
-            // Format date
-            const date = new Date(result.timestamp);
-            const formattedDate = date.toLocaleString();
-            if (dateElement) dateElement.textContent = formattedDate;
+        // Create history items using template with batch processing for better performance
+        const fragment = document.createDocumentFragment();
+        
+        // Process results in batches to improve performance
+        const batchSize = 5;
+        for (let i = 0; i < paginatedResults.length; i += batchSize) {
+            const batch = paginatedResults.slice(i, i + batchSize);
             
-            if (result.tool) {
-                // Get tool data from toolsData
-                const tool = toolsData[result.tool];
-                if (tool) {
-                    iconElement.textContent = tool.icon || '📄';
-                    titleElement.textContent = tool.name || result.title;
+            batch.forEach(result => {
+                const clone = template.content.cloneNode(true);
+                const historyItem = clone.querySelector('.history-item');
+                historyItem.dataset.resultId = result.id;
+
+                // Populate template elements
+                const titleElement = clone.querySelector('.history-title-text');
+                const iconElement = clone.querySelector('.history-icon');
+                const dateElement = clone.querySelector('.history-date');
+                const previewElement = clone.querySelector('.history-preview');
+
+                // Format date
+                const date = new Date(result.timestamp);
+                const formattedDate = date.toLocaleString();
+                if (dateElement) dateElement.textContent = formattedDate;
+                
+                if (result.tool) {
+                    // Get tool data from toolsData
+                    const tool = toolsData[result.tool];
+                    if (tool) {
+                        iconElement.textContent = tool.icon || '📄';
+                        titleElement.textContent = tool.name || result.title;
+                    } else {
+                        iconElement.textContent = '📄';
+                        titleElement.textContent = result.title;
+                    }
                 } else {
                     iconElement.textContent = '📄';
                     titleElement.textContent = result.title;
                 }
-            } else {
-                iconElement.textContent = '📄';
-                titleElement.textContent = result.title;
-            }
 
-            // Add preview text
-            if (previewElement) {
-                let previewText = '';
-                
-                // Try to get preview from different sources
-                if (result.response && result.response.choices && result.response.choices[0] && result.response.choices[0].message && result.response.choices[0].message.content) {
-                    previewText = result.response.choices[0].message.content;
-                } else if (result.content && result.content.response && result.content.response.choices && result.content.response.choices[0] && result.content.response.choices[0].message && result.content.response.choices[0].message.content) {
-                    previewText = result.content.response.choices[0].message.content;
-                } else if (result.content) {
-                    previewText = String(result.content);
-                } else {
-                    previewText = String(result);
+                // Add preview text with optimized processing
+                if (previewElement) {
+                    let previewText = '';
+                    
+                    // Try to get preview from different sources (optimized order)
+                    if (result.response?.choices?.[0]?.message?.content) {
+                        previewText = result.response.choices[0].message.content;
+                    } else if (result.content?.response?.choices?.[0]?.message?.content) {
+                        previewText = result.content.response.choices[0].message.content;
+                    } else if (result.content) {
+                        previewText = String(result.content);
+                    } else {
+                        previewText = String(result);
+                    }
+                    
+                    // Take first 200 characters and add ellipsis if truncated
+                    if (previewText.length > 200) {
+                        previewText = previewText.substring(0, 200) + '...';
+                    }
+                    
+                    previewElement.textContent = previewText;
                 }
-                
-                // Take first 200 characters and add ellipsis if truncated
-                if (previewText.length > 200) {
-                    previewText = previewText.substring(0, 200) + '...';
-                }
-                
-                previewElement.textContent = previewText;
-            }
 
-            // Add click handler to entire item
-            historyItem.addEventListener('click', () => {
-                displayHistoryResult(result.id);
+                // Add click handler to entire item
+                historyItem.addEventListener('click', () => {
+                    displayHistoryResult(result.id);
+                });
+
+                fragment.appendChild(clone);
             });
+        }
 
-            historyContent.appendChild(clone);
-        });
+        // Add all items to DOM at once for better performance
+        historyContent.appendChild(fragment);
+        
+        // Add pagination controls if there are more pages
+        if (results.length > maxItems) {
+            addPaginationControls(historyContent, maxItems, page, results.length);
+        }
     } catch (error) {
         console.error('Failed to load history:', error);
         showError('Failed to load history: ' + error.message);
@@ -3141,6 +3265,114 @@ async function displayHistory(maxItems = 10) {
         // Hide loading overlay
         hideGlobalLoading();
     }
+}
+
+/**
+ * Add pagination controls to history view
+ * 
+ * This function creates and appends pagination controls to the history view,
+ * allowing users to navigate through multiple pages of history items.
+ * 
+ * @param {HTMLElement} container - The container element to append pagination controls to
+ * @param {number} itemsPerPage - Number of items per page
+ * @param {number} currentPage - Current page number (1-based)
+ * @param {number} totalItems - Total number of items
+ * @returns {void}
+ * 
+ * @note Creates Previous/Next buttons and page numbers
+ * @note Highlights the current page
+ * @note Disables buttons when at boundaries
+ * @note Updates history view when page is changed
+ */
+function addPaginationControls(container, itemsPerPage, currentPage, totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+    // Create pagination container
+    const paginationContainer = document.createElement('div');
+    paginationContainer.className = 'pagination-controls';
+    
+    // Create Previous button
+    const prevButton = document.createElement('button');
+    prevButton.textContent = '← Previous';
+    prevButton.disabled = currentPage === 1;
+    prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            displayHistory(itemsPerPage, currentPage - 1);
+        }
+    });
+    paginationContainer.appendChild(prevButton);
+    
+    // Create page numbers
+    const pageNumbers = document.createElement('div');
+    pageNumbers.className = 'page-numbers';
+    
+    // Show page numbers with ellipsis for large page counts
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    // Add first page and ellipsis if needed
+    if (startPage > 1) {
+        const firstPage = document.createElement('button');
+        firstPage.textContent = '1';
+        firstPage.addEventListener('click', () => displayHistory(itemsPerPage, 1));
+        pageNumbers.appendChild(firstPage);
+        
+        if (startPage > 2) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            pageNumbers.appendChild(ellipsis);
+        }
+    }
+    
+    // Add page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        pageButton.className = i === currentPage ? 'active' : '';
+        pageButton.addEventListener('click', () => displayHistory(itemsPerPage, i));
+        pageNumbers.appendChild(pageButton);
+    }
+    
+    // Add last page and ellipsis if needed
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            pageNumbers.appendChild(ellipsis);
+        }
+        
+        const lastPage = document.createElement('button');
+        lastPage.textContent = totalPages;
+        lastPage.addEventListener('click', () => displayHistory(itemsPerPage, totalPages));
+        pageNumbers.appendChild(lastPage);
+    }
+    
+    paginationContainer.appendChild(pageNumbers);
+    
+    // Create Next button
+    const nextButton = document.createElement('button');
+    nextButton.textContent = 'Next →';
+    nextButton.disabled = currentPage === totalPages;
+    nextButton.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            displayHistory(itemsPerPage, currentPage + 1);
+        }
+    });
+    paginationContainer.appendChild(nextButton);
+    
+    // Add pagination info
+    const pageInfo = document.createElement('div');
+    pageInfo.className = 'page-info';
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    paginationContainer.appendChild(pageInfo);
+    
+    // Add pagination controls to container
+    container.appendChild(paginationContainer);
 }
 
 /**
@@ -3200,44 +3432,61 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Apply theme preference
     applyTheme();
-    // Load config data
-    configData = await loadJSONResource('config.json');
-    // Load categories data
+    // Load all required data in parallel for better performance
+    console.log('Starting parallel data loading...');
+    
+    // Load basic config data
+    const configData = await loadJSONResource('config.json');
+    if (!configData) {
+        console.error('Failed to load config data');
+        return;
+    }
+    
+    // Set basic data
     categoriesData = configData.categories || {};
-    // Load languages data
     languagesData = configData.languages || {};
-    // Load tools from individual files in their categories
-    toolsData = {};
     commonData = configData.common || {};
-
-    // Load all tools from individual files
+    
+    // Prepare tool loading requests
     const toolCategories = configData.tools || {};
-    let totalTools = 0;
-    let successfulTools = 0;
-
-    for (const [toolId, categoryId] of Object.entries(configData.tools)) {
-        totalTools++;
+    const toolRequests = [];
+    const toolPaths = [];
+    
+    for (const [toolId, categoryId] of Object.entries(toolCategories)) {
         const toolPath = `tools/${categoryId}/${toolId}.json`;
-        try {
-            const tool = await loadJSONResource(toolPath);
-
+        toolRequests.push({ filename: toolPath });
+        toolPaths.push({ toolId, categoryId, toolPath });
+    }
+    
+    // Load all tools in parallel
+    const toolsResults = await loadJSONResources(toolRequests, true);
+    
+    // Process loaded tools
+    toolsData = {};
+    let successfulTools = 0;
+    let failedTools = 0;
+    
+    for (const { toolId, categoryId, toolPath } of toolPaths) {
+        const toolData = toolsResults[toolPath];
+        if (toolData) {
             // Verify tool has required properties
-            if (!tool.id) {
-                tool.id = toolId;
+            if (!toolData.id) {
+                toolData.id = toolId;
             }
-            if (!tool.category) {
-                tool.category = categoryId;
+            if (!toolData.category) {
+                toolData.category = categoryId;
             }
-
-            toolsData[toolId] = tool;
+            
+            toolsData[toolId] = toolData;
             successfulTools++;
-            console.log(`✓ Loaded tool: ${toolId} (${tool.name}) from ${toolPath}`);
-        } catch (error) {
-            console.error(`✗ Failed to load tool ${toolId} from ${toolPath}:`, error);
+            console.log(`✓ Loaded tool: ${toolId} (${toolData.name || 'Unnamed Tool'}) from ${toolPath}`);
+        } else {
+            failedTools++;
+            console.error(`✗ Failed to load tool ${toolId} from ${toolPath}`);
         }
     }
-
-    console.log(`Tool loading summary: ${successfulTools}/${totalTools} tools loaded successfully`);
+    
+    console.log(`Tool loading summary: ${successfulTools}/${toolPaths.length} tools loaded successfully (${failedTools} failed)`);
 
     // Create category views and buttons after loading data
     if (categoriesData) {
