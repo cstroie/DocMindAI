@@ -390,23 +390,6 @@ function populateCategoriesMenu() {
     }
 }
 
-// Register Handlebars helpers immediately to ensure they're available when templates are rendered
-if (typeof Handlebars !== 'undefined') {
-    Handlebars.registerHelper('eq', (a, b) => a === b);
-    Handlebars.registerHelper('getSeverityColor', severity => {
-        if (severity == 0) return '#10b981';
-        if (severity <= 3) return '#3b82f6';
-        if (severity <= 6) return '#f59e0b';
-        return '#ef4444';
-    });
-    Handlebars.registerHelper('getSeverityLabel', severity => {
-        if (severity == 0) return 'Normal';
-        if (severity <= 3) return 'Minor';
-        if (severity <= 6) return 'Moderate';
-        if (severity <= 8) return 'Severe';
-        return 'Critic';
-    });
-}
 
 /**
  * Toggle between light and dark themes
@@ -3194,6 +3177,24 @@ async function displayHistory(maxItems = 10) {
  * @see errorHandler - Global error handling system
  */
 document.addEventListener('DOMContentLoaded', async function() {
+    // Register Handlebars helpers to ensure they're available
+    if (typeof Handlebars !== 'undefined') {
+        Handlebars.registerHelper('eq', (a, b) => a === b);
+        Handlebars.registerHelper('getSeverityColor', severity => {
+            if (severity == 0) return '#10b981';
+            if (severity <= 3) return '#3b82f6';
+            if (severity <= 6) return '#f59e0b';
+            return '#ef4444';
+        });
+        Handlebars.registerHelper('getSeverityLabel', severity => {
+            if (severity == 0) return 'Normal';
+            if (severity <= 3) return 'Minor';
+            if (severity <= 6) return 'Moderate';
+            if (severity <= 8) return 'Severe';
+            return 'Critic';
+        });
+    }
+
     // Set up global error handling
     setupGlobalErrorHandling();
 
