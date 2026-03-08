@@ -2134,7 +2134,10 @@ function switchView(viewName) {
 
     // Special handling for history view
     if (viewName === 'history') {
-        displayHistory();
+        // Use setTimeout to allow the view to be displayed before loading history
+        setTimeout(() => {
+            displayHistory();
+        }, 100);
     }
 }
 
@@ -2460,7 +2463,7 @@ async function displayHistory(maxItems = 10) {
         historyContent.innerHTML = '';
 
         // Load results from history
-        const results = loadResultsFromHistory(maxItems = maxItems);
+        const results = loadResultsFromHistory(maxItems);
 
         if (results.length === 0) {
             // Show empty state using template
@@ -2544,6 +2547,7 @@ async function displayHistory(maxItems = 10) {
             historyContent.appendChild(clone);
         });
     } catch (error) {
+        console.error('Failed to load history:', error);
         showError('Failed to load history: ' + error.message);
     } finally {
         // Hide loading overlay
