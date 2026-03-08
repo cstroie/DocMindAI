@@ -2522,15 +2522,15 @@ function showResults() {
  * @example
  * // Convert simple object to markdown
  * const obj = { title: 'Document', pages: 10 };
- * const markdown = dataToMarkdown(obj);
+ * const markdown = jsonToMarkdown(obj);
  * // Returns: "### Title\n\nDocument\n\n### Pages\n\n10"
  * 
  * // Convert array to markdown list
  * const arr = ['Item 1', 'Item 2'];
- * const markdown = dataToMarkdown(arr);
+ * const markdown = jsonToMarkdown(arr);
  * // Returns: "- Item 1\n- Item 2"
  */
-function dataToMarkdown(data, level = 3) {
+function jsonToMarkdown(data, level = 3) {
     if (typeof data === 'string') {
         return data;
     } else if (Array.isArray(data)) {
