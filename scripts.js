@@ -1273,6 +1273,12 @@ function displayResults(results, fromHistory = false) {
     // Store the original form data for details view
     currentPrompt = '';
     currentResponse = '';
+    
+    // Check if backend returned the prompt in debug/prompt
+    if (results.debug && results.debug.prompt) {
+        currentPrompt = results.debug.prompt;
+    }
+    
     if (results.error) {
         // If results contain an error, display it
         console.error('Error found:\n', results.error);
