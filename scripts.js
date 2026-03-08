@@ -4,6 +4,8 @@ let toolsData = {};
 let commonData = {};
 let languagesData = {}
 let promptsData = null;
+let currentPrompt = ''; // Store current prompt
+let currentResponse = ''; // Store current response
 
 /**
  * Populate top menu with categories
@@ -1267,6 +1269,10 @@ function displayResults(results, fromHistory = false) {
 
     // Extract the actual response content from the API response
     let responseContent = '';
+    
+    // Store the original form data for details view
+    currentPrompt = '';
+    currentResponse = '';
     if (results.error) {
         // If results contain an error, display it
         console.error('Error found:\n', results.error);
@@ -1393,6 +1399,17 @@ function displayResults(results, fromHistory = false) {
 
     // Scroll to results
     resultsArea.scrollIntoView({ behavior: 'smooth' });
+
+    // Store prompt and response for details view
+    if (!fromHistory) {
+        // Get the form data to store the prompt
+        const form = document.getElementById('apiForm');
+        if (form) {
+            const formData = new FormData(form);
+            currentPrompt = Object.fromEntries(formData);
+        }
+        currentResponse = responseContent;
+    }
 
     // Save result to history only if it's not from history
     if (!fromHistory) {
@@ -1896,6 +1913,41 @@ function clearHistory() {
 }
 
 /**
+ * Toggle details section visibility
+ *
+ * This function shows or hides the details section and fills it with
+ * the current prompt and response data.
+ *
+ * @return {void}
+ *
+ * @note Fills detailsPrompt and detailsResponse elements with stored data
+ * @note Toggles the display of detailsSection
+ * @see displayResults() - Stores prompt and response data
+ */
+function toggleDetails() {
+    const detailsSection = document.getElementById('detailsSection');
+    const detailsPrompt = document.getElementById('detailsPrompt');
+    const detailsResponse = document.getElementById('detailsResponse');
+    
+    if (!detailsSection || !detailsPrompt || !detailsResponse) {
+        console.error('Details section elements not found');
+        return;
+    }
+    
+    if (detailsSection.style.display === 'none' || !detailsSection.style.display) {
+        // Show details section
+        detailsPrompt.textContent = JSON.stringify(currentPrompt, null, 2);
+        detailsResponse.textContent = currentResponse;
+        detailsSection.style.display = 'block';
+        document.getElementById('detailsBtn').textContent = 'Hide Details';
+    } else {
+        // Hide details section
+        detailsSection.style.display = 'none';
+        document.getElementById('detailsBtn').textContent = 'Details';
+    }
+}
+
+/**
  * Display history of saved results
  *
  * This function populates the history view with saved results from localStorage.
@@ -2082,6 +2134,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     if (clearHistoryBtn) {
         clearHistoryBtn.addEventListener('click', clearHistory);
+    }
+    // Set up details button
+    const detailsBtn = document.getElementById('detailsBtn');
+    if (detailsBtn) {
+        detailsBtn.addEventListener('click', toggleDetails);
     }
     // Set up view switching for sidebar navigation
     const navButtons = document.querySelectorAll('.nav-item');
