@@ -311,24 +311,35 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
 }
 
 /**
- * Load JSON resource from file
+ * Load JSON resource from file with comprehensive error handling
  * 
  * This function fetches and parses a JSON configuration file from the server.
- * It handles errors gracefully and can extract a specific root key from the
- * JSON data if provided.
+ * It provides robust error handling and can extract a specific root key from the
+ * JSON data if provided. The function validates inputs and provides detailed
+ * error messages for debugging.
  * 
- * @param {string} filename - The JSON file to load (e.g., 'config.json')
- * @param {string} rootKey - The root key to extract from the JSON data (e.g., 'tools')
+ * @param {string} filename - The JSON file to load (e.g., 'config.json', 'tools/category/tool.json')
+ * @param {string} [rootKey] - Optional root key to extract from the JSON data (e.g., 'tools')
  * @returns {Promise<Object|null>} Promise resolving to the extracted data or null on error
  * 
- * @note Uses the Fetch API to retrieve the JSON file
- * @note Handles network errors and JSON parsing errors
+ * @throws {Error} If filename is invalid or network request fails
+ * @note Uses the Fetch API with proper error handling for HTTP status codes
+ * @note Handles network errors, JSON parsing errors, and missing data gracefully
  * @note If rootKey is provided, returns data[rootKey] if it exists, otherwise returns entire data
- * @note Logs errors to console for debugging
- * @note Used for loading tools, languages, categories, and prompts
+ * @note Logs detailed error messages to console for debugging
+ * @note Used for loading configuration, tools, languages, categories, and prompts
  * @see displayTools() - Uses this to load tools data
  * @see populateToolSelect() - Uses this to load tools data
  * @see Document.addEventListener('DOMContentLoaded') - Calls this for initial data loading
+ * @example
+ * // Load entire config file
+ * const config = await loadJSONResource('config.json');
+ * 
+ * // Load only tools section
+ * const tools = await loadJSONResource('config.json', 'tools');
+ * 
+ * // Load individual tool file
+ * const tool = await loadJSONResource('tools/category/tool.json');
  */
 async function loadJSONResource(filename, rootKey) {
     try {
@@ -706,24 +717,33 @@ function populateToolSelect(toolSelect) {
 }
 
 /**
- * Display a tool form with the given configuration
+ * Display a tool form with comprehensive configuration handling
  * 
- * This function renders the form for a specific tool. It:
- * 1. Updates the top title and description with tool information
- * 2. Sets up the form action input with the tool ID
- * 3. Retrieves saved preferences from localStorage
- * 4. Creates form fields based on the tool configuration
- * 5. Shows the form and hides the results area
- * 6. Scrolls to the form for better UX
+ * This function renders the form for a specific tool based on its configuration.
+ * It handles the complete form lifecycle including validation, population with saved preferences,
+ * and proper error handling. The function supports both tool-specific fields and common fields
+ * referenced by string names.
  * 
  * @param {string} toolId - The ID of the tool to display
- * @return {void}
+ * @returns {void}
  * 
- * @note Uses the tool's form.fields array to create input elements
- * @note Retrieves saved model and language preferences from localStorage
- * @note Hides the results area when displaying a new form
- * @note Uses smooth scrolling to bring the form into view
- * @see createFormField() - Called to create each form field
+ * @throws {Error} If toolId is invalid or required form elements are missing
+ * @note Validates toolId and checks for required form elements before proceeding
+ * @note Updates page title and subtitle with tool and category information
+ * @note Retrieves user preferences from localStorage for model, language, and image size
+ * @note Supports both direct field objects and string references to common fields
+ * @note Creates form fields using createFormField() with proper error handling
+ * @note Sets up cancel button to return to the appropriate category view
+ * @note Uses smooth scrolling to ensure the form is visible to the user
+ * @see createFormField() - Called to create each form field with validation
+ * @see toolsData - Global object containing tool configurations
+ * @see categoriesData - Global object containing category information
+ * @example
+ * // Display a specific tool form
+ * displayToolForm('text-extractor');
+ * 
+ * // Function handles missing tools gracefully
+ * displayToolForm('nonexistent-tool'); // Shows error message
  */
 function displayToolForm(toolId) {
     // Validate input
@@ -852,31 +872,54 @@ function displayToolForm(toolId) {
 }
 
 /**
- * Create a form field element based on field configuration
+ * Create a form field element with comprehensive type handling and dynamic loading
  * 
- * This function creates a form field element based on the provided field
- * configuration. It supports various field types including text, textarea,
- * select, hidden, and file inputs. For select fields, it can fetch options
- * dynamically from the API (for models and prompts) or use predefined options.
+ * This function creates form field elements based on field configuration objects.
+ * It supports multiple field types with proper validation, dynamic option loading,
+ * and user preference integration. The function handles complex scenarios like
+ * dynamic API fetching for select fields and proper error states.
  * 
  * @param {Object} field - The field configuration object
  * @param {string} field.name - The name attribute for the field
- * @param {string} field.type - The type of field (textarea, select, hidden, text, etc.)
+ * @param {string} field.type - The type of field (textarea, select, hidden, text, file, etc.)
  * @param {string} [field.label] - The label text for the field
  * @param {boolean} [field.required] - Whether the field is required
  * @param {Array} [field.options] - Options for select fields
  * @param {string} [field.value] - Default value for the field
- * @param {Object} cookies - Object containing cookie values
- * @returns {HTMLElement} The created form field element
+ * @param {string} [field.placeholder] - Placeholder text for input fields
+ * @param {string} [field.help] - Help text for the field
+ * @param {Object} [cookies] - Object containing saved user preferences
+ * @returns {HTMLElement|null} The created form field element or null if creation fails
  * 
- * @note Supports dynamic fetching of models and prompts from API
- * @note Uses global languagesData for language selection
- * @note Applies saved preferences from cookies (docmind-model, docmind-language)
- * @note Creates appropriate HTML elements based on field type
- * @note Adds help text if provided in field configuration
- * @see fetchModels() - Called for dynamic model loading
- * @see fetchExpPrompts() - Called for dynamic prompt loading
- * @see displayToolForm() - Calls this function for each field
+ * @throws {Error} If field configuration is invalid or required elements are missing
+ * @note Supports field types: text, textarea, select, hidden, file, and other HTML input types
+ * @note Handles dynamic field loading for models (fetchModels) and prompts (fetchExpPrompts)
+ * @note Integrates with global languagesData for language selection with flag icons
+ * @note Applies saved user preferences from cookies for model and language fields
+ * @note Creates proper HTML structure with labels, inputs, and help text
+ * @note Provides loading states for dynamically populated select fields
+ * @note Includes error handling for failed dynamic loading operations
+ * @see fetchModels() - Called for dynamic model loading from API
+ * @see fetchExpPrompts() - Called for dynamic prompt loading from API
+ * @see displayToolForm() - Calls this function for each field in tool configuration
+ * @see languagesData - Global object containing language data with flag icons
+ * @example
+ * // Create a text input field
+ * const textField = createFormField({
+ *     name: 'title',
+ *     type: 'text',
+ *     label: 'Document Title',
+ *     required: true,
+ *     placeholder: 'Enter document title'
+ * });
+ * 
+ * // Create a dynamic model select field
+ * const modelField = createFormField({
+ *     name: 'model',
+ *     type: 'select',
+ *     label: 'AI Model',
+ *     required: true
+ * }, savedPreferences);
  */
 function createFormField(field, cookies = {}) {
     // Create container div
@@ -1157,29 +1200,31 @@ async function fetchExpPrompts(selectElement) {
 }
 
 /**
- * Handle form submission
+ * Handle form submission with comprehensive error handling and user feedback
  * 
- * This function handles the form submission event. It:
- * 1. Prevents the default form submission
- * 2. Collects form data
- * 3. Shows a loading state on the submit button
- * 4. Sends the form data to the server API
- * 5. Processes the response
- * 6. Saves user preferences as cookies
- * 7. Restores the button state
+ * This function manages the complete form submission lifecycle including data collection,
+ * API communication, user preference saving, and proper error handling. It provides
+ * visual feedback during processing and handles various response formats appropriately.
  * 
  * @param {Event} event - The form submission event
- * @return {Promise<void>}
+ * @returns {Promise<void>}
  * 
- * @note Uses the FormData API to collect form data
- * @note Makes POST request to docmind.php
- * @note Expects JSON response from the server
- * @note Saves model and language preferences as cookies (30-day expiration)
- * @note Handles network errors and API errors gracefully
- * @note Shows loading state during processing
- * @see displayResults() - Called to render successful responses
- * @see showError() - Called to display error messages
- * @see Document.addEventListener('DOMContentLoaded') - Sets up this handler
+ * @throws {Error} If form validation fails or API communication encounters errors
+ * @note Prevents default form submission and uses FormData API for data collection
+ * @note Makes POST request to docmind.php with Accept: application/json header
+ * @note Validates response format and handles both JSON and non-JSON responses
+ * @note Saves user preferences (model, language, max_image_size) to localStorage
+ * @note Shows loading state on submit button during API processing
+ * @note Handles network errors, HTTP errors, and API errors with appropriate messages
+ * @note Calls displayResults() for successful API responses
+ * @note Calls showError() for validation errors and API errors
+ * @note Restores submit button state after processing completes
+ * @see displayResults() - Called to render successful API responses
+ * @see showError() - Called to display error messages to users
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up this handler on form elements
+ * @example
+ * // Form submission is automatically handled when form is submitted
+ * // No direct calling needed - event handler is set up in DOMContentLoaded
  */
 async function handleFormSubmit(event) {
     // Prevent default form submission
@@ -1249,28 +1294,38 @@ async function handleFormSubmit(event) {
 }
 
 /**
- * Display results in the results area
+ * Display API results with comprehensive content processing and rendering
  * 
- * This function renders the API response in the results area. It:
- * 1. Extracts the response content from the API response
- * 2. Updates the results title and description based on the tool
- * 3. Detects the content type (JSON, markdown, or other)
- * 4. Converts the content to the appropriate display format
- * 5. Renders the content with syntax highlighting
- * 6. Shows the results area and applies syntax highlighting
- * 7. Scrolls to the results
+ * This function processes and renders API responses in the results area with support for
+ * multiple content types and display formats. It handles complex content detection,
+ * conversion, and rendering with proper error handling and user feedback.
  * 
- * @param {Object} results - The results object from the API
- * @return {void}
+ * @param {Object} results - The results object from the API containing response data
+ * @param {boolean} [fromHistory=false] - Flag indicating if results are from history
+ * @returns {void}
  * 
- * @note Handles JSON, markdown, and plain text content
- * @note Supports tool-specific display formats (markdown, html, json)
+ * @throws {Error} If no valid response content is found or content processing fails
+ * @note Extracts response content from multiple possible locations in the API response
+ * @note Supports HTML, JSON, and LLM chat completion response formats
+ * @note Updates results title and subtitle based on tool configuration
+ * @note Detects content type using extractCodeFenceInfo() for proper processing
+ * @note Renders content based on tool display preferences (html, markdown, json)
  * @note Uses marked.js for markdown to HTML conversion
- * @note Uses highlight.js for syntax highlighting
- * @note Calls jsonToMarkdown() for JSON content conversion
+ * @note Uses highlight.js for syntax highlighting of code blocks
+ * @note Calls jsonToMarkdown() for JSON content conversion to markdown
+ * @note Stores original raw response data for copy functionality
+ * @note Automatically saves results to history unless fromHistory flag is true
+ * @note Scrolls results into view with smooth scrolling for better UX
  * @see handleFormSubmit() - Calls this function on successful form submission
  * @see applySyntaxHighlighting() - Called to highlight code blocks
  * @see showError() - Called if no valid response content is found
+ * @see saveResultToHistory() - Called to save results unless fromHistory
+ * @example
+ * // Display fresh API results
+ * displayResults(apiResponse);
+ * 
+ * // Display results from history
+ * displayResults(savedResult, true);
  */
 function displayResults(results, fromHistory = false) {
     // Get results area and title elements
@@ -1603,15 +1658,36 @@ function showResults() {
 }
 
 /**
- * Convert data to Markdown format
+ * Convert data to Markdown format with comprehensive type handling
  * 
- * This function acts as a central handler for converting various data types
- * (objects, arrays, primitives) into Markdown format. It delegates specific
- * conversions to helper functions based on the data type.
+ * This function serves as the central entry point for converting various data types
+ * into Markdown format. It intelligently delegates to specialized helper functions
+ * based on the data type, ensuring proper formatting for objects, arrays, and
+ * primitive values. The function maintains consistent formatting across different
+ * data structures.
  * 
- * @param {Object|Array|string} data - The data to convert
- * @param {number} [level=3] - The heading level for objects (1-6)
- * @return {string} Markdown representation of the data
+ * @param {Object|Array|string|number|boolean} data - The data to convert to Markdown
+ * @param {number} [level=3] - The heading level for objects (1-6), used for nested structures
+ * @returns {string} Markdown representation of the data with proper formatting
+ * 
+ * @note Handles complex nested structures including objects with nested objects and arrays
+ * @note Uses appropriate heading levels for nested content (automatically increments for deeper nesting)
+ * @note Preserves data types and converts primitives to string representation
+ * @note Delegates to specialized functions: objectToMarkdown(), arrayToMarkdown()
+ * @note Maintains consistent formatting across different data structures
+ * @note Skips null and undefined values to avoid empty content
+ * @see objectToMarkdown() - Handles object conversion with proper heading structure
+ * @see arrayToMarkdown() - Handles array conversion with list or table formatting
+ * @example
+ * // Convert simple object to markdown
+ * const obj = { title: 'Document', pages: 10 };
+ * const markdown = dataToMarkdown(obj);
+ * // Returns: "### Title\n\nDocument\n\n### Pages\n\n10"
+ * 
+ * // Convert array to markdown list
+ * const arr = ['Item 1', 'Item 2'];
+ * const markdown = dataToMarkdown(arr);
+ * // Returns: "- Item 1\n- Item 2"
  */
 function dataToMarkdown(data, level = 3) {
     if (typeof data === 'string') {
@@ -1645,23 +1721,39 @@ function arrayToMarkdown(arr) {
 }
 
 /**
- * Convert an object to Markdown headings and paragraphs
+ * Convert JavaScript object to structured Markdown with proper heading hierarchy
  * 
- * This function converts a JavaScript object into markdown format with
- * headings and paragraphs. Each key becomes a heading, and each value
- * becomes content. Nested objects and arrays are handled recursively.
+ * This function transforms JavaScript objects into well-structured Markdown documents
+ * with appropriate heading levels and content organization. It handles complex nested
+ * structures, skips empty values, and maintains consistent formatting throughout.
  * 
- * @param {Object} obj - The object to convert
- * @param {number} [level=3] - The heading level to start with (1-6)
- * @return {string} Markdown representation
+ * @param {Object} obj - The JavaScript object to convert to Markdown
+ * @param {number} [level=3] - The starting heading level (1-6), automatically increments for nested objects
+ * @returns {string} Structured Markdown representation with proper headings and content
  * 
- * @note Skips null and undefined values
- * @note Capitalizes the first letter of each key
- * @note Uses markdown headings (#) based on the level parameter
- * @note Handles nested objects recursively with increasing heading level
- * @note Handles arrays by calling jsonToMarkdown() recursively
- * @note Converts numbers and booleans to strings
- * @see jsonToMarkdown() - Calls this function for object conversion
+ * @throws {Error} If object contains circular references (handled by recursion limit)
+ * @note Skips null and undefined values to avoid empty content sections
+ * @note Capitalizes the first letter of each key for better readability
+ * @note Uses markdown headings (#) with automatic level adjustment for nested content
+ * @note Handles nested objects recursively with incremented heading levels
+ * @note Handles arrays by delegating to jsonToMarkdown() for consistent formatting
+ * @note Converts primitive values (numbers, booleans) to string representation
+ * @note Maintains proper spacing and formatting for readability
+ * @note Limits heading levels to maximum 6 (######) as per Markdown specification
+ * @see jsonToMarkdown() - Used for array handling within objects
+ * @see dataToMarkdown() - Central conversion function that delegates to this function
+ * @example
+ * // Convert nested object to markdown
+ * const data = { 
+ *     title: 'Analysis Report',
+ *     summary: 'This is a summary',
+ *     details: { 
+ *         items: ['Item 1', 'Item 2'],
+ *         count: 2 
+ *     } 
+ * };
+ * const markdown = objectToMarkdown(data);
+ * // Returns structured markdown with proper heading hierarchy
  */
 function objectToMarkdown(obj, level = 3) {
     let markdown = '';
@@ -1782,18 +1874,35 @@ function arrayOfObjectsToTable(arr) {
 }
 
 /**
- * Switch between different views in the application
+ * Switch between application views with comprehensive state management
  *
- * This function handles view switching by hiding all views and showing
- * the selected view. It also updates the active state of navigation buttons.
+ * This function manages the complete view switching lifecycle including hiding all inactive views,
+ * showing the selected view, updating navigation states, and handling special view-specific
+ * actions. It provides a centralized way to manage application state and user navigation.
  *
- * @param {string} viewName - The name of the view to show (e.g., 'home', 'tools', 'history')
- * @return {void}
+ * @param {string} viewName - The name of the view to show (e.g., 'home', 'tools', 'history', 'form', 'results')
+ * @returns {void}
  *
- * @note Hides all views and shows only the selected one
- * @note Updates active state of sidebar navigation buttons
- * @note Updates the page title based on the view
- * @see Document.addEventListener('DOMContentLoaded') - Sets up view switching handlers
+ * @throws {Error} If viewName is invalid or target view element is not found
+ * @note Hides all views with class 'view' and shows only the selected view
+ * @note Updates active state of navigation buttons based on data-view attribute
+ * @note Updates page title and subtitle using updatePageTitle() function
+ * @note Special handling for history view that calls displayHistory() automatically
+ * @note Handles view-specific actions like loading history data when switching to history view
+ * @note Maintains proper view state for mobile navigation and responsive design
+ * @note Logs errors to console if view element is not found
+ * @see Document.addEventListener('DOMContentLoaded') - Sets up view switching handlers on navigation buttons
+ * @see updatePageTitle() - Updates page title and subtitle based on current view
+ * @see displayHistory() - Called automatically when switching to history view
+ * @example
+ * // Switch to home view
+ * switchView('home');
+ * 
+ * // Switch to results view (typically called after form submission)
+ * switchView('results');
+ * 
+ * // Switch to history view (automatically loads history data)
+ * switchView('history');
  */
 function switchView(viewName) {
     // Hide all views
@@ -1948,16 +2057,32 @@ function saveResultToHistory(result) {
 }
 
 /**
- * Load results from localStorage
+ * Load results from localStorage with pagination and error handling
  *
- * This function loads saved results from localStorage and returns them.
+ * This function retrieves saved results from localStorage with configurable pagination
+ * and robust error handling. It ensures data integrity and provides sorted results
+ * with the most recent items first.
  *
- * @param {number} [maxItems=10] - Maximum number of results to return
- * @return {Array} Array of saved results, sorted by timestamp (newest first)
+ * @param {number} [maxItems=10] - Maximum number of results to return (default: 10)
+ * @returns {Array} Array of saved results, sorted by timestamp (newest first)
  *
- * @note Returns empty array if no results are found or on error
- * @note Sorts results by timestamp (newest first)
- * @see displayHistory() - Uses this function to show history
+ * @throws {Error} If localStorage access fails or data parsing encounters errors
+ * @note Returns empty array if no results are found, data is invalid, or errors occur
+ * @note Sorts results by timestamp in descending order (newest first)
+ * @note Limits returned results to maxItems for performance and display purposes
+ * @note Handles JSON parsing errors gracefully with try-catch blocks
+ * @note Uses localStorage key 'docmind-results' for data persistence
+ * @see displayHistory() - Uses this function to populate history view
+ * @see saveResultToHistory() - Complementary function that saves results to localStorage
+ * @example
+ * // Load default number of results (10)
+ * const results = loadResultsFromHistory();
+ * 
+ * // Load specific number of results
+ * const recentResults = loadResultsFromHistory(5);
+ * 
+ * // Load all results (unlimited)
+ * const allResults = loadResultsFromHistory(Infinity);
  */
 function loadResultsFromHistory(maxItems = 10) {
     try {
@@ -2123,18 +2248,36 @@ function toggleDetails() {
 }
 
 /**
- * Display history of saved results
+ * Display history of saved results with comprehensive item rendering and interaction
  *
- * This function populates the history view with saved results from localStorage.
- * It creates clickable history items that allow users to view previous results.
+ * This function populates the history view with saved results from localStorage,
+ * providing a rich interactive interface for users to browse and restore previous
+ * analysis sessions. It handles empty states, item rendering, and user interactions.
  *
- * @return {void}
+ * @param {number} [maxItems=10] - Maximum number of history items to display
+ * @returns {void}
  *
- * @note Loads results from localStorage using loadResultsFromHistory()
- * @note Creates history items with timestamps and tool names
- * @note Sets up click handlers to display specific results
- * @note Shows a message if no history is available
+ * @throws {Error} If history content element is not found or template loading fails
+ * @note Loads results from localStorage using loadResultsFromHistory() with pagination
+ * @note Uses historyItemTemplate for consistent item rendering across the application
+ * @note Populates items with tool icons, names, timestamps, and content previews
+ * @note Sets up click handlers on entire items for viewing results and "Show Form" buttons
+ * @note Handles missing tool data gracefully with fallback icons and names
+ * @note Shows empty state message when no history is available using historyEmptyTemplate
+ * @note Truncates preview text to 200 characters with ellipsis for better display
+ * @note Integrates with toolsData to display accurate tool information and icons
  * @see switchView() - Calls this function when history view is selected
+ * @see loadResultsFromHistory() - Loads paginated results from localStorage
+ * @see displayHistoryResult() - Called when history items are clicked
+ * @see loadHistoryForm() - Called when "Show Form" buttons are clicked
+ * @see historyItemTemplate - Template used for rendering individual history items
+ * @see historyEmptyTemplate - Template used for empty state display
+ * @example
+ * // Display default number of history items (10)
+ * displayHistory();
+ * 
+ * // Display specific number of history items
+ * displayHistory(5);
  */
 function displayHistory(maxItems = 10) {
     const historyContent = document.getElementById('historyContent');
