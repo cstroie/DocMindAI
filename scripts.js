@@ -733,7 +733,7 @@ function showGlobalLoading(text = "Loading...") {
         }
     }
     
-    const loadingText = overlay.querySelector('.global-loading-text');
+    const loadingText = overlay.querySelector('p');
     if (loadingText) {
         loadingText.textContent = text;
     }
@@ -777,18 +777,9 @@ function showLoadingState(element, text = "Processing...") {
     if (!element) return;
     
     element.classList.add('loading');
-    
-    if (element.tagName === 'BUTTON') {
-        const btnText = element.querySelector('.btn-text');
-        const btnLoading = element.querySelector('.btn-loading');
-        
-        if (btnText) btnText.style.display = 'none';
-        if (btnLoading) {
-            btnLoading.style.display = 'flex';
-            const loadingText = btnLoading.querySelector('.loading-text');
-            if (loadingText) loadingText.textContent = text;
-        }
-    }
+    element.dataset.label = element.textContent;
+    element.textContent = text;
+    element.setAttribute("aria-busy", true);
 }
 
 /**
@@ -807,14 +798,8 @@ function hideLoadingState(element) {
     if (!element) return;
     
     element.classList.remove('loading');
-    
-    if (element.tagName === 'BUTTON') {
-        const btnText = element.querySelector('.btn-text');
-        const btnLoading = element.querySelector('.btn-loading');
-        
-        if (btnText) btnText.style.display = 'block';
-        if (btnLoading) btnLoading.style.display = 'none';
-    }
+    element.textContent = element.dataset.label;
+    element.removeAttribute("aria-busy");
 }
 
 /**
@@ -3518,24 +3503,13 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Set up form submission
     document.getElementById('apiForm')?.addEventListener('submit', handleFormSubmit);
-    // Set up theme toggle button
-    document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
     // Set up menu toggle button
     document.getElementById('menuToggle')?.addEventListener('click', toggleMenu);
-    // Set up copy results button
-    document.getElementById('copyResultsBtn')?.addEventListener('click', copyResultsToClipboard);
-    // Set up download results button
-    document.getElementById('downloadResultsBtn')?.addEventListener('click', downloadResults);
     // Set up show form button
     document.getElementById('showFormBtn')?.addEventListener('click', () => {
         switchView('form');
         document.getElementById('toolForm').scrollIntoView({ behavior: 'smooth' });
     });
-    // Set up clear history button (only if it exists)
-    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-    if (clearHistoryBtn) {
-        clearHistoryBtn.addEventListener('click', clearHistory);
-    }
     // Set up view switching for sidebar navigation
     const navButtons = document.querySelectorAll('.nav-item');
     navButtons.forEach(button => {
@@ -3603,28 +3577,4 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Load last 3 items from history on page load
     displayHistory(3);
-
-    // Save application state to localStorage before page unload
-    window.addEventListener('beforeunload', () => {
-        try {
-            localStorage.setItem('docmind-app-state', JSON.stringify(appState.getState()));
-        } catch (error) {
-            console.error('Failed to save application state:', error);
-        }
-    });
-
-    // Restore application state from localStorage on page load
-    try {
-        const savedState = localStorage.getItem('docmind-app-state');
-        if (savedState) {
-            const state = JSON.parse(savedState);
-            appState.restoreState(state);
-            // Restore the current view
-            appState.switchView(appState.currentView);
-        }
-    } catch (error) {
-        console.error('Failed to restore application state:', error);
-        // Clear corrupted state and start fresh
-        appState.clearState();
-    }
 });

@@ -38,9 +38,7 @@ nav li :where(a,[role=link]) {
 }
 
 /* Loading States */
-.loading-overlay,
-.global-loading-overlay,
-.form-loading-overlay {
+.global-loading-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -56,69 +54,26 @@ nav li :where(a,[role=link]) {
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.loading-overlay.active,
-.global-loading-overlay.active,
-.form-loading-overlay.active {
+.global-loading-overlay.active {
     opacity: 1;
     visibility: visible;
 }
 
-.loading-container,
-.global-loading-container,
-.form-loading-container {
+.global-loading-overlay div {
     text-align: center;
     padding: 2rem;
     border-radius: var(--pico-border-radius);
-    background: var(--card-background-color);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: var(--pico-card-background-color);
+    box-shadow: var(--pico-card-box-shadow);
     max-width: 90%;
     width: 300px;
 }
 
-.loading-spinner,
-.global-loading-spinner,
-.form-loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid var(--loading-secondary);
-    border-top: 4px solid var(--loading-primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 1rem;
-}
-
-.global-loading-spinner {
-    width: 60px;
-    height: 60px;
-    border-width: 6px;
-}
-
-.form-loading-spinner {
-    width: 30px;
-    height: 30px;
-    border-width: 3px;
-}
-
-.loading-text,
-.global-loading-text,
-.form-loading-text {
+.global-loading-overlay div p {
     color: var(--loading-text);
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 500;
     margin: 0;
-}
-
-.global-loading-text {
-    font-size: 1.125rem;
-}
-
-.form-loading-text {
-    font-size: 0.875rem;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 /* Button loading states */
