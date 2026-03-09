@@ -2155,53 +2155,48 @@ async function handleFormSubmit(event) {
     }
 
     try {
-        const response = await fetch('docmind.php', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        // Check if response is OK
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // Check if response has JSON content type
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            // Parse JSON response
-            const result = await response.json();
-            // Check for errors
-            if (result.error) {
-                const errorInfo = errorHandler.categorizeError(new Error(result.error), {
-                    operation: 'submit',
-                    formId: form.id,
-                    timestamp: new Date().toISOString()
-                });
-                errorHandler.showError(errorInfo);
-                return;
-            }
-            // Display results
-            displayResults(result);
-        } else {
-            // Handle non-JSON response
-            const text = await response.text();
-            const errorInfo = errorHandler.categorizeError(new Error(`Unexpected response format: ${text}`), {
-                operation: 'submit',
-                formId: form.id,
-                timestamp: new Date().toISOString()
+        try {
+            const response = await fetch('docmind.php', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
             });
-            errorHandler.showError(errorInfo);
-            return;
+
+            // Check if response is OK
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+
+            // Check if response has JSON content type
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                // Parse JSON response
+                const result = await response.json();
+                // Check for errors
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                // Display results
+                displayResults(result);
+            } else {
+                // Handle non-JSON response
+                const text = await response.text();
+                throw new Error(`Unexpected response format: ${text}`);
+            }
+        } catch (fetchError) {
+            // Re-throw to be caught by the outer error handler
+            throw fetchError;
         }
     } catch (error) {
-        // Categorize and handle the error
+        // Categorize and handle the error with more specific context
         const errorInfo = errorHandler.categorizeError(error, {
             operation: 'submit',
             formId: form.id,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            formData: Object.fromEntries(formData)
         });
         
         // Log the error for debugging
