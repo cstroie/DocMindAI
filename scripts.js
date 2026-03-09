@@ -1545,6 +1545,11 @@ function createFormField(field, cookies = {}) {
             if (field.placeholder) {
                 input.placeholder = field.placeholder;
             }
+            // Special handling for file inputs - can only be set to empty string
+            if (field.type === 'file') {
+                input.value = '';
+                showToast('File input field - please select a file manually', 'warning');
+            }
     }
     // Append input to container
     container.appendChild(input);
