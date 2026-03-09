@@ -7,7 +7,7 @@ let promptsData = null;
 
 /**
  * Application state management system
- * 
+ *
  * This system manages the application's current state including active views,
  * form data, navigation history, and view-specific parameters. It provides
  * methods to save, restore, and transition between different application states.
@@ -78,7 +78,7 @@ class AppState {
      */
     saveViewState(viewName) {
         const state = {};
-        
+
         // Save form data for form views
         if (viewName === 'form') {
             const form = document.getElementById('apiForm');
@@ -309,61 +309,8 @@ class AppState {
 const appState = new AppState();
 
 /**
- * Setup global error handling for uncaught errors and promise rejections
- * 
- * This function sets up global error handlers to catch uncaught JavaScript errors
- * and unhandled promise rejections. It uses the global errorHandler instance to
- * categorize and display user-friendly error messages.
- * 
- * @return {void}
- * 
- * @note Sets up window.onerror for uncaught synchronous errors
- * @note Sets up window.onunhandledrejection for unhandled promise rejections
- * @note Uses errorHandler.categorizeError to categorize and display errors
- * @see errorHandler - Global error handler instance
- */
-function setupGlobalErrorHandling() {
-    // Handle uncaught synchronous errors
-    window.onerror = function(message, source, lineno, colno, error) {
-        const errorInfo = errorHandler.categorizeError(error || new Error(message), {
-            operation: 'global',
-            source: source,
-            line: lineno,
-            column: colno,
-            timestamp: new Date().toISOString()
-        });
-        
-        // Log the error for debugging
-        errorHandler.logError(errorInfo);
-        
-        // Show user-friendly error message
-        errorHandler.showError(errorInfo);
-        
-        // Prevent default error handling
-        return true;
-    };
-
-    // Handle unhandled promise rejections
-    window.onunhandledrejection = function(event) {
-        const errorInfo = errorHandler.categorizeError(event.reason, {
-            operation: 'promise',
-            timestamp: new Date().toISOString()
-        });
-        
-        // Log the error for debugging
-        errorHandler.logError(errorInfo);
-        
-        // Show user-friendly error message
-        errorHandler.showError(errorInfo);
-        
-        // Prevent default error handling
-        return true;
-    };
-}
-
-/**
  * Populate top menu with categories
- * 
+ *
  * This creates clickable menu items for each category in the main navigation bar
  */
 function populateCategoriesMenu() {
@@ -405,304 +352,26 @@ function populateCategoriesMenu() {
  * @note Updates the data-theme attribute on HTML element to apply theme changes
  * @see Document.addEventListener('DOMContentLoaded') - Sets up theme toggle handler
  */
-function toggleTheme() {                                                                                                                 
-    // Get current preference from localStorage                                                                                          
-    const currentPreference = localStorage.getItem('docmind-theme') || 'system';                                                         
-    let newPreference;                                                                                                                   
+function toggleTheme() {
+    // Get current preference from localStorage
+    const currentPreference = localStorage.getItem('docmind-theme') || 'system';
+    let newPreference;
 
-    // Cycle through theme preferences                                                                                                   
-    if (currentPreference === 'light') {                                                                                                 
-        newPreference = 'dark';                                                                                                          
-    } else if (currentPreference === 'dark') {                                                                                           
-        newPreference = 'system';                                                                                                        
-    } else {                                                                                                                             
-        newPreference = 'light';                                                                                                         
-    }                                                                                                                                    
-
-    // Save theme preference                                                                                                             
-    localStorage.setItem('docmind-theme', newPreference);                                                                                
-
-    // Apply the new theme                                                                                                               
-    applyTheme();                                                                                                                        
-}                                                                                                                                        
-
-/**
- * Error handling system with comprehensive categorization
- * 
- * This system categorizes errors into different types and provides user-friendly
- * messages. It includes retry mechanisms and detailed logging for debugging.
- */
-
-/**
- * Error types with severity levels
- */
-const ErrorTypes = {
-    NETWORK: {
-        code: 'NETWORK_ERROR',
-        severity: 'high',
-        message: 'Network connection error',
-        description: 'Unable to connect to the server. Please check your internet connection.'
-    },
-    VALIDATION: {
-        code: 'VALIDATION_ERROR',
-        severity: 'medium',
-        message: 'Validation error',
-        description: 'Please check your input and try again.'
-    },
-    API: {
-        code: 'API_ERROR',
-        severity: 'high',
-        message: 'Server error',
-        description: 'The server encountered an error. Please try again later.'
-    },
-    AUTH: {
-        code: 'AUTH_ERROR',
-        severity: 'high',
-        message: 'Authentication error',
-        description: 'Please log in again to continue.'
-    },
-    TIMEOUT: {
-        code: 'TIMEOUT_ERROR',
-        severity: 'medium',
-        message: 'Request timeout',
-        description: 'The request took too long to complete. Please try again.'
-    },
-    UNKNOWN: {
-        code: 'UNKNOWN_ERROR',
-        severity: 'low',
-        message: 'Unexpected error',
-        description: 'An unexpected error occurred. Please try again.'
-    }
-};
-
-/**
- * Error handler class
- */
-class ErrorHandler {
-    constructor() {
-        this.errorCount = 0;
-        this.maxRetries = 3;
-        this.retryDelay = 1000;
+    // Cycle through theme preferences
+    if (currentPreference === 'light') {
+        newPreference = 'dark';
+    } else if (currentPreference === 'dark') {
+        newPreference = 'system';
+    } else {
+        newPreference = 'light';
     }
 
-    /**
-     * Categorize error based on error type
-     * @param {Error} error - The error to categorize
-     * @param {Object} context - Additional context about the error
-     * @returns {Object} Categorized error information
-     */
-    categorizeError(error, context = {}) {
-        let errorType = ErrorTypes.UNKNOWN;
-        let userMessage = errorType.message;
-        let userDescription = errorType.description;
-        let suggestions = [];
+    // Save theme preference
+    localStorage.setItem('docmind-theme', newPreference);
 
-        // Network errors
-        if (error.name === 'NetworkError' || 
-            error.message.includes('NetworkError') ||
-            error.message.includes('fetch failed') ||
-            error.message.includes('ERR_CONNECTION')) {
-            errorType = ErrorTypes.NETWORK;
-            suggestions = [
-                'Check your internet connection',
-                'Try refreshing the page',
-                'Contact your network administrator'
-            ];
-        }
-        // Validation errors
-        else if (error.message.includes('validation') ||
-                 error.message.includes('required') ||
-                 error.message.includes('invalid')) {
-            errorType = ErrorTypes.VALIDATION;
-            suggestions = [
-                'Check all required fields',
-                'Ensure file format is correct',
-                'Verify input values'
-            ];
-        }
-        // API errors
-        else if (error.message.includes('HTTP') ||
-                 error.message.includes('API') ||
-                 error.message.includes('server')) {
-            errorType = ErrorTypes.API;
-            suggestions = [
-                'Try again in a few moments',
-                'Check if the service is available',
-                'Contact support if the problem persists'
-            ];
-        }
-        // Authentication errors
-        else if (error.message.includes('auth') ||
-                 error.message.includes('unauthorized') ||
-                 error.message.includes('forbidden')) {
-            errorType = ErrorTypes.AUTH;
-            suggestions = [
-                'Log in again',
-                'Check your session',
-                'Clear browser cache and try again'
-            ];
-        }
-        // Timeout errors
-        else if (error.message.includes('timeout') ||
-                 error.message.includes('ETIMEDOUT')) {
-            errorType = ErrorTypes.TIMEOUT;
-            suggestions = [
-                'Try again with smaller files',
-                'Check your internet speed',
-                'Try a different time'
-            ];
-        }
-
-        // Add context-specific suggestions
-        if (context.operation) {
-            switch (context.operation) {
-                case 'upload':
-                    suggestions.push('Ensure file size is within limits');
-                    break;
-                case 'api':
-                    suggestions.push('Check server status');
-                    break;
-                case 'network':
-                    suggestions.push('Try switching networks');
-                    break;
-            }
-        }
-
-        // Form submission errors
-        else if (context.operation === 'submit') {
-            errorType = ErrorTypes.API;
-            suggestions = [
-                'Check all required fields',
-                'Ensure files are properly uploaded',
-                'Try again with different parameters',
-                'Check file size limits (max 5MB)'
-            ];
-        }
-
-        return {
-            type: errorType,
-            originalError: error,
-            userMessage,
-            userDescription,
-            suggestions,
-            timestamp: new Date().toISOString(),
-            context
-        };
-    }
-
-    /**
-     * Show user-friendly error message
-     * @param {Object} errorInfo - Categorized error information
-     * @param {HTMLElement} [container] - Container to show error in
-     */
-    showError(errorInfo, container = null) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = `error-message ${errorInfo.type.severity}`;
-        errorDiv.innerHTML = `
-            <div class="error-header">
-                <span class="error-icon">⚠️</span>
-                <h3>${errorInfo.userMessage}</h3>
-            </div>
-            <div class="error-description">
-                ${errorInfo.userDescription}
-            </div>
-            <div class="error-suggestions">
-                <h4>Suggestions:</h4>
-                <ul>
-                    ${errorInfo.suggestions.map(s => `<li>${s}</li>`).join('')}
-                </ul>
-            </div>
-            <div class="error-actions">
-                <button class="retry-btn">Retry</button>
-                <button class="dismiss-btn">Dismiss</button>
-            </div>
-        `;
-
-        // Add event listeners
-        const retryBtn = errorDiv.querySelector('.retry-btn');
-        const dismissBtn = errorDiv.querySelector('.dismiss-btn');
-
-        retryBtn.addEventListener('click', () => {
-            this.retryOperation(errorInfo.context);
-        });
-
-        dismissBtn.addEventListener('click', () => {
-            errorDiv.remove();
-        });
-
-        // Show error in container or in main content area
-        if (container) {
-            container.appendChild(errorDiv);
-        } else {
-            const mainContent = document.querySelector('.main-content') || document.body;
-            mainContent.appendChild(errorDiv);
-        }
-
-        // Auto-dismiss after 30 seconds
-        setTimeout(() => {
-            if (errorDiv.parentNode) {
-                errorDiv.remove();
-            }
-        }, 30000);
-    }
-
-    /**
-     * Retry operation with exponential backoff
-     * @param {Object} context - Context for the operation to retry
-     */
-    async retryOperation(context) {
-        this.errorCount++;
-        
-        if (this.errorCount >= this.maxRetries) {
-            this.showError({
-                type: ErrorTypes.API,
-                userMessage: 'Maximum retries exceeded',
-                userDescription: 'The operation failed after multiple attempts. Please try again later.',
-                suggestions: ['Check your internet connection', 'Try again in a few minutes'],
-                context
-            });
-            return;
-        }
-
-        const delay = this.retryDelay * Math.pow(2, this.errorCount - 1);
-        
-        setTimeout(async () => {
-            try {
-                if (context.operation === 'fetch') {
-                    await context.fn();
-                } else if (context.operation === 'submit') {
-                    await context.fn();
-                }
-            } catch (error) {
-                const errorInfo = this.categorizeError(error, context);
-                this.showError(errorInfo);
-            }
-        }, delay);
-    }
-
-    /**
-     * Log error for debugging
-     * @param {Object} errorInfo - Categorized error information
-     */
-    logError(errorInfo) {
-        console.error('DocMind AI Error:', {
-            type: errorInfo.type.code,
-            message: errorInfo.userMessage,
-            description: errorInfo.userDescription,
-            timestamp: errorInfo.timestamp,
-            context: errorInfo.context,
-            stack: errorInfo.originalError.stack
-        });
-
-        // Send error to monitoring service if available
-        if (typeof trackJs !== 'undefined') {
-            trackJs.track(errorInfo.originalError);
-        }
-    }
+    // Apply the new theme
+    applyTheme();
 }
-
-// Global error handler instance
-const errorHandler = new ErrorHandler();
 
 /**
  * Show global loading overlay
@@ -720,7 +389,7 @@ const errorHandler = new ErrorHandler();
  */
 function showGlobalLoading(text = "Loading...") {
     let overlay = document.getElementById('globalLoadingOverlay');
-    
+
     if (!overlay) {
         const template = document.getElementById('globalLoadingTemplate');
         if (template) {
@@ -732,12 +401,12 @@ function showGlobalLoading(text = "Loading...") {
             return;
         }
     }
-    
+
     const loadingText = overlay.querySelector('p');
     if (loadingText) {
         loadingText.textContent = text;
     }
-    
+
     overlay.classList.add('active');
 }
 
@@ -775,7 +444,7 @@ function hideGlobalLoading() {
  */
 function showLoadingState(element, text = "Processing...") {
     if (!element) return;
-    
+
     element.classList.add('loading');
     element.dataset.label = element.textContent;
     element.textContent = text;
@@ -796,7 +465,7 @@ function showLoadingState(element, text = "Processing...") {
  */
 function hideLoadingState(element) {
     if (!element) return;
-    
+
     element.classList.remove('loading');
     element.textContent = element.dataset.label;
     element.removeAttribute("aria-busy");
@@ -817,33 +486,33 @@ function hideLoadingState(element) {
  * @note Sets data-theme attribute on HTML element
  * @see Document.addEventListener('DOMContentLoaded') - Calls this function on page load
  */
-function applyTheme() {                                                                                                                  
-    // Get theme preference from localStorage                                                                                            
-    const preference = localStorage.getItem('docmind-theme') || 'system';                                                                
-    let actualTheme, themeIconChar;                                                                                                      
+function applyTheme() {
+    // Get theme preference from localStorage
+    const preference = localStorage.getItem('docmind-theme') || 'system';
+    let actualTheme, themeIconChar;
 
-    // Determine the actual theme to apply and icon to show                                                                              
-    if (preference === 'light') {                                                                                                        
-        actualTheme = 'light';                                                                                                           
-        themeIconChar = '🌙';                                                                                                            
-    } else if (preference === 'dark') {                                                                                                  
-        actualTheme = 'dark';                                                                                                            
-        themeIconChar = '☀️';                                                                                                            
-    } else { // system                                                                                                                   
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;                                             
-        actualTheme = systemPrefersDark ? 'dark' : 'light';                                                                              
-        themeIconChar = systemPrefersDark ? '☀️' : '🌙';                                                                                  
-    }                                                                                                                                    
+    // Determine the actual theme to apply and icon to show
+    if (preference === 'light') {
+        actualTheme = 'light';
+        themeIconChar = '🌙';
+    } else if (preference === 'dark') {
+        actualTheme = 'dark';
+        themeIconChar = '☀️';
+    } else { // system
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        actualTheme = systemPrefersDark ? 'dark' : 'light';
+        themeIconChar = systemPrefersDark ? '☀️' : '🌙';
+    }
 
-    // Update theme button icon                                                                                                          
-    const themeButton = document.getElementById('themeToggle');                                                                          
-    if (themeButton) {                                                                                                                   
-        themeButton.textContent = themeIconChar;                                                                                         
-    }                                                                                                                                    
+    // Update theme button icon
+    const themeButton = document.getElementById('themeToggle');
+    if (themeButton) {
+        themeButton.textContent = themeIconChar;
+    }
 
-    // Apply the theme                                                                                                                   
-    document.documentElement.setAttribute('data-theme', actualTheme);                                                                    
-}                                                                                                                                        
+    // Apply the theme
+    document.documentElement.setAttribute('data-theme', actualTheme);
+}
 
 /**
  * Toggle sidebar menu for mobile devices
@@ -879,7 +548,7 @@ function toggleMenu() {
  *
  * @note Uses the Clipboard API for modern browsers
  * @note Falls back to document.execCommand for older browsers
- * @note Shows success/error notifications using showNotification()
+ * @note Shows success/error notifications using showToast()
  * @note Handles cases where clipboard access is denied
  * @see Document.addEventListener('DOMContentLoaded') - Sets up this handler
  */
@@ -887,7 +556,7 @@ async function copyResultsToClipboard() {
     const resultsContent = document.getElementById('resultsContent');
 
     if (!resultsContent) {
-        showError('Results content not found');
+        showToast('Results content not found', 'error');
         return;
     }
 
@@ -896,15 +565,15 @@ async function copyResultsToClipboard() {
         const rawData = resultsContent.dataset.raw;
         const codeBlock = resultsContent.querySelector('pre code');
         let textToCopy = rawData || (
-            codeBlock ? 
-                codeBlock.textContent :   // Use code block text if exists 
+            codeBlock ?
+                codeBlock.textContent :   // Use code block text if exists
                 resultsContent.textContent  // Fallback to regular content
         );
 
         // Use the Clipboard API if available
         if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(textToCopy);
-            showNotification('Results copied to clipboard!', 'success');
+            showToast('Results copied to clipboard!', 'success');
         }
         // Fallback for older browsers
         else {
@@ -919,19 +588,19 @@ async function copyResultsToClipboard() {
                 // Execute the copy command
                 const success = document.execCommand('copy');
                 if (success) {
-                    showNotification('Results copied to clipboard!', 'success');
+                    showToast('Results copied to clipboard!', 'success');
                 } else {
-                    showError('Failed to copy results to clipboard');
+                    showToast('Failed to copy results to clipboard', 'error');
                 }
             } catch (err) {
-                showError('Failed to copy results: ' + err.message);
+                showToast('Failed to copy results: ' + err.message, 'error');
             } finally {
                 // Remove the temporary textarea
                 document.body.removeChild(textarea);
             }
         }
     } catch (error) {
-        showError('Failed to copy results: ' + error.message);
+        showToast('Failed to copy results: ' + error.message, 'error');
     }
 }
 
@@ -960,14 +629,14 @@ function applySyntaxHighlighting(element) {
 
 /**
  * Escape HTML special characters
- * 
+ *
  * This function safely escapes HTML special characters to prevent XSS attacks
  * and ensure proper rendering of text content. It converts characters like
  * <, >, &, and " into their HTML entity equivalents.
- * 
+ *
  * @param {string} text - The text to escape
  * @return {string} The escaped HTML-safe text
- * 
+ *
  * @note Uses the DOM API for reliable escaping
  * @note Prevents script injection and HTML injection attacks
  * @note Used for displaying user-generated or API-generated content safely
@@ -981,15 +650,15 @@ function escapeHtml(text) {
 
 /**
  * Extract code fence information from text
- * 
+ *
  * This function analyzes text to detect markdown code fences and extract
  * the programming language type and the actual code content. It's used to
  * determine how to display and highlight code blocks in the UI.
- * 
+ *
  * @param {string} text - Text to analyze
  * @param {string} [defaultType='text'] - Default type when no fence is found
  * @returns {Object} Object with 'type' and 'text' keys
- * 
+ *
  * @note Supports markdown code fences in format ```language
  * @note Returns empty type if no language is specified in the fence
  * @note If no fence is found, uses the default type
@@ -1027,17 +696,17 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
 
 /**
  * Load JSON resource from file with comprehensive error handling and loading states
- * 
+ *
  * This function fetches and parses a JSON configuration file from the server.
- * It provides robust error handling, loading states, and can extract a specific 
- * root key from the JSON data if provided. The function validates inputs and 
+ * It provides robust error handling, loading states, and can extract a specific
+ * root key from the JSON data if provided. The function validates inputs and
  * provides detailed error messages for debugging.
- * 
+ *
  * @param {string} filename - The JSON file to load (e.g., 'config.json', 'tools/category/tool.json')
  * @param {string} [rootKey] - Optional root key to extract from the JSON data (e.g., 'tools')
  * @param {boolean} [showLoading=false] - Whether to show loading overlay during operation
  * @returns {Promise<Object|null>} Promise resolving to the extracted data or null on error
- * 
+ *
  * @throws {Error} If filename is invalid or network request fails
  * @note Uses the Fetch API with proper error handling for HTTP status codes
  * @note Handles network errors, JSON parsing errors, and missing data gracefully
@@ -1051,10 +720,10 @@ function extractCodeFenceInfo(text, defaultType = 'text') {
  * @example
  * // Load entire config file
  * const config = await loadJSONResource('config.json');
- * 
+ *
  * // Load only tools section
  * const tools = await loadJSONResource('config.json', 'tools');
- * 
+ *
  * // Load individual tool file with loading state
  * const tool = await loadJSONResource('tools/category/tool.json', null, true);
  */
@@ -1072,7 +741,7 @@ async function loadJSONResource(filename, rootKey, showLoading = false) {
 
         // Load data from JSON file
         const response = await fetch(filename);
-        
+
         // Check if response is ok
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -1094,39 +763,29 @@ async function loadJSONResource(filename, rootKey, showLoading = false) {
         // Return the specified root key if it exists, otherwise return the entire data
         return data[rootKey] ?? data;
     } catch (error) {
-        // Categorize and handle the error
-        const errorInfo = errorHandler.categorizeError(error, {
-            operation: 'fetch',
-            filename: filename,
-            rootKey: rootKey
-        });
-        
-        // Log the error for debugging
-        errorHandler.logError(errorInfo);
-        
         // Show user-friendly error message
-        errorHandler.showError(errorInfo);
-        
+        showToast(error.message, 'error');
+
         // Hide loading state if shown
         if (showLoading) {
             hideGlobalLoading();
         }
-        
+
         return null;
     }
 }
 
 /**
  * Load multiple JSON resources in parallel with comprehensive error handling
- * 
+ *
  * This function fetches multiple JSON files concurrently using Promise.allSettled,
  * providing robust error handling and loading states. It's optimized for performance
  * by loading resources in parallel rather than sequentially.
- * 
+ *
  * @param {Array<Object>} requests - Array of request objects with filename and optional rootKey
  * @param {boolean} [showLoading=false] - Whether to show loading overlay during operation
  * @returns {Promise<Object>} Promise resolving to an object with results keyed by filename
- * 
+ *
  * @throws {Error} If requests array is invalid
  * @note Uses Promise.allSettled to handle all requests even if some fail
  * @note Provides detailed error information for failed requests
@@ -1193,24 +852,14 @@ async function loadJSONResources(requests, showLoading = false) {
 
         return successfulResults;
     } catch (error) {
-        // Categorize and handle the error
-        const errorInfo = errorHandler.categorizeError(error, {
-            operation: 'parallel_fetch',
-            requests: requests,
-            timestamp: new Date().toISOString()
-        });
-        
-        // Log the error for debugging
-        errorHandler.logError(errorInfo);
-        
         // Show user-friendly error message
-        errorHandler.showError(errorInfo);
-        
+        showToast(error.message, 'error');
+
         // Hide loading state if shown
         if (showLoading) {
             hideGlobalLoading();
         }
-        
+
         return {};
     }
 }
@@ -1290,12 +939,12 @@ function createCategoriesViews(categories) {
  *
  * @note Uses dataset.raw from resultsContent when available
  * @note Falls back to text content when raw data isn't available
- * @note Shows success/error notifications using showNotification()
+ * @note Shows success/error notifications using showToast()
  */
 function downloadResults() {
     const resultsContent = document.getElementById('resultsContent');
     if (!resultsContent) {
-        showError('Results content not found');
+        showToast('Results content not found', 'error');
         return;
     }
 
@@ -1309,7 +958,7 @@ function downloadResults() {
     const textContent = rawData || resultsContent.textContent;
 
     if (!textContent) {
-        showError('No content available to download');
+        showToast('No content available to download', 'error');
         return;
     }
 
@@ -1331,21 +980,21 @@ function downloadResults() {
             document.body.removeChild(a);
         }, 100);
 
-        showNotification('Download started!', 'success');
+        showToast('Download started!', 'success');
     } catch (error) {
-        showError('Failed to download: ' + error.message);
+        showToast('Failed to download: ' + error.message, 'error');
     }
 }
 
 /**
  * Populate home page with category cards
- * 
+ *
  * This function creates category cards for the home page using the template
  * and populates them with category data. Each card shows the category icon,
  * name, and description, and links to the tools view.
- * 
+ *
  * @return {void}
- * 
+ *
  * @note Uses the category card template (#cardTemplate)
  * @note Dynamically creates cards for each category with click handlers
  * @see Document.addEventListener('DOMContentLoaded') - Calls this function
@@ -1489,14 +1138,14 @@ function loadToolsInCategory(category) {
 
 /**
  * Populate the tool select dropdown with grouped options
- * 
+ *
  * This function populates the tool selection dropdown with all available
  * tools, organized by category. It creates optgroups for each category
  * and adds tool options with icons and names.
- * 
+ *
  * @param {HTMLSelectElement} toolSelect - The select element to populate
  * @return {void}
- * 
+ *
  * @note Tools are grouped by their 'category' property
  * @note Each category becomes an optgroup in the dropdown
  * @note Tool icons are displayed before the tool name
@@ -1561,15 +1210,15 @@ function populateToolSelect(toolSelect) {
 
 /**
  * Display a tool form with comprehensive configuration handling and loading states
- * 
+ *
  * This function renders the form for a specific tool based on its configuration.
  * It handles the complete form lifecycle including validation, population with saved preferences,
- * loading states, and proper error handling. The function supports both tool-specific fields and 
+ * loading states, and proper error handling. The function supports both tool-specific fields and
  * common fields referenced by string names.
- * 
+ *
  * @param {string} toolId - The ID of the tool to display
  * @returns {Promise<void>}
- * 
+ *
  * @throws {Error} If toolId is invalid or required form elements are missing
  * @note Validates toolId and checks for required form elements before proceeding
  * @note Shows loading overlay during form population
@@ -1585,30 +1234,20 @@ function populateToolSelect(toolSelect) {
  * @example
  * // Display a specific tool form
  * await displayToolForm('text-extractor');
- * 
+ *
  * // Function handles missing tools gracefully
  * displayToolForm('nonexistent-tool'); // Shows error message
  */
 async function displayToolForm(toolId) {
     // Validate input
     if (!toolId || typeof toolId !== 'string') {
-        const errorInfo = errorHandler.categorizeError(new Error('Invalid tool ID provided'), {
-            operation: 'load_form',
-            toolId: toolId,
-            timestamp: new Date().toISOString()
-        });
-        errorHandler.showError(errorInfo);
+        showToast('Invalid tool ID provided', 'error');
         return;
     }
 
     // Use the global toolsData if available
     if (!toolsData || Object.keys(toolsData).length === 0) {
-        const errorInfo = errorHandler.categorizeError(new Error('No tools data available'), {
-            operation: 'load_form',
-            toolId: toolId,
-            timestamp: new Date().toISOString()
-        });
-        errorHandler.showError(errorInfo);
+        showToast('No tools data available', 'error');
         return;
     }
 
@@ -1622,12 +1261,7 @@ async function displayToolForm(toolId) {
 
         // If tool is not found, it might not be loaded yet
         if (!tool) {
-            const errorInfo = errorHandler.categorizeError(new Error(`Tool ${toolId} not found`), {
-                operation: 'load_form',
-                toolId: toolId,
-                timestamp: new Date().toISOString()
-            });
-            errorHandler.showError(errorInfo);
+            showToast(`Tool ${toolId} not found`, 'error');
             hideGlobalLoading();
             return;
         }
@@ -1664,14 +1298,9 @@ async function displayToolForm(toolId) {
         const toolForm = document.getElementById('toolForm');
         const formFields = document.getElementById('formFields');
         const actionInput = document.getElementById('action');
-        
+
         if (!toolForm || !formFields || !actionInput) {
-            const errorInfo = errorHandler.categorizeError(new Error('Required form elements not found'), {
-                operation: 'load_form',
-                toolId: toolId,
-                timestamp: new Date().toISOString()
-            });
-            errorHandler.showError(errorInfo);
+            showToast('Required form elements not found', 'error');
             hideGlobalLoading();
             return;
         }
@@ -1686,45 +1315,35 @@ async function displayToolForm(toolId) {
             'docmind-max_image_size': localStorage.getItem('docmind-max_image_size')
         };
 
-        // Create form fields based on formConfig                                                                         
-        if (tool.form?.fields) {                                                                          
-            tool.form.fields.forEach(field => {                                                                       
-                // If field is a string, get the field definition from common/form/fields                             
-                if (typeof field === 'string') {                                                                      
-                    if (!commonData?.form?.fields) { 
-                        const errorInfo = errorHandler.categorizeError(new Error('No common data available'), {
-                            operation: 'load_form',
-                            toolId: toolId,
-                            timestamp: new Date().toISOString()
-                        });
-                        errorHandler.showError(errorInfo);
-                        return;                                                                                       
-                    }                                                                                                 
-                    const commonField = commonData.form.fields.find(f => f.name === field);                     
-                    if (!commonField) {                                                                               
-                        const errorInfo = errorHandler.categorizeError(new Error(`Field "${field}" not found`), {
-                            operation: 'load_form',
-                            toolId: toolId,
-                            timestamp: new Date().toISOString()
-                        });
-                        errorHandler.showError(errorInfo);
-                        return;                                                                                       
-                    }                                                                                                 
-                    field = commonField;                                                                              
-                }                                                                                                     
+        // Create form fields based on formConfig
+        if (tool.form?.fields) {
+            tool.form.fields.forEach(field => {
+                // If field is a string, get the field definition from common/form/fields
+                if (typeof field === 'string') {
+                    if (!commonData?.form?.fields) {
+                        showToast('No common data available', 'error');
+                        return;
+                    }
+                    const commonField = commonData.form.fields.find(f => f.name === field);
+                    if (!commonField) {
+                        showToast(`Field "${field}" not found`, 'error');
+                        return;
+                    }
+                    field = commonField;
+                }
 
-                const fieldElement = createFormField(field, preferences);                                                 
-                if (fieldElement) {                                                                                   
-                    formFields.appendChild(fieldElement);                                                             
-                } else if (field.type === 'hidden') {                                                                 
-                    // Create and append hidden input directly to the form                                            
-                    const hiddenInput = document.createElement('input');                                              
-                    hiddenInput.type = 'hidden';                                                                      
-                    hiddenInput.name = field.name;                                                                    
-                    hiddenInput.value = field.value || '';                                                            
-                    toolForm.appendChild(hiddenInput);                                                                
-                }                                                                                                     
-            });                                                                                                       
+                const fieldElement = createFormField(field, preferences);
+                if (fieldElement) {
+                    formFields.appendChild(fieldElement);
+                } else if (field.type === 'hidden') {
+                    // Create and append hidden input directly to the form
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = field.name;
+                    hiddenInput.value = field.value || '';
+                    toolForm.appendChild(hiddenInput);
+                }
+            });
         }
 
         // Show the form and hide results area
@@ -1750,17 +1369,8 @@ async function displayToolForm(toolId) {
             toolForm.scrollIntoView({ behavior: 'smooth' });
         }
     } catch (error) {
-        const errorInfo = errorHandler.categorizeError(error, {
-            operation: 'load_form',
-            toolId: toolId,
-            timestamp: new Date().toISOString()
-        });
-        
-        // Log the error for debugging
-        errorHandler.logError(errorInfo);
-        
         // Show user-friendly error message
-        errorHandler.showError(errorInfo);
+        showToast(error.message, 'error');
     } finally {
         // Hide form loading state
         hideGlobalLoading();
@@ -1769,12 +1379,12 @@ async function displayToolForm(toolId) {
 
 /**
  * Create a form field element with comprehensive type handling and dynamic loading
- * 
+ *
  * This function creates form field elements based on field configuration objects.
  * It supports multiple field types with proper validation, dynamic option loading,
  * and user preference integration. The function handles complex scenarios like
  * dynamic API fetching for select fields and proper error states.
- * 
+ *
  * @param {Object} field - The field configuration object
  * @param {string} field.name - The name attribute for the field
  * @param {string} field.type - The type of field (textarea, select, hidden, text, file, etc.)
@@ -1786,7 +1396,7 @@ async function displayToolForm(toolId) {
  * @param {string} [field.help] - Help text for the field
  * @param {Object} [cookies] - Object containing saved user preferences
  * @returns {HTMLElement|null} The created form field element or null if creation fails
- * 
+ *
  * @throws {Error} If field configuration is invalid or required elements are missing
  * @note Supports field types: text, textarea, select, hidden, file, and other HTML input types
  * @note Handles dynamic field loading for models (fetchModels) and prompts (fetchExpPrompts)
@@ -1808,7 +1418,7 @@ async function displayToolForm(toolId) {
  *     required: true,
  *     placeholder: 'Enter document title'
  * });
- * 
+ *
  * // Create a dynamic model select field
  * const modelField = createFormField({
  *     name: 'model',
@@ -1952,15 +1562,15 @@ function createFormField(field, cookies = {}) {
 
 /**
  * Fetch models from API and populate select element
- * 
+ *
  * This function fetches available AI models from the server API and populates
  * a select element with the retrieved models. It handles loading states,
  * errors, and applies saved preferences from cookies.
- * 
+ *
  * @param {HTMLSelectElement} selectElement - The select element to populate
  * @param {Object} cookies - Object containing cookie values
  * @return {Promise<void>}
- * 
+ *
  * @note Makes API call to docmind.php?action=get_models
  * @note Shows loading state while fetching
  * @note Applies saved model preference from docmind-model cookie
@@ -2019,15 +1629,15 @@ async function fetchModels(selectElement, cookies = {}) {
 
 /**
  * Fetch prompts from API and populate select element
- * 
+ *
  * This function fetches available prompt templates from the server API and
  * populates a select element with the retrieved prompts. It also sets up an
  * event listener to automatically populate the prompt textarea when a prompt
  * is selected.
- * 
+ *
  * @param {HTMLSelectElement} selectElement - The select element to populate
  * @return {Promise<void>}
- * 
+ *
  * @note Makes API call to docmind.php?action=get_prompts
  * @note Caches prompts data globally in promptsData variable
  * @note Shows loading state while fetching
@@ -2097,14 +1707,14 @@ async function fetchExpPrompts(selectElement) {
 
 /**
  * Handle form submission with comprehensive error handling, user feedback, and loading states
- * 
+ *
  * This function manages the complete form submission lifecycle including data collection,
- * API communication, user preference saving, loading states, and proper error handling. 
+ * API communication, user preference saving, loading states, and proper error handling.
  * It provides visual feedback during processing and handles various response formats appropriately.
- * 
+ *
  * @param {Event} event - The form submission event
  * @returns {Promise<void>}
- * 
+ *
  * @throws {Error} If form validation fails or API communication encounters errors
  * @note Prevents default form submission and uses FormData API for data collection
  * @note Shows global loading overlay during API processing
@@ -2114,10 +1724,9 @@ async function fetchExpPrompts(selectElement) {
  * @note Saves user preferences (model, language, max_image_size) to localStorage
  * @note Handles network errors, HTTP errors, and API errors with appropriate messages
  * @note Calls displayResults() for successful API responses
- * @note Uses errorHandler for comprehensive error handling
  * @note Restores submit button state after processing completes
  * @see displayResults() - Called to render successful API responses
- * @see errorHandler.showError() - Called to display user-friendly error messages
+ * @see showToast() - Called to display user-friendly error messages
  * @see Document.addEventListener('DOMContentLoaded') - Sets up this handler on form elements
  * @example
  * // Form submission is automatically handled when form is submitted
@@ -2126,20 +1735,15 @@ async function fetchExpPrompts(selectElement) {
 async function handleFormSubmit(event) {
     // Prevent default form submission
     event.preventDefault();
-    
+
     // Get form data
     const form = event.target;
     const formData = new FormData(form);
-    
+
     // Get the action (tool ID) from the form
     const action = formData.get('action');
     if (!action) {
-        const errorInfo = errorHandler.categorizeError(new Error('No tool specified'), {
-            operation: 'submit',
-            formId: form.id,
-            timestamp: new Date().toISOString()
-        });
-        errorHandler.showError(errorInfo);
+        showToast('No tool specified', 'error');
         hideGlobalLoading();
         return;
     }
@@ -2200,19 +1804,8 @@ async function handleFormSubmit(event) {
             throw fetchError;
         }
     } catch (error) {
-        // Categorize and handle the error with more specific context
-        const errorInfo = errorHandler.categorizeError(error, {
-            operation: 'submit',
-            formId: form.id,
-            timestamp: new Date().toISOString(),
-            formData: Object.fromEntries(formData)
-        });
-        
-        // Log the error for debugging
-        errorHandler.logError(errorInfo);
-        
         // Show user-friendly error message
-        errorHandler.showError(errorInfo);
+        showToast(error.message, 'error');
     } finally {
         // Restore button state and hide loading
         hideLoadingState(submitBtn);
@@ -2222,15 +1815,15 @@ async function handleFormSubmit(event) {
 
 /**
  * Display API results with comprehensive content processing and rendering
- * 
+ *
  * This function processes and renders API responses in the results area with support for
  * multiple content types and display formats. It handles complex content detection,
  * conversion, and rendering with proper error handling and user feedback.
- * 
+ *
  * @param {Object} results - The results object from the API containing response data
  * @param {boolean} [fromHistory=false] - Flag indicating if results are from history
  * @returns {void}
- * 
+ *
  * @throws {Error} If no valid response content is found or content processing fails
  * @note Extracts response content from multiple possible locations in the API response
  * @note Supports HTML, JSON, and LLM chat completion response formats
@@ -2245,12 +1838,12 @@ async function handleFormSubmit(event) {
  * @note Scrolls results into view with smooth scrolling for better UX
  * @see handleFormSubmit() - Calls this function on successful form submission
  * @see applySyntaxHighlighting() - Called to highlight code blocks
- * @see showError() - Called if no valid response content is found
+ * @see showToast() - Called if no valid response content is found
  * @see saveResultToHistory() - Called to save results unless fromHistory
  * @example
  * // Display fresh API results
  * displayResults(apiResponse);
- * 
+ *
  * // Display results from history
  * displayResults(savedResult, true);
  */
@@ -2265,16 +1858,16 @@ function displayResults(results, fromHistory = false) {
 
     // Extract the actual response content from the API response
     let responseContent = '';
-    
+
     // Check if backend returned the prompt in debug/prompt
     if (results.debug && results.debug.prompt && detailsPrompt) {
         detailsPrompt.innerHTML = `<code>${results.debug.prompt}</code>`;
     }
-    
+
     if (results.error) {
         // If results contain an error, display it
         console.error('Error found:\n', results.error);
-        showError(results.error);
+        showToast(results.error, 'error');
         return;
     } else if (results.html) {
         // If results contain HTML, return it directly
@@ -2286,7 +1879,7 @@ function displayResults(results, fromHistory = false) {
         console.log('LLM response found:\n', responseContent);
     } else {
         console.error('No valid response content found');
-        showError('No response content available');
+        showToast('No response content available', 'error');
         return;
     }
 
@@ -2324,7 +1917,7 @@ function displayResults(results, fromHistory = false) {
     if (results.response && detailsResponse) {
         detailsResponse.innerHTML = `<code class="language-json">${JSON.stringify(results.response, null, 2)}</code>`;
     }
-    
+
     // Apply syntax highlighting
     applySyntaxHighlighting(resultsArea);
 
@@ -2394,8 +1987,8 @@ function renderContent(resultsContent, resultsInfo, displayFormat, tool) {
                 if (tool && tool.template && typeof Handlebars !== 'undefined') {
                     try {
                         // Handle both string and array templates
-                        const templateContent = Array.isArray(tool.template) ? 
-                            tool.template.join('\n') : 
+                        const templateContent = Array.isArray(tool.template) ?
+                            tool.template.join('\n') :
                             tool.template;
                         const template = Handlebars.compile(templateContent);
                         resultsContent.innerHTML = template(jsonData);
@@ -2444,124 +2037,82 @@ function renderContent(resultsContent, resultsInfo, displayFormat, tool) {
     }
 }
 
-/**
- * Show a notification message
- *
- * This function displays a notification message to the user. It supports
- * different types of notifications (success, info, warning, error).
- *
- * @param {string} message - The notification message to display
- * @param {string} type - The type of notification (success, info, warning, error)
- * @return {void}
- *
- * @note Creates a notification element and adds it to the notification container
- * @note Automatically removes the notification after 5 seconds
- * @note Uses different colors and icons based on notification type
- * @see copyResultsToClipboard() - Calls this function on successful copy
- */
-function showNotification(message, type = 'info') {
-    const notificationContainer = document.getElementById('notificationContainer');
-    if (!notificationContainer) {
-        console.error('Notification container not found');
-        return;
+function showToast(message, type = 'success', duration = 5000) {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container';
+        document.body.appendChild(toastContainer);
     }
 
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}-notification`;
+    // Use template for toast
+    const toastTemplate = document.getElementById('toast-template');
+    const toast = toastTemplate.content.cloneNode(true).querySelector('.toast');
+    toast.className = `toast toast-${type}`;
 
-    // Set notification icon based on type
-    const icons = {
-        'info': 'ℹ️',
-        'success': '✅',
-        'warning': '⚠️',
-        'error': '❌'
+    // Add icon based on type
+    const iconMap = {
+        success: 'ℹ️',
+        error: '✅',
+        warning: '⚠️',
+        info: '❌'
     };
-    const icon = icons[type] || 'ℹ️';
 
-    // Set notification content
-    notification.innerHTML = `
-        <div class="notification-icon">${icon}</div>
-        <div class="notification-content">${message}</div>
-        <button class="notification-close">×</button>
-    `;
+    const icon = iconMap[type] || 'ℹ️';
+    toast.innerHTML = `<span>${icon}</span> ${message}`;
 
-    // Add close button functionality
-    const closeButton = notification.querySelector('.notification-close');
-    closeButton.addEventListener('click', () => {
-        notification.remove();
-    });
+    // Add toast to container
+    toastContainer.appendChild(toast);
 
-    // Add notification to container
-    notificationContainer.appendChild(notification);
+    // Log the toast message for debugging
+    console.log(`Showing ${type} toast: ${message}`);
 
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-        if (notification && notification.parentNode) {
-            notification.remove();
+    // Auto-remove toast after duration
+    const removeToast = () => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
         }
-    }, 5000);
+    };
+
+    // Support for persistent toasts (duration = 0)
+    if (duration > 0) {
+        setTimeout(removeToast, duration);
+    }
+
+    // Allow manual dismissal by clicking
+    toast.addEventListener('click', removeToast);
+
+    // Return the toast element for potential further manipulation
+    return toast;
 }
 
-/**
- * Display an error message in the results area
- * 
- * This function displays an error message in the results area. It uses the
- * error template if available, or falls back to direct HTML rendering.
- * 
- * @param {string} message - The error message to display
- * @return {void}
- * 
- * @note Uses the error template (#errorTemplate) if available
- * @note Falls back to direct HTML rendering if template is not found
- * @note Shows the results area and scrolls to it
- * @note Escapes the message for security
- * @see handleFormSubmit() - Calls this function on form submission errors
- * @see displayTools() - Calls this function if tools data is unavailable
- */
-function showError(message) {
-    // Get the results area element
-    const resultsArea = document.getElementById('resultsArea');
+// Simple modal dialog function
+function showModalError(title, message) {
+  // Remove any existing modal
+  const existingModal = document.getElementById('modalError');
+  if (existingModal) {
+    existingModal.remove();
+  }
 
-    // Check if resultsArea exists
-    if (!resultsArea) {
-        console.error('Results area not found:', message);
-        // Try to show error in main content as fallback
-        const mainContent = document.querySelector('.main-content');
-        if (mainContent) {
-            const errorElement = document.createElement('div');
-            errorElement.className = 'error';
-            errorElement.innerHTML = `
-                <strong>Error:</strong> ${escapeHtml(message)}
-            `;
-            mainContent.innerHTML = '';
-            mainContent.appendChild(errorElement);
-        }
-        return;
-    }
+  // Create modal element
+  const modal = document.createElement("dialog");
+  modal.id = "modalError";
+  modal.innerHTML = `
+    <article>
+        <header>
+            <h2>${escapeHtml(title)}</h2>
+        </header>
+        <p>${escapeHtml(message)}</p>
+        <footer>
+            <button onclick="document.getElementById('modalError').remove()">OK</button>
+        </footer>
+    </article>
+    `;
 
-    // Get the error template
-    const errorTemplate = document.getElementById('errorTemplate');
-    if (errorTemplate) {
-        // Clone the template content
-        const errorElement = errorTemplate.content.cloneNode(true);
-
-        // Set the error message
-        const errorMessageElement = errorElement.querySelector('.error-message');
-        if (errorMessageElement) {
-            errorMessageElement.textContent = message;
-        }
-
-        // Display error message
-        resultsArea.innerHTML = '';
-        resultsArea.appendChild(errorElement);
-    } else {
-        // Fallback to direct HTML if template not found
-        resultsArea.innerHTML = `<div class="error-message">${escapeHtml(message)}</div>`;
-    }
-
-    // Show results area and switch to results view
-    showResults();
+  document.body.appendChild(modal);
+  modal.showModal();
 }
 
 /**
@@ -2574,7 +2125,7 @@ function showError(message) {
  * @note Shows the results area
  * @note Switches to results view
  * @note Scrolls to results
- * @see showError() - Calls this function when showing errors
+ * @see showToast() - Calls this function when showing errors
  * @see displayResults() - Calls this function when displaying results
  */
 function showResults() {
@@ -2588,17 +2139,17 @@ function showResults() {
 
 /**
  * Convert data to Markdown format with comprehensive type handling
- * 
+ *
  * This function serves as the central entry point for converting various data types
  * into Markdown format. It intelligently delegates to specialized helper functions
  * based on the data type, ensuring proper formatting for objects, arrays, and
  * primitive values. The function maintains consistent formatting across different
  * data structures.
- * 
+ *
  * @param {Object|Array|string|number|boolean} data - The data to convert to Markdown
  * @param {number} [level=3] - The heading level for objects (1-6), used for nested structures
  * @returns {string} Markdown representation of the data with proper formatting
- * 
+ *
  * @note Handles complex nested structures including objects with nested objects and arrays
  * @note Uses appropriate heading levels for nested content (automatically increments for deeper nesting)
  * @note Preserves data types and converts primitives to string representation
@@ -2612,7 +2163,7 @@ function showResults() {
  * const obj = { title: 'Document', pages: 10 };
  * const markdown = jsonToMarkdown(obj);
  * // Returns: "### Title\n\nDocument\n\n### Pages\n\n10"
- * 
+ *
  * // Convert array to markdown list
  * const arr = ['Item 1', 'Item 2'];
  * const markdown = jsonToMarkdown(arr);
@@ -2632,10 +2183,10 @@ function jsonToMarkdown(data, level = 3) {
 
 /**
  * Convert an array to Markdown format
- * 
+ *
  * This function converts an array into a Markdown list or table, depending
  * on whether the array contains objects or primitive values.
- * 
+ *
  * @param {Array} arr - The array to convert
  * @return {string} Markdown representation of the array
  */
@@ -2651,15 +2202,15 @@ function arrayToMarkdown(arr) {
 
 /**
  * Convert JavaScript object to structured Markdown with proper heading hierarchy
- * 
+ *
  * This function transforms JavaScript objects into well-structured Markdown documents
  * with appropriate heading levels and content organization. It handles complex nested
  * structures, skips empty values, and maintains consistent formatting throughout.
- * 
+ *
  * @param {Object} obj - The JavaScript object to convert to Markdown
  * @param {number} [level=3] - The starting heading level (1-6), automatically increments for nested objects
  * @returns {string} Structured Markdown representation with proper headings and content
- * 
+ *
  * @throws {Error} If object contains circular references (handled by recursion limit)
  * @note Skips null and undefined values to avoid empty content sections
  * @note Capitalizes the first letter of each key for better readability
@@ -2673,13 +2224,13 @@ function arrayToMarkdown(arr) {
  * @see dataToMarkdown() - Central conversion function that delegates to this function
  * @example
  * // Convert nested object to markdown
- * const data = { 
+ * const data = {
  *     title: 'Analysis Report',
  *     summary: 'This is a summary',
- *     details: { 
+ *     details: {
  *         items: ['Item 1', 'Item 2'],
- *         count: 2 
- *     } 
+ *         count: 2
+ *     }
  * };
  * const markdown = objectToMarkdown(data);
  * // Returns structured markdown with proper heading hierarchy
@@ -2719,14 +2270,14 @@ function objectToMarkdown(obj, level = 3) {
 
 /**
  * Convert an array to a markdown list
- * 
+ *
  * This function converts a JavaScript array into a markdown list format.
  * Each array item becomes a list item. Nested arrays and objects are
  * handled recursively.
- * 
+ *
  * @param {Array} arr - The array to convert
  * @return {string} Markdown list representation
- * 
+ *
  * @note Skips null and undefined values
  * @note Handles nested arrays recursively
  * @note Handles objects by calling objectToMarkdown() recursively
@@ -2759,14 +2310,14 @@ function arrayToList(arr) {
 
 /**
  * Convert an array of objects to a markdown table
- * 
+ *
  * This function converts an array of objects into a markdown table format.
  * Each object represents a row, and each key represents a column. The
  * function automatically detects all unique keys across all objects.
- * 
+ *
  * @param {Array<Object>} arr - The array of objects to convert
  * @return {string} Markdown table representation
- * 
+ *
  * @note Returns empty string if array is empty
  * @note Automatically detects all unique keys from all objects
  * @note Creates a header row with column names
@@ -2821,10 +2372,10 @@ function arrayOfObjectsToTable(arr) {
  * @example
  * // Switch to home view
  * switchView('home');
- * 
+ *
  * // Switch to results view with parameters
  * switchView('results', { resultId: '123' });
- * 
+ *
  * // Switch to history view with custom item limit
  * switchView('history', { maxItems: 5 });
  */
@@ -2971,10 +2522,10 @@ function saveResultToHistory(result) {
  * @example
  * // Load default number of results (10)
  * const results = loadResultsFromHistory();
- * 
+ *
  * // Load specific number of results
  * const recentResults = loadResultsFromHistory(5);
- * 
+ *
  * // Load all results (unlimited)
  * const allResults = loadResultsFromHistory(Infinity);
  */
@@ -3015,10 +2566,10 @@ function displayHistoryResult(resultId) {
             // Switch to results view
             switchView('results');
         } else {
-            showError('Result not found in history');
+            showToast('Result not found in history', 'error');
         }
     } catch (error) {
-        showError('Failed to load result from history: ' + error.message);
+        showToast('Failed to load result from history: ' + error.message, 'error');
     }
 }
 
@@ -3046,7 +2597,7 @@ function loadHistoryForm(resultId) {
             // Get the tool ID from the saved result
             const toolId = result.tool;
             if (!toolId) {
-                showError('Tool ID not found in saved result');
+                showToast('Tool ID not found in saved result', 'error');
                 return;
             }
 
@@ -3075,10 +2626,10 @@ function loadHistoryForm(resultId) {
                 }, 100); // Small delay to ensure form is populated
             }
         } else {
-            showError('Result not found in history');
+            showToast('Result not found in history', 'error');
         }
     } catch (error) {
-        showError('Failed to load form from history: ' + error.message);
+        showToast('Failed to load form from history: ' + error.message, 'error');
     }
 }
 
@@ -3100,9 +2651,9 @@ function clearHistory() {
             localStorage.removeItem('docmind-results');
             // Refresh the history view
             displayHistory();
-            showNotification('History cleared successfully', 'success');
+            showToast('History cleared successfully', 'success');
         } catch (error) {
-            showError('Failed to clear history: ' + error.message);
+            showToast('Failed to clear history: ' + error.message, 'error');
         }
     }
 }
@@ -3139,10 +2690,10 @@ function clearHistory() {
  * @example
  * // Display default number of history items (10)
  * await displayHistory();
- * 
+ *
  * // Display specific number of history items
  * await displayHistory(5);
- * 
+ *
  * // Display second page with 10 items per page
  * await displayHistory(10, 2);
  */
@@ -3162,7 +2713,7 @@ async function displayHistory(maxItems = 10, page = 1) {
 
         // Load results from history with pagination
         const results = loadResultsFromHistory(maxItems * page);
-        
+
         // Apply pagination
         const startIndex = (page - 1) * maxItems;
         const paginatedResults = results.slice(startIndex, startIndex + maxItems);
@@ -3188,12 +2739,12 @@ async function displayHistory(maxItems = 10, page = 1) {
 
         // Create history items using template with batch processing for better performance
         const fragment = document.createDocumentFragment();
-        
+
         // Process results in batches to improve performance
         const batchSize = 5;
         for (let i = 0; i < paginatedResults.length; i += batchSize) {
             const batch = paginatedResults.slice(i, i + batchSize);
-            
+
             batch.forEach(result => {
                 const clone = template.content.cloneNode(true);
                 const historyItem = clone.querySelector('.history-item');
@@ -3209,7 +2760,7 @@ async function displayHistory(maxItems = 10, page = 1) {
                 const date = new Date(result.timestamp);
                 const formattedDate = date.toLocaleString();
                 if (dateElement) dateElement.textContent = formattedDate;
-                
+
                 if (result.tool) {
                     // Get tool data from toolsData
                     const tool = toolsData[result.tool];
@@ -3228,7 +2779,7 @@ async function displayHistory(maxItems = 10, page = 1) {
                 // Add preview text with optimized processing
                 if (previewElement) {
                     let previewText = '';
-                    
+
                     // Try to get preview from different sources (optimized order)
                     if (result.response?.choices?.[0]?.message?.content) {
                         previewText = result.response.choices[0].message.content;
@@ -3239,12 +2790,12 @@ async function displayHistory(maxItems = 10, page = 1) {
                     } else {
                         previewText = String(result);
                     }
-                    
+
                     // Take first 200 characters and add ellipsis if truncated
                     if (previewText.length > 200) {
                         previewText = previewText.substring(0, 200) + '...';
                     }
-                    
+
                     previewElement.textContent = previewText;
                 }
 
@@ -3259,14 +2810,14 @@ async function displayHistory(maxItems = 10, page = 1) {
 
         // Add all items to DOM at once for better performance
         historyContent.appendChild(fragment);
-        
+
         // Add pagination controls if there are more pages
         if (results.length > maxItems) {
             addPaginationControls(historyContent, maxItems, page, results.length);
         }
     } catch (error) {
         console.error('Failed to load history:', error);
-        showError('Failed to load history: ' + error.message);
+        showToast('Failed to load history: ' + error.message, 'error');
     } finally {
         // Hide loading overlay
         hideGlobalLoading();
@@ -3275,16 +2826,16 @@ async function displayHistory(maxItems = 10, page = 1) {
 
 /**
  * Add pagination controls to history view
- * 
+ *
  * This function creates and appends pagination controls to the history view,
  * allowing users to navigate through multiple pages of history items.
- * 
+ *
  * @param {HTMLElement} container - The container element to append pagination controls to
  * @param {number} itemsPerPage - Number of items per page
  * @param {number} currentPage - Current page number (1-based)
  * @param {number} totalItems - Total number of items
  * @returns {void}
- * 
+ *
  * @note Creates Previous/Next buttons and page numbers
  * @note Highlights the current page
  * @note Disables buttons when at boundaries
@@ -3292,11 +2843,11 @@ async function displayHistory(maxItems = 10, page = 1) {
  */
 function addPaginationControls(container, itemsPerPage, currentPage, totalItems) {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    
+
     // Create pagination container
     const paginationContainer = document.createElement('div');
     paginationContainer.className = 'pagination-controls';
-    
+
     // Create Previous button
     const prevButton = document.createElement('button');
     prevButton.textContent = '← Previous';
@@ -3307,34 +2858,34 @@ function addPaginationControls(container, itemsPerPage, currentPage, totalItems)
         }
     });
     paginationContainer.appendChild(prevButton);
-    
+
     // Create page numbers
     const pageNumbers = document.createElement('div');
     pageNumbers.className = 'page-numbers';
-    
+
     // Show page numbers with ellipsis for large page counts
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
+
     if (endPage - startPage + 1 < maxVisiblePages) {
         startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-    
+
     // Add first page and ellipsis if needed
     if (startPage > 1) {
         const firstPage = document.createElement('button');
         firstPage.textContent = '1';
         firstPage.addEventListener('click', () => displayHistory(itemsPerPage, 1));
         pageNumbers.appendChild(firstPage);
-        
+
         if (startPage > 2) {
             const ellipsis = document.createElement('span');
             ellipsis.textContent = '...';
             pageNumbers.appendChild(ellipsis);
         }
     }
-    
+
     // Add page numbers
     for (let i = startPage; i <= endPage; i++) {
         const pageButton = document.createElement('button');
@@ -3343,7 +2894,7 @@ function addPaginationControls(container, itemsPerPage, currentPage, totalItems)
         pageButton.addEventListener('click', () => displayHistory(itemsPerPage, i));
         pageNumbers.appendChild(pageButton);
     }
-    
+
     // Add last page and ellipsis if needed
     if (endPage < totalPages) {
         if (endPage < totalPages - 1) {
@@ -3351,15 +2902,15 @@ function addPaginationControls(container, itemsPerPage, currentPage, totalItems)
             ellipsis.textContent = '...';
             pageNumbers.appendChild(ellipsis);
         }
-        
+
         const lastPage = document.createElement('button');
         lastPage.textContent = totalPages;
         lastPage.addEventListener('click', () => displayHistory(itemsPerPage, totalPages));
         pageNumbers.appendChild(lastPage);
     }
-    
+
     paginationContainer.appendChild(pageNumbers);
-    
+
     // Create Next button
     const nextButton = document.createElement('button');
     nextButton.textContent = 'Next →';
@@ -3370,13 +2921,13 @@ function addPaginationControls(container, itemsPerPage, currentPage, totalItems)
         }
     });
     paginationContainer.appendChild(nextButton);
-    
+
     // Add pagination info
     const pageInfo = document.createElement('div');
     pageInfo.className = 'page-info';
     pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
     paginationContainer.appendChild(pageInfo);
-    
+
     // Add pagination controls to container
     container.appendChild(paginationContainer);
 }
@@ -3412,7 +2963,6 @@ function addPaginationControls(container, itemsPerPage, currentPage, totalItems)
  * @see toggleTheme() - Handles theme toggling
  * @see switchView() - Handles view switching
  * @see applyTheme() - Applies theme preference
- * @see errorHandler - Global error handling system
  */
 document.addEventListener('DOMContentLoaded', async function() {
     // Register Handlebars helpers to ensure they're available
@@ -3433,45 +2983,42 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // Set up global error handling
-    setupGlobalErrorHandling();
-
     // Apply theme preference
     applyTheme();
     // Load all required data in parallel for better performance
     console.log('Starting parallel data loading...');
-    
+
     // Load basic config data
     const configData = await loadJSONResource('config.json');
     if (!configData) {
         console.error('Failed to load config data');
         return;
     }
-    
+
     // Set basic data
     categoriesData = configData.categories || {};
     languagesData = configData.languages || {};
     commonData = configData.common || {};
-    
+
     // Prepare tool loading requests
     const toolCategories = configData.tools || {};
     const toolRequests = [];
     const toolPaths = [];
-    
+
     for (const [toolId, categoryId] of Object.entries(toolCategories)) {
         const toolPath = `tools/${categoryId}/${toolId}.json`;
         toolRequests.push({ filename: toolPath });
         toolPaths.push({ toolId, categoryId, toolPath });
     }
-    
+
     // Load all tools in parallel
     const toolsResults = await loadJSONResources(toolRequests, true);
-    
+
     // Process loaded tools
     toolsData = {};
     let successfulTools = 0;
     let failedTools = 0;
-    
+
     for (const { toolId, categoryId, toolPath } of toolPaths) {
         const toolData = toolsResults[toolPath];
         if (toolData) {
@@ -3482,7 +3029,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (!toolData.category) {
                 toolData.category = categoryId;
             }
-            
+
             toolsData[toolId] = toolData;
             successfulTools++;
             console.log(`✓ Loaded tool: ${toolId} (${toolData.name || 'Unnamed Tool'}) from ${toolPath}`);
@@ -3491,7 +3038,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.error(`✗ Failed to load tool ${toolId} from ${toolPath}`);
         }
     }
-    
+
     console.log(`Tool loading summary: ${successfulTools}/${toolPaths.length} tools loaded successfully (${failedTools} failed)`);
 
     // Create category views and buttons after loading data
