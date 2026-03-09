@@ -2145,6 +2145,19 @@ async function handleFormSubmit(event) {
     // Get form data
     const form = event.target;
     const formData = new FormData(form);
+    
+    // Get the action (tool ID) from the form
+    const action = formData.get('action');
+    if (!action) {
+        const errorInfo = errorHandler.categorizeError(new Error('No tool specified'), {
+            operation: 'submit',
+            formId: form.id,
+            timestamp: new Date().toISOString()
+        });
+        errorHandler.showError(errorInfo);
+        hideGlobalLoading();
+        return;
+    }
 
     // Show loading states
     showGlobalLoading('Processing your request...');
