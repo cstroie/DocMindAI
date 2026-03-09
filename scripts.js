@@ -568,6 +568,17 @@ class ErrorHandler {
             }
         }
 
+        // Form submission errors
+        else if (context.operation === 'submit') {
+            errorType = ErrorTypes.API;
+            suggestions = [
+                'Check all required fields',
+                'Ensure files are properly uploaded',
+                'Try again with different parameters',
+                'Check file size limits (max 5MB)'
+            ];
+        }
+
         return {
             type: errorType,
             originalError: error,
