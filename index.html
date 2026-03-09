@@ -21,7 +21,7 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
     <nav class="container-fluid">
         <ul>
             <li>
-                <a href="#" class="logo" onclick="switchView('home')" data-tooltip="Home" data-placement="bottom">
+                <a href="#" class="logo" onclick="showToast('Welcome to DocMind AI!')" data-tooltip="Home" data-placement="bottom">
                     <span class="logo-icon">💠</span>
                     <strong class="logo-text">
                         <span class="logo-text-first">DocMind</span>
@@ -138,9 +138,11 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
         </article>
     </main>
 
-    <!-- Notifications -->
-    <div class="notification-container" id="notificationContainer"></div>
-
+    <!-- Toast notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+    <template id="toast-template">
+        <div class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    </template>
 
     <div class="global-loading-overlay active" id="globalLoadingOverlay">
         <div>
@@ -150,7 +152,8 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
     </div>
 
     <!-- Templates -->
-    <template id="errorTemplate">
+    <template id="errorTemplate1">
+        <dialog open>
         <article class="notification error-notification">
             <main>
                 <div class="notification-icon">⚠️</div>
@@ -165,6 +168,26 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
                 <button class="secondary" onclick="switchView('results')">Details</button>
             </footer>
         </article>
+        </dialog>
+    </template>
+
+    <template id="errorTemplate">
+        <dialog open>
+            <article>
+                <main>
+                    <div>⚠️</div>
+                    <div>
+                        <strong>Error:</strong>
+                        <p></p>
+                    </div>
+                </main>
+                <footer class="grid">
+                    <button class="primary">×</button>
+                    <button class="secondary" onclick="switchView('form')">Show Form</button>
+                    <button class="secondary" onclick="switchView('results')">Details</button>
+                </footer>
+            </article>
+        </dialog>
     </template>
 
     <template id="cardTemplate">

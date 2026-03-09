@@ -121,6 +121,9 @@ class AppState {
                     if (input) {
                         if (input.type === 'checkbox' || input.type === 'radio') {
                             input.checked = value;
+                        } else if (input.type === 'file') {
+                            input.value = '';
+                            showToast('Please select a file manually', 'warning');
                         } else {
                             input.value = value;
                         }
@@ -1545,11 +1548,6 @@ function createFormField(field, cookies = {}) {
             if (field.placeholder) {
                 input.placeholder = field.placeholder;
             }
-            // Special handling for file inputs - can only be set to empty string
-            if (field.type === 'file') {
-                input.value = '';
-                showToast('File input field - please select a file manually', 'warning');
-            }
     }
     // Append input to container
     container.appendChild(input);
@@ -2059,10 +2057,10 @@ function showToast(message, type = 'success', duration = 5000) {
 
     // Add icon based on type
     const iconMap = {
-        success: 'ℹ️',
-        error: '✅',
+        info: 'ℹ️',
+        success: '✅',
         warning: '⚠️',
-        info: '❌'
+        error: '❌'
     };
 
     const icon = iconMap[type] || 'ℹ️';
@@ -2072,7 +2070,22 @@ function showToast(message, type = 'success', duration = 5000) {
     toastContainer.appendChild(toast);
 
     // Log the toast message for debugging
-    console.log(`Showing ${type} toast: ${message}`);
+    switch(type) {
+        case 'info':
+            console.info(`Info toast: ${message}`);
+            break;
+        case 'success':
+            console.log(`Success toast: ${message}`);
+            break;
+        case 'warning':
+            console.warn(`Warning toast: ${message}`);
+            break;
+        case 'error':
+            console.error(`Error toast: ${message}`);
+            break;
+        default:
+            console.log(`Toast: ${message}`);
+    }
 
     // Auto-remove toast after duration
     const removeToast = () => {
@@ -2571,7 +2584,7 @@ function displayHistoryResult(resultId) {
             // Switch to results view
             switchView('results');
         } else {
-            showToast('Result not found in history', 'error');
+            showToast('Result not found in history', 'warning');
         }
     } catch (error) {
         showToast('Failed to load result from history: ' + error.message, 'error');
@@ -2620,8 +2633,12 @@ function loadHistoryForm(resultId) {
                         for (const [key, value] of Object.entries(savedFormData)) {
                             const input = form.querySelector(`[name="${key}"]`);
                             if (input) {
+                                console.log(`Setting form field "${key}" to value:`, value);
                                 if (input.type === 'checkbox' || input.type === 'radio') {
                                     input.checked = value;
+                                } else if (field.type === 'file') {
+                                    input.value = '';
+                                    showToast('Please select a file manually', 'warning');
                                 } else {
                                     input.value = value;
                                 }
