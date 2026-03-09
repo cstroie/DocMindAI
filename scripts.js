@@ -2314,17 +2314,19 @@ function displayResults(results, fromHistory = false) {
         resultsArea.style.display = 'block';
         // Switch to results view
         switchView('results');
-        // Apply syntax highlighting
-        applySyntaxHighlighting(resultsArea);
     } else {
         console.error('Results content is empty');
     }
 
     // Store the original raw response data (for copy functionality)
     resultsContent.dataset.raw = responseContent;
-    if (detailsResponse) {
-        detailsResponse.innerHTML = `<code>${responseContent}</code>`;
+    // Show the full response
+    if (results.response && detailsResponse) {
+        detailsResponse.innerHTML = `<code class="language-json">${JSON.stringify(results.response, null, 2)}</code>`;
     }
+    
+    // Apply syntax highlighting
+    applySyntaxHighlighting(resultsArea);
 
     // Scroll to results
     resultsArea.scrollIntoView({ behavior: 'smooth' });
