@@ -54,6 +54,11 @@
     }
   },
   "categories": {
+    "rad": {
+      "name": "Radiology",
+      "icon": "☢️",
+      "description": "Tools for radiology decision support and imaging data extraction"
+    },
     "cli": {
       "name": "Clinical",
       "icon": "🏥",
@@ -63,6 +68,11 @@
       "name": "Medical Administration",
       "icon": "📋",
       "description": "Tools for processing medical documentation and administrative tasks"
+    },
+    "pac": {
+      "name": "Patient Education",
+      "icon": "🧑",
+      "description": "Tools for patient education, awareness, and care guidance"
     },
     "res": {
       "name": "Research & Academia",
@@ -74,20 +84,15 @@
       "icon": "🧠",
       "description": "Tools for document processing and content transformation"
     },
-    "dev": {
-      "name": "Development & Testing",
-      "icon": "🧪",
-      "description": "Tools for AI model testing and experimentation"
-    },
-    "rad": {
-      "name": "Radiology",
-      "icon": "🩻",
-      "description": "Tools for radiology decision support and imaging data extraction"
-    },
     "ccr": {
       "name": "Content Creation",
       "icon": "✍️",
       "description": "Tools for generating and composing content including emails and more"
+    },
+    "dev": {
+      "name": "Development & Testing",
+      "icon": "🧪",
+      "description": "Tools for AI model testing and experimentation"
     }
   },
   "common": {
@@ -140,15 +145,15 @@
     }
   },
   "tools": {
-      "dqc": "cli",
-      "rex": "rad",
+      "dqc": "pac",
+      "rex": "pac",
       "rrs": "rad",
       "rdd": "rad",
       "soap": "cli",
       "dsn": "cli",
-      "pec": "cli",
+      "pec": "pac",
       "sbar": "cli",
-      "mex": "cli",
+      "mex": "pac",
       "anm": "cli",
       "cpn": "cli",
       "sde": "cpr",

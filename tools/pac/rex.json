@@ -8,7 +8,6 @@
     "task": "Using the radiology report and any patient context provided, write a clear, empathetic explanation of the imaging results at an 8th-grade reading level. Tailor the explanation to the patient context if provided.",
     "critical_instruction": "{language_instruction}",
     "patient_context": "{context}",
-    "radiology_report": "{report}",
     "output_format": [
       "### About This Scan",
       "In 2–3 plain sentences: what type of imaging this is (X-ray, CT, MRI, ultrasound, etc.), what part of the body it examines, and why it is commonly ordered. If patient context is provided, connect it to their reason for having the scan.",
@@ -36,7 +35,8 @@
       "Use the patient context to personalise the explanation where relevant — reference their stated reason for the scan if provided",
       "Always end with the italic disclaimer line exactly as written in the output format",
       "Respond ONLY with the formatted markdown, without preamble or commentary"
-    ]
+    ],
+    "radiology_report": "{report}"
   },
   "display": "html",
   "form": {

@@ -6,312 +6,6 @@ let languagesData = {}
 let promptsData = null;
 
 /**
- * Application state management system
- *
- * This system manages the application's current state including active views,
- * form data, navigation history, and view-specific parameters. It provides
- * methods to save, restore, and transition between different application states.
- */
-class AppState {
-    constructor() {
-        this.currentView = 'home';
-        this.previousView = null;
-        this.viewHistory = [];
-        this.formData = {};
-        this.viewState = {};
-        this.maxHistory = 10;
-    }
-
-    /**
-     * Switch to a new view with state preservation
-     * @param {string} viewName - The view to switch to
-     * @param {Object} params - Optional parameters for the view
-     */
-    switchView(viewName, params = {}) {
-        // Save current view state before switching
-        if (this.currentView) {
-            this.saveViewState(this.currentView);
-        }
-
-        // Add current view to history if it's not the same as new view
-        if (this.currentView && this.currentView !== viewName) {
-            this.addToHistory(this.currentView);
-        }
-
-        // Update view tracking
-        this.previousView = this.currentView;
-        this.currentView = viewName;
-
-        // Restore view state if available
-        if (this.viewState[viewName]) {
-            this.restoreViewState(viewName);
-        }
-
-        // Store view parameters
-        if (Object.keys(params).length > 0) {
-            this.viewState[`${viewName}_params`] = params;
-        }
-
-        // Trigger view transition
-        this.transitionToView(viewName, params);
-    }
-
-    /**
-     * Add view to history
-     * @param {string} viewName - The view to add to history
-     */
-    addToHistory(viewName) {
-        this.viewHistory.unshift({
-            view: viewName,
-            timestamp: Date.now()
-        });
-
-        // Keep only the most recent views
-        if (this.viewHistory.length > this.maxHistory) {
-            this.viewHistory = this.viewHistory.slice(0, this.maxHistory);
-        }
-    }
-
-    /**
-     * Save current view state
-     * @param {string} viewName - The view to save state for
-     */
-    saveViewState(viewName) {
-        const state = {};
-
-        // Save form data for form views
-        if (viewName === 'form') {
-            const form = document.getElementById('apiForm');
-            if (form) {
-                const formData = new FormData(form);
-                state.formData = Object.fromEntries(formData);
-            }
-        }
-
-        // Save scroll position
-        state.scrollPosition = window.scrollY;
-
-        // Save any view-specific state
-        switch (viewName) {
-            case 'results':
-                state.resultsContent = document.getElementById('resultsContent')?.innerHTML;
-                break;
-            case 'history':
-                state.historyItems = document.getElementById('historyContent')?.innerHTML;
-                break;
-        }
-
-        this.viewState[viewName] = state;
-    }
-
-    /**
-     * Restore view state
-     * @param {string} viewName - The view to restore state for
-     */
-    restoreViewState(viewName) {
-        const state = this.viewState[viewName];
-        if (!state) return;
-
-        // Restore form data
-        if (state.formData && viewName === 'form') {
-            const form = document.getElementById('apiForm');
-            if (form) {
-                for (const [key, value] of Object.entries(state.formData)) {
-                    const input = form.querySelector(`[name="${key}"]`);
-                    if (input) {
-                        if (input.type === 'checkbox' || input.type === 'radio') {
-                            input.checked = value;
-                        } else if (input.type === 'file') {
-                            input.value = '';
-                            showToast('Please select a file manually', 'warning');
-                        } else {
-                            input.value = value;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Restore scroll position
-        if (state.scrollPosition !== undefined) {
-            window.scrollTo(0, state.scrollPosition);
-        }
-
-        // Restore view-specific state
-        switch (viewName) {
-            case 'results':
-                const resultsContent = document.getElementById('resultsContent');
-                if (resultsContent && state.resultsContent) {
-                    resultsContent.innerHTML = state.resultsContent;
-                }
-                break;
-            case 'history':
-                const historyContent = document.getElementById('historyContent');
-                if (historyContent && state.historyItems) {
-                    historyContent.innerHTML = state.historyItems;
-                }
-                break;
-        }
-    }
-
-    /**
-     * Transition to a new view
-     * @param {string} viewName - The view to transition to
-     * @param {Object} params - Optional parameters for the transition
-     */
-    transitionToView(viewName, params = {}) {
-        // Hide all views
-        const views = document.querySelectorAll('.view');
-        views.forEach(view => {
-            view.classList.remove('active-view');
-            view.style.display = 'none';
-        });
-
-        // Show the selected view
-        const selectedView = document.querySelector(`.${viewName}-view`);
-        if (selectedView) {
-            selectedView.classList.add('active-view');
-            selectedView.style.display = 'block';
-        }
-
-        // Update navigation state
-        this.updateNavigationState(viewName);
-
-        // Update page title
-        this.updatePageTitle(viewName);
-
-        // Handle view-specific transitions
-        this.handleViewTransition(viewName, params);
-    }
-
-    /**
-     * Update navigation state
-     * @param {string} viewName - The current view name
-     */
-    updateNavigationState(viewName) {
-        const navButtons = document.querySelectorAll('.nav-item');
-        navButtons.forEach(button => {
-            button.classList.remove('active');
-            if (button.dataset.view === viewName) {
-                button.classList.add('active');
-            }
-        });
-    }
-
-    /**
-     * Update page title based on current view
-     * @param {string} viewName - The current view name
-     */
-    updatePageTitle(viewName) {
-        const pageTitle = document.getElementById('pageTitle');
-        const pageSubtitle = document.getElementById('pageSubtitle');
-
-        if (!pageTitle || !pageSubtitle) return;
-
-        const titles = {
-            'home': {
-                title: '🏠 Home',
-                subtitle: 'Welcome to DocMind AI - Intelligent Document Processing'
-            },
-            'history': {
-                title: '⏳ History',
-                subtitle: 'View your previous analysis sessions and results'
-            },
-            'settings': {
-                title: '⚙️ Settings',
-                subtitle: 'Configure your preferences and account settings'
-            }
-        };
-
-        const viewTitle = titles[viewName];
-        if (viewTitle) {
-            pageTitle.textContent = viewTitle.title;
-            pageSubtitle.textContent = viewTitle.subtitle;
-        }
-    }
-
-    /**
-     * Handle view-specific transitions
-     * @param {string} viewName - The view name
-     * @param {Object} params - Transition parameters
-     */
-    handleViewTransition(viewName, params) {
-        switch (viewName) {
-            case 'history':
-                // Load history data with a small delay to allow view to be displayed
-                setTimeout(() => {
-                    displayHistory(params.maxItems || 10);
-                }, 100);
-                break;
-            case 'form':
-                // Handle form-specific transitions
-                if (params.toolId) {
-                    displayToolForm(params.toolId);
-                }
-                break;
-            case 'results':
-                // Handle results-specific transitions
-                if (params.resultId) {
-                    displayHistoryResult(params.resultId);
-                }
-                break;
-        }
-    }
-
-    /**
-     * Go back to the previous view
-     */
-    goBack() {
-        if (this.previousView) {
-            this.switchView(this.previousView);
-        } else {
-            // Fallback to home if no previous view
-            this.switchView('home');
-        }
-    }
-
-    /**
-     * Clear all saved state
-     */
-    clearState() {
-        this.currentView = 'home';
-        this.previousView = null;
-        this.viewHistory = [];
-        this.formData = {};
-        this.viewState = {};
-    }
-
-    /**
-     * Get current state as a serializable object
-     * @returns {Object} Current state
-     */
-    getState() {
-        return {
-            currentView: this.currentView,
-            previousView: this.previousView,
-            viewHistory: this.viewHistory,
-            formData: this.formData,
-            viewState: this.viewState
-        };
-    }
-
-    /**
-     * Restore state from a serialized object
-     * @param {Object} state - The state to restore
-     */
-    restoreState(state) {
-        this.currentView = state.currentView || 'home';
-        this.previousView = state.previousView || null;
-        this.viewHistory = state.viewHistory || [];
-        this.formData = state.formData || {};
-        this.viewState = state.viewState || {};
-    }
-}
-
-// Global application state instance
-const appState = new AppState();
-
-/**
  * Populate top menu with categories
  *
  * This creates clickable menu items for each category in the main navigation bar
@@ -400,17 +94,30 @@ function showGlobalLoading(text = "Loading...") {
             overlay.setAttribute("id", "globalLoadingOverlay");
             document.body.appendChild(overlay);
         } else {
-            console.error('Global loading template not found');
+            showToast('Global loading template not found', 'error');
             return;
         }
     }
 
+    // Set the text
     const loadingText = overlay.querySelector('p');
     if (loadingText) {
         loadingText.textContent = text;
     }
 
+    // Return the progress element for external updates
+    const progress = overlay.querySelector('progress');
+
+    // Show the overlay with fade-in animation
     overlay.classList.add('active');
+
+    // Return the progress element so it can be updated by the caller if needed
+    if (progress) {
+        // Set to indeterminate by default
+        progress.removeAttribute('value'); 
+        progress.removeAttribute('max');
+        return progress;
+    }
 }
 
 /**
@@ -747,14 +454,14 @@ async function loadJSONResource(filename, rootKey, showLoading = false) {
 
         // Check if response is ok
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP ${response.status}: ${filename}`);
         }
 
         const data = await response.json();
 
         // Check for errors
         if (data.error) {
-            console.error(`Failed to load ${filename}:`, data.error);
+            showToast(`Failed to load ${filename}: ${data.error}`, 'error');
             return null;
         }
 
@@ -812,14 +519,22 @@ async function loadJSONResources(requests, showLoading = false) {
         }
 
         // Show loading state if requested
-        if (showLoading) {
-            showGlobalLoading('Loading resources...');
+        const progress = showLoading ? showGlobalLoading('Loading resources...') : null;
+        if (progress) {
+            progress.max = requests.length;
+            progress.value = 0;
         }
 
+        // Count the tools
+        let successfulTools = 0;
         // Create array of promises for all requests
         const promises = requests.map(async (request) => {
             const { filename, rootKey } = request;
             const data = await loadJSONResource(filename, rootKey, false);
+            successfulTools++;
+            if (progress) {
+                progress.value = successfulTools;
+            }
             return { filename, rootKey, data };
         });
 
@@ -829,7 +544,6 @@ async function loadJSONResources(requests, showLoading = false) {
         // Process results
         const successfulResults = {};
         const failedResults = [];
-
         results.forEach((result, index) => {
             const request = requests[index];
             if (result.status === 'fulfilled' && result.value.data !== null) {
@@ -853,6 +567,7 @@ async function loadJSONResources(requests, showLoading = false) {
             hideGlobalLoading();
         }
 
+        // Return the successful results
         return successfulResults;
     } catch (error) {
         // Show user-friendly error message
@@ -889,8 +604,6 @@ async function loadJSONResources(requests, showLoading = false) {
 function createCategoriesViews(categories) {
     const viewContainer = document.querySelector('.view-container');
     const toolsViewTemplate = document.getElementById('toolsViewTemplate');
-    const sidebarNav = document.querySelector('.sidebar-nav');
-    const homeButton = document.querySelector('.nav-item[data-view="home"]');
 
     // Create a view for each category
     const categoryEntries = Object.entries(categories);
@@ -1005,7 +718,7 @@ function downloadResults() {
 function populateCategoryCards() {
     const categoriesGrid = document.getElementById('categoriesGrid');
     if (!categoriesGrid) {
-        console.error('Categories grid element not found');
+        showToast('Categories grid element not found', 'error');
         return;
     }
 
@@ -1015,7 +728,7 @@ function populateCategoryCards() {
     // Get category card template
     const template = document.getElementById('cardTemplate');
     if (!template) {
-        console.error('Category card template not found');
+        showToast('Category card template not found', 'error');
         return;
     }
 
@@ -1063,20 +776,20 @@ function populateCategoryCards() {
 function loadToolsInCategory(category) {
     // Validate input
     if (!category || typeof category !== 'string') {
-        console.error('Invalid category provided');
+        showToast('Invalid category provided', 'warning');
         return;
     }
 
     // Get the category tools grid
     const toolsGrid = document.getElementById(`${category}ToolsGrid`);
     if (!toolsGrid) {
-        console.error(`Category tools grid not found for category: ${category}`);
+        showToast(`Category tools grid not found for category: ${category}`, 'error');
         return;
     }
 
     // Check if toolsData is available
     if (!toolsData || Object.keys(toolsData).length === 0) {
-        console.error('No tools data available');
+        showToast('No tools data available', 'error');
         return;
     }
 
@@ -1099,7 +812,7 @@ function loadToolsInCategory(category) {
     // Get card template
     const template = document.getElementById('cardTemplate');
     if (!template) {
-        console.error('Card template not found');
+        showToast('Card template not found', 'error');
         return;
     }
 
@@ -1161,7 +874,7 @@ function populateToolSelect(toolSelect) {
 
     // Check if toolsData is available
     if (!toolsData || Object.keys(toolsData).length === 0) {
-        console.warn('No tools data available');
+        showToast('No tools data available', 'error');
         return;
     }
 
@@ -1512,7 +1225,7 @@ function createFormField(field, cookies = {}) {
                         input.appendChild(option);
                     }
                 } else {
-                    console.error('No languages data available');
+                    showToast('No languages data available', 'error');
                     input.innerHTML = '';
                     const errorOption = document.createElement('option');
                     errorOption.value = '';
@@ -1587,7 +1300,7 @@ async function fetchModels(selectElement, cookies = {}) {
         const data = await response.json();
 
         if (data.error) {
-            console.error('Failed to load models:', data.error);
+            showToast('Failed to load models: ' + data.error, 'error');
             // Clear loading option and add error option
             selectElement.innerHTML = '';
             const errorOption = document.createElement('option');
@@ -1620,7 +1333,7 @@ async function fetchModels(selectElement, cookies = {}) {
             }
         }
     } catch (error) {
-        console.error('Failed to load models:', error.message);
+        showToast('Failed to load models: ' + error.message, 'error');
         // Clear loading option and add error option
         selectElement.innerHTML = '';
         const errorOption = document.createElement('option');
@@ -1656,7 +1369,7 @@ async function fetchExpPrompts(selectElement) {
             const data = await response.json();
 
             if (data.error) {
-                console.error('Failed to load prompts:', data.error);
+                showToast('Failed to load prompts: ' + data.error, 'error');
                 // Clear loading option and add error option
                 selectElement.innerHTML = '';
                 const errorOption = document.createElement('option');
@@ -1698,7 +1411,7 @@ async function fetchExpPrompts(selectElement) {
             }
         });
     } catch (error) {
-        console.error('Failed to load prompts:', error.message);
+        showToast('Failed to load prompts: ' + error.message, 'error');
         // Clear loading option and add error option
         selectElement.innerHTML = '';
         const errorOption = document.createElement('option');
@@ -1869,19 +1582,16 @@ function displayResults(results, fromHistory = false) {
 
     if (results.error) {
         // If results contain an error, display it
-        console.error('Error found:\n', results.error);
         showToast(results.error, 'error');
         return;
     } else if (results.html) {
         // If results contain HTML, return it directly
-        console.log('HTML content found:\n', results.html);
+        showToast('HTML content found', 'debug');
         responseContent = results.html;
     } else if (results.response && results.response.choices && results.response.choices[0] && results.response.choices[0].message && results.response.choices[0].message.content) {
         // Extract content from LLM chat completion response
         responseContent = results.response.choices[0].message.content;
-        console.log('LLM response found:\n', responseContent);
     } else {
-        console.error('No valid response content found');
         showToast('No response content available', 'error');
         return;
     }
@@ -1895,11 +1605,10 @@ function displayResults(results, fromHistory = false) {
 
     // Check if the result contains markdown code fences
     const resultsInfo = extractCodeFenceInfo(responseContent, 'markdown');
-    console.log('Code fence info:\n', resultsInfo);
 
     // Check the desired display format from tool
     const displayFormat = tool && tool.display ? tool.display.toLowerCase() : resultsInfo.type;
-    console.log('Display format requested: ', displayFormat);
+    showToast('Display format requested: ' + displayFormat, 'debug');
 
     // Render content based on type and format
     renderContent(resultsContent, resultsInfo, displayFormat, tool);
@@ -1911,7 +1620,7 @@ function displayResults(results, fromHistory = false) {
         // Switch to results view
         switchView('results');
     } else {
-        console.error('Results content is empty');
+        showToast('Results content is empty', 'error');
     }
 
     // Store the original raw response data (for copy functionality)
@@ -1983,7 +1692,6 @@ function renderContent(resultsContent, resultsInfo, displayFormat, tool) {
         // If the result is JSON, parse it
         try {
             const jsonData = JSON.parse(resultsInfo.text);
-            console.log('Parsed JSON data:\n', jsonData);
 
             // HTML display format with Handlebars template
             if (displayFormat === 'html') {
@@ -1996,7 +1704,7 @@ function renderContent(resultsContent, resultsInfo, displayFormat, tool) {
                         const template = Handlebars.compile(templateContent);
                         resultsContent.innerHTML = template(jsonData);
                     } catch (error) {
-                        console.error('Handlebars template error:', error);
+                        showToast('Handlebars template error: ' + error.message, 'error');
                         // Fallback to markdown rendering
                         const markdownContent = jsonToMarkdown(jsonData);
                         resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
@@ -2009,33 +1717,27 @@ function renderContent(resultsContent, resultsInfo, displayFormat, tool) {
             } else if (displayFormat === 'markdown') {
                 // Convert JSON to markdown
                 const markdownContent = jsonToMarkdown(jsonData);
-                console.log('JSON to Markdown conversion:\n', markdownContent);
                 resultsContent.innerHTML = `<pre><code class="${displayFormat}">${markdownContent}</code></pre>`;
             } else {
                 // Convert JSON to pretty JSON string
                 const prettyJson = JSON.stringify(jsonData, null, 2);
-                console.log('Displaying as pretty JSON:\n', prettyJson);
                 resultsContent.innerHTML = `<pre><code class="json">${prettyJson}</code></pre>`;
             }
         } catch (error) {
-            console.error('Error parsing JSON:', error);
+            showToast('Error parsing JSON: ' + error.message, 'error');
             resultsContent.innerHTML = `<pre><code>${resultsInfo.text}</code></pre>`;
         }
     } else if (resultsInfo.type === 'markdown') {
         // If the result is markdown, convert it to HTML
-        console.log('Processing markdown content');
         if (displayFormat === 'html') {
             // Convert JSON to HTML via markdown
-            console.log('Converting markdown to HTML');
             resultsContent.innerHTML = `<div class="article">${marked.parse(resultsInfo.text)}</div>`;
         } else {
             // Keep as markdown with syntax highlighting
-            console.log('Displaying as markdown with syntax highlighting');
             resultsContent.innerHTML = `<pre><code class="markdown">${escapeHtml(resultsInfo.text)}</code></pre>`;
         }
     } else {
         // For other types, use the original response content, with syntax highlighting
-        console.log(`Displaying as ${resultsInfo.type} type\n`, resultsInfo.text);
         resultsContent.innerHTML = `<pre><code class="${resultsInfo.type}">${escapeHtml(resultsInfo.text)}</code></pre>`;
     }
 }
@@ -2383,10 +2085,7 @@ function arrayOfObjectsToTable(arr) {
  * @returns {void}
  *
  * @throws {Error} If viewName is invalid or target view element is not found
- * @note Delegates to appState.switchView() for comprehensive state management
  * @note Supports optional parameters for view-specific configurations
- * @see appState - Global application state management instance
- * @see appState.switchView() - Core view switching logic with state preservation
  * @example
  * // Switch to home view
  * switchView('home');
@@ -2398,7 +2097,19 @@ function arrayOfObjectsToTable(arr) {
  * switchView('history', { maxItems: 5 });
  */
 function switchView(viewName, params = {}) {
-    appState.switchView(viewName, params);
+    // Hide all views
+    const views = document.querySelectorAll('.view');
+    views.forEach(view => {
+        view.classList.remove('active-view');
+        view.style.display = 'none';
+    });
+
+    // Show the selected view
+    const selectedView = document.querySelector(`.${viewName}-view`);
+    if (selectedView) {
+        selectedView.classList.add('active-view');
+        selectedView.style.display = 'block';
+    }
 }
 
 /**
@@ -2411,8 +2122,6 @@ function switchView(viewName, params = {}) {
  * @return {void}
  *
  * @note Updates pageTitle and pageSubtitle elements
- * @note Now called by appState.updatePageTitle() as part of state management
- * @see appState.updatePageTitle() - Core title update logic in state management
  */
 function updatePageTitle(viewName) {
     const pageTitle = document.getElementById('pageTitle');
@@ -2515,7 +2224,7 @@ function saveResultToHistory(result) {
         // Save back to localStorage
         localStorage.setItem('docmind-results', JSON.stringify(existingResults));
     } catch (error) {
-        console.error('Failed to save result to history:', error);
+        showToast('Failed to save result to history: ' + error.message, 'error');
     }
 }
 
@@ -2555,7 +2264,7 @@ function loadResultsFromHistory(maxItems = 10) {
         // Return only the specified number of items
         return sortedResults.slice(0, maxItems);
     } catch (error) {
-        console.error('Failed to load results from history:', error);
+        showToast('Failed to load results from history: ' + error.message, 'error');
         return [];
     }
 }
@@ -2633,7 +2342,6 @@ function loadHistoryForm(resultId) {
                         for (const [key, value] of Object.entries(savedFormData)) {
                             const input = form.querySelector(`[name="${key}"]`);
                             if (input) {
-                                console.log(`Setting form field "${key}" to value:`, value);
                                 if (input.type === 'checkbox' || input.type === 'radio') {
                                     input.checked = value;
                                 } else if (field.type === 'file') {
@@ -2722,7 +2430,7 @@ function clearHistory() {
 async function displayHistory(maxItems = 10, page = 1) {
     const historyContent = document.getElementById('historyContent');
     if (!historyContent) {
-        console.error('History content element not found');
+        showToast('History content element not found', 'error');
         return;
     }
 
@@ -2755,7 +2463,7 @@ async function displayHistory(maxItems = 10, page = 1) {
         // Get history item template
         const template = document.getElementById('historyItemTemplate');
         if (!template) {
-            console.error('History item template not found');
+            showToast('History item template not found', 'error');
             return;
         }
 
@@ -2838,7 +2546,6 @@ async function displayHistory(maxItems = 10, page = 1) {
             addPaginationControls(historyContent, maxItems, page, results.length);
         }
     } catch (error) {
-        console.error('Failed to load history:', error);
         showToast('Failed to load history: ' + error.message, 'error');
     } finally {
         // Hide loading overlay
@@ -2964,10 +2671,7 @@ function addPaginationControls(container, itemsPerPage, currentPage, totalItems)
  * 3. Displays available tools in the UI
  * 4. Sets up the form submission handler
  * 5. Sets up the theme toggle button
- * 6. Sets up view switching for sidebar navigation
- * 7. Sets up category buttons in the sidebar
- * 8. Applies the user's theme preference
- * 9. Sets up global error handling
+ * 6. Applies the user's theme preference
  *
  * @note This is the main entry point for the application
  * @note Uses async/await for sequential data loading
@@ -2987,6 +2691,9 @@ function addPaginationControls(container, itemsPerPage, currentPage, totalItems)
  * @see applyTheme() - Applies theme preference
  */
 document.addEventListener('DOMContentLoaded', async function() {
+    // Apply theme preference
+    applyTheme();
+
     // Register Handlebars helpers to ensure they're available
     if (typeof Handlebars !== 'undefined') {
         Handlebars.registerHelper('eq', (a, b) => a === b);
@@ -3005,15 +2712,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // Apply theme preference
-    applyTheme();
-    // Load all required data in parallel for better performance
-    console.log('Starting parallel data loading...');
-
     // Load basic config data
     const configData = await loadJSONResource('config.json');
     if (!configData) {
-        console.error('Failed to load config data');
+        showToast('Failed to load config data', 'error');
         return;
     }
 
@@ -3023,11 +2725,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     commonData = configData.common || {};
 
     // Prepare tool loading requests
-    const toolCategories = configData.tools || {};
+    const toolList = configData.tools || {};
     const toolRequests = [];
     const toolPaths = [];
 
-    for (const [toolId, categoryId] of Object.entries(toolCategories)) {
+    for (const [toolId, categoryId] of Object.entries(toolList)) {
         const toolPath = `tools/${categoryId}/${toolId}.json`;
         toolRequests.push({ filename: toolPath });
         toolPaths.push({ toolId, categoryId, toolPath });
@@ -3044,24 +2746,19 @@ document.addEventListener('DOMContentLoaded', async function() {
     for (const { toolId, categoryId, toolPath } of toolPaths) {
         const toolData = toolsResults[toolPath];
         if (toolData) {
-            // Verify tool has required properties
-            if (!toolData.id) {
-                toolData.id = toolId;
-            }
-            if (!toolData.category) {
-                toolData.category = categoryId;
-            }
-
+            // Set required properties
+            toolData.id = toolId;
+            toolData.category = categoryId;
+            // Store in global toolsData object
             toolsData[toolId] = toolData;
             successfulTools++;
-            console.log(`✓ Loaded tool: ${toolId} (${toolData.name || 'Unnamed Tool'}) from ${toolPath}`);
         } else {
             failedTools++;
-            console.error(`✗ Failed to load tool ${toolId} from ${toolPath}`);
+            showToast(`Failed to load tool ${toolId} from ${toolPath}`, 'warning');
         }
     }
 
-    console.log(`Tool loading summary: ${successfulTools}/${toolPaths.length} tools loaded successfully (${failedTools} failed)`);
+    showToast(`Loaded ${successfulTools} out of ${toolPaths.length} tools`, 'info');
 
     // Create category views and buttons after loading data
     if (categoriesData) {
@@ -3081,70 +2778,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         switchView('form');
         document.getElementById('toolForm').scrollIntoView({ behavior: 'smooth' });
     });
-    // Set up view switching for sidebar navigation
-    const navButtons = document.querySelectorAll('.nav-item');
-    navButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            // Check if this is a category button with submenu
-            const submenu = this.querySelector('.nav-submenu');
-            if (submenu && submenu.children.length > 0) {
-                e.stopPropagation();
-                // Toggle the active state for this button only
-                this.classList.toggle('active');
-
-                // Close other open submenus
-                navButtons.forEach(otherButton => {
-                    if (otherButton !== this && otherButton.classList.contains('active')) {
-                        otherButton.classList.remove('active');
-                    }
-                });
-                return;
-            }
-
-            // Handle regular navigation
-            const viewName = this.dataset.view;
-            if (viewName) {
-                appState.switchView(viewName);
-            }
-        });
-    });
-
-    // Handle tool selection from submenus
-    const subNavButtons = document.querySelectorAll('.sub-nav-item');
-    subNavButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const toolId = this.dataset.toolId;
-            if (toolId) {
-                // Switch to form view with tool parameter
-                appState.switchView('form', { toolId: toolId });
-
-                // Close the parent submenu
-                const parentNavItem = this.closest('.nav-item');
-                if (parentNavItem) {
-                    parentNavItem.classList.remove('active');
-                }
-
-                // Close sidebar on mobile after selecting a tool
-                const sidebar = document.querySelector('.sidebar');
-                if (sidebar && window.innerWidth <= 768) {
-                    sidebar.classList.remove('active');
-                    const menuToggle = document.getElementById('menuToggle');
-                    if (menuToggle) {
-                        menuToggle.innerHTML = '☰';
-                    }
-                }
-            }
-        });
-    });
-
-    // Set up back button functionality (if exists)
-    const backButton = document.getElementById('backButton');
-    if (backButton) {
-        backButton.addEventListener('click', () => {
-            appState.goBack();
-        });
-    }
 
     // Load last 3 items from history on page load
     displayHistory(3);
