@@ -37,314 +37,159 @@ Create a `config.php` file with your AI API settings:
 
 ```php
 <?php
-$LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1';
-$LLM_API_KEY = '';
-$DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
-$DEFAULT_VISION_MODEL = 'gemma3:4b';
-$LLM_API_FILTER = '/free/';
-$CHAT_HISTORY_LENGTH = 10;
+/**
+ * Configuration file for DocMind AI
+ *
+ * IMPORTANT: This file should be renamed to config.php and placed in the same directory
+ * as the application files. Do not commit config.php to version control as it may contain
+ * sensitive information.
+ *
+ * @author Costin Stroie <costinstroie@eridu.eu.org>
+ * @license GPL 3
+ */
+
+/**
+ * AI API Configuration
+ *
+ * @var string $LLM_API_ENDPOINT The base URL for your AI API endpoint
+ * @var string $LLM_API_KEY Your API key if required (leave empty if not needed)
+ * @var string $DEFAULT_TEXT_MODEL Default model for text processing
+ * @var string $DEFAULT_VISION_MODEL Default model for vision/image processing
+ * @var string $LLM_API_FILTER Regular expression to filter available models
+ */
+$LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1'; // Your AI API endpoint
+$LLM_API_KEY = ''; // API key if required
+$DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b'; // Default text model
+$DEFAULT_VISION_MODEL = 'gemma3:4b'; // Default vision model
+$LLM_API_FILTER = '/free/'; // Regular expression to filter models
+
+/**
+ * Application Configuration
+ *
+ * @var int $CHAT_HISTORY_LENGTH Maximum number of messages to keep in chat history
+ */
+$CHAT_HISTORY_LENGTH = 10; // Maximum chat history length
+
+/**
+ * Security Configuration
+ *
+ * @var bool $DEBUG_MODE Enable debug mode for development
+ * @var array $ALLOWED_ORIGINS List of allowed origins for CORS
+ */
+$DEBUG_MODE = false; // Set to true for development/debugging
+$ALLOWED_ORIGINS = ['*']; // List of allowed origins for CORS
+
+/**
+ * File Upload Configuration
+ *
+ * @var int $MAX_FILE_SIZE Maximum file size for uploads in bytes
+ * @var array $ALLOWED_FILE_TYPES Allowed file types for uploads
+ */
+$MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+$ALLOWED_FILE_TYPES = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+    'application/pdf',
+    'text/plain', 'text/markdown',
+    'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.oasis.opendocument.text'
+];
 ?>
 ```
 
-## 🛠️ Tools Included
+## 🛠️ Tools Overview
 
-### 1. Radiology Report Analyzer (rra.php)
-Analyzes radiology reports and extracts key medical information in a structured JSON format.
+DocMind AI provides a comprehensive suite of AI-powered tools organized into categories for different use cases:
 
-**Features:**
-- AI-powered analysis of radiology reports
-- Multiple lightweight AI models support (filtered for free models)
-- Multilingual output (6 languages)
-- Web interface with real-time results
-- REST API support
+### 🏥 Clinical Tools
+- **Radiology Report Analyzer (rra.php)** - Analyzes radiology reports and extracts key medical information
+- **Radiology Differential Diagnosis (rdd.php)** - Generates differential diagnoses with supporting information
+- **Discharge Paper Analyzer (dpa.php)** - Analyzes patient discharge papers for radiology use
+- **Patient Education Content (pec.php)** - Converts complex medical information into patient-friendly content
+- **Clinical SOAP Notes (soap.php)** - Creates structured SOAP notes from medical content
+- **Diagnosis Summary (dsn.php)** - Summarizes key diagnostic information
+- **Clinical Notes (cn.php)** - Generates clinical notes from medical data
+- **Pre-operative Assessment (pre.php)** - Analyzes pre-operative assessments
 
-**API Usage:**
-```http
-POST /rra.php
-Content-Type: application/x-www-form-urlencoded
+### 🩻 Radiology Tools
+- **Radiology Report Extractor (rex.php)** - Extracts specific information from radiology reports
+- **Radiology Report Summary (rrs.php)** - Summarizes radiology reports
+- **Radiology Differential Diagnosis (rdd.php)** - Generates differential diagnoses
+- **Medical Report Summary (mrs.php)** - Summarizes medical reports
 
-report=Hazy opacity in the left mid lung field...&model=qwen2.5:1.5b&language=en
-```
+### 📋 Medical Administration
+- **Discharge Paper Analyzer (dpa.php)** - Analyzes patient discharge papers
+- **Hospital Discharge Analyzer (hda.php)** - Analyzes hospital discharge documents
+- **Radiology Report Parser (rpd.php)** - Parses radiology reports for administrative use
 
-**Response:**
-```json
-{
-  "pathologic": "yes/no",
-  "severity": 0-10,
-  "summary": "summary text",
-  "diagnoses": ["diagnosis1", "diagnosis2", "diagnosis3"]
-}
-```
+### 📚 Research & Academia
+- **Academic Paper Analyzer (apa.php)** - Analyzes academic papers and extracts key information
+- **Evidence-based Template (etp.php)** - Creates evidence-based medical templates
+- **Summarize This Paper (stp.php)** - AI-powered academic paper summarization
+- **Structured Analysis (sta.php)** - Provides structured analysis of academic content
+- **Search Medical Literature (sml.php)** - Searches medical literature databases
+- **Paper Literature Database (pld.php)** - Manages paper literature databases
 
-### 2. Radiology Differential Diagnosis (rdd.php)
-Generates differential diagnoses with supporting information from radiology reports.
+### 🧠 Content Processing
+- **Simple Content Parser (scp.php)** - Scrapes web pages and converts to clean Markdown
+- **Web Page Summarizer (wps.php)** - Returns structured summaries of web articles
+- **Content Transformer (cta.php)** - Transforms content between different formats
+- **Radiology Differential Diagnosis (rdd.php)** - Processes radiology content
 
-**Features:**
-- AI-powered differential diagnosis generation
-- Multiple lightweight AI models support
-- Multilingual output (6 languages)
-- Web interface with real-time results
-- REST API support
+### ✍️ Content Creation
+- **Email Composer (eml.php)** - Composes emails with AI assistance
+- **Patient Education Content (pec.php)** - Creates patient-friendly educational content
 
-**API Usage:**
-```http
-POST /rdd.php
-Content-Type: application/x-www-form-urlencoded
+### 🧪 Development & Testing
+- **Web Page Content (wpc.php)** - Tests web page content extraction
+- **Experimentation (exp.php)** - AI model testing and experimentation
+- **Image OCR Tool (ocr.php)** - AI-powered OCR for images and PDFs
 
-report=Hazy opacity in the left mid lung field...&model=qwen2.5:1.5b&language=en
-```
+## 🌍 Supported Languages
 
-**Response:**
-```json
-{
-  "diagnoses": [
-    {
-      "condition": "diagnosis name",
-      "probability": 0-100,
-      "description": "detailed explanation",
-      "supporting_features": ["feature1", "feature2"],
-      "references": ["reference1", "reference2"]
-    }
-  ]
-}
-```
+All tools support these languages:
+- Romanian (ro) 🇷🇴
+- English (en) 🇬🇧
+- Spanish (es) 🇪🇸
+- French (fr) 🇫🇷
+- German (de) 🇩🇪
+- Italian (it) 🇮🇹
+- Greek (el) 🇬🇷
+- Hungarian (hu) 🇭🇺
+- Russian (ru) 🇷🇺
 
-### 3. Discharge Paper Analyzer (dpa.php)
-Analyzes patient discharge papers and summarizes key medical information for radiology use.
+## 🎨 Features
 
-**Features:**
-- AI-powered analysis of patient discharge papers
-- Multiple lightweight AI models support
-- Multilingual output (6 languages)
-- Web interface with real-time results
-- REST API support
+### Web Interface
+- Modern, responsive design with dark/light theme support
+- Category-based organization of tools
+- Real-time processing with loading indicators
+- Syntax highlighting for code and structured data
+- History tracking with pagination
+- Form validation and error handling
+- Toast notifications for user feedback
 
-**API Usage:**
-```http
-POST /dpa.php
-Content-Type: application/x-www-form-urlencoded
+### API Support
+- RESTful API endpoints for all tools
+- JSON response format
+- File upload support for documents and images
+- Multilingual output support
+- Error handling and validation
+- CORS support for cross-origin requests
 
-report=Patient discharged after treatment for pneumonia...&model=qwen2.5:1.5b&language=ro
-```
-
-**Response:**
-```json
-{
-  "pathologic": "yes/no",
-  "severity": 0-10,
-  "summary": "summary paragraph",
-  "keywords": ["keyword1", "keyword2", "keyword3"]
-}
-```
-
-### 4. Image OCR Tool (ocr.php)
-Uses AI to perform OCR on uploaded images and extract text in Markdown format.
-
-**Features:**
-- AI-powered OCR of images and PDFs
-- Multiple lightweight AI models support
-- Multilingual output (6 languages)
-- Web interface with real-time results
-- REST API support
-- PDF processing capabilities
-
-**API Usage:**
-```http
-POST /ocr.php
-Content-Type: multipart/form-data
-
-file=@document.png&model=gemma3:4b&language=en
-```
-
-**Response:**
-```json
-{
-  "text": "extracted text in markdown format"
-}
-```
-
-### 5. Simple Content Parser (scp.php)
-Scrapes web pages and converts them to clean Markdown or DokuWiki format using AI processing.
-
-**Features:**
-- Web scraping with Chrome browser simulation
-- Cookie handling for session management
-- AI-powered content detection and formatting conversion
-- Web interface with real-time results
-- REST API support
-- Multiple output formats (Markdown, DokuWiki)
-
-**API Usage:**
-```http
-POST /scp.php
-Content-Type: application/x-www-form-urlencoded
-
-url=https://example.com/article&model=qwen2.5:1.5b&language=en&format=markdown
-```
-
-**Response:**
-```json
-{
-  "markdown": "content in markdown format"
-}
-```
-
-### 6. Web Page Summarizer (wps.php)
-Scrapes web pages and returns a structured summary of the most important points in the article.
-
-**Features:**
-- Web scraping with Chrome browser simulation
-- AI-powered content summarization
-- Multilingual output (6 languages)
-- Web interface with real-time results
-- REST API support
-
-**API Usage:**
-```http
-POST /wps.php
-Content-Type: application/x-www-form-urlencoded
-
-url=https://example.com/article&model=qwen2.5:1.5b&language=en
-```
-
-**Response:**
-```json
-{
-  "title": "article title",
-  "summary": "main summary",
-  "key_points": ["point 1", "point 2", ...],
-  "keywords": ["keyword1", "keyword2", ...]
-}
-```
-
-### 7. Summarize This Paper (stp.php)
-AI-powered academic paper summarization with structured approaches.
-
-**Features:**
-- Text input or file upload (txt/markdown)
-- Predefined prompt templates (Three-Pass Summary, Problem–Idea–Evidence)
-- Multiple lightweight AI models support
-- Multilingual output (6 languages)
-- Web interface with real-time results
-- REST API support
-
-**API Usage:**
-```http
-POST /stp.php
-Content-Type: application/x-www-form-urlencoded
-
-content=Research paper content...&model=qwen2.5:1.5b&language=en&prompt_type=three_pass
-```
-
-**Response:**
-```json
-{
-  "summary": "structured summary based on selected prompt"
-}
-```
-
-### 8. Patient Education Content (pec.php)
-Converts complex medical information into patient-friendly educational content.
-
-**Features:**
-- AI-powered simplification of medical content
-- Multiple lightweight AI models support
-- Multilingual output (6 languages)
-- Web interface with real-time results
-- REST API support
-
-**API Usage:**
-```http
-POST /pec.php
-Content-Type: application/x-www-form-urlencoded
-
-content=Complex medical content...&model=qwen2.5:1.5b&language=en
-```
-
-**Response:**
-```json
-{
-  "education": "simplified patient-friendly content"
-}
-```
-
-### 9. Search Medical Literature (sml.php)
-Searches medical literature databases and gets AI-summarized research papers.
-
-**Features:**
-- PubMed database search
-- AI-powered summarization of research papers
-- Multiple lightweight AI models support
-- Multilingual output (6 languages)
-- Web interface with real-time results
-- REST API support
-
-**API Usage:**
-```http
-POST /sml.php
-Content-Type: application/x-www-form-urlencoded
-
-query=diabetes treatment&model=qwen2.5:1.5b&language=en
-```
-
-**Response:**
-```json
-{
-  "results": [
-    {
-      "title": "paper title",
-      "authors": ["author1", "author2"],
-      "journal": "journal name",
-      "year": 2023,
-      "summary": "structured summary",
-      "key_findings": ["finding1", "finding2"],
-      "methodology": "research methodology",
-      "pmid": "pubmed id"
-    }
-  ]
-}
-```
-
-### 10. Medical Chat Assistant (chat.php)
-Interact directly with an AI medical assistant for real-time medical queries.
-
-**Features:**
-- Real-time chat interface with medical AI
-- Multiple AI personalities (Medical Assistant, GP, Specialist, Researcher, Skippy)
-- Multiple lightweight AI models support
-- Multilingual output (6 languages)
-- Web interface with real-time results
-- REST API support
-
-**API Usage:**
-```http
-POST /chat.php
-Content-Type: application/json
-
-{
-  "message": "What are the symptoms of diabetes?",
-  "history": [],
-  "model": "qwen2.5:1.5b",
-  "personality": "medical_assistant",
-  "language": "en"
-}
-```
-
-**Response:**
-```json
-{
-  "reply": "AI response",
-  "history": [chat history array],
-  "model": "model used",
-  "language": "language used",
-  "personality": "personality used"
-}
-```
+### Technical Features
+- AI-powered document processing
+- OCR capabilities for images and PDFs
+- Web scraping with cookie handling
+- Markdown and HTML content processing
+- JSON data extraction and transformation
+- Handlebars templating for dynamic content
+- LocalStorage for history persistence
+- Modern JavaScript with async/await
 
 ## 📖 Usage
 
 ### Web Interface
-Access any of the tools directly through a web browser:
+Access any tool directly through your web browser:
 - `http://your-server/rra.php` - Radiology Report Analyzer
 - `http://your-server/rdd.php` - Radiology Differential Diagnosis
 - `http://your-server/dpa.php` - Discharge Paper Analyzer
@@ -356,18 +201,23 @@ Access any of the tools directly through a web browser:
 - `http://your-server/sml.php` - Search Medical Literature
 - `http://your-server/chat.php` - Medical Chat Assistant
 
-### API Endpoints
-All tools support REST API calls as described in their respective sections above.
+### API Usage Example
+```http
+POST /rra.php
+Content-Type: application/x-www-form-urlencoded
 
-## 🌍 Supported Languages
+report=Hazy opacity in the left mid lung field...&model=qwen2.5:1.5b&language=en
+```
 
-All tools support these languages:
-- Romanian (ro)
-- English (en)
-- Spanish (es)
-- French (fr)
-- German (de)
-- Italian (it)
+### Response Example
+```json
+{
+  "pathologic": "yes",
+  "severity": 5,
+  "summary": "Moderate opacity detected in left mid lung field",
+  "diagnoses": ["Pneumonia", "Pleural effusion", "Atelectasis"]
+}
+```
 
 ## 🎨 Syntax Highlighting
 
@@ -393,6 +243,52 @@ To change the theme, simply replace the URL with another style from the highligh
 - Access to compatible AI API (e.g., Ollama, MedGemma)
 - [highlight.js](https://highlightjs.org/) for syntax highlighting (included in the repository)
 
+## 🛠️ Development
+
+### Project Structure
+```
+docmind-ai/
+├── config.php.example          # Configuration template
+├── config.json                # Tool and language configuration
+├── index.html                 # Main web interface
+├── scripts.js                 # Frontend JavaScript
+├── styles.css                 # Application styles
+├── handlebars.min.js          # Template engine
+├── marked.js                  # Markdown parser
+├── highlight.min.js           # Syntax highlighting
+├── tools/                     # Tool configurations
+│   ├── cli/                   # Clinical tools
+│   ├── rad/                   # Radiology tools
+│   ├── adm/                   # Medical administration
+│   ├── res/                   # Research & academia
+│   ├── cpr/                   # Content processing
+│   ├── dev/                   # Development & testing
+│   ├── rad/                   # Radiology (duplicate)
+│   └── ccr/                   # Content creation
+└── [various PHP tool files]   # Individual tool implementations
+```
+
+### Adding New Tools
+1. Create a tool configuration file in the appropriate category folder
+2. Add the tool to `config.json` under the appropriate category
+3. Implement the tool logic in a PHP file
+4. Test the tool through both web interface and API
+
+### Configuration
+- Tools are configured in `config.json` with metadata and form fields
+- Categories organize tools by functionality
+- Languages define supported output languages
+- Common form fields are defined for consistency
+
+### Frontend Architecture
+- Modern JavaScript with ES6+ features
+- Async/await for API calls
+- State management with AppState class
+- Template-based rendering with Handlebars
+- Responsive design with CSS Grid and Flexbox
+- Dark/light theme support
+- Loading states and error handling
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please follow these guidelines:
@@ -400,6 +296,8 @@ Contributions are welcome! Please follow these guidelines:
 - Create a feature branch
 - Submit a pull request
 - Follow the existing code style
+- Update documentation for new features
+- Test your changes thoroughly
 
 ## 📋 Agent Guidance
 
