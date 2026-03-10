@@ -4,7 +4,49 @@
 
 A comprehensive collection of PHP web applications that use AI to process documents and extract key information in structured formats.
 
-## Tools Included
+## 🚀 Quick Start
+
+### Installation
+```bash
+git clone https://github.com/cstroie/DocMindAI.git
+cd docmind-ai
+cp config.php.example config.php
+# Edit config.php with your AI API settings
+```
+
+### Prerequisites
+- PHP 7.0+
+- cURL extension
+- JSON extension
+- ImageMagick or GraphicsMagick (for OCR functionality)
+- Access to compatible AI API (e.g., Ollama, MedGemma)
+
+### Setup
+1. Clone this repository or download the files
+2. Create a `config.php` file from the example:
+   ```bash
+   cp config.php.example config.php
+   ```
+3. Edit `config.php` with your AI API endpoint and settings
+4. Ensure all required PHP extensions are installed and enabled
+5. Make sure your web server has write access to the system's temporary directory
+
+## 📋 Configuration
+
+Create a `config.php` file with your AI API settings:
+
+```php
+<?php
+$LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1';
+$LLM_API_KEY = '';
+$DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
+$DEFAULT_VISION_MODEL = 'gemma3:4b';
+$LLM_API_FILTER = '/free/';
+$CHAT_HISTORY_LENGTH = 10;
+?>
+```
+
+## 🛠️ Tools Included
 
 ### 1. Radiology Report Analyzer (rra.php)
 Analyzes radiology reports and extracts key medical information in a structured JSON format.
@@ -299,95 +341,6 @@ Content-Type: application/json
 }
 ```
 
-## 📋 Requirements
-
-- PHP 7.0+
-- cURL extension
-- JSON extension
-- ImageMagick or GraphicsMagick PHP extensions (for OCR PDF processing)
-- Access to compatible AI API (e.g., Ollama, MedGemma)
-- [highlight.js](https://highlightjs.org/) for syntax highlighting (included in the repository)
-
-## Agent Guidance
-
-For developers extending or modifying DocMind AI, see [AGENTS.md](AGENTS.md) for architecture documentation and common development patterns.
-
-## 🔧 Configuration
-
-Create a `config.php` file from the example:
-```bash
-cp config.php.example config.php
-```
-
-Then edit `config.php` with your AI API settings:
-```php
-<?php
-$LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1';
-$LLM_API_KEY = '';
-$DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
-$DEFAULT_VISION_MODEL = 'gemma3:4b';
-$LLM_API_FILTER = '/free/';
-$CHAT_HISTORY_LENGTH = 10;
-?>
-
-### Syntax Highlighting
-
-The application uses [highlight.js](https://highlightjs.org/) for syntax highlighting. The library is included in the repository as `highlight.min.js`. To customize the highlighting style, you can:
-
-1. Replace the CSS file in the HTML head section
-2. Choose from available styles at https://highlightjs.org/static/demo/
-3. Or create your own custom theme
-
-The current configuration uses the GitHub theme:
-```html
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
-```
-
-To change the theme, simply replace the URL with another style from the highlight.js collection.
-- ImageMagick or GraphicsMagick PHP extensions (for OCR PDF processing)
-
-## 🚀 Quick Start
-
-### Installation
-```bash
-git clone https://github.com/cstroie/DocMindAI.git
-cd docmind-ai
-cp config.php.example config.php
-# Edit config.php with your AI API settings
-```
-
-### Prerequisites
-- PHP 7.0+
-- cURL extension
-- JSON extension
-- ImageMagick or GraphicsMagick (for OCR functionality)
-- Access to compatible AI API (e.g., Ollama, MedGemma)
-
-### Setup
-1. Clone this repository or download the files
-2. Create a `config.php` file from the example:
-   ```bash
-   cp config.php.example config.php
-   ```
-3. Edit `config.php` with your AI API endpoint and settings
-4. Ensure all required PHP extensions are installed and enabled
-5. Make sure your web server has write access to the system's temporary directory
-
-## Configuration
-
-Create a `config.php` file with your AI API settings:
-
-```php
-<?php
-$LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1';
-$LLM_API_KEY = '';
-$DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
-$DEFAULT_VISION_MODEL = 'gemma3:4b';
-$LLM_API_FILTER = '/free/';
-$CHAT_HISTORY_LENGTH = 10;
-?>
-```
-
 ## 📖 Usage
 
 ### Web Interface
@@ -406,7 +359,7 @@ Access any of the tools directly through a web browser:
 ### API Endpoints
 All tools support REST API calls as described in their respective sections above.
 
-## 📝 Supported Languages
+## 🌍 Supported Languages
 
 All tools support these languages:
 - Romanian (ro)
@@ -416,19 +369,29 @@ All tools support these languages:
 - German (de)
 - Italian (it)
 
-## Supported Languages
+## 🎨 Syntax Highlighting
 
-All tools support these languages:
-- Romanian (ro)
-- English (en)
-- Spanish (es)
-- French (fr)
-- German (de)
-- Italian (it)
+The application uses [highlight.js](https://highlightjs.org/) for syntax highlighting. The library is included in the repository as `highlight.min.js`. To customize the highlighting style, you can:
 
-## 📄 License
+1. Replace the CSS file in the HTML head section
+2. Choose from available styles at https://highlightjs.org/static/demo/
+3. Or create your own custom theme
 
-This project is licensed under the GPL 3 License - see the [LICENSE](LICENSE) file for details.
+The current configuration uses the GitHub theme:
+```html
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+```
+
+To change the theme, simply replace the URL with another style from the highlight.js collection.
+
+## 📋 Requirements
+
+- PHP 7.0+
+- cURL extension
+- JSON extension
+- ImageMagick or GraphicsMagick PHP extensions (for OCR PDF processing)
+- Access to compatible AI API (e.g., Ollama, MedGemma)
+- [highlight.js](https://highlightjs.org/) for syntax highlighting (included in the repository)
 
 ## 🤝 Contributing
 
@@ -437,6 +400,14 @@ Contributions are welcome! Please follow these guidelines:
 - Create a feature branch
 - Submit a pull request
 - Follow the existing code style
+
+## 📋 Agent Guidance
+
+For developers extending or modifying DocMind AI, see [AGENTS.md](AGENTS.md) for architecture documentation and common development patterns.
+
+## 📄 License
+
+This project is licensed under the GPL 3 License - see the [LICENSE](LICENSE) file for details.
 
 ## 📬 Contact
 
