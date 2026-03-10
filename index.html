@@ -21,7 +21,7 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
     <nav class="container-fluid">
         <ul>
             <li>
-                <a href="#" class="logo" onclick="showToast('Welcome to DocMind AI!')" data-tooltip="Home" data-placement="bottom">
+                <a href="#" class="logo" onclick="switchView('home')" data-tooltip="Home" data-placement="bottom">
                     <span class="logo-icon">💠</span>
                     <strong class="logo-text">
                         <span class="logo-text-first">DocMind</span>
@@ -221,20 +221,20 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
     <template id="historyItemTemplate">
         <section class="history-item">
             <hgroup class="history-info">
-                <h3 class="history-title">
+                <h4 class="history-title">
                     <span class="history-icon">⏳</span> 
                     <span class="history-title-text"></span>
-                </h3>
+                </h4>
                 <p class="history-date"></p>
-                <p class="history-preview"></p>
             </hgroup>
+            <code class="history-preview"></code>
         </section>
     </template>
 
     <template id="historyEmptyTemplate">
         <div class="history-empty-state">
             <div class="empty-state-icon">📄</div>
-            <h3 class="empty-state-title">No history yet</h3>
+            <h4 class="empty-state-title">No history yet</h4>
             <p class="empty-state-description">Your analysis history will appear here</p>
         </div>
     </template>

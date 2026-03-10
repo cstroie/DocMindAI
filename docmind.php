@@ -624,6 +624,8 @@ function buildToolPrompt($tool, $form_data) {
  *       ['line1', 'line2', 'line3'] becomes "line1\nline2\nline3"
  */
 function convertPromptArrayToText($prompt_array, $indent_level = 0) {
+    // Base indentation for nested structures
+    $indent = str_repeat('  ', $indent_level);
     // Check if this is an associative array (JSON object)
     if (array_keys($prompt_array) !== range(0, count($prompt_array) - 1)) {
         // Convert JSON object to formatted text
@@ -632,13 +634,20 @@ function convertPromptArrayToText($prompt_array, $indent_level = 0) {
         foreach ($prompt_array as $key => $value) {
             // Replace underscores with spaces in key names
             $formatted_key = str_replace('_', ' ', $key);
-
+            // Use UPPERCASE for keys in level 0 and Title Case for nested keys
+            if ($indent_level > 0) {
+                $formatted_key = ucwords($formatted_key);
+            } else {
+                $formatted_key = strtoupper($formatted_key);
+            }
             // Handle array values recursively
             if (is_array($value)) {
                 $value = convertPromptArrayToText($value, $indent_level + 1);
             }
+            // Indent value based on nesting level
+            $value = $indent . str_replace("\n", "\n" . $indent, $value);
             // Append to prompt text with formatting
-            $prompt_text .= strtoupper($formatted_key) . "\n" . $value . "\n\n";
+            $prompt_text .= $formatted_key . "\n" . $value . "\n\n";
         }
         // Trim trailing newlines and return
         return rtrim($prompt_text, "\n");
@@ -649,7 +658,7 @@ function convertPromptArrayToText($prompt_array, $indent_level = 0) {
             if (is_array($item)) {
                 $result[] = convertPromptArrayToText($item, $indent_level);
             } else {
-                $result[] = $item;
+                $result[] = $indent . $item;
             }
         }
         // Join items with newlines and return

@@ -4,45 +4,50 @@
   "description": "Generate professional email replies based on email content and context",
   "icon": "✉️",
   "prompt": {
-    "role": "You are a professional email assistant.",
-    "task": "Your task is to help draft {response_style}, polite, and effective email responses based on the original email and the user's response idea.",
+    "role": "You are a professional email assistant. You draft clear, well-structured email replies tailored to the requested tone.",
+    "task": "Draft a reply to the original email below, incorporating the user's response idea. Apply a {response_style} tone throughout.",
     "critical_instruction": "{language_instruction}",
-    "guidelines": [
-      "1. Tone:",
-      "- Maintain a {response_style} tone throughout the email.",
-      "- Use clear and proper language.",
-      "- Be concise and to the point.",
+    "output_format": [
+      "**Subject:** [Reply subject line, prefixed with Re: if replying, or a new subject if initiating]",
       "",
-      "2. Structure:",
-      "- Start with a polite greeting (e.g., \"Hi [Recipient's Name],\").",
-      "- Acknowledge the original email and summarize the main points if necessary.",
-      "- Present the response idea in a clear and structured manner.",
-      "- End with a polite closing (e.g., \"Best regards,\") and your name or appropriate signature.",
+      "[Greeting — e.g. 'Hi [Name],' or 'Dear [Name],' depending on tone]",
       "",
-      "3. Content:",
-      "- Address all points mentioned in the original email.",
-      "- Incorporate the user's response idea naturally into the email.",
-      "- Provide any necessary details or explanations.",
-      "- If additional information or action is required, clearly state what is needed.",
+      "[Opening sentence acknowledging the original email where appropriate]",
       "",
-      "4. Formatting:",
-      "- Use proper paragraph breaks for readability.",
-      "- Use bullet points or numbered lists if it helps clarify the information.",
-      "- Ensure the email is well-organized and easy to follow."
+      "[Body — address all points from the original email; incorporate the response idea naturally; use paragraphs or bullet points where clarity benefits]",
+      "",
+      "[Closing sentence — next steps, call to action, or courteous sign-off]",
+      "",
+      "[Sign-off — e.g. 'Best regards,' / 'Kind regards,' / 'Thanks,'] ",
+      "[Sender name or signature placeholder]"
     ],
-    "orginal email": "{orginal_email}",
-    "response idea": "{response_idea}"
+    "guidelines": [
+      "Tone: maintain {response_style} consistently — do not mix tones",
+      "Address every point raised in the original email; do not omit any",
+      "Incorporate the response idea naturally — expand it into full sentences, do not copy it verbatim",
+      "Use bullet points or numbered lists only where they genuinely aid clarity",
+      "Keep the email concise — no filler phrases, no unnecessary repetition",
+      "Match greeting and sign-off formality to the selected tone"
+    ],
+    "rules": [
+      "Output ONLY the email — no preamble, no commentary, no explanations before or after",
+      "Always include a subject line",
+      "Do not invent facts not present in the original email or response idea",
+      "If the original email contains the sender's name, address them by name in the greeting"
+    ],
+    "original_email": "{original_email}",
+    "response_idea": "{response_idea}"
   },
   "display": "markdown",
   "form": {
     "title": "Email Generator",
-    "description": "Generate professional email replies based on email content and context",
+    "description": "Generate a professional email reply based on the original email and your response idea.",
     "fields": [
       {
         "name": "response_style",
         "type": "select",
         "label": "Response Style",
-        "help": "Select the desired tone and style for the email response",
+        "help": "Select the tone for the email reply",
         "options": [
           {"value": "formal", "label": "Formal"},
           {"value": "casual", "label": "Casual"},
@@ -50,23 +55,23 @@
           {"value": "empathetic", "label": "Empathetic"},
           {"value": "assertive", "label": "Assertive"},
           {"value": "persuasive", "label": "Persuasive"},
-          {"value": "concise", "label": "Concise"}
+          {"value": "brief and to the point", "label": "Concise"}
         ]
       },
       {
-        "name": "orginal_email",
+        "name": "original_email",
         "type": "textarea",
         "label": "Original Email",
-        "help": "Enter the original email content you want to generate a reply for.",
-        "placeholder": "Example:\nHi Team,\n\nI wanted to check in on the status of the project deliverables. We are approaching the deadline and I want to ensure everything is on track. Please provide an update on your progress and let me know if there are any blockers.\n\nBest,\nManager",
+        "help": "Paste the email you want to reply to.",
+        "placeholder": "Hi Team,\n\nI wanted to check in on the status of the project deliverables. We are approaching the deadline and I want to ensure everything is on track. Please provide an update on your progress and let me know if there are any blockers.\n\nBest,\nManager",
         "required": true
       },
       {
         "name": "response_idea",
         "type": "textarea",
         "label": "Response Idea",
-        "help": "Enter your idea for how you'd like to respond to the original email.",
-        "placeholder": "Example:\nI've reviewed the deliverables and they look good. I'll be sending the final version to the client by Friday.",
+        "help": "Describe in a few words or sentences how you want to reply. The AI will expand this into a full email.",
+        "placeholder": "I've reviewed the deliverables and they look good. I'll be sending the final version to the client by Friday.",
         "required": true
       },
       "model",
