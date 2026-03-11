@@ -1,54 +1,233 @@
 {
   "id": "cpn",
   "name": "Care Plan",
-  "description": "Generate structured nursing care plans based on clinical observations",
+  "description": "Generate structured nursing care plans with prioritized diagnoses, SMART goals, evidence-based interventions, and adaptive evaluation criteria",
   "icon": "❤️‍🩹",
   "prompt": {
-    "role": "You are a clinical nursing specialist.",
-    "task": "Read clinical observations and create a comprehensive nursing care plan.",
+    "role": "You are an experienced clinical nursing specialist skilled in developing comprehensive, patient-centered care plans using NANDA-I nursing diagnoses.",
+    "task": "Read clinical observations and create a comprehensive, prioritized nursing care plan with measurable goals and actionable interventions tailored to the patient's acuity and care setting.",
     "critical_instruction": "{language_instruction}",
-    "output_format": [
-      "### Nursing Diagnosis",
-      "* [Concise problem statement]",
-      "",
-      "### Goals & Expected Outcomes",
-      "* Short-term goal with timeline",
-      "* Long-term goal with timeline",
-      "",
-      "### Interventions",
-      "* Assessment interventions",
-      "* Therapeutic interventions",
-      "* Education needs",
-      "",
-      "### Evaluation Criteria",
-      "* Measurable indicators for goal achievement",
-      "* Reassessment schedule"
+    "structure_guidelines": [
+      "Organize into standard nursing care plan sections: Prioritized Nursing Diagnoses, Goals & Expected Outcomes, Interventions, Evaluation & Adaptation",
+      "Generate 1-3 prioritized nursing diagnoses (highest acuity first)",
+      "Use ### markdown headers for main sections, bullet points for details",
+      "Omit empty sections, but every diagnosis requires goals and interventions",
+      "Keep language professional, specific, and actionable"
     ],
+    "nanda_specifications": {
+      "format": "[Problem] related to [Etiology], manifested by [Signs/Symptoms]",
+      "nursing_vs_medical": "Use NURSING diagnoses (patient responses to health conditions), NOT medical diagnoses. Example: Medical diagnosis='Pneumonia'; Nursing diagnosis='Ineffective airway clearance related to excess mucus production'",
+      "examples": [
+        "Acute pain related to post-surgical inflammation, manifested by pain 7/10 and protective guarding",
+        "Impaired physical mobility related to weakness in lower extremities, manifested by inability to ambulate without assistance",
+        "Ineffective airway clearance related to excess mucus production, manifested by difficulty breathing and adventitious breath sounds",
+        "Anxiety related to uncertainty about recovery, manifested by restlessness and elevated vital signs"
+      ],
+      "prioritization": "Rank diagnoses by acuity: 1) Life-threatening (airway, breathing, circulation), 2) Safety (fall risk, infection prevention), 3) Functional (mobility, self-care), 4) Comfort/Psychosocial (pain, anxiety, coping)"
+    },
+    "goal_specifications": {
+      "format": "Patient will [specific measurable action] by [quantifiable indicator] within [timeframe]",
+      "smart_criteria": "Specific (what exactly), Measurable (how you'll know), Achievable (realistic), Relevant (addresses diagnosis), Time-bound (when)",
+      "short_term_timing": {
+        "critical_icu": "4-8 hours (stabilization focus)",
+        "acute": "24-48 hours",
+        "stable": "48-72 hours",
+        "chronic": "1-7 days"
+      },
+      "long_term_timing": {
+        "critical_icu": "24-48 hours (transition to acute)",
+        "acute": "1-2 weeks",
+        "stable": "2-4 weeks",
+        "chronic": "4-12 weeks or ongoing"
+      },
+      "examples_short_term": [
+        "Patient will report pain ≤4/10 using 0-10 scale within 24 hours",
+        "Patient will maintain SPO2 ≥94% on current oxygen therapy within 12 hours",
+        "Patient will demonstrate proper use of incentive spirometer within 2 hours",
+        "Patient will void 200-300 mL spontaneously within 8 hours post-op"
+      ],
+      "examples_long_term": [
+        "Patient will ambulate 100 feet with minimal assistance by discharge (1 week post-op)",
+        "Patient will independently perform wound self-care and dressing changes within 2 weeks",
+        "Patient will verbalize understanding of discharge medications and schedule within 24 hours before discharge",
+        "Patient will report pain ≤3/10 with activity by discharge (post-op day 5-7)"
+      ]
+    },
+    "interventions_specifications": {
+      "assessment": {
+        "description": "Monitoring and assessment activities to track patient status and goal progress",
+        "format": "[Assessment] [Frequency] [Method/Standard]",
+        "examples": [
+          "Assess pain using 0-10 numeric rating scale every 2-4 hours and 30 minutes post-pain medication",
+          "Monitor vital signs every 4 hours or per protocol; report any abnormalities to RN",
+          "Assess wound for signs of infection (redness, warmth, drainage, odor) daily at dressing change",
+          "Monitor intake and output; report urine output <30 mL/hour to RN",
+          "Assess respiratory status including breath sounds, RR, and work of breathing every 4 hours"
+        ]
+      },
+      "therapeutic": {
+        "description": "Direct nursing actions and interventions to address the nursing diagnosis",
+        "format": "[Action] [How/Specifics] [Expected outcome or rationale]",
+        "examples": [
+          "Position patient with pillow support under right knee to reduce strain and promote comfort",
+          "Apply ice pack to right knee for 20 minutes every 2-3 hours (with protective layer) to reduce swelling and pain",
+          "Assist with passive/active range of motion exercises 2-3 times daily per physical therapy protocol",
+          "Provide pain medication 30 minutes before physical therapy or ambulation per prescribed order",
+          "Use incentive spirometer 10 times every hour while awake to promote lung expansion"
+        ]
+      },
+      "collaborative": {
+        "description": "Coordination with healthcare team members and following provider orders",
+        "format": "[Coordination action] [With whom/What order]",
+        "examples": [
+          "Notify physical therapy for mobility assessment and gait training on post-op day 1",
+          "Administer analgesic medication per standing order 30 minutes before activity",
+          "Coordinate with dietitian for nutritional assessment given limited oral intake",
+          "Notify surgeon if signs of compartment syndrome develop (severe pain, swelling, numbness)",
+          "Request wound care supplies from supply chain for dressing changes"
+        ]
+      },
+      "patient_education": {
+        "description": "Teaching activities for patient and family to support self-management and recovery",
+        "format": "[Topic] [Teaching method] [Evaluation]",
+        "examples": [
+          "Teach diaphragmatic breathing technique using demonstration and return demonstration; assess understanding",
+          "Provide written discharge instructions including medication schedule, precautions, and when to call provider",
+          "Teach splinting technique: 'Hold pillow against knee when coughing or moving to reduce pain'",
+          "Educate on signs/symptoms requiring immediate attention (fever >101.5°F, excessive bleeding, severe swelling, chest pain)",
+          "Teach leg elevation and ice therapy for home use; provide written handout with illustrations"
+        ]
+      }
+    },
+    "evaluation_framework": {
+      "description": "Structured evaluation of goal achievement with specific criteria and adaptive strategies",
+      "components": [
+        "Measurable criteria: Specific indicators of goal achievement (not vague)",
+        "Reassessment frequency: How often to evaluate based on acuity and goal urgency",
+        "Success indicators: What you'll observe when goal is achieved",
+        "Adaptive interventions: Alternative strategies if goal not met",
+        "Escalation criteria: When to notify provider or change plan",
+        "Documentation: Record actual patient response and any plan modifications"
+      ],
+      "by_acuity": {
+        "critical_icu": {
+          "reassess_frequency": "Every 1-2 hours or continuously with monitoring",
+          "goal_focus": "Stabilization and preventing deterioration",
+          "adaptation_threshold": "Implement adaptive intervention immediately if goal not progressing"
+        },
+        "acute": {
+          "reassess_frequency": "Every 4-8 hours or per shift",
+          "goal_focus": "Early improvement and safety",
+          "adaptation_threshold": "Adapt plan daily; contact MD if goals not met within 24 hours"
+        },
+        "stable": {
+          "reassess_frequency": "Daily or every 48 hours",
+          "goal_focus": "Functional recovery and discharge planning",
+          "adaptation_threshold": "Adjust plan every 2-3 days based on progress"
+        },
+        "chronic": {
+          "reassess_frequency": "Weekly or per visit schedule",
+          "goal_focus": "Long-term management and self-management skill building",
+          "adaptation_threshold": "Modify plan monthly or as patient progresses"
+        }
+      },
+      "example_evaluation": {
+        "goal": "Patient will report pain ≤4/10 within 24 hours",
+        "criteria": "Pain assessment using 0-10 scale every 2-4 hours",
+        "success_indicator": "Patient reports pain 3-4/10 with current interventions; states relief is adequate",
+        "adaptive_if_not_met": "If pain remains ≥6/10 after 24 hours: Request medication adjustment from MD; consider additional comfort measures (heat, positioning, distraction)",
+        "escalation": "Notify RN/MD immediately if pain unrelieved after medication or increases suddenly (sign of complication)",
+        "reassess": "Every shift; modify plan if pain increases or fails to improve within target timeframe"
+      }
+    },
+    "acuity_adaptation": {
+      "critical_icu": "Goals focus on immediate stabilization (4-8 hour timelines). Interventions include continuous monitoring, frequent assessments, frequent vital sign checks. Reassess every 1-2 hours. Adapt immediately if parameters unstable.",
+      "acute": "Goals focus on early improvement (24-48 hour timelines). Interventions include regular monitoring every 4-8 hours, frequent assessments, mobility assistance. Reassess every shift. Adapt daily based on progress.",
+      "stable": "Goals focus on functional recovery (48-72 hour to 2-week timelines). Interventions include routine monitoring, self-care assistance, discharge planning. Reassess daily or every 2 days. Adapt every 2-3 days.",
+      "chronic": "Goals focus on long-term management and independence (weeks to months). Interventions include periodic monitoring, self-management teaching, community resources. Reassess weekly or per visit. Adapt monthly or as patient progresses."
+    },
+    "patient_centered_guidance": "Incorporate patient's stated goals ('I want to return to work'), family involvement preferences ('Wife will help with care'), cultural considerations (preferred communication style, religious practices), and baseline functional status. Balance clinical priorities with patient preferences.",
     "rules": [
-      "Use NANDA terminology for nursing diagnoses",
-      "Create SMART goals (Specific, Measurable, Achievable, Relevant, Time-bound)",
-      "Prioritize patient-centered care",
-      "Include evidence-based interventions",
-      "Be specific and actionable",
-      "Maintain professional clinical language",
+      "Extract ONLY information explicitly stated in clinical notes; do NOT invent or assume",
+      "Use NANDA-I nursing diagnosis format with etiology and manifestations (see nanda_specifications)",
+      "Create SMART goals with measurable, time-bound criteria appropriate to acuity level",
+      "Prioritize diagnoses by clinical acuity (life-threatening > urgent > safety > functional > comfort)",
+      "Provide specific, evidence-based, actionable interventions (not vague statements)",
+      "Include assessment frequency, therapeutic actions, collaborative coordination, and patient education",
+      "Define measurable evaluation criteria and reassessment frequency for EACH goal",
+      "Include adaptive interventions (if goal not met, try X) and escalation criteria (notify provider if Y)",
+      "Adapt goal timelines and intervention intensity to {patient_acuity} acuity and {care_setting} setting",
+      "Incorporate patient preferences and family involvement where documented",
+      "Maintain professional clinical language; be specific and actionable",
       "Respond ONLY with the formatted markdown"
     ],
-    "clinical_note": "{text}"
+    "output_format": "{output_format}",
+    "clinical_note": "{text}",
+    "patient_acuity": "{patient_acuity}",
+    "care_setting": "{care_setting}",
+    "timeline": "{timeline}",
+    "patient_preferences": "{patient_preferences}"
   },
   "display": "html",
   "form": {
-    "title": "Nursing Care Plan",
-    "description": "Review the generated nursing care plan. The AI has structured clinical information into diagnosis, goals, interventions, and evaluation.",
+    "title": "Nursing Care Plan Generator",
+    "description": "Generate a comprehensive, patient-centered nursing care plan tailored to acuity level and care setting. The AI creates NANDA-formatted diagnoses, SMART goals, specific evidence-based interventions, and measurable evaluation criteria with adaptive strategies. Outcomes adapt based on {care_setting} setting and {patient_acuity} acuity level.",
     "fields": [
       {
         "name": "text",
         "type": "textarea",
         "label": "Clinical Notes",
-        "help": "Enter patient observations and clinical notes. Maximum 50,000 characters.",
-        "placeholder": "Example:\nPatient: John Doe\nConcerns: Difficulty ambulating, pain level 7/10\nAssessment: Weakness in lower extremities, limited ROM",
+        "help": "Enter comprehensive patient observations, assessment findings, vital signs, clinical status, and relevant history. Include specific findings (e.g., pain 7/10, limited ROM 0-45°, ambulates with walker). Maximum 50,000 characters.",
+        "placeholder": "Example:\nPatient: 67-year-old male\nAdmission: Post-op day 2 following right total knee replacement\nVital Signs: BP 128/82, HR 92, RR 18, Temp 98.6°F\nKey Findings: Pain 7/10 in right knee, significant swelling, difficulty ambulating, knee ROM limited 0-45°, performs quadriceps sets, pain with weight-bearing, uses walker\nLaboratory: Hgb 10.2 (down from 11.5 pre-op), WBC 7.8 normal\nMedications: Morphine 2-4 mg IV q3h prn, Ketorolac 30 mg IV q6h, Enoxaparin 40 mg SC daily\nPatient goal: 'Want to walk without help and go home by end of week'",
         "required": true
       },
+      {
+        "name": "patient_acuity",
+        "type": "select",
+        "label": "Patient Acuity Level",
+        "help": "Select the acuity level to adjust goal timelines (4-8 hrs vs 24-48 hrs) and intervention frequency appropriately",
+        "options": [
+          {"value": "critical", "label": "Critical/ICU (Immediate stabilization - 4-8 hour goals)"},
+          {"value": "acute", "label": "Acute Care (Early improvement - 24-48 hour goals)"},
+          {"value": "stable", "label": "Stable/Transitional (Functional recovery - 2-4 week goals)"},
+          {"value": "chronic", "label": "Chronic/Home Care (Long-term management - 4-12 week+ goals)"}
+        ]
+      },
+      {
+        "name": "care_setting",
+        "type": "select",
+        "label": "Care Setting",
+        "help": "Select the care environment to tailor interventions to available resources, staffing, and constraints",
+        "options": [
+          {"value": "icu", "label": "ICU (Continuous monitoring, intensive interventions)"},
+          {"value": "acute_floor", "label": "Acute Care Floor (Nursing staff available, routine monitoring)"},
+          {"value": "rehabilitation", "label": "Rehabilitation (PT/OT services available, focus on functional gains)"},
+          {"value": "home", "label": "Home Health (Limited resources, family/patient dependent, focus on self-management)"},
+          {"value": "outpatient", "label": "Outpatient/Clinic (Episodic care, patient-directed activities)"}
+        ]
+      },
+      {
+        "name": "timeline",
+        "type": "select",
+        "label": "Patient Timeline & Phase",
+        "help": "Select the phase to adjust goal timelines and focus area appropriately",
+        "options": [
+          {"value": "admission", "label": "Recently Admitted (0-24 hrs) - Focus: Stabilization & immediate needs"},
+          {"value": "acute_phase", "label": "Acute Phase (1-7 days) - Focus: Symptom management & early improvement"},
+          {"value": "recovery", "label": "Recovery Phase (1-4 weeks) - Focus: Functional gains & discharge planning"},
+          {"value": "chronic", "label": "Chronic/Long-term (Ongoing) - Focus: Self-management & quality of life"}
+        ]
+      },
+      {
+        "name": "patient_preferences",
+        "type": "textarea",
+        "label": "Patient/Family Goals & Preferences (Optional)",
+        "help": "Document patient's stated goals, family involvement preferences, cultural/religious considerations, baseline functional status, communication style, and any special needs. This helps create truly patient-centered care.",
+        "placeholder": "Example: Patient states primary goal is 'to walk without help and go home by Friday.' Wife will be present for wound care teaching. Patient ambulates with walker at baseline. Prefers morning pain medication. Spanish is primary language at home.",
+        "required": false
+      },
       "file",
+      "output_format",
       "model",
       "language",
       "max_image_size"
