@@ -6,7 +6,7 @@
   "prompt": {
     "role": "You are a data extraction API.",
     "task": "Extract structured data from the following. If a file is provided, extract data from the file content as well.",
-    "output_format": "{output}",
+    "output_format": "{output_format}",
     "text": "{text}"
   },
   "form": {
@@ -22,19 +22,7 @@
         "required": true
       },
       "file",
-      {
-        "name": "output",
-        "type": "select",
-        "label": "Output Format",
-        "help": "Select the output format for the extracted data.",
-        "options": [
-          {"value": "json", "label": "JSON"},
-          {"value": "yaml", "label": "YAML"},
-          {"value": "xml", "label": "XML"},
-          {"value": "html", "label": "HTML"},
-          {"value": "markdown", "label": "Markdown"}
-        ]
-      },
+      "output_format",
       "model",
       "max_image_size"
     ]
