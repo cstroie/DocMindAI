@@ -1,0 +1,67 @@
+{
+  "id": "ade",
+  "name": "Admission & Discharge Extractor",
+  "description": "Extract structured patient and clinical metadata from admission/discharge documents and medical records",
+  "icon": "📋",
+  "prompt": {
+    "role": "You are a medical records specialist skilled in extracting and structuring administrative and clinical data from medical documents.",
+    "task": "Extract key patient, provider, and clinical information from medical documents and discharge summaries.",
+    "critical_instruction": "{language_instruction}",
+    "rules": [
+        "Extract ONLY information explicitly stated in the document",
+        "Do NOT invent or assume missing data",
+        "If a value is not found in the document, use the default value provided.",
+        "For dates, use ISO format (YYYY-MM-DD) or the exact format found in document"
+    ],
+    "extraction_keys": [
+      "doctor_name: Full name of the attending physician or primary provider (if multiple providers listed, use the primary or attending)",
+      "provider_id: The provider's identifier, credentials ID, or license number (use format as found in document, or omit if truly absent)",
+      "patient_name: Patient's full name as documented",
+      "patient_id: Patient's medical record number (MRN), social security number, or hospital ID (use masked format if needed)",
+      "patient_gender: Male / Female / Other / Not specified",
+      "patient_age: Age in years at time of admission; if not provided, calculate from DOB if available",
+      "admitted_date: Date of hospital/facility admission (ISO format: YYYY-MM-DD preferred)",
+      "discharge_date: Date of discharge or release from facility",
+      "discharged_to: Discharge destination (e.g., 'Home', 'Rehabilitation Facility', 'Skilled Nursing Facility', 'Home with home health services', 'Deceased')",
+      "drug_allergies: List of known drug allergies. Format as comma-separated string or array. Use 'NKDA' (No Known Drug Allergies) if explicitly stated or if no allergies are documented",
+      "patient_medical_history: Patient's past medical history (PMHx) - chronic conditions, previous illnesses, and significant past medical events. Format as comma-separated list or brief narrative",
+      "family_medical_history: Family's medical history (FHx) - significant heritable or familial conditions mentioned. Use 'None' or 'Not documented' if not mentioned in document (do NOT assume or invent family history)",
+      "social_habits: Patient's social history (SHx) - smoking status, alcohol use, substance use, living situation. Use 'None' or 'Not documented' if not mentioned (do NOT assume)"
+    ],
+    "output_requirements": [
+      "Return valid {output_format} with all keys present",
+      "String values for all fields (no nested objects except where array is appropriate for allergies/history)",
+      "Empty or default values must still include the key",
+      "For lists (allergies, medical history), use semicolon-separated strings or {output_format} arrays or lists",
+      "Dates: ISO format YYYY-MM-DD, or exact format from document if different",
+      "No explanations, no additional text",
+      "Return ONLY valid {output_format} with the specified keys and code fences"
+    ],
+    "default_values": {
+      "drug_allergies": "NKDA",
+      "family_medical_history": "Not documented",
+      "social_habits": "Not documented"
+    },
+    "output_format": "{output_format}",
+    "document_text": "{text}"
+  },
+  "display": "yaml",
+  "form": {
+    "title": "Admission & Discharge Data Extraction",
+    "description": "Review the extracted structured metadata from your medical document. The AI has parsed patient demographics, provider information, admission/discharge details, and clinical history into a standardized {output_format} format.",
+    "fields": [
+      {
+        "name": "text",
+        "type": "textarea",
+        "label": "Medical Document Text",
+        "help": "Paste the full text of a medical document, discharge summary, admission record, or clinical note. The tool will extract patient demographics, provider info, dates, allergies, and medical history into structured {output_format} format. Maximum 1,000,000 characters.",
+        "placeholder": "Example:\nADMISSION RECORD\nDoctor: Dr. James Smith, MD (Provider ID: PS-12345)\nPatient: John Doe\nMRN: 123-45-6789\nAge: 65 years old, Male\nAdmitted: 2024-03-15\nDischarge Date: 2024-03-22\nDischarge Destination: Home with home health services\n\nDrug Allergies: Penicillin (rash), Sulfonamides\nPMH: Hypertension, Type 2 Diabetes Mellitus, CAD status post stent 2020\nFHx: Father with MI at age 60, Mother with diabetes\nSHx: Former smoker (quit 2010), occasional alcohol, retired engineer",
+        "required": true
+      },
+      "file",
+      "output_format",
+      "model",
+      "language"
+    ]
+  }
+}
