@@ -18,6 +18,7 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
     <script src="highlight.min.js" defer></script>
 </head>
 <body>
+    <!-- Navigation Bar -->
     <nav class="container-fluid">
         <ul>
             <li>
@@ -34,7 +35,7 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
         </ul>
         <ul>
             <li>
-                <a href="#" data-view="history" data-tooltip="View history" data-placement="bottom" aria-label="View history" onclick="switchView('history')">⏳</a>
+                <a href="#" data-view="history" data-tooltip="View history" data-placement="bottom" aria-label="View history" onclick="switchView('history')">📜</a>
             </li>
             <li>
                 <a href="#" id="themeToggle" class="outline" data-tooltip="Toggle theme" data-placement="bottom" aria-label="Toggle theme" onclick="toggleTheme()">🌙</a>
@@ -42,19 +43,20 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
         </ul>
     </nav>
 
+    <!-- Page Header -->
     <header class="container">
+        <aside>💠</aside>
         <hgroup>
-            <h1 class="page-title" id="pageTitle">Welcome to DocMind AI</h1>
-            <p class="page-subtitle" id="pageSubtitle">Intelligent Document Processing</p>
+            <h1 id="pageTitle">Welcome to DocMind AI</h1>
+            <p  id="pageSubtitle">Intelligent Document Processing</p>
         </hgroup>
         <select id="toolSelect">
-            <option selected disabled value="">Home</option>
+            <option selected disabled value=""></option>
         </select>
     </header>
 
     <!-- Main Content Area -->
     <main class="container view-container">
-
         <!-- Home View -->
         <section class="view home-view active-view">
             <article class="hero">
@@ -77,9 +79,10 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
         <!-- Results View -->
         <article id="resultsArea" class="view results-view" style="display: none;">
             <header>
+                <aside></aside>
                 <hgroup>
-                    <h2 id="resultsTitle"></h2>
-                    <p id="resultsSubtitle"></p>
+                    <h2></h2>
+                    <p></p>
                 </hgroup>
             </header>
             <main id="resultsContent">
@@ -89,7 +92,7 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
                 <details name="detailsPrompt">
                     <summary>Prompt</summary>
                     <pre id="detailsPrompt"></pre>
-                </details> 
+                </details>
                 <details name="detailsResponse">
                     <summary>Raw response</summary>
                     <pre id="detailsResponse"></pre>
@@ -105,9 +108,10 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
         <!-- Form View -->
         <article id="toolForm" class="view form-view" style="display: none;">
             <header>
+                <aside>📝</aside>
                 <hgroup>
-                    <h2 id="formTitle"></h2>
-                    <p id="formSubtitle"></p>
+                    <h2></h2>
+                    <p></p>
                 </hgroup>
             </header>
             <form id="apiForm" enctype="multipart/form-data">
@@ -123,13 +127,15 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
         </article>
 
         <!-- History View -->
-        <article class="history-container view history-view">
+        <article class="view history-view">
             <header>
+                <aside>📜</aside>
                 <hgroup>
                     <h2>Analysis History</h2>
+                    <p>Track your previous analysis sessions and results</p>
                 </hgroup>
             </header>
-            <main id="historyContent">
+            <main>
                 <!-- History items will be displayed here -->
             </main>
             <footer class="grid">
@@ -152,43 +158,19 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
         </div>
     </div>
 
-    <!-- Templates -->
-    <template id="errorTemplate1">
-        <dialog open>
-        <article class="notification error-notification">
-            <main>
-                <div class="notification-icon">⚠️</div>
-                <div class="notification-content">
-                    <strong>Error:</strong>
-                    <div class="error-message"></div>
-                </div>
+    <!-- Tools View Template -->
+    <template id="toolsViewTemplate">
+        <section class="view tools-view">
+            <header>
+                <aside>🔧</aside>
+                <hgroup>
+                    <h2>AI Tools</h2>
+                    <p>Select a tool to process your documents</p>
+                </hgroup>
+            </header>
+            <main class="grid">
             </main>
-            <footer class="grid">
-                <button class="primary">×</button>
-                <button class="secondary" onclick="switchView('form')">Show Form</button>
-                <button class="secondary" onclick="switchView('results')">Details</button>
-            </footer>
-        </article>
-        </dialog>
-    </template>
-
-    <template id="errorTemplate">
-        <dialog open>
-            <article>
-                <main>
-                    <div>⚠️</div>
-                    <div>
-                        <strong>Error:</strong>
-                        <p></p>
-                    </div>
-                </main>
-                <footer class="grid">
-                    <button class="primary">×</button>
-                    <button class="secondary" onclick="switchView('form')">Show Form</button>
-                    <button class="secondary" onclick="switchView('results')">Details</button>
-                </footer>
-            </article>
-        </dialog>
+        </section>
     </template>
 
     <template id="cardTemplate">
@@ -204,38 +186,26 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
     <!-- History Templates -->
     <template id="historyItemTemplate">
         <section class="history-item">
-            <hgroup class="history-info">
-                <h4 class="history-title">
-                    <span class="history-icon">⏳</span> 
-                    <span class="history-title-text"></span>
-                </h4>
-                <p class="history-date"></p>
-            </hgroup>
-            <code class="history-preview"></code>
+            <header>
+                <aside></aside>
+                <hgroup>
+                    <h4></h4>
+                    <p></p>
+                </hgroup>
+            </header>
+            <code></code>
         </section>
     </template>
 
     <template id="historyEmptyTemplate">
-        <section class="history-empty-state">
-            <hgroup class="history-info">
-                <h4 class="empty-state-title"><span class="empty-state-icon">📄</span>No history yet</h4>
-                <p>Your analysis history will appear here</p>
-            </hgroup>
-        </section>
-    </template>
-
-    <!-- Tools View Template -->
-    <template id="toolsViewTemplate">
-        <section class="view tools-view">
-            <hgroup class="tools-header">
-                <h2 class="tools-title" id="topTitle">🔧 AI Tools</h2>
-                <p class="tools-subtitle" id="topDescription">Select a tool to process your documents</p>
-            </hgroup>
-
-            <!-- Tools Grid -->
-            <div class="grid tools-grid" id="toolsGrid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                <!-- Will be populated by JavaScript -->
-            </div>
+        <section class="history-item">
+            <header>
+                <aside>📜</aside>
+                <hgroup>
+                    <h4>No history yet</h4>
+                    <p>Your analysis history will appear here</p>
+                </hgroup>
+            </header>
         </section>
     </template>
 </body>

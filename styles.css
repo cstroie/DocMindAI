@@ -146,147 +146,7 @@ nav li :where(a,[role=link]) {
     animation: spin 1s linear infinite;
 }
 
-/* Error message styles */
-.error-message {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    max-width: 400px;
-    padding: 1.5rem;
-    border-radius: var(--pico-border-radius);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 10000;
-    animation: slideIn 0.3s ease-out;
-}
 
-.error-message.high {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    border: 1px solid #fca5a5;
-    color: #991b1b;
-}
-
-.error-message.medium {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border: 1px solid #fcd34d;
-    color: #92400e;
-}
-
-.error-message.low {
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-    border: 1px solid #93c5fd;
-    color: #1e40af;
-}
-
-.error-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.error-header h3 {
-    margin: 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-}
-
-.error-description {
-    margin-bottom: 1rem;
-    line-height: 1.5;
-}
-
-.error-suggestions {
-    margin-bottom: 1rem;
-}
-
-.error-suggestions h4 {
-    margin: 0 0 0.5rem 0;
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.error-suggestions ul {
-    margin: 0;
-    padding-left: 1.5rem;
-}
-
-.error-suggestions li {
-    margin-bottom: 0.25rem;
-    font-size: 0.875rem;
-}
-
-.error-actions {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.error-actions button {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: var(--pico-border-radius);
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.retry-btn {
-    background: var(--primary);
-    color: white;
-}
-
-.retry-btn:hover {
-    background: var(--primary-hover);
-    transform: translateY(-1px);
-}
-
-.dismiss-btn {
-    background: var(--secondary);
-    color: white;
-}
-
-.dismiss-btn:hover {
-    background: var(--secondary-hover);
-    transform: translateY(-1px);
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-
-/* Error notification styles */
-.error-notification {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    border: 1px solid #fca5a5;
-    color: #991b1b;
-    padding: 1rem;
-    border-radius: var(--pico-border-radius);
-    margin-bottom: 1rem;
-}
-
-.error-notification .notification-icon {
-    font-size: 1.5rem;
-    margin-right: 0.5rem;
-}
-
-.error-notification .notification-content {
-    flex: 1;
-}
-
-.error-notification .error-message {
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    line-height: 1.4;
-}
 
 /* Toast notifications */
 .toast-container {
@@ -354,6 +214,8 @@ nav li :where(a,[role=link]) {
     to { opacity: 0; transform: translateY(-20px); }
 }
 
+
+/* Hero Section */
 .hero {
     display: flex;
     align-items: center;
@@ -395,17 +257,48 @@ nav li :where(a,[role=link]) {
     opacity: 0.8;
 }
 
+/* Main header */
+body>header {
+  display: flex;
+  gap: 1rem;
+  font-size: 200%;
+}
 
+body>header hgroup {
+  flex: 2;
+  margin-bottom: 0;
+}
+body>header select {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Cards and Views */
 .card {
   display: flex;
   gap: 1rem;
   padding: 1.5rem;
+  margin: 0;
   font-size: 200%;
 }
 
-.card hgroup {
+.view>header,
+.history-item header {
+  display: flex;
+  gap: 1rem;
+  font-size: 200%;
+}
+
+.view>header>hgroup,
+.card hgroup,
+.history-item hgroup {
   flex: 1;
   margin-bottom: 0;
+}
+
+.view>main.grid {
+    margin-top: var(--pico-block-spacing-vertical);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
 
@@ -430,6 +323,9 @@ ul.keywords li {
     color: var(--pico-secondary-inverse);
     border-color: var(--pico-secondary-hover-border);
 }
+
+
+
 
 .article {
     margin: 0 auto;

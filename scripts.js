@@ -612,7 +612,7 @@ function createCategoriesViews(categories) {
         const [categoryId, categoryData] = categoryEntries[i];
         // Clone the template content
         const templateContent = toolsViewTemplate.content.cloneNode(true);
-        const categoryView = templateContent.querySelector('.tools-view');
+        const categoryView = templateContent.querySelector('section');
 
         // Update the view properties
         //categoryView.classList.add('category-view');
@@ -621,17 +621,16 @@ function createCategoriesViews(categories) {
         categoryView.style.display = 'none';
 
         // Update the title and description
-        const titleElement = categoryView.querySelector('.tools-title');
-        const descriptionElement = categoryView.querySelector('.tools-subtitle');
-        if (titleElement) {
-            titleElement.textContent = `${categoryData.icon || '📄'} ${categoryData.name}`;
-        }
-        if (descriptionElement) {
-            descriptionElement.textContent = categoryData.description || '';
-        }
+        const iconElement = categoryView.querySelector('header aside');
+        const titleElement = categoryView.querySelector('header h2');
+        const descriptionElement = categoryView.querySelector('header p');
+        
+        iconElement.textContent = categoryData.icon || '📁';
+        titleElement.textContent = categoryData.name || `Category: ${categoryId}`;
+        descriptionElement.textContent = categoryData.description || '';
 
         // Update the tools grid ID
-        const toolsGrid = categoryView.querySelector('.tools-grid');
+        const toolsGrid = categoryView.querySelector('.grid');
         if (toolsGrid) {
             toolsGrid.id = `${categoryId}ToolsGrid`;
         }
@@ -736,24 +735,21 @@ function populateCategoryCards() {
     // Add a card for each category
     for (const [categoryId, categoryData] of Object.entries(categoriesData)) {
         const clone = template.content.cloneNode(true);
-
         // Populate card elements
         const iconElement = clone.querySelector('aside');
         const titleElement = clone.querySelector('h4');
         const descriptionElement = clone.querySelector('p');
-
         if (iconElement) iconElement.textContent = categoryData.icon || '📁';
         if (titleElement) titleElement.textContent = categoryData.name;
         if (descriptionElement) descriptionElement.textContent = categoryData.description || '';
-
         // Add click handler to show category tools
-        const card = clone.querySelector('.card');
+        card = clone.querySelector('article');
         if (card) {
             card.addEventListener('click', () => {
                 switchView('tools-' + categoryId);
             });
         }
-
+        // Add the card
         categoriesGrid.appendChild(clone);
     }
 }
@@ -995,24 +991,21 @@ async function displayToolForm(toolId) {
             });
         }
 
+        // Get the form
+        const toolForm = document.getElementById('toolForm');
+
         // Update form title and description
-        const formTitle = document.getElementById('formTitle');
-        const formSubtitle = document.getElementById('formSubtitle');
-        if (formTitle) formTitle.textContent = (tool.icon || '📄') + ' ' + (tool.name || 'Unnamed Tool');
-        if (formSubtitle) formSubtitle.textContent = tool.description || '';
+        const formIcon = toolForm.querySelector('header aside');
+        const formTitle = toolForm.querySelector('header h2');
+        const formSubtitle = toolForm.querySelector('header p');
+        formIcon.textContent = tool.icon || '📄';
+        formTitle.textContent = tool.name || 'Unnamed Tool';
+        formSubtitle.textContent = tool.description || '';
 
         // Update page title and subtitle with category info
-        const pageTitle = document.getElementById('pageTitle');
-        const pageSubtitle = document.getElementById('pageSubtitle');
-        if (pageTitle && pageSubtitle && tool.category && categoriesData) {
-            if (category) {
-                pageTitle.textContent = category.icon + ' ' + category.name;
-                pageSubtitle.textContent = category.description;
-            }
-        }
+        updatePageTitle(category.name, category.description, category.icon);
 
         // Populate the form fields
-        const toolForm = document.getElementById('toolForm');
         const formFields = document.getElementById('formFields');
         const actionInput = document.getElementById('action');
 
@@ -1568,8 +1561,9 @@ function displayResults(results, fromHistory = false) {
     // Get results area and title elements
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
-    const resultsTitle = document.getElementById('resultsTitle');
-    const resultsSubtitle = document.getElementById('resultsSubtitle');
+    const resultsTitle = resultsArea.querySelector('header>hgroup>h2');
+    const resultsSubtitle = resultsArea.querySelector('header>hgroup>p');
+    const resultsIcon = resultsArea.querySelector('header>aside');
     const detailsPrompt = document.getElementById('detailsPrompt');
     const detailsResponse = document.getElementById('detailsResponse');
 
@@ -1602,7 +1596,21 @@ function displayResults(results, fromHistory = false) {
     const tool = toolsData[toolId] || null;
 
     // Update results title and subtitle
-    updateResultsTitle(tool, resultsTitle, resultsSubtitle);
+    if (resultsTitle && tool && tool.form && tool.form.title) {
+        resultsTitle.textContent = tool.form.title;
+    } else {
+        resultsTitle.textContent = 'Results';
+    }
+    if (resultsSubtitle && tool && tool.form && tool.form.description) {
+        resultsSubtitle.textContent = tool.form.description;
+    } else {
+        resultsSubtitle.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
+    }
+    if (resultsIcon && tool && tool.form && tool.form.icon) {
+        resultsIcon.textContent = tool.form.icon;
+    } else {
+        resultsIcon.textContent = '';
+    }
 
     // Check if the result contains markdown code fences
     const resultsInfo = extractCodeFenceInfo(responseContent, 'markdown');
@@ -1640,34 +1648,6 @@ function displayResults(results, fromHistory = false) {
     // Save result to history only if it's not from history
     if (!fromHistory) {
         saveResultToHistory(results);
-    }
-}
-
-/**
- * Update results title and subtitle based on tool
- *
- * This function updates the results title and subtitle based on the tool configuration.
- *
- * @param {Object} tool - The tool configuration object
- * @param {HTMLElement} resultsTitle - The results title element
- * @param {HTMLElement} resultsSubtitle - The results subtitle element
- * @return {void}
- *
- * @note Updates title and subtitle based on tool.form.title and tool.form.description
- * @note Called by displayResults() when rendering results
- */
-function updateResultsTitle(tool, resultsTitle, resultsSubtitle) {
-    if (!resultsTitle || !resultsSubtitle) return;
-
-    if (tool && tool.form && tool.form.title) {
-        resultsTitle.textContent = tool.form.title;
-    } else {
-        resultsTitle.textContent = '📝 Results';
-    }
-    if (tool && tool.form && tool.form.description) {
-        resultsSubtitle.textContent = tool.form.description;
-    } else {
-        resultsSubtitle.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
     }
 }
 
@@ -2104,7 +2084,6 @@ function switchView(viewName, params = {}) {
         view.classList.remove('active-view');
         view.style.display = 'none';
     });
-
     // Show the selected view
     const selectedView = document.querySelector(`.${viewName}-view`);
     if (selectedView) {
@@ -2124,11 +2103,20 @@ function switchView(viewName, params = {}) {
  *
  * @note Updates pageTitle and pageSubtitle elements
  */
-function updatePageTitle(viewName) {
-    const pageTitle = document.getElementById('pageTitle');
-    const pageSubtitle = document.getElementById('pageSubtitle');
+function updatePageTitle(title, subtitle, icon) {
+    const pageTitle = document.querySelector('body>header h1');
+    const pageSubtitle = document.querySelector('body>header p');
+    const pageIcon = document.querySelector('body>header aside');
 
-    if (!pageTitle || !pageSubtitle) return;
+    if (pageTitle && title) {
+        pageTitle.textContent = title;
+    }
+    if (pageSubtitle && subtitle) {
+        pageSubtitle.textContent = subtitle;
+    }
+    if (pageIcon && icon) {
+        pageIcon.textContent = icon;
+    }
 
     const titles = {
         'home': {
@@ -2144,12 +2132,6 @@ function updatePageTitle(viewName) {
             subtitle: 'Configure your preferences and account settings'
         }
     };
-
-    const viewTitle = titles[viewName];
-    if (viewTitle) {
-        pageTitle.textContent = viewTitle.title;
-        pageSubtitle.textContent = viewTitle.subtitle;
-    }
 }
 
 /**
@@ -2429,7 +2411,7 @@ function clearHistory() {
  * await displayHistory(10, 2);
  */
 async function displayHistory(maxItems = 10, page = 1) {
-    const historyContent = document.getElementById('historyContent');
+    const historyContent = document.querySelector('.history-view main');
     if (!historyContent) {
         showToast('History content element not found', 'error');
         return;
@@ -2468,79 +2450,69 @@ async function displayHistory(maxItems = 10, page = 1) {
             return;
         }
 
-        // Create history items using template with batch processing for better performance
-        const fragment = document.createDocumentFragment();
-
         // Process results in batches to improve performance
-        const batchSize = 5;
-        for (let i = 0; i < paginatedResults.length; i += batchSize) {
-            const batch = paginatedResults.slice(i, i + batchSize);
+        paginatedResults.forEach(result => {
+            const clone = template.content.cloneNode(true);
+            const historyItem = clone.querySelector('section');
+            historyItem.dataset.resultId = result.id;
 
-            batch.forEach(result => {
-                const clone = template.content.cloneNode(true);
-                const historyItem = clone.querySelector('.history-item');
-                historyItem.dataset.resultId = result.id;
+            // Populate template elements
+            const iconElement = clone.querySelector('aside');
+            const titleElement = clone.querySelector('h4');
+            const dateElement = clone.querySelector('p');
+            const previewElement = clone.querySelector('code');
 
-                // Populate template elements
-                const titleElement = clone.querySelector('.history-title-text');
-                const iconElement = clone.querySelector('.history-icon');
-                const dateElement = clone.querySelector('.history-date');
-                const previewElement = clone.querySelector('.history-preview');
+            // Format date
+            const date = new Date(result.timestamp);
+            const formattedDate = date.toLocaleString();
+            if (dateElement) dateElement.textContent = formattedDate;
 
-                // Format date
-                const date = new Date(result.timestamp);
-                const formattedDate = date.toLocaleString();
-                if (dateElement) dateElement.textContent = formattedDate;
-
-                if (result.tool) {
-                    // Get tool data from toolsData
-                    const tool = toolsData[result.tool];
-                    if (tool) {
-                        iconElement.textContent = tool.icon || '📄';
-                        titleElement.textContent = tool.name || result.title;
-                    } else {
-                        iconElement.textContent = '📄';
-                        titleElement.textContent = result.title;
-                    }
+            if (result.tool) {
+                // Get tool data from toolsData
+                const tool = toolsData[result.tool];
+                if (tool) {
+                    iconElement.textContent = tool.icon || '📄';
+                    titleElement.textContent = tool.name || result.title;
                 } else {
                     iconElement.textContent = '📄';
                     titleElement.textContent = result.title;
                 }
+            } else {
+                iconElement.textContent = '📄';
+                titleElement.textContent = result.title;
+            }
 
-                // Add preview text with optimized processing
-                if (previewElement) {
-                    let previewText = '';
-
-                    // Try to get preview from different sources (optimized order)
-                    if (result.response?.choices?.[0]?.message?.content) {
-                        previewText = result.response.choices[0].message.content;
-                    } else if (result.content?.response?.choices?.[0]?.message?.content) {
-                        previewText = result.content.response.choices[0].message.content;
-                    } else if (result.content) {
-                        previewText = String(result.content);
-                    } else {
-                        previewText = String(result);
-                    }
-
-                    // Take first 200 characters and add ellipsis if truncated
-                    if (previewText.length > 200) {
-                        previewText = previewText.substring(0, 200) + '...';
-                    }
-
-                    previewElement.textContent = previewText;
+            // Add preview text with optimized processing
+            if (previewElement) {
+                let previewText = '';
+                // Try to get preview from different sources (optimized order)
+                if (result.response?.choices?.[0]?.message?.content) {
+                    previewText = result.response.choices[0].message.content;
+                } else if (result.content?.response?.choices?.[0]?.message?.content) {
+                    previewText = result.content.response.choices[0].message.content;
+                } else if (result.content) {
+                    previewText = String(result.content);
+                } else {
+                    previewText = String(result);
                 }
+                // Take first 200 characters and add ellipsis if truncated
+                if (previewText.length > 200) {
+                    previewText = previewText.substring(0, 200) + '...';
+                }
+                // Set the preview text content
+                previewElement.textContent = previewText;
+                if (typeof hljs !== 'undefined') {
+                    hljs.highlightElement(previewElement);
+                }
+            }
 
-                // Add click handler to entire item
-                historyItem.addEventListener('click', () => {
-                    displayHistoryResult(result.id);
-                });
-
-                fragment.appendChild(clone);
+            // Add click handler to entire item
+            historyItem.addEventListener('click', () => {
+                displayHistoryResult(result.id);
             });
-        }
 
-        // Add all items to DOM at once for better performance
-        historyContent.appendChild(fragment);
+            historyContent.appendChild(clone);
+        });
 
         // Add pagination controls if there are more pages
         if (results.length > maxItems) {
