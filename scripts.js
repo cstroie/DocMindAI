@@ -88,15 +88,16 @@ function showGlobalLoading(text = "Loading...") {
     let overlay = document.getElementById('globalLoadingOverlay');
 
     if (!overlay) {
-        const template = document.getElementById('globalLoadingTemplate');
-        if (template) {
-            overlay = template.content.cloneNode(true).querySelector('.global-loading-overlay');
-            overlay.setAttribute("id", "globalLoadingOverlay");
-            document.body.appendChild(overlay);
-        } else {
-            showToast('Global loading template not found', 'error');
-            return;
-        }
+        overlay = document.createElement('div');
+        overlay.className = 'global-loading-overlay active';
+        overlay.id = 'globalLoadingOverlay';
+        overlay.innerHTML = `
+            <div>
+                <progress></progress>
+                <p>Initializing...</p>
+            </div>
+        `;
+        document.body.appendChild(overlay);
     }
 
     // Set the text
@@ -1049,15 +1050,15 @@ async function displayToolForm(toolId) {
                 }
 
                 const fieldElement = createFormField(field, preferences);
-                if (fieldElement) {
-                    formFields.appendChild(fieldElement);
-                } else if (field.type === 'hidden') {
+                if (field.type === 'hidden') {
                     // Create and append hidden input directly to the form
                     const hiddenInput = document.createElement('input');
                     hiddenInput.type = 'hidden';
                     hiddenInput.name = field.name;
                     hiddenInput.value = field.value || '';
                     toolForm.appendChild(hiddenInput);
+                } else {
+                    formFields.appendChild(fieldElement);
                 }
             });
         }

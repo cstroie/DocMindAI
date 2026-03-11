@@ -144,6 +144,7 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
         <div class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
     </template>
 
+    <!-- Global Loading Overlay -->
     <div class="global-loading-overlay active" id="globalLoadingOverlay">
         <div>
             <progress></progress>
@@ -200,24 +201,7 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
         </article>
     </template>
 
-    <template id="globalLoadingTemplate">
-        <div class="global-loading-overlay">
-            <div>
-                <progress></progress>
-                <p>Loading...</p>
-            </div>
-        </div>
-    </template>
-
-    <template id="formLoadingTemplate">
-        <div class="form-loading-overlay">
-            <div class="form-loading-container">
-                <div class="form-loading-spinner"></div>
-                <div class="form-loading-text">Loading form...</div>
-            </div>
-        </div>
-    </template>
-
+    <!-- History Templates -->
     <template id="historyItemTemplate">
         <section class="history-item">
             <hgroup class="history-info">
@@ -253,27 +237,6 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
                 <!-- Will be populated by JavaScript -->
             </div>
         </section>
-    </template>
-
-    <template id="formFieldTemplate">
-        <div class="form-group">
-            <label class="form-label"></label>
-            <div class="form-control-container"></div>
-            <div class="form-help-text"></div>
-        </div>
-    </template>
-
-    <template id="resultTemplate">
-        <div class="result-card">
-            <div class="result-header">
-                <h3 class="result-title"></h3>
-                <div class="result-meta"></div>
-            </div>
-            <div class="result-content"></div>
-            <div class="result-footer">
-                <div class="result-actions"></div>
-            </div>
-        </div>
     </template>
 </body>
 </html>
