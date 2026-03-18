@@ -59,7 +59,7 @@ function getLlmProviderConfig($provider = 'ollama') {
 }
 
 // Get provider configuration (default to ollama if not specified)
-$provider = $_ENV['LLM_PROVIDER'] ?? 'ollama';
+$provider = $LLM_PROVIDER ?? 'ollama';
 $llm_config = getLlmProviderConfig($provider);
 
 // Create chat endpoint URL by appending the chat completions path
@@ -1354,7 +1354,7 @@ function handleGetModels() {
     // Check if models contain an error
     if (isset($models['error'])) {
         // If API call fails, use provider-specific default models as fallback
-        $provider = $_ENV['LLM_PROVIDER'] ?? 'ollama';
+        $provider = $LLM_PROVIDER ?? 'ollama';
         switch ($provider) {
             case 'openai':
                 $models = [

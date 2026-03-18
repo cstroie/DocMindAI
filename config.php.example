@@ -15,12 +15,14 @@
  *
  * @var string $LLM_API_ENDPOINT The base URL for your AI API endpoint
  * @var string $LLM_API_KEY Your API key if required (leave empty if not needed)
+ * @var string $LLM_PROVIDER The LLM API provider (ollama, openrouter, openai, together, cerebras, local)
  * @var string $DEFAULT_TEXT_MODEL Default model for text processing
  * @var string $DEFAULT_VISION_MODEL Default model for vision/image processing
  * @var string $LLM_API_FILTER Regular expression to filter available models
  */
 $LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1'; // Your AI API endpoint
 $LLM_API_KEY = ''; // API key if required
+$LLM_PROVIDER = 'ollama'; // LLM API provider (ollama, openrouter, openai, together, cerebras, local)
 $DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b'; // Default text model
 $DEFAULT_VISION_MODEL = 'gemma3:4b'; // Default vision model
 $LLM_API_FILTER = '/free/'; // Regular expression to filter models
