@@ -21,12 +21,155 @@ if (file_exists('config.php')) {
 }
 
 /**
+ * Fetches the X-Vqd-4 token from DuckDuckGo status endpoint.
+ * 
+ * @return array Array with 'token' and 'token_hash' keys, or false on failure
+ */
+function fetchDuckDuckGoToken() {
+    $status_url = "https://duckduckgo.com/duckchat/v1/status";
+    $headers = [
+        "Accept" => "*/*",
+        "Referer" => "https://duckduckgo.com/",
+        "Origin" => "https://duckduckgo.com",
+        "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "Dnt" => "1",
+        "Sec-Gpc" => "1",
+        "Sec-Fetch-Site" => "same-origin",
+        "Sec-Fetch-Mode" => "cors",
+        "Sec-Fetch-Dest" => "empty",
+        "Priority" => "u=1, i",
+        "X-Vqd-Accept" => "1",
+    ];
+    
+    $ch = curl_init($status_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($http_code != 200) {
+        return false;
+    }
+    
+    // Parse headers to get tokens
+    $x_vqd_4 = null;
+    $x_vqd_hash_1 = null;
+    
+    // Get the response headers
+    $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+    $header_text = substr($response, 0, $header_size);
+    
+    // Parse headers manually
+    foreach (explode("\r\n", $header_text) as $header) {
+        if (strpos($header, 'X-Vqd-4:') === 0) {
+            $x_vqd_4 = trim(substr($header, 10));
+        } elseif (strpos($header, 'x-vqd-hash-1:') === 0) {
+            $x_vqd_hash_1 = trim(substr($header, 15));
+        }
+    }
+    
+    return [
+        'token' => $x_vqd_4,
+        'token_hash' => $x_vqd_hash_1
+    ];
+}
+
+/**
+ * Call DuckDuckGo chat API
+ * 
+ * @param string $query The query to send
+ * @param string $model The model to use
+ * @param string $token Optional X-Vqd-4 token
+ * @param string $token_hash Optional x-vqd-hash-1 token
+ * @return array API response or error array
+ */
+function callDuckDuckGoChat($query, $model = 'gpt-4o-mini', $token = null, $token_hash = null) {
+    // Get tokens if not provided
+    if (!$token || !$token_hash) {
+        $token_data = fetchDuckDuckGoToken();
+        if (!$token_data) {
+            return ['error' => 'Failed to fetch token'];
+        }
+        $token = $token_data['token'];
+        $token_hash = $token_data['token_hash'];
+    }
+    
+    $chat_url = "https://duckduckgo.com/duckchat/v1/chat";
+    $headers = [
+        "Accept" => "text/event-stream",
+        "Content-Type" => "application/json",
+        "Referer" => "https://duckduckgo.com/",
+        "Origin" => "https://duckduckgo.com",
+        "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "X-Vqd-4" => $token,
+        "x-vqd-hash-1" => $token_hash,
+        "Dnt" => "1",
+        "Sec-Gpc" => "1",
+        "Sec-Fetch-Site" => "same-origin",
+        "Sec-Fetch-Mode" => "cors",
+        "Sec-Fetch-Dest" => "empty",
+        "Priority" => "u=1, i",
+    ];
+    
+    $payload = [
+        "model" => $model,
+        "messages" => [["role" => "user", "content" => $query]]
+    ];
+    
+    $ch = curl_init($chat_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($http_code == 401) {
+        // Try to get new token and retry
+        $token_data = fetchDuckDuckGoToken();
+        if ($token_data) {
+            return callDuckDuckGoChat($query, $model, $token_data['token'], $token_data['token_hash']);
+        } else {
+            return ['error' => 'Failed to fetch new token after 401 error'];
+        }
+    }
+    
+    if ($http_code != 200) {
+        return ['error' => 'API error: HTTP ' . $http_code];
+    }
+    
+    // Parse SSE response
+    $full_message = "";
+    $lines = explode("\n", $response);
+    
+    foreach ($lines as $line) {
+        if (strpos($line, "data: ") === 0) {
+            $data = substr($line, 6);
+            try {
+                $json_data = json_decode($data, true);
+                if (isset($json_data['message'])) {
+                    $full_message .= $json_data['message'];
+                }
+            } catch (Exception $e) {
+                // Ignore JSON decode errors
+            }
+        }
+    }
+    
+    return ['content' => $full_message];
+}
+
+/**
  * Get LLM API configuration based on provider
  * 
  * This function returns the appropriate API endpoint and key for different LLM providers.
  * It supports various providers with their specific endpoint configurations.
  * 
- * @param string $provider The provider name (ollama, openrouter, openai, together, cerebras, local)
+ * @param string $provider The provider name (ollama, openrouter, openai, together, cerebras, local, duck)
  * @return array Configuration array with 'endpoint' and 'key' keys
  */
 function getLlmProviderConfig($provider = 'ollama') {
@@ -54,6 +197,10 @@ function getLlmProviderConfig($provider = 'ollama') {
         'local' => [
             'endpoint' => 'http://localhost:8000/v1',
             'key' => ''
+        ],
+        'duck' => [
+            'endpoint' => 'https://duckduckgo.com/duckchat/v1/chat',
+            'key' => '' // DuckDuckGo doesn't require API key
         ]
     ];
     
@@ -821,6 +968,7 @@ function getAvailableModels($api_endpoint, $api_key = '', $filter_regex = '') {
  * @param string $api_endpoint_chat The chat API endpoint URL
  * @param array $data The request data (messages, model, etc.)
  * @param string $api_key The API key (if required)
+ * @param string $provider The LLM provider name
  * @return array|false API response data or error array
  * 
  * @note Uses POST method with JSON payload
@@ -831,8 +979,20 @@ function getAvailableModels($api_endpoint, $api_key = '', $filter_regex = '') {
  * @see handleProfileAction() - Uses this for profile processing
  * @see getHttpErrorExplanation() - Used for error messages
  */
-function callLLMApi($api_endpoint_chat, $data, $api_key = '') {
-    // Make API request
+function callLLMApi($api_endpoint_chat, $data, $api_key = '', $provider = 'ollama') {
+    // Special handling for DuckDuckGo provider
+    if ($provider === 'duck') {
+        $query = '';
+        foreach ($data['messages'] as $message) {
+            if ($message['role'] === 'user') {
+                $query = $message['content'];
+                break;
+            }
+        }
+        return callDuckDuckGoChat($query, $data['model'] ?? 'gpt-4o-mini');
+    }
+    
+    // Make API request for other providers
     $ch = curl_init($api_endpoint_chat);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
@@ -1330,6 +1490,12 @@ function handleGetModels() {
                     'cerebras/Cerebras-2.0' => 'Cerebras 2.0'
                 ];
                 break;
+            case 'duck':
+                $models = [
+                    'gpt-4o-mini' => 'GPT-4o Mini (DuckDuckGo)',
+                    'gpt-4o' => 'GPT-4o (DuckDuckGo)'
+                ];
+                break;
             default:
                 // Default fallback for ollama and local
                 $models = [
@@ -1611,7 +1777,7 @@ function handleToolAction($tool_id) {
     }
 
     // Call LLM API
-    $response = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY);
+    $response = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY, $provider);
 
     if (!isset($response['error'])) {
         // Process and return the response
