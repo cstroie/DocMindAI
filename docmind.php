@@ -16,6 +16,8 @@
 // Load configuration if available
 if (file_exists('config.php')) {
     include 'config.php';
+} else if (file_exists('config.php.example')) {
+    include 'config.php.example';
 }
 
 /**
@@ -56,62 +58,6 @@ function getLlmProviderConfig($provider = 'ollama') {
     ];
     
     return $configs[$provider] ?? $configs['ollama'];
-}
-
-// Get provider configuration (default to ollama if not specified)
-$provider = $LLM_PROVIDER ?? 'ollama';
-$llm_config = getLlmProviderConfig($provider);
-
-// Create chat endpoint URL by appending the chat completions path
-$LLM_API_ENDPOINT_CHAT = $llm_config['endpoint'] . '/chat/completions';
-$LLM_API_KEY = $llm_config['key'];
-
-// Load configuration from config.php.example if config.php doesn't exist
-if (!file_exists('config.php') && file_exists('config.php.example')) {
-    include 'config.php.example';
-}
-
-/**
- * Maximum file upload size (10MB)
- */
-define('MAX_FILE_SIZE', 10 * 1024 * 1024);
-
-// Load default configuration from config.php.example if not already loaded
-if (!isset($LLM_API_ENDPOINT)) {
-    $LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1';
-}
-if (!isset($LLM_API_KEY)) {
-    $LLM_API_KEY = '';
-}
-if (!isset($DEFAULT_TEXT_MODEL)) {
-    $DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
-}
-if (!isset($DEFAULT_VISION_MODEL)) {
-    $DEFAULT_VISION_MODEL = 'gemma3:4b';
-}
-if (!isset($LLM_API_FILTER)) {
-    $LLM_API_FILTER = '/free/';
-}
-if (!isset($CHAT_HISTORY_LENGTH)) {
-    $CHAT_HISTORY_LENGTH = 10;
-}
-if (!isset($DEBUG_MODE)) {
-    $DEBUG_MODE = false;
-}
-if (!isset($ALLOWED_ORIGINS)) {
-    $ALLOWED_ORIGINS = ['*'];
-}
-if (!isset($MAX_FILE_SIZE)) {
-    $MAX_FILE_SIZE = 10 * 1024 * 1024;
-}
-if (!isset($ALLOWED_FILE_TYPES)) {
-    $ALLOWED_FILE_TYPES = [
-        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-        'application/pdf',
-        'text/plain', 'text/markdown',
-        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.oasis.opendocument.text'
-    ];
 }
 
 // =========================================================================
@@ -2002,6 +1948,56 @@ function displayWebInterface() {
     include 'index.html';
 }
 
+
+
+// Get provider configuration (default to ollama if not specified)
+$provider = $LLM_PROVIDER ?? 'ollama';
+$llm_config = getLlmProviderConfig($provider);
+
+// Create chat endpoint URL by appending the chat completions path
+$LLM_API_ENDPOINT_CHAT = $llm_config['endpoint'] . '/chat/completions';
+$LLM_API_KEY = $llm_config['key'];
+
+
+/**
+ * Maximum file upload size (10MB)
+ */
+define('MAX_FILE_SIZE', 10 * 1024 * 1024);
+
+// Load default configuration from config.php.example if not already loaded
+if (!isset($LLM_API_KEY)) {
+    $LLM_API_KEY = '';
+}
+if (!isset($DEFAULT_TEXT_MODEL)) {
+    $DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
+}
+if (!isset($DEFAULT_VISION_MODEL)) {
+    $DEFAULT_VISION_MODEL = 'gemma3:4b';
+}
+if (!isset($LLM_API_FILTER)) {
+    $LLM_API_FILTER = '/free/';
+}
+if (!isset($CHAT_HISTORY_LENGTH)) {
+    $CHAT_HISTORY_LENGTH = 10;
+}
+if (!isset($DEBUG_MODE)) {
+    $DEBUG_MODE = false;
+}
+if (!isset($ALLOWED_ORIGINS)) {
+    $ALLOWED_ORIGINS = ['*'];
+}
+if (!isset($MAX_FILE_SIZE)) {
+    $MAX_FILE_SIZE = 10 * 1024 * 1024;
+}
+if (!isset($ALLOWED_FILE_TYPES)) {
+    $ALLOWED_FILE_TYPES = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf',
+        'text/plain', 'text/markdown',
+        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.oasis.opendocument.text'
+    ];
+}
 
 // =========================================================================
 // Main Request Router
