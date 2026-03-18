@@ -18,8 +18,53 @@ if (file_exists('config.php')) {
     include 'config.php';
 }
 
+/**
+ * Get LLM API configuration based on provider
+ * 
+ * This function returns the appropriate API endpoint and key for different LLM providers.
+ * It supports various providers with their specific endpoint configurations.
+ * 
+ * @param string $provider The provider name (ollama, openrouter, openai, together, cerebras, local)
+ * @return array Configuration array with 'endpoint' and 'key' keys
+ */
+function getLlmProviderConfig($provider = 'ollama') {
+    $configs = [
+        'ollama' => [
+            'endpoint' => 'http://localhost:11434/v1',
+            'key' => 'ollama' // Ollama doesn't require API key but some clients expect one
+        ],
+        'openrouter' => [
+            'endpoint' => 'https://openrouter.ai/api/v1',
+            'key' => ''
+        ],
+        'openai' => [
+            'endpoint' => 'https://api.openai.com/v1',
+            'key' => ''
+        ],
+        'together' => [
+            'endpoint' => 'https://api.together.xyz/v1',
+            'key' => ''
+        ],
+        'cerebras' => [
+            'endpoint' => 'https://api.cerebras.ai/v1',
+            'key' => ''
+        ],
+        'local' => [
+            'endpoint' => 'http://localhost:8000/v1',
+            'key' => ''
+        ]
+    ];
+    
+    return $configs[$provider] ?? $configs['ollama'];
+}
+
+// Get provider configuration (default to ollama if not specified)
+$provider = $_ENV['LLM_PROVIDER'] ?? 'ollama';
+$llm_config = getLlmProviderConfig($provider);
+
 // Create chat endpoint URL by appending the chat completions path
-$LLM_API_ENDPOINT_CHAT = $LLM_API_ENDPOINT . '/chat/completions';
+$LLM_API_ENDPOINT_CHAT = $llm_config['endpoint'] . '/chat/completions';
+$LLM_API_KEY = $llm_config['key'];
 
 /**
  * Maximum file upload size (10MB)
@@ -1236,7 +1281,7 @@ function handleApiRequest() {
  * LLM API endpoint. It uses server-side configuration values and provides
  * fallback defaults if the API call fails.
  * 
- * @global string $LLM_API_ENDPOINT The base API endpoint URL
+ * @global string $LLM_API_ENDPOINT_CHAT The chat API endpoint URL
  * @global string $LLM_API_KEY The API authentication key
  * @global string $LLM_API_FILTER Optional regex filter for model names
  * 
@@ -1248,10 +1293,10 @@ function handleApiRequest() {
  * @note If API call fails, returns default models for fallback functionality
  */
 function handleGetModels() {
-    global $LLM_API_ENDPOINT, $LLM_API_KEY, $LLM_API_FILTER;
+    global $LLM_API_ENDPOINT_CHAT, $LLM_API_KEY, $LLM_API_FILTER;
 
-    // Use server-side configured values
-    $api_endpoint = $LLM_API_ENDPOINT;
+    // Extract base endpoint from chat endpoint
+    $api_endpoint = preg_replace('/\/chat\/completions$/', '', $LLM_API_ENDPOINT_CHAT);
     $api_key = $LLM_API_KEY;
     $filter = $LLM_API_FILTER;
 
@@ -1265,12 +1310,44 @@ function handleGetModels() {
 
     // Check if models contain an error
     if (isset($models['error'])) {
-        // If API call fails, use default models as fallback
-        // This ensures the application remains functional even if API is unavailable
-        $models = [
-            'gemma3:1b' => 'Gemma 3 (1B)',
-            'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)'
-        ];
+        // If API call fails, use provider-specific default models as fallback
+        $provider = $_ENV['LLM_PROVIDER'] ?? 'ollama';
+        switch ($provider) {
+            case 'openai':
+                $models = [
+                    'gpt-4' => 'GPT-4',
+                    'gpt-3.5-turbo' => 'GPT-3.5 Turbo',
+                    'gpt-4-turbo' => 'GPT-4 Turbo'
+                ];
+                break;
+            case 'openrouter':
+                $models = [
+                    'openai/gpt-4' => 'GPT-4 (OpenRouter)',
+                    'openai/gpt-3.5-turbo' => 'GPT-3.5 Turbo (OpenRouter)',
+                    'anthropic/claude-3-opus' => 'Claude 3 Opus (OpenRouter)',
+                    'meta-llama/llama-3-70b-instruct' => 'Llama 3 70B (OpenRouter)'
+                ];
+                break;
+            case 'together':
+                $models = [
+                    'togethercomputer/Llama-2-7b-chat' => 'Llama 2 7B (Together)',
+                    'togethercomputer/Llama-2-13b-chat' => 'Llama 2 13B (Together)',
+                    'togethercomputer/Llama-2-70b-chat' => 'Llama 2 70B (Together)'
+                ];
+                break;
+            case 'cerebras':
+                $models = [
+                    'cerebras/Cerebras-3.1' => 'Cerebras 3.1',
+                    'cerebras/Cerebras-2.0' => 'Cerebras 2.0'
+                ];
+                break;
+            default:
+                // Default fallback for ollama and local
+                $models = [
+                    'gemma3:1b' => 'Gemma 3 (1B)',
+                    'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)'
+                ];
+        }
     }
 
     // Sort models alphabetically by key (model name) for consistent UI display
