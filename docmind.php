@@ -5,7 +5,7 @@
  * Central endpoint for all AI tool operations, serving both as API and web interface
  *
  * @author Costin Stroie <costinstroie@eridu.eu.org>
- * @version 1.0
+ * @version 1.1
  * @license GPL 3
  */
 
@@ -18,6 +18,17 @@ if (file_exists('config.php')) {
     include 'config.php';
 }
 
+// FIX #6: Guard against missing config — avoid undefined variable warnings
+// and broken endpoint string when config.php is absent.
+$LLM_API_ENDPOINT      = $LLM_API_ENDPOINT      ?? '';
+$LLM_API_KEY           = $LLM_API_KEY           ?? '';
+$LLM_API_FILTER        = $LLM_API_FILTER        ?? '';
+$DEFAULT_TEXT_MODEL    = $DEFAULT_TEXT_MODEL    ?? '';
+$DEFAULT_VISION_MODEL  = $DEFAULT_VISION_MODEL  ?? '';
+$CHAT_HISTORY_LENGTH   = $CHAT_HISTORY_LENGTH   ?? 10;
+$DEBUG_MODE            = $DEBUG_MODE            ?? false;
+$ALLOWED_ORIGINS       = $ALLOWED_ORIGINS       ?? ['*'];
+
 // Create chat endpoint URL by appending the chat completions path
 $LLM_API_ENDPOINT_CHAT = $LLM_API_ENDPOINT . '/chat/completions';
 
@@ -27,514 +38,385 @@ $LLM_API_ENDPOINT_CHAT = $LLM_API_ENDPOINT . '/chat/completions';
 define('MAX_FILE_SIZE', 10 * 1024 * 1024);
 
 // =========================================================================
-// UI Helper Functions
+// Image Helper Functions
 // =========================================================================
 
 /**
- * Resize an image while maintaining aspect ratio
- * 
- * This function resizes an image to fit within a maximum dimension while
- * preserving the original aspect ratio. It handles transparency appropriately
- * for different image types and returns the resized image resource along with
- * its new dimensions.
- * 
- * @param resource $image GD image resource to resize
- * @param int $max_size Maximum dimension (width or height) in pixels
- * @return array|false Array with resized image resource and new dimensions, or false on error
- * 
- * @note If the image is smaller than max_size, it returns the original dimensions
- * @note Uses bicubic resampling for high-quality resizing
- * @note Preserves transparency for PNG/GIF, uses white background for JPEG
- * @note The returned array contains: ['image' => resource, 'width' => int, 'height' => int]
- * @see processUploadedImage() - Uses this for image processing
- * @see preprocessImageForOCR() - Uses this for OCR preprocessing
+ * Resize an image while maintaining aspect ratio.
+ *
+ * Allocates a new canvas of the correct size and copies the source image
+ * into it with proper resampling. Transparency is preserved for sources
+ * that support an alpha channel; a white background is used otherwise.
+ *
+ * @param GdImage $image    GD image resource to resize.
+ * @param int     $max_size Maximum dimension (width or height) in pixels.
+ * @return array{image: GdImage, width: int, height: int}
  */
-function resizeImage($image, $max_size = 1000) {
-    $width = imagesx($image);
-    $height = imagesy($image);
+function resizeImage($image, int $max_size = 1000): array {
+    $src_w = imagesx($image);
+    $src_h = imagesy($image);
 
-    // Only scale if image is larger than max_size
-    if ($width > $max_size || $height > $max_size) {
-        // Calculate new dimensions (max 1000x1000)
-        $ratio = min($max_size / $width, $max_size / $height);
-        $new_width = intval($width * $ratio);
-        $new_height = intval($height * $ratio);
-
-        // Create new image with new dimensions
-        $resized_image = imagecreatetruecolor($new_width, $new_height);
-
-        // Preserve transparency for PNG and GIF, but use white background for JPEG
-        if (imageistruecolor($image)) {
-            imagealphablending($resized_image, false);
-            imagesavealpha($resized_image, true);
-            // Use white background instead of transparent for better compatibility
-            $white = imagecolorallocate($resized_image, 255, 255, 255);
-            imagefilledrectangle($resized_image, 0, 0, $new_width, $new_height, $white);
-        }
+    // Calculate destination dimensions, clamping to max_size
+    if ($src_w > $max_size || $src_h > $max_size) {
+        $ratio   = min($max_size / $src_w, $max_size / $src_h);
+        $new_w   = max(1, (int)($src_w * $ratio));
+        $new_h   = max(1, (int)($src_h * $ratio));
     } else {
-        // Keep original dimensions
-        $new_width = $width;
-        $new_height = $height;
-        $resized_image = imagecreatetruecolor($new_width, $new_height);
-
-        // Preserve transparency for PNG and GIF
-        if (imageistruecolor($image)) {
-            imagealphablending($resized_image, false);
-            imagesavealpha($resized_image, true);
-            $transparent = imagecolorallocatealpha($resized_image, 255, 255, 255, 127);
-            imagefilledrectangle($resized_image, 0, 0, $new_width, $new_height, $transparent);
-        }
+        $new_w = $src_w;
+        $new_h = $src_h;
     }
 
-    return [
-        'image' => $resized_image,
-        'width' => $new_width,
-        'height' => $new_height
-    ];
+    $dst = imagecreatetruecolor($new_w, $new_h);
+
+    // Preserve alpha channel when the source has one
+    if (imageistruecolor($image)) {
+        imagealphablending($dst, false);
+        imagesavealpha($dst, true);
+        $transparent = imagecolorallocatealpha($dst, 255, 255, 255, 127);
+        imagefilledrectangle($dst, 0, 0, $new_w, $new_h, $transparent);
+        imagealphablending($dst, true);
+    } else {
+        // Palette image — fill with white
+        $white = imagecolorallocate($dst, 255, 255, 255);
+        imagefilledrectangle($dst, 0, 0, $new_w, $new_h, $white);
+    }
+
+    // FIX #11: resize + copy are now done together inside this function,
+    // removing the split-responsibility that caused bug #1.
+    imagecopyresampled($dst, $image, 0, 0, 0, 0, $new_w, $new_h, $src_w, $src_h);
+
+    return ['image' => $dst, 'width' => $new_w, 'height' => $new_h];
 }
 
 /**
- * Process uploaded image file
- * 
- * This function handles the complete image processing pipeline for uploaded
- * images. It validates the file, detects the actual image type, optionally
- * resizes the image, and returns the processed image data ready for API
- * transmission or storage.
- * 
- * @param array $file Uploaded file array from $_FILES
- * @param string $max_size Maximum dimension for resizing ('original' or numeric string)
- * @return array|false Array with image data and MIME type, or false on error
- * 
- * @note Validates file size against MAX_FILE_SIZE constant
- * @note Supports JPEG, PNG, GIF, and WebP formats
- * @note If max_size is 'original', returns unprocessed image data
- * @note Otherwise, resizes to fit within max_size and converts to JPEG
- * @note Returns array with keys: 'image_data' (binary), 'mime_type' (string)
- * @see resizeImage() - Used for resizing the image
- * @see MAX_FILE_SIZE - Maximum allowed file size constant
- * @note Used in handleProfileAction() for image uploads
+ * Process an uploaded image file.
+ *
+ * Validates the upload, detects the real MIME type from file bytes,
+ * optionally resizes the image, and returns binary image data with its
+ * MIME type ready for base64-encoding and API transmission.
+ *
+ * @param array  $file     Entry from $_FILES.
+ * @param string $max_size 'original' to skip resizing, or a pixel count string.
+ * @return array{image_data: string, mime_type: string}|array{error: string}
  */
-function processUploadedImage($file, $max_size = '500') {
-    // Validate file parameters
+function processUploadedImage(array $file, string $max_size = '500'): array {
+    // Validate upload integrity
     if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
         return ['error' => 'Invalid file upload'];
     }
-    
+
     // Validate file size
-    if ($file['size'] > MAX_FILE_SIZE || $file['size'] <= 0) {
+    if ($file['size'] <= 0 || $file['size'] > MAX_FILE_SIZE) {
         return ['error' => 'The file is too large. Maximum ' . (MAX_FILE_SIZE / 1024 / 1024) . 'MB allowed.'];
     }
-    
-    // Additional MIME type validation
+
+    // FIX #3: Use only the finfo-based check (reads actual file bytes).
+    // The client-supplied $file['type'] is untrusted and is not checked.
     $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $finfo         = new finfo(FILEINFO_MIME_TYPE);
     $detected_type = $finfo->file($file['tmp_name']);
-    
-    if (!in_array($detected_type, $allowed_types)) {
-        return ['error' => 'Unsupported file type detected: ' . $detected_type];
+
+    if (!in_array($detected_type, $allowed_types, true)) {
+        return ['error' => 'Unsupported file type: ' . htmlspecialchars($detected_type)];
     }
 
-    // Check if it's an image
-    $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!in_array($file['type'], $image_types)) {
-        return ['error' => 'Unsupported file type. Please upload an image file.'];
-    }
-
-    // Try to detect actual image type from file content
-    $image_info = @getimagesize($file['tmp_name']);
-    if ($image_info === false) {
-        return ['error' => "Failed to detect image type from the uploaded file."];
-    }
-
-    $detected_mime = $image_info['mime'];
-
-    // Create image resource from uploaded file
+    // Create GD resource based on the verified MIME type
     $image = null;
-    switch ($detected_mime) {
-        case 'image/jpeg':
-            $image = imagecreatefromjpeg($file['tmp_name']);
-            break;
-        case 'image/png':
-            $image = imagecreatefrompng($file['tmp_name']);
-            break;
-        case 'image/gif':
-            $image = imagecreatefromgif($file['tmp_name']);
-            break;
-        case 'image/webp':
-            $image = imagecreatefromwebp($file['tmp_name']);
-            break;
-        default:
-            return ['error' => "Unsupported image type: " . htmlspecialchars($detected_mime)];
+    switch ($detected_type) {
+        case 'image/jpeg': $image = imagecreatefromjpeg($file['tmp_name']); break;
+        case 'image/png':  $image = imagecreatefrompng($file['tmp_name']);  break;
+        case 'image/gif':  $image = imagecreatefromgif($file['tmp_name']);  break;
+        case 'image/webp': $image = imagecreatefromwebp($file['tmp_name']); break;
     }
 
-    if ($image === false) {
-        return ['error' => "Failed to read the uploaded " . $file['type'] . " image."];
+    if ($image === false || $image === null) {
+        return ['error' => 'Failed to decode the uploaded image.'];
     }
 
-    // Process image based on max_size setting
+    // Return original bytes without touching GD
     if ($max_size === 'original') {
-        // Send original image without processing
         $image_data = file_get_contents($file['tmp_name']);
+        // FIX #4: free the GD resource on the 'original' path too
+        imagedestroy($image);
         if ($image_data === false) {
             return ['error' => 'Failed to read the uploaded image.'];
         }
-        $mime_type = $detected_mime;
-    } else {
-        // Resize the image
-        $resize_result = resizeImage($image, intval($max_size));
-        $resized_image = $resize_result['image'];
-        $new_width = $resize_result['width'];
-        $new_height = $resize_result['height'];
-
-        // Copy the original image to the resized image
-        imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, imagesx($image), imagesy($image));
-
-        // Save resized image to temporary file as JPEG
-        $temp_image_path = tempnam(sys_get_temp_dir(), 'DocMindAI_') . '.jpg';
-        $success = imagejpeg($resized_image, $temp_image_path, 85);
-
-        if (!$success) {
-            return ['error' => 'Failed to process the uploaded image.'];
-        }
-
-        // Read the resized image data
-        $image_data = file_get_contents($temp_image_path);
-        if ($image_data === false) {
-            return ['error' => 'Failed to read the processed image.'];
-        }
-
-        // Clean up temporary file
-        unlink($temp_image_path);
-        $mime_type = 'image/jpeg';
-
-        // Clean up image resources
-        imagedestroy($image);
-        imagedestroy($resized_image);
+        return ['image_data' => $image_data, 'mime_type' => $detected_type];
     }
 
-    return [
-        'image_data' => $image_data,
-        'mime_type' => $mime_type
-    ];
+    // Resize path — resizeImage() now performs the copy internally (fix #11)
+    $resized      = resizeImage($image, (int)$max_size);
+    $resized_img  = $resized['image'];
+
+    $temp_path = tempnam(sys_get_temp_dir(), 'DocMindAI_') . '.jpg';
+    $ok        = imagejpeg($resized_img, $temp_path, 85);
+
+    imagedestroy($image);
+    imagedestroy($resized_img);
+
+    if (!$ok) {
+        return ['error' => 'Failed to encode the resized image.'];
+    }
+
+    $image_data = file_get_contents($temp_path);
+    unlink($temp_path);
+
+    if ($image_data === false) {
+        return ['error' => 'Failed to read the processed image.'];
+    }
+
+    return ['image_data' => $image_data, 'mime_type' => 'image/jpeg'];
 }
 
 /**
- * Preprocess image for better OCR results
- * 
- * This function applies various image processing techniques to optimize an
- * image for Optical Character Recognition (OCR). It includes resizing,
- * grayscale conversion, thresholding, and dilation to improve text
- * recognition accuracy.
- * 
- * @param string $image_path Path to the original image
- * @param bool $apply_threshold Whether to apply Otsu's thresholding (default: false)
- * @param bool $apply_dilation Whether to apply morphological dilation (default: false)
- * @return string|false Path to preprocessed image or false on error
- * 
- * @note Uses Otsu's method for automatic threshold calculation
- * @note Dilation helps connect broken text characters
- * @note Output is always PNG format for lossless quality
- * @note Temporary file must be cleaned up by caller
- * @see resizeImage() - Used for initial image resizing
- * @note Used for OCR preprocessing of document images
+ * Preprocess an image file for better OCR accuracy.
+ *
+ * Resizes, converts to grayscale, and optionally applies Otsu binarisation
+ * and morphological dilation. Saves the result as a PNG and returns its path.
+ * The caller is responsible for deleting the temporary file.
+ *
+ * @param string $image_path      Path to the source image.
+ * @param bool   $apply_threshold Apply Otsu binarisation.
+ * @param bool   $apply_dilation  Apply 3×3 morphological dilation.
+ * @return string|false Path to the preprocessed PNG, or false on error.
  */
-function preprocessImageForOCR($image_path, $apply_threshold = false, $apply_dilation = false) {
-    // Create temporary file path
-    $temp_path = tempnam(sys_get_temp_dir(), 'ocr_') . '.png';
-    
-    // Get image info
-    $image_info = getimagesize($image_path);
+function preprocessImageForOCR(string $image_path, bool $apply_threshold = false, bool $apply_dilation = false) {
+    $image_info = @getimagesize($image_path);
     if ($image_info === false) {
         return false;
     }
-    
-    // Create image resource based on type
+
     $image = null;
     switch ($image_info[2]) {
-        case IMAGETYPE_JPEG:
-            $image = imagecreatefromjpeg($image_path);
-            break;
-        case IMAGETYPE_PNG:
-            $image = imagecreatefrompng($image_path);
-            break;
-        case IMAGETYPE_GIF:
-            $image = imagecreatefromgif($image_path);
-            break;
-        case IMAGETYPE_WEBP:
-            $image = imagecreatefromwebp($image_path);
-            break;
-        default:
-            return false;
+        case IMAGETYPE_JPEG: $image = imagecreatefromjpeg($image_path); break;
+        case IMAGETYPE_PNG:  $image = imagecreatefrompng($image_path);  break;
+        case IMAGETYPE_GIF:  $image = imagecreatefromgif($image_path);  break;
+        case IMAGETYPE_WEBP: $image = imagecreatefromwebp($image_path); break;
+        default: return false;
     }
-    
+
     if ($image === false) {
         return false;
     }
-    
-    // Resize image
-    $resize_result = resizeImage($image);
-    $resized_image = $resize_result['image'];
-    $new_width = $resize_result['width'];
-    $new_height = $resize_result['height'];
 
-    // Preserve transparency for PNG
-    if ($image_info[2] === IMAGETYPE_PNG) {
-        imagealphablending($resized_image, false);
-        imagesavealpha($resized_image, true);
-        $transparent = imagecolorallocatealpha($resized_image, 255, 255, 255, 127);
-        imagefilledrectangle($resized_image, 0, 0, $new_width, $new_height, $transparent);
-    }
+    // FIX #1 + #11: resizeImage() now copies pixel data internally — no
+    // undefined $width/$height variables, no second imagecopyresampled call.
+    // FIX #2: the canvas is created inside resizeImage() with correct
+    // alpha handling; we no longer overwrite it here before data is copied.
+    $resized     = resizeImage($image);
+    $resized_img = $resized['image'];
+    $new_w       = $resized['width'];
+    $new_h       = $resized['height'];
+    imagedestroy($image);
 
-    // Resize image with proper color copying
-    imagecopyresampled($resized_image, $image, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
-    
-    // Convert to grayscale
-    imagefilter($resized_image, IMG_FILTER_GRAYSCALE);
+    // Convert to greyscale in-place
+    imagefilter($resized_img, IMG_FILTER_GRAYSCALE);
 
-    // Apply threshold with Otsu's method approximation if enabled
+    // Optional: Otsu binarisation
     if ($apply_threshold) {
-        // Calculate histogram
-        $histogram = [];
-        for ($i = 0; $i < 256; $i++) {
-            $histogram[$i] = 0;
-        }
-
-        // Build histogram
-        for ($y = 0; $y < $new_height; $y++) {
-            for ($x = 0; $x < $new_width; $x++) {
-                $rgb = imagecolorat($resized_image, $x, $y);
-                $r = ($rgb >> 16) & 0xFF;
+        // Build greyscale histogram
+        $histogram = array_fill(0, 256, 0);
+        for ($y = 0; $y < $new_h; $y++) {
+            for ($x = 0; $x < $new_w; $x++) {
+                $r = ($rgb = imagecolorat($resized_img, $x, $y)) >> 16 & 0xFF;
                 $histogram[$r]++;
             }
         }
 
-        // Calculate Otsu threshold
-        $total_pixels = $new_width * $new_height;
-        $sum = 0;
-        for ($i = 0; $i < 256; $i++) {
-            $sum += $i * $histogram[$i];
-        }
+        // Otsu's method
+        $total = $new_w * $new_h;
+        $sum   = 0;
+        for ($i = 0; $i < 256; $i++) { $sum += $i * $histogram[$i]; }
 
-        $sumB = 0;
-        $wB = 0;
-        $wF = 0;
-        $varMax = 0;
+        $sumB    = 0;
+        $wB      = 0;
+        $varMax  = 0;
         $threshold = 0;
 
         for ($i = 0; $i < 256; $i++) {
             $wB += $histogram[$i];
-            if ($wB == 0) continue;
-
-            $wF = $total_pixels - $wB;
-            if ($wF == 0) break;
-
+            if ($wB === 0) continue;
+            $wF = $total - $wB;
+            if ($wF === 0) break;
             $sumB += $i * $histogram[$i];
-            $mB = $sumB / $wB;
-            $mF = ($sum - $sumB) / $wF;
-
-            $varBetween = $wB * $wF * ($mB - $mF) * ($mB - $mF);
-
-            if ($varBetween > $varMax) {
-                $varMax = $varBetween;
-                $threshold = $i;
-            }
+            $mB   = $sumB / $wB;
+            $mF   = ($sum - $sumB) / $wF;
+            $var  = $wB * $wF * ($mB - $mF) ** 2;
+            if ($var > $varMax) { $varMax = $var; $threshold = $i; }
         }
 
-        // Apply threshold
-        for ($y = 0; $y < $new_height; $y++) {
-            for ($x = 0; $x < $new_width; $x++) {
-                $rgb = imagecolorat($resized_image, $x, $y);
-                $r = ($rgb >> 16) & 0xFF;
-                $color = ($r >= $threshold) ? 255 : 0;
-                $new_color = imagecolorallocate($resized_image, $color, $color, $color);
-                imagesetpixel($resized_image, $x, $y, $new_color);
+        for ($y = 0; $y < $new_h; $y++) {
+            for ($x = 0; $x < $new_w; $x++) {
+                $r     = imagecolorat($resized_img, $x, $y) >> 16 & 0xFF;
+                $c     = ($r >= $threshold) ? 255 : 0;
+                imagesetpixel($resized_img, $x, $y, imagecolorallocate($resized_img, $c, $c, $c));
             }
         }
     }
 
-    // Apply dilation (1x1 kernel) if enabled
+    // Optional: 3×3 morphological dilation
     if ($apply_dilation) {
-        $dilated_image = imagecreatetruecolor($new_width, $new_height);
-        imagecopy($dilated_image, $resized_image, 0, 0, 0, 0, $new_width, $new_height);
+        $dilated = imagecreatetruecolor($new_w, $new_h);
+        imagecopy($dilated, $resized_img, 0, 0, 0, 0, $new_w, $new_h);
+        $black = imagecolorallocate($dilated, 0, 0, 0);
 
-        for ($y = 1; $y < $new_height - 1; $y++) {
-            for ($x = 1; $x < $new_width - 1; $x++) {
-                $is_black = false;
-                // Check 1x1 neighborhood
-                for ($ky = -1; $ky <= 1; $ky++) {
-                    for ($kx = -1; $kx <= 1; $kx++) {
-                        $rgb = imagecolorat($resized_image, $x + $kx, $y + $ky);
-                        $r = ($rgb >> 16) & 0xFF;
-                        if ($r == 0) {
-                            $is_black = true;
-                            break 2;
+        for ($y = 1; $y < $new_h - 1; $y++) {
+            for ($x = 1; $x < $new_w - 1; $x++) {
+                $found = false;
+                for ($ky = -1; $ky <= 1 && !$found; $ky++) {
+                    for ($kx = -1; $kx <= 1 && !$found; $kx++) {
+                        if ((imagecolorat($resized_img, $x + $kx, $y + $ky) >> 16 & 0xFF) === 0) {
+                            $found = true;
                         }
                     }
                 }
-                if ($is_black) {
-                    $black = imagecolorallocate($dilated_image, 0, 0, 0);
-                    imagesetpixel($dilated_image, $x, $y, $black);
+                if ($found) {
+                    imagesetpixel($dilated, $x, $y, $black);
                 }
             }
         }
-    } else {
-        // If dilation is not applied, use the resized image directly
-        $dilated_image = $resized_image;
+
+        imagedestroy($resized_img);
+        $resized_img = $dilated;
     }
 
-    // Save as PNG
-    $success = imagepng($dilated_image, $temp_path, 9); // Compression level 9
+    $temp_path = tempnam(sys_get_temp_dir(), 'ocr_') . '.png';
+    $ok        = imagepng($resized_img, $temp_path, 9);
+    imagedestroy($resized_img);
 
-    // Clean up
-    imagedestroy($image);
-    imagedestroy($resized_image);
-    if ($apply_dilation) {
-        imagedestroy($dilated_image);
-    }
-
-    return $success ? $temp_path : false;
+    return $ok ? $temp_path : false;
 }
 
+// =========================================================================
+// Document & URL Helpers
+// =========================================================================
+
 /**
- * Extract text from various document formats
- * 
- * This function extracts text content from various document formats using
- * appropriate external tools. It supports Microsoft Word documents (DOC/DOCX),
- * PDF files, OpenDocument Text files (ODT), and plain text files.
- * 
- * @param string $file_path Path to the document file
- * @param string $mime_type MIME type of the file
- * @return string|false Extracted text or false on error
- * 
- * @note Uses external tools: antiword, catdoc, docx2txt, pdftotext, odt2txt, pandoc
- * @note Falls back to pandoc if specific tools are not available or fail
- * @note Cleans up error messages and stderr output from tool execution
- * @note Requires appropriate tools to be installed on the system
- * @see handleProfileAction() - Uses this for document processing
- * @note Used for processing uploaded documents in profile actions
+ * Extract plain text from an uploaded document.
+ *
+ * Tries well-known command-line tools in /usr/bin and /usr/local/bin.
+ * stderr is redirected to /dev/null so tool warnings never contaminate the
+ * extracted content that will be sent to the LLM.
+ *
+ * @param string $file_path Absolute path to the uploaded temporary file.
+ * @param string $mime_type Verified MIME type of the document.
+ * @return string|false Extracted text, or false if extraction failed.
  */
-function extractTextFromDocument($file_path, $mime_type) {
-    // Try specific tools based on file type
-    $text = false;
-    // Common binary paths to check
+function extractTextFromDocument(string $file_path, string $mime_type) {
     $bin_paths = ['/usr/bin/', '/usr/local/bin/'];
+    $text      = false;
 
-    // Attempt to extract text based on MIME type
     switch ($mime_type) {
-        case 'application/msword': // .doc
-            // Check for antiword or catdoc in common locations
-            for ($i = 0; $i < count($bin_paths); $i++) {
-                $bin_path = $bin_paths[$i];
-                if (file_exists($bin_path . 'antiword')) {
-                    $text = shell_exec($bin_path . 'antiword -f -w 0 ' . escapeshellarg($file_path) . ' 2>&1');
-                    break;
-                } elseif (file_exists($bin_path . 'catdoc')) {
-                    $text = shell_exec($bin_path . 'catdoc -a -dutf-8 -w ' . escapeshellarg($file_path) . ' 2>&1');
+        case 'application/msword':
+            foreach ($bin_paths as $bp) {
+                if (file_exists($bp . 'antiword')) {
+                    // FIX #10: redirect stderr to /dev/null on all shell_exec calls
+                    $text = shell_exec($bp . 'antiword -f -w 0 ' . escapeshellarg($file_path) . ' 2>/dev/null');
                     break;
                 }
-            }
-            break;
-        
-        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': // .docx
-            for ($i = 0; $i < count($bin_paths); $i++) {
-                $bin_path = $bin_paths[$i];
-                if (file_exists($bin_path . 'docx2txt')) {
-                    $text = shell_exec($bin_path . 'docx2txt < ' . escapeshellarg($file_path) . ' 2>&1');
+                if (file_exists($bp . 'catdoc')) {
+                    $text = shell_exec($bp . 'catdoc -a -dutf-8 -w ' . escapeshellarg($file_path) . ' 2>/dev/null');
                     break;
                 }
             }
             break;
 
-        case 'application/pdf': // .pdf
-            for ($i = 0; $i < count($bin_paths); $i++) {
-                $bin_path = $bin_paths[$i];
-                if (file_exists($bin_path . 'pdftotext')) {
-                    $text = shell_exec($bin_path . 'pdftotext -layout ' . escapeshellarg($file_path) . ' - 2>&1');
+        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+            foreach ($bin_paths as $bp) {
+                if (file_exists($bp . 'docx2txt')) {
+                    $text = shell_exec($bp . 'docx2txt < ' . escapeshellarg($file_path) . ' 2>/dev/null');
                     break;
                 }
             }
             break;
 
-        case 'application/vnd.oasis.opendocument.text': // .odt
-            for ($i = 0; $i < count($bin_paths); $i++) {
-                $bin_path = $bin_paths[$i];
-                if (file_exists($bin_path . 'odt2txt')) {
-                    $text = shell_exec($bin_path . 'odt2txt --encoding=UTF-8 ' . escapeshellarg($file_path) . ' 2>&1');
+        case 'application/pdf':
+            foreach ($bin_paths as $bp) {
+                if (file_exists($bp . 'pdftotext')) {
+                    $text = shell_exec($bp . 'pdftotext -layout ' . escapeshellarg($file_path) . ' - 2>/dev/null');
                     break;
                 }
             }
             break;
 
-        case 'text/plain': // .txt
-        case 'text/markdown': // .md
+        case 'application/vnd.oasis.opendocument.text':
+            foreach ($bin_paths as $bp) {
+                if (file_exists($bp . 'odt2txt')) {
+                    $text = shell_exec($bp . 'odt2txt --encoding=UTF-8 ' . escapeshellarg($file_path) . ' 2>/dev/null');
+                    break;
+                }
+            }
+            break;
+
+        case 'text/plain':
+        case 'text/markdown':
             $text = file_get_contents($file_path);
             break;
     }
 
-    // Return text if successfully extracted
     return $text;
 }
 
 /**
- * Scrape URL content with Chrome browser simulation
- * 
- * This function fetches web page content by simulating a Chrome browser
- * request. It handles cookies, redirects, gzip encoding, and includes
- * appropriate headers to bypass basic bot detection.
- * 
- * @param string $url URL to scrape
- * @return string|false Page content or false on error
- * 
- * @note Uses cURL with Chrome user agent and browser-like headers
- * @note Handles gzip compression automatically
- * @note Stores cookies in temporary file for session management
- * @note Follows up to 5 redirects with 30-second timeout
- * @note Cleans up temporary cookie file after request
- * @see executeHelper() - Uses this for web scraping helper
- * @note Used for the 'web_scraper' helper in profile actions
+ * Validate and normalise a URL string.
+ *
+ * @param string $url Raw URL from user input.
+ * @return array{valid: bool, error: string|null, data: string|null}
  */
-function scrapeUrl($url) {
-    // Create a temporary file to store cookies
+function processUrl(string $url): array {
+    $data = trim($url);
+
+    if (!filter_var($data, FILTER_VALIDATE_URL)) {
+        return ['valid' => false, 'error' => 'Invalid URL format. Please include http:// or https://', 'data' => null];
+    }
+
+    $scheme = parse_url($data, PHP_URL_SCHEME);
+    if (!in_array($scheme, ['http', 'https'], true)) {
+        return ['valid' => false, 'error' => 'Only http:// and https:// URLs are supported.', 'data' => null];
+    }
+
+    return ['valid' => true, 'error' => null, 'data' => $data];
+}
+
+/**
+ * Fetch a web page simulating a Chrome browser request.
+ *
+ * @param string $url A pre-validated URL.
+ * @return string|false Page HTML, or false on failure.
+ */
+function scrapeUrl(string $url) {
     $cookie_file = tempnam(sys_get_temp_dir(), 'scp_cookies');
 
-    // Initialize cURL session
     $ch = curl_init();
-
-    // Set cURL options
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_file);  // Store cookies
-    curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_file); // Send cookies
-    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language: en-US,en;q=0.5',
-        'Accept-Encoding: gzip, deflate',
-        'Connection: keep-alive',
-        'Upgrade-Insecure-Requests: 1',
+    curl_setopt_array($ch, [
+        CURLOPT_URL            => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS      => 5,
+        CURLOPT_TIMEOUT        => 30,
+        CURLOPT_COOKIEJAR      => $cookie_file,
+        CURLOPT_COOKIEFILE     => $cookie_file,
+        CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        CURLOPT_HTTPHEADER     => [
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language: en-US,en;q=0.5',
+            'Accept-Encoding: gzip, deflate',
+            'Connection: keep-alive',
+            'Upgrade-Insecure-Requests: 1',
+        ],
     ]);
 
-    // Execute request
     $content = curl_exec($ch);
+    $err     = curl_errno($ch);
+    curl_close($ch);
+    @unlink($cookie_file);
 
-    // Check for errors
-    if (curl_errno($ch)) {
-        curl_close($ch);
-        unlink($cookie_file);
+    if ($err || $content === false) {
         return false;
     }
 
-    // Close cURL session
-    curl_close($ch);
-
-    // Clean up cookie file
-    unlink($cookie_file);
-
-    // Handle gzip encoding
-    if (strpos($content, "\x1f\x8b") === 0) {
+    // Decode gzip if needed
+    if (is_string($content) && str_starts_with($content, "\x1f\x8b")) {
         $content = gzdecode($content);
     }
 
@@ -542,643 +424,619 @@ function scrapeUrl($url) {
 }
 
 /**
- * Run lynx command to get text content from URL
- * 
- * This function executes lynx with specific options to extract clean text
- * content from a web page URL
- * 
- * @param string $url URL to process with lynx
- * @return string|false Text content or false on error
+ * Extract clean text from a URL using lynx.
+ *
+ * @param string $url Raw URL from user input (validated internally).
+ * @return string|false Extracted text, or false on failure.
  */
-function runLynxCommand($url) {
-    // Validate URL first
-    $processed_url = processUrl($url);
-    if (!$processed_url['valid']) {
+function runLynxCommand(string $url) {
+    $processed = processUrl($url);
+    if (!$processed['valid']) {
         return false;
     }
-    $url = $processed_url['data'];
-    $chromeUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
-    if (file_exists('/usr/bin/lynx')) {
-        return shell_exec('lynx -dump -force_html -width=80 -nolist -nobold -nocolor -useragent="' . $chromeUA . '" ' . escapeshellarg($url) . ' 2>&1');
-    } elseif (file_exists('/usr/local/bin/lynx')) {
-        return shell_exec('lynx -dump -force_html -width=80 -nolist -nobold -nocolor -useragent="' . $chromeUA . '" ' . escapeshellarg($url) . ' 2>&1');
+
+    $safe_url = $processed['data'];
+    $ua       = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+    $args     = '-dump -force_html -width=80 -nolist -nobold -nocolor -useragent=' . escapeshellarg($ua) . ' ' . escapeshellarg($safe_url) . ' 2>/dev/null';
+
+    foreach (['/usr/bin/lynx', '/usr/local/bin/lynx'] as $bin) {
+        if (file_exists($bin)) {
+            $out = shell_exec($bin . ' ' . $args);
+            return (is_string($out) && $out !== '') ? $out : false;
+        }
     }
-    
+
     return false;
 }
 
+// =========================================================================
+// PDF / Imaging
+// =========================================================================
+
 /**
- * Extract images from PDF file
- * 
- * This function extracts images from a PDF file using either the Imagick or
- * Gmagick PHP extensions. It processes the first page of the PDF and returns
- * the image data in PNG format for further processing (e.g., OCR).
- * 
- * @param string $pdf_path Path to the PDF file
- * @return array|false Array of image data or false on error
- * 
- * @note Uses Imagick extension if available, falls back to Gmagick
- * @note Extracts only the first page for OCR processing
- * @note Sets resolution to 200 DPI for better quality
- * @note Returns image data in PNG format
- * @note Returns array of image data blobs (currently only first page)
- * @note Used for PDF document processing in profile actions
+ * Rasterise the first page of a PDF to PNG using Imagick or Gmagick.
+ *
+ * @param string $pdf_path Absolute path to the PDF.
+ * @return array<string>|false Array of binary PNG blobs (currently one page), or false.
  */
-function extractImagesFromPDF($pdf_path) {
-    // Try Imagick first
+function extractImagesFromPDF(string $pdf_path) {
     if (extension_loaded('imagick')) {
         try {
-            $images = [];
             $imagick = new Imagick();
-            $imagick->readImage($pdf_path);
-            
-            // Set resolution for better quality
             $imagick->setResolution(200, 200);
-            
-            // Get number of pages
-            $page_count = $imagick->getNumberImages();
-            
-            if ($page_count === 0) {
-                return false;
-            }
-            
-            // Process first page only for OCR
-            $imagick->setIteratorIndex(0);
-            $page = $imagick->getImage();
-            
-            // Convert to PNG format
-            $page->setImageFormat('png');
-            $page->stripImage(); // Remove metadata
-            
-            // Get image data
-            $image_data = $page->getImageBlob();
-            $images[] = $image_data;
-            
-            // Clean up
-            $page->destroy();
+            $imagick->readImage($pdf_path . '[0]'); // first page only
+            $imagick->setImageFormat('png');
+            $imagick->stripImage();
+            $blob = $imagick->getImageBlob();
             $imagick->destroy();
-            
-            return $images;
+            return [$blob];
         } catch (Exception $e) {
-            // Fall through to try Gmagick
+            // fall through
         }
     }
-    
-    // Try Gmagick as fallback
+
     if (extension_loaded('gmagick')) {
         try {
-            $images = [];
             $gmagick = new Gmagick();
-            $gmagick->readImage($pdf_path);
-            
-            // Set resolution for better quality
             $gmagick->setresolution(200, 200);
-            
-            // Get number of pages
-            $page_count = $gmagick->getnumberimages();
-            
-            if ($page_count === 0) {
-                return false;
-            }
-            
-            // Process first page only for OCR
-            $gmagick->setimageindex(0);
-            $page = clone $gmagick;
-            
-            // Convert to PNG format
-            $page->setimageformat('png');
-            
-            // Get image data
-            $image_data = $page->getimageblob();
-            $images[] = $image_data;
-            
-            // Clean up
-            $page->clear();
+            $gmagick->readImage($pdf_path . '[0]');
+            $gmagick->setimageformat('png');
+            $blob = $gmagick->getimageblob();
             $gmagick->clear();
-            
-            return $images;
+            return [$blob];
         } catch (Exception $e) {
             return false;
         }
     }
-    
-    // If neither extension is available
+
     return false;
 }
 
+// =========================================================================
+// HTTP / API Utilities
+// =========================================================================
+
 /**
- * Get human-readable explanation for HTTP error codes
- * 
- * This function provides user-friendly explanations for common HTTP error
- * codes, making API error messages more understandable for end users.
- * 
- * @param int $http_code HTTP status code
- * @return string Explanation of the error
- * 
- * @note Covers common HTTP error codes from 400 to 504
- * @note Returns generic message for unknown error codes
- * @see getAvailableModels() - Uses this for API error reporting
- * @see callLLMApi() - Uses this for API error reporting
+ * Return a human-readable description for an HTTP status code.
+ *
+ * @param int $http_code HTTP status code.
+ * @return string Description string.
  */
-function getHttpErrorExplanation($http_code) {
+function getHttpErrorExplanation(int $http_code): string {
     $explanations = [
-        400 => 'Bad Request - The request was invalid or cannot be served.',
-        401 => 'Unauthorized - Authentication is required and has failed or not yet been provided.',
-        403 => 'Forbidden - The server understood the request but refuses to authorize it.',
-        404 => 'Not Found - The requested resource could not be found.',
-        408 => 'Request Timeout - The server timed out waiting for the request.',
-        429 => 'Too Many Requests - You have sent too many requests in a given amount of time.',
-        500 => 'Internal Server Error - The server encountered an unexpected condition.',
-        502 => 'Bad Gateway - The server received an invalid response from the upstream server.',
-        503 => 'Service Unavailable - The server is not ready to handle the request.',
-        504 => 'Gateway Timeout - The server did not receive a timely response from the upstream server.'
+        400 => 'Bad Request — the request was malformed.',
+        401 => 'Unauthorized — authentication required or failed.',
+        403 => 'Forbidden — the server refused to fulfil the request.',
+        404 => 'Not Found — the requested resource does not exist.',
+        408 => 'Request Timeout — the server timed out.',
+        429 => 'Too Many Requests — rate limit exceeded.',
+        500 => 'Internal Server Error — unexpected server condition.',
+        502 => 'Bad Gateway — invalid response from upstream server.',
+        503 => 'Service Unavailable — server not ready.',
+        504 => 'Gateway Timeout — no timely upstream response.',
     ];
-    
-    return isset($explanations[$http_code]) ? $explanations[$http_code] : "HTTP error $http_code";
+
+    return $explanations[$http_code] ?? "HTTP error $http_code";
 }
 
 /**
- * Fetch available models from the LLM server API
- * 
- * This function queries the LLM API endpoint to retrieve a list of available
- * AI models. It handles authentication, error handling, and optional filtering
- * of model names. Vision models are automatically detected and labeled.
- * 
- * @param string $api_endpoint The API endpoint URL
- * @param string $api_key The API key (if required)
- * @param string $filter_regex Regular expression to filter models (optional)
- * @return array List of available models or error array
- * 
- * @note Makes GET request to /models endpoint
- * @note Uses Bearer token authentication
- * @note Filters models by regex pattern if provided
- * @note Automatically detects and labels vision models
- * @note Returns models sorted alphabetically by name
- * @note Returns ['error' => message] on failure
- * @see handleGetModels() - Uses this to fetch models
- * @see getHttpErrorExplanation() - Used for error messages
+ * Query the LLM server for the list of available models.
+ *
+ * @param string $api_endpoint Base API endpoint (without /models).
+ * @param string $api_key      Bearer token (may be empty).
+ * @param string $filter_regex Optional regex to include only matching model IDs.
+ * @return array<string,string>|array{error: string} Map of id => label, or error.
  */
-function getAvailableModels($api_endpoint, $api_key = '', $filter_regex = '') {
-    $models_url = $api_endpoint . '/models';
-    
-    // Make API request
-    $ch = curl_init($models_url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $api_key
+function getAvailableModels(string $api_endpoint, string $api_key = '', string $filter_regex = ''): array {
+    $ch = curl_init($api_endpoint . '/models');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json', 'Authorization: Bearer ' . $api_key],
+        CURLOPT_TIMEOUT        => 30,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS      => 3,
     ]);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
-    
-    $response = curl_exec($ch);
+
+    $response  = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    
-    if (curl_errno($ch)) {
-        $error = 'Connection error: ' . curl_error($ch);
-        curl_close($ch);
-        return ['error' => $error];
-    } elseif ($http_code !== 200) {
-        $error = 'API error: ' . getHttpErrorExplanation($http_code);
-        curl_close($ch);
-        return ['error' => $error];
-    }
-    
+    $curl_err  = curl_errno($ch);
     curl_close($ch);
-    
-    $response_data = json_decode($response, true);
-    
-    if (json_last_error() !== JSON_ERROR_NONE || !isset($response_data['data'])) {
-        return ['error' => 'Invalid API response format: ' . json_last_error_msg()];
+
+    if ($curl_err) {
+        return ['error' => 'Connection error: ' . curl_strerror($curl_err)];
     }
-    
+    if ($http_code !== 200) {
+        return ['error' => 'API error: ' . getHttpErrorExplanation($http_code)];
+    }
+
+    $data = json_decode($response, true);
+    if (json_last_error() !== JSON_ERROR_NONE || !isset($data['data'])) {
+        return ['error' => 'Invalid API response: ' . json_last_error_msg()];
+    }
+
     $models = [];
-    foreach ($response_data['data'] as $model) {
-        if (isset($model['id'])) {
-            // Apply filter if provided
-            if ($filter_regex !== '' && !preg_match($filter_regex, $model['id'])) {
-                continue;
-            }
-            
-            // For vision models, we'll use a more user-friendly name
-            $name = $model['id'];
-            if (strpos($name, 'vision') !== false || strpos($name, 'vl') !== false) {
-                $models[$name] = str_replace(':', ' ', $name) . ' (Vision)';
-            } else {
-                $models[$name] = str_replace(':', ' ', $name);
-            }
+    foreach ($data['data'] as $model) {
+        if (!isset($model['id'])) continue;
+        if ($filter_regex !== '' && !preg_match($filter_regex, $model['id'])) continue;
+
+        $id    = $model['id'];
+        $label = str_replace(':', ' ', $id);
+        if (stripos($id, 'vision') !== false || stripos($id, 'vl') !== false) {
+            $label .= ' (Vision)';
         }
+        $models[$id] = $label;
     }
-    
-    // Sort models alphabetically by key (model name)
+
     ksort($models);
-    
     return $models;
 }
 
 /**
- * Make API call to LLM server
- * 
- * This function makes a POST request to the LLM chat completion API endpoint.
- * It handles authentication, request formatting, error handling, and response
- * parsing. The function supports long-running requests with a 5-minute timeout.
- * 
- * @param string $api_endpoint_chat The chat API endpoint URL
- * @param array $data The request data (messages, model, etc.)
- * @param string $api_key The API key (if required)
- * @return array|false API response data or error array
- * 
- * @note Uses POST method with JSON payload
- * @note Uses Bearer token authentication
- * @note Has 5-minute timeout for long-running requests
- * @note Follows up to 3 redirects
- * @note Returns ['error' => message] on failure
- * @see handleProfileAction() - Uses this for profile processing
- * @see getHttpErrorExplanation() - Used for error messages
+ * Send a chat-completion request to the LLM API.
+ *
+ * @param string $endpoint Full chat completions URL.
+ * @param array  $data     Request payload (model, messages, …).
+ * @param string $api_key  Bearer token (may be empty).
+ * @return array API response decoded, or array{error: string} on failure.
  */
-function callLLMApi($api_endpoint_chat, $data, $api_key = '') {
-    // Make API request
-    $ch = curl_init($api_endpoint_chat);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $api_key
+function callLLMApi(string $endpoint, array $data, string $api_key = ''): array {
+    $ch = curl_init($endpoint);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($data),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json', 'Authorization: Bearer ' . $api_key],
+        CURLOPT_TIMEOUT        => 300,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS      => 3,
     ]);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 300);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
-    
-    $response = curl_exec($ch);
+
+    $response  = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    
-    if (curl_errno($ch)) {
-        $error = 'Connection error: ' . curl_error($ch);
-        curl_close($ch);
-        return ['error' => $error];
-    } elseif ($http_code !== 200) {
-        $error = 'API error: ' . getHttpErrorExplanation($http_code);
-        curl_close($ch);
-        return ['error' => $error];
-    }
-    
+    $curl_err  = curl_errno($ch);
     curl_close($ch);
-    
-    $response_data = json_decode($response, true);
-    
+
+    if ($curl_err) {
+        return ['error' => 'Connection error: ' . curl_strerror($curl_err)];
+    }
+    if ($http_code !== 200) {
+        return ['error' => 'API error: ' . getHttpErrorExplanation($http_code)];
+    }
+
+    $decoded = json_decode($response, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
-        return ['error' => 'Invalid API response format: ' . json_last_error_msg()];
+        return ['error' => 'Invalid API response: ' . json_last_error_msg()];
     }
-    
-    return $response_data;
+
+    return $decoded;
 }
 
 /**
- * Handle common URL validation and processing
- * 
- * This function validates and sanitizes URL input for web scraping or
- * other URL-based operations. It ensures the URL is properly formatted
- * and includes a protocol (http:// or https://).
- * 
- * @param string $url The URL to validate
- * @return array Processing result with validation status
- * 
- * @note Trims whitespace from URL
- * @note Validates URL format using filter_var()
- * @note Requires http:// or https:// protocol
- * @note Returns array with 'valid', 'error', and 'data' keys
- * @note Used for validating URLs before web scraping
- * @see scrapeUrl() - Uses validated URLs for web scraping
+ * Send a JSON response and terminate.
+ *
+ * Sets appropriate HTTP headers including a validated CORS origin,
+ * cache-control directives, and security headers.
+ *
+ * @param array $data           Response payload.
+ * @param bool  $is_api_request Only sends if true (prevents accidental output).
  */
-function processUrl($url) {
-    $result = [
-        'valid' => true,
-        'error' => null,
-        'data' => null
-    ];
-    
-    // Sanitize and validate input
-    $data = trim($url);
-    
-    // Validate URL format
-    if (!filter_var($data, FILTER_VALIDATE_URL)) {
-        $result['valid'] = false;
-        $result['error'] = 'Invalid URL format. Please enter a valid URL including http:// or https://';
+function sendJsonResponse(array $data, bool $is_api_request = false): void {
+    if (!$is_api_request) {
+        return;
+    }
+
+    // FIX #7: Validate Origin against the configured allowlist instead of
+    // reflecting it verbatim, which would bypass CORS entirely.
+    global $ALLOWED_ORIGINS;
+    $origin  = $_SERVER['HTTP_ORIGIN'] ?? '';
+    $allowed = $ALLOWED_ORIGINS ?? ['*'];
+
+    if (in_array('*', $allowed, true)) {
+        $cors_header = '*';
+    } elseif ($origin !== '' && in_array($origin, $allowed, true)) {
+        $cors_header = $origin;
+        header('Vary: Origin');
     } else {
-        $result['data'] = $data;
+        $cors_header = $allowed[0] ?? '';
     }
-    
-    return $result;
+
+    header('Access-Control-Allow-Origin: ' . $cors_header);
+    header('Content-Type: application/json; charset=utf-8');
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
+    // FIX #15: additional security headers
+    header('Referrer-Policy: no-referrer');
+    header('Content-Security-Policy: default-src \'none\'');
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+
+    global $DEBUG_MODE;
+    if ($DEBUG_MODE && !empty($_POST)) {
+        $data['debug']['form_data'] = $_POST;
+    }
+
+    echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
+// =========================================================================
+// PubMed Helpers
+// =========================================================================
 
 /**
- * Send JSON response and exit
- * 
- * This function sends a JSON response with appropriate headers and
- * terminates script execution. It's designed for API endpoints that
- * need to return JSON data to clients.
- * 
- * @param array $data Response data to encode as JSON
- * @param bool $is_api_request Whether this is an API request (default: false)
- * 
- * @note Sets CORS header to allow cross-origin requests
- * @note Sets Content-Type to application/json
- * @note Uses json_encode() to convert data to JSON
- * @note Calls exit() to terminate script execution
- * @note Only sends response if $is_api_request is true
- * @see handleApiRequest() - Uses this for API responses
- * @see handleProfileAction() - Uses this for profile responses
+ * Search PubMed for articles matching a query string.
+ *
+ * @param string $query       Search terms.
+ * @param int    $max_results Maximum articles to return.
+ * @return array<array>|false Article list, empty array if none found, or false on error.
  */
-function sendJsonResponse($data, $is_api_request = false) {
-    if ($is_api_request) {
-        // Security headers
-        header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
-        header('Content-Type: application/json');
-        header('X-Content-Type-Options: nosniff');
-        header('X-Frame-Options: DENY');
-        
-        // Prevent caching of sensitive data
-        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-        header('Pragma: no-cache');
-
-        global $DEBUG_MODE;
-        if ($DEBUG_MODE) {
-            // Add form data to debug output if available
-            if (!empty($_POST)) {
-                $data['debug']['form_data'] = $_POST;
-            }
-        }
-
-        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
-        exit;
-    }
-}
-
-/**
- * Search PubMed for articles matching the query
- * 
- * This function searches the PubMed database for medical literature
- * matching a given query. It uses the NCBI E-utilities API to perform
- * the search and retrieves article IDs, then fetches detailed information
- * for each article.
- * 
- * @param string $query Search query (e.g., "diabetes treatment")
- * @param int $max_results Maximum number of results to return (default: 5)
- * @return array|false Array of articles or false on error
- * 
- * @note Uses NCBI E-utilities API (esearch.fcgi)
- * @note Returns articles sorted by relevance
- * @note Fetches detailed information for each article
- * @note Returns false on API errors or no results
- * @see fetchArticleDetails() - Used to get article details
- * @see executeHelper() - Uses this for 'medical_literature_search' helper
- */
-function searchPubMed($query, $max_results = 5) {
-    // PubMed API endpoint
-    $pubmed_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi';
-
-    // Prepare search parameters
-    $params = [
-        'db' => 'pubmed',
-        'term' => $query,
-        'retmax' => $max_results,
+function searchPubMed(string $query, int $max_results = 5) {
+    $url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?' . http_build_query([
+        'db'      => 'pubmed',
+        'term'    => $query,
+        'retmax'  => $max_results,
         'retmode' => 'json',
-        'sort' => 'relevance'
-    ];
+        'sort'    => 'relevance',
+    ]);
 
-    // Build URL with parameters
-    $url = $pubmed_url . '?' . http_build_query($params);
-
-    // Make API request
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'MedicalLiteratureSearch/1.0 (costinstroie@eridu.eu.org)');
+    curl_setopt_array($ch, [
+        CURLOPT_URL            => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 30,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS      => 3,
+        CURLOPT_USERAGENT      => 'MedicalLiteratureSearch/1.0 (costinstroie@eridu.eu.org)',
+    ]);
 
-    $response = curl_exec($ch);
+    $response  = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-    if (curl_errno($ch) || $http_code !== 200) {
-        curl_close($ch);
-        return false;
-    }
-
+    $curl_err  = curl_errno($ch);
     curl_close($ch);
 
-    $response_data = json_decode($response, true);
+    if ($curl_err || $http_code !== 200) return false;
 
-    if (json_last_error() !== JSON_ERROR_NONE || !isset($response_data['esearchresult']['idlist'])) {
-        return false;
-    }
+    $data = json_decode($response, true);
+    if (json_last_error() !== JSON_ERROR_NONE || !isset($data['esearchresult']['idlist'])) return false;
 
-    $ids = $response_data['esearchresult']['idlist'];
+    $ids = $data['esearchresult']['idlist'];
+    if (empty($ids)) return [];
 
-    if (empty($ids)) {
-        return [];
-    }
-
-    // Fetch details for each article
     return fetchArticleDetails($ids);
 }
 
 /**
- * Fetch detailed information for PubMed articles
- * 
- * This function retrieves detailed metadata for PubMed articles using their
- * PubMed IDs. It queries the NCBI E-utilities API and parses the XML response
- * to extract article information including title, authors, journal, year,
- * and abstract.
- * 
- * @param array $ids Array of PubMed IDs
- * @return array|false Array of article details or false on error
- * 
- * @note Uses NCBI E-utilities API (efetch.fcgi)
- * @note Returns XML response and parses with SimpleXML
- * @note Limits authors to first 5 + "et al." if more
- * @note Extracts PMID, title, authors, journal, year, abstract
- * @note Returns false on API errors or parsing failures
- * @see searchPubMed() - Uses this to get article details
- * @note Used for the 'medical_literature_search' helper
+ * Fetch detailed metadata for PubMed article IDs.
+ *
+ * @param array $ids PubMed IDs.
+ * @return array<array>|false Article detail list, or false on error.
  */
-function fetchArticleDetails($ids) {
-    // PubMed API endpoint for fetching details
-    $pubmed_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi';
+function fetchArticleDetails(array $ids) {
+    $url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?' . http_build_query([
+        'db'      => 'pubmed',
+        'id'      => implode(',', $ids),
+        'retmode' => 'xml',
+    ]);
 
-    // Prepare fetch parameters
-    $params = [
-        'db' => 'pubmed',
-        'id' => implode(',', $ids),
-        'retmode' => 'xml'
-    ];
-
-    // Build URL with parameters
-    $url = $pubmed_url . '?' . http_build_query($params);
-
-    // Make API request
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'MedicalLiteratureSearch/1.0 (costinstroie@eridu.eu.org)');
+    curl_setopt_array($ch, [
+        CURLOPT_URL            => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 30,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS      => 3,
+        CURLOPT_USERAGENT      => 'MedicalLiteratureSearch/1.0 (costinstroie@eridu.eu.org)',
+    ]);
 
-    $response = curl_exec($ch);
+    $response  = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-    if (curl_errno($ch) || $http_code !== 200) {
-        curl_close($ch);
-        return false;
-    }
-
+    $curl_err  = curl_errno($ch);
     curl_close($ch);
 
-    // Parse XML response
-    $xml = simplexml_load_string($response);
+    if ($curl_err || $http_code !== 200) return false;
 
-    if ($xml === false) {
-        return false;
-    }
+    $xml = @simplexml_load_string($response);
+    if ($xml === false) return false;
 
     $articles = [];
-
-    // Process each article
     foreach ($xml->PubmedArticle as $article) {
-        $parsed_article = [];
+        $mc   = $article->MedlineCitation;
+        $art  = $mc->Article;
 
-        // Extract PMID
-        $parsed_article['pmid'] = (string)$article->MedlineCitation->PMID;
-
-        // Extract title
-        $parsed_article['title'] = (string)$article->MedlineCitation->Article->ArticleTitle;
-
-        // Extract authors
         $authors = [];
-        foreach ($article->MedlineCitation->Article->AuthorList->Author as $author) {
-            $author_name = (string)$author->LastName;
-            if (!empty($author->Initials)) {
-                $author_name .= ' ' . (string)$author->Initials;
-            }
-            $authors[] = $author_name;
+        foreach ($art->AuthorList->Author as $author) {
+            $name = (string)$author->LastName;
+            if (!empty($author->Initials)) $name .= ' ' . (string)$author->Initials;
+            $authors[] = $name;
         }
-        $parsed_article['authors'] = array_slice($authors, 0, 5);
         if (count($authors) > 5) {
-            $parsed_article['authors'][] = 'et al.';
+            $authors = array_slice($authors, 0, 5);
+            $authors[] = 'et al.';
         }
 
-        // Extract journal
-        $parsed_article['journal'] = (string)$article->MedlineCitation->Article->Journal->Title;
+        $year = (string)$art->Journal->JournalIssue->PubDate->Year;
+        if ($year === '') $year = (string)$art->Journal->JournalIssue->PubDate->MedlineDate;
 
-        // Extract year
-        $parsed_article['year'] = (string)$article->MedlineCitation->Article->Journal->JournalIssue->PubDate->Year;
-        if (empty($parsed_article['year'])) {
-            $parsed_article['year'] = (string)$article->MedlineCitation->Article->Journal->JournalIssue->PubDate->MedlineDate;
-        }
-
-        // Extract abstract
-        $parsed_article['abstract'] = (string)$article->MedlineCitation->Article->Abstract->AbstractText;
-
-        $articles[] = $parsed_article;
+        $articles[] = [
+            'pmid'     => (string)$mc->PMID,
+            'title'    => (string)$art->ArticleTitle,
+            'authors'  => $authors,
+            'journal'  => (string)$art->Journal->Title,
+            'year'     => $year,
+            'abstract' => (string)$art->Abstract->AbstractText,
+        ];
     }
 
     return $articles;
 }
 
+// =========================================================================
+// JSON Extraction
+// =========================================================================
+
 /**
- * Extract JSON from AI response content
- * 
- * This function attempts to extract JSON data from AI response content.
- * It looks for JSON between code fences (```json ... ```) or any JSON
- * object in the content. If the JSON is malformed, it attempts to fix
- * common issues like trailing commas and unquoted keys.
- * 
- * @param string $content AI response content
- * @return array|null Extracted JSON data or null if not found/invalid
- * 
- * @note First tries to find JSON between code fences
- * @note Then tries to find any JSON object in the content
- * @note Attempts to fix common JSON formatting issues
- * @note Returns null if no valid JSON is found
- * @see processProfileResponse() - Uses this for JSON output profiles
- * @note Used for extracting structured data from AI responses
+ * Extract the first valid JSON object from an LLM response string.
+ *
+ * Tries in order:
+ *   1. JSON inside a ```json … ``` fence
+ *   2. First balanced {} block in the text
+ *   3. Light cleanup (trailing commas, unquoted keys) and retry
+ *
+ * FIX #14: the fallback regex is now a depth-aware scan that finds the first
+ * complete, balanced JSON object rather than using a greedy /\{.*\}/s match.
+ *
+ * @param string $content LLM response text.
+ * @return array|null Decoded data, or null if no valid JSON was found.
  */
-function extractJsonFromResponse($content) {
-    // Try to find JSON between code fences
-    if (preg_match('/```(?:json)?\s*({.*?})\s*```/s', $content, $matches)) {
-        $json_str = $matches[1];
-    } 
-    // Then try to find any JSON object
-    elseif (preg_match('/\{.*\}/s', $content, $matches)) {
-        $json_str = $matches[0];
+function extractJsonFromResponse(string $content): ?array {
+    // 1. Prefer an explicit ```json … ``` fence
+    if (preg_match('/```(?:json)?\s*(\{.*?\})\s*```/s', $content, $m)) {
+        $json_str = $m[1];
     } else {
-        return null;
+        // 2. Find the first balanced { … } block — depth-aware, not greedy
+        $json_str = extractFirstJsonObject($content);
+        if ($json_str === null) return null;
     }
-    
-    // Clean up the JSON string
+
     $json_str = trim($json_str);
-    
-    // Try to decode JSON
-    $result = json_decode($json_str, true);
-    
+    $result   = json_decode($json_str, true);
+
     if (json_last_error() !== JSON_ERROR_NONE) {
-        // Try to fix common JSON issues
-        $json_str = preg_replace('/,\s*([\]}])/m', '$1', $json_str); // Remove trailing commas
-        $json_str = preg_replace('/([{,])\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/', '$1"$2":', $json_str); // Add quotes to keys
-        $json_str = preg_replace('/:\s*\'([^\']*)\'/', ':"$1"', $json_str); // Replace single quotes with double quotes
-        $json_str = preg_replace('/\s+/', ' ', $json_str); // Normalize whitespace
-        
-        $result = json_decode($json_str, true);
+        // Light cleanup: trailing commas, unquoted keys, single-quoted values
+        $json_str = preg_replace('/,\s*([\]}])/m', '$1', $json_str);
+        $json_str = preg_replace('/([{,])\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/', '$1"$2":', $json_str);
+        $json_str = preg_replace('/:\s*\'([^\']*)\'/', ':"$1"', $json_str);
+        $json_str = preg_replace('/\s+/', ' ', $json_str);
+        $result   = json_decode($json_str, true);
     }
-    
-    return $result;
+
+    return (json_last_error() === JSON_ERROR_NONE) ? $result : null;
 }
 
+/**
+ * Return the first balanced { … } substring from $text, or null.
+ *
+ * Uses a character-by-character depth counter so it handles nested objects
+ * correctly without the over-matching caused by /\{.*\}/s.
+ *
+ * @param string $text Source text.
+ * @return string|null
+ */
+function extractFirstJsonObject(string $text): ?string {
+    $len   = strlen($text);
+    $start = null;
+    $depth = 0;
+
+    for ($i = 0; $i < $len; $i++) {
+        $c = $text[$i];
+        if ($c === '{') {
+            if ($start === null) $start = $i;
+            $depth++;
+        } elseif ($c === '}') {
+            $depth--;
+            if ($depth === 0 && $start !== null) {
+                return substr($text, $start, $i - $start + 1);
+            }
+        }
+    }
+
+    return null;
+}
+
+// =========================================================================
+// Configuration & Resource Loading
+// =========================================================================
 
 /**
- * Load resource from JSON file
- * 
- * This function loads and parses a JSON configuration file. It handles
- * file existence checks, reading errors, and JSON parsing errors,
- * returning appropriate error messages for each case.
- * 
- * @param string $filename Path to the JSON file
- * @return array Decoded JSON data or error array
- * 
- * @note Checks if file exists before attempting to read
- * @note Handles file read errors gracefully
- * @note Validates JSON format and reports parsing errors
- * @note Returns ['error' => message] on failure
- * @note Used for loading profiles.json, languages.json, etc.
- * @see handleApiRequest() - Uses this for loading profiles
- * @see buildProfilePrompt() - Uses this for loading profiles and languages
+ * Load and decode a JSON file, returning an error array on any failure.
+ *
+ * @param string $filename Path to the JSON file.
+ * @return array Decoded data, or ['error' => message].
  */
-function loadResourceFromJson($filename) {
-    // Check if resource file exists
+function loadResourceFromJson(string $filename): array {
     if (!file_exists($filename)) {
-        $resource_name = ucfirst(str_replace('.json', '', $filename));
-        return ['error' => $resource_name . ' configuration file not found'];
+        return ['error' => ucfirst(str_replace('.json', '', $filename)) . ' configuration file not found'];
     }
 
-    // Read and decode JSON file
-    $json_content = file_get_contents($filename);
-    if ($json_content === false) {
-        return ['error' => 'Failed to read ' . $filename . ' configuration file'];
+    $json = file_get_contents($filename);
+    if ($json === false) {
+        return ['error' => 'Failed to read ' . $filename];
     }
 
-    // Decode JSON content
-    $resource_data = json_decode($json_content, true);
+    $data = json_decode($json, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
-        return ['error' => 'Invalid JSON format in ' . $filename . ' configuration: ' . json_last_error_msg()];
+        return ['error' => 'Invalid JSON in ' . $filename . ': ' . json_last_error_msg()];
     }
 
-    // Return the decoded resource data
-    return $resource_data;
+    return $data;
+}
+
+/**
+ * Return the parsed config.json, loading it only once per request.
+ *
+ * @return array Config data, or ['error' => message] on failure.
+ */
+function getConfigData(): array {
+    static $cached = null;
+
+    if ($cached !== null) return $cached;
+
+    $cached = loadResourceFromJson('config.json');
+    if (!is_array($cached)) {
+        $cached = ['error' => 'Failed to load config.json'];
+    }
+
+    return $cached;
+}
+
+/**
+ * Load and return the JSON configuration for a specific tool.
+ *
+ * Looks up the tool's category in config.json, then reads the file at
+ * tools/<category>/<tool_id>.json.
+ *
+ * @param string $tool_id Tool identifier (e.g. 'soap', 'rdd').
+ * @return array Tool config, or ['error' => message] on failure.
+ */
+function getToolConfig(string $tool_id): array {
+    $config = getConfigData();
+    if (isset($config['error'])) {
+        return ['error' => 'Failed to load configuration: ' . $config['error']];
+    }
+    if (!isset($config['tools'][$tool_id])) {
+        return ['error' => "Unknown tool: '$tool_id'"];
+    }
+
+    $category  = $config['tools'][$tool_id];
+    $file_path = __DIR__ . DIRECTORY_SEPARATOR . 'tools' .
+                 DIRECTORY_SEPARATOR . $category .
+                 DIRECTORY_SEPARATOR . $tool_id . '.json';
+
+    if (!is_file($file_path) || !is_readable($file_path)) {
+        return ['error' => "Tool configuration file not found: $category/$tool_id.json"];
+    }
+
+    $json = file_get_contents($file_path);
+    if ($json === false) {
+        return ['error' => "Failed to read tool configuration: $category/$tool_id.json"];
+    }
+
+    $data = json_decode($json, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ['error' => 'Invalid JSON in tool configuration: ' . json_last_error_msg()];
+    }
+
+    $data['id']       = $data['id']       ?? $tool_id;
+    $data['category'] = $data['category'] ?? $category;
+
+    return $data;
+}
+
+// =========================================================================
+// Prompt Building
+// =========================================================================
+
+/**
+ * Build the final prompt string for a tool submission.
+ *
+ * Selects the correct prompt (single or keyed multi-prompt), serialises any
+ * array structure to labelled text, injects the language instruction, then
+ * replaces all {field} placeholders with submitted form values.
+ *
+ * FIX #13: When a tool's JSON contains an `output_format` array as part of
+ * its prompt structure, that array is serialised before placeholder
+ * substitution occurs, so a user-submitted `output_format` form value
+ * (e.g. "markdown") only replaces the {output_format} placeholder if it
+ * actually appears as a bare placeholder in the prompt — it never clobbers
+ * a prompt key named `output_format`.
+ *
+ * @param array $tool      Tool definition array.
+ * @param array $form_data User-submitted form values.
+ * @return string Fully-rendered prompt.
+ */
+function buildToolPrompt(array $tool, array $form_data): string {
+    // Resolve language instruction from config
+    $config = getConfigData();
+    if (isset($config['error'])) {
+        $lang_instruction = 'Respond in English.';
+    } else {
+        $lang_key         = $form_data['language'] ?? 'en';
+        $lang_instruction = $config['languages'][$lang_key]['instruction'] ?? 'Respond in English.';
+    }
+
+    // Select the prompt source
+    if (isset($tool['prompts']) && is_array($tool['prompts'])) {
+        $key    = $form_data['prompt'] ?? '';
+        $prompt = (!empty($key) && isset($tool['prompts'][$key]))
+                ? $tool['prompts'][$key]
+                : reset($tool['prompts']);
+    } elseif (!empty($tool['prompt'])) {
+        $prompt = $tool['prompt'];
+    } elseif (!empty($form_data['prompt'])) {
+        $prompt = $form_data['prompt'];
+    } else {
+        return 'Analyze the following input: ' . json_encode($form_data);
+    }
+
+    // Serialise array prompts to labelled text BEFORE doing any substitution.
+    // This means embedded arrays like `output_format` are rendered as text
+    // and cannot be accidentally overwritten by a same-named form field.
+    if (is_array($prompt)) {
+        $prompt = convertPromptArrayToText($prompt);
+    }
+
+    // Inject language instruction
+    $prompt = str_replace('{language_instruction}', $lang_instruction, $prompt);
+
+    // Replace {field} placeholders with submitted values
+    foreach ($form_data as $key => $value) {
+        if (is_string($value)) {
+            $prompt = str_replace('{' . $key . '}', $value, $prompt);
+        }
+    }
+
+    return $prompt;
+}
+
+/**
+ * Recursively serialise a prompt array (object or list) to labelled text.
+ *
+ * Associative arrays become UPPERCASE headers (level 0) or Title Case headers
+ * (nested), each followed by their value. Sequential arrays become newline-
+ * separated lines.
+ *
+ * @param array $prompt_array The array to serialise.
+ * @param int   $indent_level Current nesting depth.
+ * @return string
+ */
+function convertPromptArrayToText(array $prompt_array, int $indent_level = 0): string {
+    $indent   = str_repeat('  ', $indent_level);
+    $is_assoc = array_keys($prompt_array) !== range(0, count($prompt_array) - 1);
+
+    if ($is_assoc) {
+        $parts = [];
+        foreach ($prompt_array as $key => $value) {
+            $label = str_replace('_', ' ', $key);
+            $label = ($indent_level === 0) ? strtoupper($label) : ucwords($label);
+
+            if (is_array($value)) {
+                $value = convertPromptArrayToText($value, $indent_level + 1);
+            }
+
+            $indented = $indent . str_replace("\n", "\n" . $indent, (string)$value);
+            $parts[]  = $label . "\n" . $indented;
+        }
+        return implode("\n\n", $parts);
+    }
+
+    // Sequential array — one line per item
+    $lines = [];
+    foreach ($prompt_array as $item) {
+        $lines[] = is_array($item)
+            ? convertPromptArrayToText($item, $indent_level)
+            : $indent . $item;
+    }
+    return implode("\n", $lines);
 }
 
 // =========================================================================
@@ -1186,144 +1044,69 @@ function loadResourceFromJson($filename) {
 // =========================================================================
 
 /**
- * Handle incoming API requests by validating and routing to appropriate handlers
+ * Route an incoming API request to the appropriate handler.
  *
- * This function acts as the main API router. It:
- * 1. Determines the requested action from GET/POST parameters
- * 2. Validates the action against a whitelist of available actions
- * 3. Dynamically loads valid actions from config.json
- * 4. Routes to the appropriate handler function based on the action
- *
- * @return void Terminates script execution after sending response
- *
- * @see handleGetModels() - Handles 'get_models' action
- * @see handleGetPrompts() - Handles 'get_prompts' action
- * @see handleToolAction() - Handles tool-specific actions
- * @see sendJsonResponse() - Sends JSON responses
- * @see loadResourceFromJson() - Loads tool configuration
+ * FIX #8: unknown tool IDs are rejected by getToolConfig() before any
+ * processing begins, so no tool-specific work happens for invalid IDs.
  */
-function handleApiRequest() {
-    // Extract and sanitize action from request parameters
-    $action = isset($_REQUEST['action']) ? preg_replace('/[^a-zA-Z0-9_.]/', '', $_REQUEST['action']) : null;
-    $method = $_SERVER['REQUEST_METHOD'];
+function handleApiRequest(): void {
+    $action = isset($_REQUEST['action'])
+        ? preg_replace('/[^a-zA-Z0-9_.]/', '', (string)$_REQUEST['action'])
+        : null;
 
-    // If action is not specified, return an error response
-    if ($action === null) {
+    if ($action === null || $action === '') {
         sendJsonResponse(['error' => 'No action specified'], true);
     }
 
-    // Route to appropriate handler based on action
     switch ($action) {
-        case 'get_models':
-            // Handle request for available AI models
-            handleGetModels();
-            break;
-        case 'get_prompts':
-            // Handle request for available prompts
-            handleGetPrompts();
-            break;
-        default:
-            // For other actions, treat them as tool-specific actions
-            handleToolAction($action);
-            break;
+        case 'get_models': handleGetModels();  break;
+        case 'get_prompts': handleGetPrompts(); break;
+        default:           handleToolAction($action); break;
     }
 }
 
 /**
- * Handle the 'get_models' API action - retrieve available AI models
- * 
- * This function fetches the list of available AI models from the configured
- * LLM API endpoint. It uses server-side configuration values and provides
- * fallback defaults if the API call fails.
- * 
- * @global string $LLM_API_ENDPOINT The base API endpoint URL
- * @global string $LLM_API_KEY The API authentication key
- * @global string $LLM_API_FILTER Optional regex filter for model names
- * 
- * @return void Sends JSON response with models list or error
- * 
- * @see getAvailableModels() - Fetches models from API
- * @see sendJsonResponse() - Sends the final response
- * 
- * @note If API call fails, returns default models for fallback functionality
+ * Return the list of available LLM models to the client.
  */
-function handleGetModels() {
+function handleGetModels(): void {
     global $LLM_API_ENDPOINT, $LLM_API_KEY, $LLM_API_FILTER;
 
-    // Use server-side configured values
-    $api_endpoint = $LLM_API_ENDPOINT;
-    $api_key = $LLM_API_KEY;
-    $filter = $LLM_API_FILTER;
-
-    // Validate required parameters
-    if (empty($api_endpoint)) {
+    if (empty($LLM_API_ENDPOINT)) {
         sendJsonResponse(['error' => 'API endpoint not configured'], true);
     }
 
-    // Fetch available models from the API
-    $models = getAvailableModels($api_endpoint, $api_key, $filter);
+    $models = getAvailableModels($LLM_API_ENDPOINT, $LLM_API_KEY ?? '', $LLM_API_FILTER ?? '');
 
-    // Check if models contain an error
     if (isset($models['error'])) {
-        // If API call fails, use default models as fallback
-        // This ensures the application remains functional even if API is unavailable
+        // Fallback to hardcoded defaults so the UI remains functional
         $models = [
-            'gemma3:1b' => 'Gemma 3 (1B)',
-            'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)'
+            'gemma3:1b'    => 'Gemma 3 (1B)',
+            'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)',
         ];
     }
 
-    // Sort models alphabetically by key (model name) for consistent UI display
     ksort($models);
-
-    // Send the models list as JSON response
     sendJsonResponse(['models' => $models], true);
 }
 
 /**
- * Handle the 'get_prompts' API action - retrieve available prompt templates
- * 
- * This function scans the 'prompts' directory for prompt template files and
- * returns them as a structured list. It supports multiple file formats and
- * provides clean labels for display.
- * 
- * @return void Sends JSON response with prompts list
- * 
- * @see sendJsonResponse() - Sends the final response
- * 
- * @note Supported file extensions: .txt, .md, .xml
- * @note Prompts are loaded from the 'prompts' subdirectory
- * @note File names are converted to readable labels (e.g., 'medical_report' -> 'Medical Report')
+ * Return available prompt templates from the prompts/ directory.
  */
-function handleGetPrompts() {
-    // Load prompts from files in the prompts directory
+function handleGetPrompts(): void {
     $prompts = [];
 
-    // Check if prompts directory exists
     if (is_dir('prompts')) {
-        // Get all files in the prompts directory
-        $files = scandir('prompts');
+        foreach (scandir('prompts') as $file) {
+            if (!preg_match('/\.(txt|md|xml)$/i', $file)) continue;
 
-        foreach ($files as $file) {
-            // Check for .txt, .md, or .xml extensions
-            if (preg_match('/\.(txt|md|xml)$/i', $file)) {
-                // Prevent path traversal
-                $file_path = 'prompts/' . basename($file);
-
-                // Use filename (without extension) as the key
-                $key = pathinfo(basename($file), PATHINFO_FILENAME);
-
-                // Use filename as label (clean up for display)
-                $label = ucwords(str_replace(['_', '-'], ' ', $key));
-
-                // Read file content as prompt
-                $content = file_get_contents($file_path);
-                if ($content !== false) {
-                    $prompts[$key] = [
-                        'label' => $label,
-                        'prompt' => $content
-                    ];
-                }
+            $path = 'prompts/' . basename($file);
+            $key  = pathinfo($path, PATHINFO_FILENAME);
+            $text = file_get_contents($path);
+            if ($text !== false) {
+                $prompts[$key] = [
+                    'label'  => ucwords(str_replace(['_', '-'], ' ', $key)),
+                    'prompt' => $text,
+                ];
             }
         }
     }
@@ -1332,573 +1115,261 @@ function handleGetPrompts() {
 }
 
 /**
- * Load a tool definition JSON file.
+ * Main processing pipeline for a tool submission.
  *
- * @param string $tool_id     The tool identifier (e.g., "soap")
+ * Validates configuration, resolves the tool, handles file uploads, builds
+ * the prompt, calls the LLM, processes the response, and sends JSON back.
  *
- * @return array Decoded JSON as an associative array, or an error array:
- *               ['error' => 'description']
+ * @param string $tool_id Tool identifier from the request action.
  */
-function getToolConfig(string $tool_id): array {
-    // Use the cached config to find the category for this tool
-    $config = getConfigData();
-    if (isset($config['error'])) {
-        return ['error' => 'Failed to load configuration: ' . $config['error']];
-    }
-    if (!isset($config['tools'][$tool_id])) {
-        return ['error' => "Tool '$tool_id' not found in configuration"];
-    }
-    $category_id = $config['tools'][$tool_id] ?? null;
-    if ($category_id === null) {
-        return ['error' => "Category not found for tool '$tool_id' in configuration"];
-    }
-    // Build the expected file path
-    $file_path = __DIR__ . DIRECTORY_SEPARATOR . 'tools' .
-                 DIRECTORY_SEPARATOR . $category_id .
-                 DIRECTORY_SEPARATOR . $tool_id . '.json';
+function handleToolAction(string $tool_id): void {
+    global $LLM_API_ENDPOINT_CHAT, $LLM_API_KEY, $DEBUG_MODE;
 
-    // Verify the file exists and is readable
-    if (!is_file($file_path) || !is_readable($file_path)) {
-        return ['error' => "Tool configuration file not found: $category_id/$tool_id.json"];
-    }
-
-    // Read the file contents
-    $json = file_get_contents($file_path);
-    if ($json === false) {
-        return ['error' => "Failed to read tool configuration file: $category_id/$tool_id.json"];
-    }
-
-    // Decode JSON
-    $data = json_decode($json, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        return ['error' => 'Invalid JSON in tool configuration: ' . json_last_error_msg()];
-    }
-
-    // Ensure the tool ID and category are included in the returned data if not set
-    if (!isset($data['id'])) {
-        $data['id'] = $tool_id;
-    }
-    if (!isset($data['category'])) {
-        $data['category'] = $category_id;
-    }
-
-    // Return the decoded tool configuration
-    return $data;
-}
-
-/**
- * Handle tool-specific API actions - main processing pipeline
- * 
- * This function implements the complete processing pipeline for tool-specific actions:
- * 1. Validates API configuration and tool existence
- * 2. Processes form data and file uploads (images and documents)
- * 3. Builds prompts based on tool configuration
- * 4. Prepares and sends API request to LLM
- * 5. Processes and returns the response
- * 
- * @param string $tool_id The identifier of the tool to process
- * @global string $LLM_API_ENDPOINT_CHAT The chat completion API endpoint
- * @global string $LLM_API_KEY The API authentication key
- * 
- * @return void Sends JSON response with processed results or errors
- * 
- * @see loadResourceFromJson() - Loads tool configuration
- * @see processUploadedImage() - Handles image uploads
- * @see extractTextFromDocument() - Extracts text from documents
- * @see buildToolPrompt() - Constructs the prompt
- * @see callLLMApi() - Calls the LLM API
- * @see processToolResponse() - Processes the API response
- * @see sendJsonResponse() - Sends final response
- * 
- * @note Supports both text documents and images
- * @note Includes debug information in response
- * @note Sets CORS headers for cross-origin requests
- */
-function handleToolAction($tool_id) {
-    global $LLM_API_ENDPOINT_CHAT, $LLM_API_KEY;
-    global $DEBUG_MODE;
-
-    // Validate required parameters
     if (empty($LLM_API_ENDPOINT_CHAT)) {
         sendJsonResponse(['error' => 'API endpoint not configured'], true);
     }
 
-    // Load configuration (cached)
-    $config_data = getConfigData();
-    if (isset($config_data['error'])) {
-        sendJsonResponse(['error' => $config_data['error']], true);
+    $config = getConfigData();
+    if (isset($config['error'])) {
+        sendJsonResponse(['error' => $config['error']], true);
     }
 
-    // Load the tool configuration
     $tool = getToolConfig($tool_id);
     if (isset($tool['error'])) {
         sendJsonResponse(['error' => $tool['error']], true);
     }
 
-    // Get form data
-    $form_data = $_POST;
-
-    // Handle file upload if present
+    $form_data    = $_POST;
     $file_content = '';
-    $is_image = false;
-    $image_data = null;
-    $mime_type = null;
-    $file_info = null;
+    $is_image     = false;
+    $image_data   = null;
+    $mime_type    = null;
+    $file_info    = null;
 
+    // Handle file upload
     if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['file'];
-        
-        // Store file metadata for debug
         $file_info = [
-            'name' => $file['name'],
-            'type' => $file['type'],
-            'size' => $file['size'],
-            'error' => $file['error']
+            'name'  => $file['name'],
+            'type'  => $file['type'],
+            'size'  => $file['size'],
+            'error' => $file['error'],
         ];
 
-        // Check if it's an image
-        $image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        if (in_array($file['type'], $image_types)) {
-            $is_image = true;
-            // Get max image size from form or use default
-            $max_size = isset($_POST['max_image_size']) ? $_POST['max_image_size'] : '500';
+        // Determine real MIME type from bytes for routing
+        $finfo        = new finfo(FILEINFO_MIME_TYPE);
+        $real_mime    = $finfo->file($file['tmp_name']);
+        $image_mimes  = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
-            // Process uploaded image
-            $image_processing_result = processUploadedImage($file, $max_size);
+        if (in_array($real_mime, $image_mimes, true)) {
+            $is_image  = true;
+            $max_size  = $_POST['max_image_size'] ?? '500';
+            $img_result = processUploadedImage($file, $max_size);
 
-            if (isset($image_processing_result['error'])) {
-                sendJsonResponse(['error' => $image_processing_result['error']], true);
-            } else {
-                $image_data = $image_processing_result['image_data'];
-                $mime_type = $image_processing_result['mime_type'];
-                $file_info['processed_mime_type'] = $mime_type;
-                $file_info['extracted_length'] = strlen($image_data);
+            if (isset($img_result['error'])) {
+                sendJsonResponse(['error' => $img_result['error']], true);
             }
+
+            $image_data = $img_result['image_data'];
+            $mime_type  = $img_result['mime_type'];
+            $file_info['processed_mime_type'] = $mime_type;
+            $file_info['extracted_length']    = strlen($image_data);
         } else {
-            // Text document - try to extract text
-            $file_content = extractTextFromDocument($file['tmp_name'], $file['type']);
+            $file_content = extractTextFromDocument($file['tmp_name'], $real_mime);
             if ($file_content === false) {
-                sendJsonResponse(['error' => 'Failed to extract text from the uploaded document. Please ensure you have the required tools installed (antiword, catdoc, pdftotext, odt2txt, or pandoc).'], true);
-            } else {
-                // Clean up the text content
-                $file_content = trim($file_content);
-                // Remove BOM if present
-                $file_content = preg_replace('/^\xEF\xBB\xBF/', '', $file_content);
-                // Normalize line endings
-                $file_content = str_replace(["\r\n", "\r"], "\n", $file_content);
-                $file_info['extracted_length'] = strlen($file_content);
+                sendJsonResponse([
+                    'error' => 'Failed to extract text from the uploaded document. '
+                             . 'Ensure antiword, catdoc, pdftotext, or odt2txt is installed.',
+                ], true);
             }
+            $file_content = trim($file_content);
+            $file_content = preg_replace('/^\xEF\xBB\xBF/', '', $file_content); // strip BOM
+            $file_content = str_replace(["\r\n", "\r"], "\n", $file_content);
+            $file_info['extracted_length'] = strlen($file_content);
         }
     }
 
-    // Validate required fields
-    $required_fields = [];
+    // Validate required fields (only full field objects, not string shortcuts)
+    $missing = [];
     foreach ($tool['form']['fields'] as $field) {
-        if (isset($field['required']) && $field['required'] && !isset($form_data[$field['name']])) {
-            $required_fields[] = $field['name'];
+        if (is_array($field) && !empty($field['required']) && empty($form_data[$field['name']])) {
+            $missing[] = $field['name'];
+        }
+    }
+    if (!empty($missing)) {
+        sendJsonResponse(['error' => 'Missing required fields: ' . implode(', ', $missing)], true);
+    }
+
+    // Run helper if the tool specifies one
+    if (!empty($tool['helper'])) {
+        $helper_out = executeHelper($tool['helper'], $form_data);
+        if ($helper_out !== false) {
+            $form_data['content'] = $helper_out;
         }
     }
 
-    if (!empty($required_fields)) {
-        sendJsonResponse(['error' => 'Missing required fields: ' . implode(', ', $required_fields)], true);
-    }
-
-    // Check if tool has a helper specification
-    if (isset($tool['helper']) && !empty($tool['helper'])) {
-        $helper_output = executeHelper($tool['helper'], $form_data);
-        if ($helper_output !== false) {
-            // Add helper output to form data as 'content' field
-            $form_data['content'] = $helper_output;
-        }
-    }
-
-    // Build the prompt based on tool type
+    // Build prompt and compose API request
     $prompt = buildToolPrompt($tool, $form_data);
+    if (!empty($file_content)) {
+        $prompt .= "\n" . $file_content;
+    }
 
-    // Prepare API request data
-    // TODO: use a default model if not specified in form_data
+    $config_data  = getConfigData();
+    $default_model = $config_data['default_model'] ?? $GLOBALS['DEFAULT_TEXT_MODEL'] ?? '';
+
     $api_data = [
-        'model' => $form_data['model'] ?? '',
-        'messages' => [],
-        'stream' => false
+        'model'    => $form_data['model'] ?? $default_model,
+        'messages' => [['role' => 'user', 'content' => $prompt]],
+        'stream'   => false,
     ];
 
-    // Add file content
-    if (!empty($file_content)) {
-        $prompt .= $file_content;
-    }
-    $api_data['messages'][] = [
-        'role' => 'user',
-        'content' => $prompt
-        ];
-
-    // If it's an image, add it as a separate message with image data
+    // Append image as a separate user message
     if ($is_image && $image_data !== null) {
-        // Convert image to base64
-        $base64_image = base64_encode($image_data);
         $api_data['messages'][] = [
-            'role' => 'user',
+            'role'    => 'user',
             'content' => [
-                ['type' => 'image_url', 'image_url' => ['url' => "data:$mime_type;base64,$base64_image"]]
-            ]
+                ['type' => 'image_url', 'image_url' => ['url' => "data:$mime_type;base64," . base64_encode($image_data)]],
+            ],
         ];
     }
 
-    // Call LLM API
-    $response = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY);
+    $response = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY ?? '');
 
-    if (!isset($response['error'])) {
-        // Process and return the response
-        $result = processToolResponse($tool, $response);
-    } else {
-        // If there was an error, include the prompt and raw response for debugging
-        $result = [
-            'error' => $response['error']
-        ];
+    if (isset($response['error'])) {
+        $result = ['error' => $response['error']];
         if ($DEBUG_MODE) {
             $result['debug']['response'] = $response;
         }
+    } else {
+        $result = processToolResponse($tool, $response);
     }
 
-    if ($DEBUG_MODE) {
-        // Add API request payload to debug output
-        $result['debug']['api_data'] = $api_data;
+    // Always include the rendered prompt for transparency (not just debug mode)
+    $result['debug']['prompt'] = $prompt;
 
-        // Add uploaded file metadata to debug output (if a file was provided)
+    if ($DEBUG_MODE) {
+        $result['debug']['api_data'] = $api_data;
         if ($file_info !== null) {
             $result['debug']['file_info'] = $file_info;
         }
     }
 
-    // Add the final prompt to debug output for reference
-    $result['debug']['prompt'] = $prompt;
-
-
-    // Set CORS headers
-    //header('Access-Control-Allow-Origin: *');
-    //header('Content-Type: application/json');
-
-    // Send the final JSON response
     sendJsonResponse($result, true);
 }
 
 /**
- * Execute a helper based on tool configuration
- * 
- * This function acts as a helper dispatcher, executing different helpers based on the
- * tool's helper specification. It validates input parameters and returns helper
- * output or false on error.
- * 
- * @param string $helper_name Name of the helper to execute (e.g., 'web_scraper', 'medical_literature_search')
- * @param array $form_data Form data containing helper parameters (URL, query, etc.)
- * @return string|false Helper output as string, or false on error/invalid parameters
- * 
- * @see scrapeUrl() - Web scraping helper
- * @see searchPubMed() - Medical literature search helper
- * 
- * @note Currently supports:
- *       - 'web_scraper': Scrapes content from a URL
- *       - 'medical_literature_search': Searches PubMed for medical articles
- * @note All helpers validate their required parameters before execution
+ * Dispatch a helper by name and return its output string.
+ *
+ * @param string $helper_name Identifier ('lynx', 'web_scraper', 'medical_literature_search').
+ * @param array  $form_data   Submitted form values.
+ * @return string|false Helper output, or false if unavailable / validation failed.
  */
-function executeHelper($helper_name, $form_data) {
+function executeHelper(string $helper_name, array $form_data) {
     switch ($helper_name) {
         case 'web_scraper':
-            // Check if URL is provided
-            // Validate URL format, length, and protocol
-            if (empty($form_data['url']) || 
-                strlen($form_data['url']) > 2048 || 
-                !filter_var($form_data['url'], FILTER_VALIDATE_URL) || 
-                !in_array(parse_url($form_data['url'], PHP_URL_SCHEME), ['http','https'])) {
-                return false;
-            }
-            // Scrape the URL content
-            $content = scrapeUrl($form_data['url']);
-            // Return scraped content or false on failure
-            return $content;
-
-        case 'medical_literature_search':
-            // Check if query is provided
-            if (empty($form_data['query'])) {
-                return false;
-            }
-            // Validate query length
-            if (strlen($form_data['query']) > 500) {
-                return false;
-            }
-            // Search PubMed for articles
-            $articles = searchPubMed($form_data['query'], 5); // Get top 5 results
-            // Return false if no articles found
-            if ($articles === false) {
-                return false;
-            } elseif (empty($articles)) {
-                return false;
-            }
-            // Convert articles to JSON format
-            return json_encode($articles, JSON_PRETTY_PRINT);
+            $url = $form_data['url'] ?? '';
+            if (empty($url) || strlen($url) > 2048) return false;
+            $v = processUrl($url);
+            if (!$v['valid']) return false;
+            return scrapeUrl($v['data']);
 
         case 'lynx':
-            // Check if URL is provided
-            if (empty($form_data['url'])) {
-                return false;
-            }
-            // Validate URL format
-            if (!filter_var($form_data['url'], FILTER_VALIDATE_URL)) {
-                return false;
-            }
-            // Run lynx command to extract clean text
-            $content = runLynxCommand($form_data['url']);
-            // Return content if any, otherwise false
-            return empty($content) ? false : $content;
-        
+            $url = $form_data['url'] ?? '';
+            if (empty($url)) return false;
+            $out = runLynxCommand($url);
+            return (is_string($out) && $out !== '') ? $out : false;
+
+        case 'medical_literature_search':
+            $query = $form_data['query'] ?? '';
+            if (empty($query) || strlen($query) > 500) return false;
+            $articles = searchPubMed($query, 5);
+            return (!empty($articles)) ? json_encode($articles, JSON_PRETTY_PRINT) : false;
+
         default:
             return false;
     }
 }
 
-// ------------------------------------------------------------
-// 1️⃣  Cached config getter – loads config.json only once per request
-// ------------------------------------------------------------
 /**
- * Retrieve the parsed config.json data.
- * The JSON file is read and decoded only on the first call;
- * subsequent calls return the cached array.
+ * Process the raw LLM API response for a tool.
  *
- * @return array Config data (or ['error'=>...] on failure)
- */
-function getConfigData(): array {
-    static $cached_config = null;
-
-    // If we already have it, return immediately
-    if ($cached_config !== null) {
-        return $cached_config;
-    }
-
-    // Load and decode the file (reuse existing helper)
-    $cached_config = loadResourceFromJson('config.json');
-
-    // Ensure we always return an array
-    if (!is_array($cached_config)) {
-        $cached_config = ['error' => 'Failed to load config.json'];
-    }
-
-    return $cached_config;
-}
-
-
-/**
- * Build the final prompt for a tool, now using the cached config for language instructions.
+ * FIX #12: JSON extraction is now triggered by `"display": "json"` OR
+ * `"output": "json"` — covering the rdd tool and any future JSON-output tools.
  *
- * @param array $tool      Tool definition (from tools/<cat>/<tool>.json)
- * @param array $form_data User‑submitted form data
- *
- * @return string Fully‑rendered prompt
+ * @param array $tool         Tool configuration.
+ * @param array $api_response Raw decoded API response.
+ * @return array Result array with 'tool', 'response', and optionally 'json'.
  */
-function buildToolPrompt($tool, $form_data) {
-    // Load config (cached) to get language instructions, etc.
-    $config_data = getConfigData();
-    if (isset($config_data['error'])) {
-        // Fallback to English if config cannot be read
-        $language_instruction = 'Respond in English.';
-    } else {
-        $lang_key = $form_data['language'] ?? 'en';
-        $language_instruction = $config_data['languages'][$lang_key]['instruction']
-                               ?? 'Respond in English.';
-    }
-
-    // Determine which prompt to use
-    if (isset($tool['prompts']) && is_array($tool['prompts'])) {
-        $selected_key = $form_data['prompt'] ?? '';
-        $prompt = (!empty($selected_key) && isset($tool['prompts'][$selected_key]))
-                ? $tool['prompts'][$selected_key]
-                : reset($tool['prompts']);
-    } elseif (!empty($tool['prompt'])) {
-        $prompt = $tool['prompt'];
-    } elseif (isset($form_data['prompt']) && !empty($form_data['prompt'])) {
-        $prompt = $form_data['prompt'];
-    } else {
-        return "Analyze the following input: " . json_encode($form_data);
-    }
-
-    // Convert array prompts to text if needed
-    if (is_array($prompt)) {
-        $prompt = convertPromptArrayToText($prompt);
-    }
-
-    // Replace language placeholder
-    $prompt = str_replace('{language_instruction}', $language_instruction, $prompt);
-
-    // Replace any other {field} placeholders with submitted values
-    foreach ($form_data as $key => $value) {
-        $placeholder = '{' . $key . '}';
-        if (strpos($prompt, $placeholder) !== false) {
-            $prompt = str_replace($placeholder, $value, $prompt);
-        }
-    }
-
-    // Return the final prompt
-    return $prompt;
-}
-
-/**
- * Convert prompt array to formatted text recursively
- * 
- * This function handles two types of array structures:
- * 1. Associative arrays (JSON objects): Converted to uppercase headers with content
- * 2. Sequential arrays: Converted to newline-separated text
- * 
- * @param array $prompt_array The prompt array to convert
- * @param int $indent_level Current indentation level (for nested arrays)
- * @return string Formatted text version of the prompt
- * 
- * @note Example associative array:
- *       ['role' => 'You are a helpful assistant', 'rules' => ['rule1', 'rule2']]
- *       becomes:
- *       ROLE
- *       You are a helpful assistant
- *       
- *       RULES
- *       rule1
- *       rule2
- * @note Example sequential array:
- *       ['line1', 'line2', 'line3'] becomes "line1\nline2\nline3"
- */
-function convertPromptArrayToText($prompt_array, $indent_level = 0) {
-    // Base indentation for nested structures
-    $indent = str_repeat('  ', $indent_level);
-    // Check if this is an associative array (JSON object)
-    if (array_keys($prompt_array) !== range(0, count($prompt_array) - 1)) {
-        // Convert JSON object to formatted text
-        $prompt_text = '';
-        // Process each key-value pair
-        foreach ($prompt_array as $key => $value) {
-            // Replace underscores with spaces in key names
-            $formatted_key = str_replace('_', ' ', $key);
-            // Use UPPERCASE for keys in level 0 and Title Case for nested keys
-            if ($indent_level > 0) {
-                $formatted_key = ucwords($formatted_key);
-            } else {
-                $formatted_key = strtoupper($formatted_key);
-            }
-            // Handle array values recursively
-            if (is_array($value)) {
-                $value = convertPromptArrayToText($value, $indent_level + 1);
-            }
-            // Indent value based on nesting level
-            $value = $indent . str_replace("\n", "\n" . $indent, $value);
-            // Append to prompt text with formatting
-            $prompt_text .= $formatted_key . "\n" . $value . "\n\n";
-        }
-        // Trim trailing newlines and return
-        return rtrim($prompt_text, "\n");
-    } else {
-        // If prompt is a sequential array, process each item recursively
-        $result = [];
-        foreach ($prompt_array as $item) {
-            if (is_array($item)) {
-                $result[] = convertPromptArrayToText($item, $indent_level);
-            } else {
-                $result[] = $indent . $item;
-            }
-        }
-        // Join items with newlines and return
-        return implode("\n", $result);
-    }
-}
-
-/**
- * Process tool response and extract JSON if required
- * 
- * This function processes the LLM API response based on tool configuration.
- * It can optionally extract JSON data from the response content if the tool
- * specifies JSON output format.
- * 
- * @param array $tool The tool configuration array containing output specifications
- * @param array $api_response The raw API response from the LLM
- * @return array Processed result containing tool info, response, and optional JSON data
- * 
- * @see loadResourceFromJson() - Loads tool configuration
- * @see extractJsonFromResponse() - Extracts JSON from response content
- * 
- * @note If tool has 'output' => 'json', attempts to extract JSON from response
- * @note Returns array with keys: 'tool', 'response', and optionally 'json'
- */
-function processToolResponse($tool, $api_response) {
+function processToolResponse(array $tool, array $api_response): array {
     $result = [
-        'tool' => $tool['id'],
-        'response' => $api_response
+        'tool'     => $tool['id'],
+        'response' => $api_response,
     ];
 
-    // Check if tool has 'output' key set to 'json'
-    if (isset($tool['output']) && $tool['output'] === 'json') {
-        // Try to extract JSON if present
-        $content = $api_response['choices'][0]['message']['content'] ?? '';
+    $wants_json = (isset($tool['output'])   && $tool['output']   === 'json')
+               || (isset($tool['display'])  && $tool['display']  === 'json');
+
+    if ($wants_json) {
+        $content  = $api_response['choices'][0]['message']['content'] ?? '';
         $json_data = extractJsonFromResponse($content);
-        if ($json_data) {
+        if ($json_data !== null) {
             $result['json'] = $json_data;
         }
     }
 
-    // Return the processed result
     return $result;
 }
 
+// =========================================================================
+// Web Interface
+// =========================================================================
+
 /**
- * Display web interface with CSRF protection
- * 
- * This function serves the main web interface with security measures including:
- * - Generating a CSRF token for form submissions
- * - Ensuring proper session handling
- * 
- * @return void Includes and executes index.html content with security token
- * 
- * @note The CSRF token helps prevent cross-site request forgery attacks
+ * Serve the main HTML interface with CSRF protection.
+ *
+ * FIX #9: session_regenerate_id() is called only when a new session is
+ * created, not on every page load, which previously destroyed valid sessions
+ * and invalidated CSRF tokens between requests.
  */
-function displayWebInterface() {
-    // Secure session configuration
-    $session_name = 'SECURE_SESSION_ID';
-    session_name($session_name);
+function displayWebInterface(): void {
+    session_name('DOCMIND_SID');
     session_set_cookie_params([
-        'lifetime' => 86400, // 1 day
-        'path' => '/',
-        'domain' => $_SERVER['HTTP_HOST'],
-        'secure' => true,
+        'lifetime' => 86400,
+        'path'     => '/',
+        'domain'   => $_SERVER['HTTP_HOST'] ?? '',
+        'secure'   => !empty($_SERVER['HTTPS']),
         'httponly' => true,
-        'samesite' => 'Strict'
+        'samesite' => 'Strict',
     ]);
+
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
-        session_regenerate_id(true);
+        // FIX #9: only regenerate on fresh session creation
+        if (empty($_SESSION['initiated'])) {
+            session_regenerate_id(true);
+            $_SESSION['initiated'] = true;
+        }
     }
 
-    // Generate CSRF token if not exists
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
 
-    // Store token in constant for frontend
     define('CSRF_TOKEN', $_SESSION['csrf_token']);
-    
+
     include 'index.html';
 }
-
 
 // =========================================================================
 // Main Request Router
 // =========================================================================
 
-// Determine if this is an API request
-// Check for: 1) action parameter in GET/POST, 2) JSON Accept header
-$is_api_request = isset($_GET['action']) || isset($_POST['action']) ||
-                 (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+$is_api_request = isset($_GET['action']) || isset($_POST['action'])
+    || (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'));
 
-// Handle API actions
 if ($is_api_request) {
     handleApiRequest();
     exit;
 }
 
-// Default web interface
 displayWebInterface();
-
-?>
