@@ -13,7 +13,29 @@
 // Initialization & Configuration
 // =========================================================================
 
+/**
+ * Load configuration from config.ini file (cached)
+ *
+ * @return array Configuration array or error message
+ */
+function loadConfig() {
+    static $CONFIG = null;
+    if ($CONFIG === null) {
+        $CONFIG = parse_ini_file(__DIR__ . '/config.ini', true);
+        if ($CONFIG === false) {
+            return ['error' => 'Failed to load config.ini'];
+        }
+    }
+    return $CONFIG;
+}
 // Load configuration if available
+>>>>>>> REPLACE```
+
+docmind.php
+```php
+<<<<<<< SEARCH
+$provider = $LLM_PROVIDER ?? 'ollama';
+$llm_config = getLlmProviderConfig($provider);
 $CONFIG = parse_ini_file('config.ini', true);
 if ($CONFIG === false) {
     die('Configuration file config.ini not found or invalid.');
