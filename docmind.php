@@ -14,23 +14,34 @@
 // =========================================================================
 
 // Load configuration if available
-$config_ini = parse_ini_file('config.ini', true);
-if ($config_ini === false) {
+$CONFIG = parse_ini_file('config.ini', true);
+if ($CONFIG === false) {
     die('Configuration file config.ini not found or invalid.');
 }
-$config = $config_ini['general'] ?? [];
-$provider = $config['provider'] ?? 'ollama';
-$providerConfig = getLlmProviderConfig($provider);
+$CONFIG = $CONFIG['general'] ?? [];
+// Ensure all expected keys have sensible defaults
+$CONFIG['provider']            = $CONFIG['provider']            ?? 'ollama';
+$CONFIG['default_text_model']  = $CONFIG['default_text_model']  ?? 'qwen2.5:1.5b';
+$CONFIG['default_vision_model']= $CONFIG['default_vision_model']?? 'gemma3:4b';
+$CONFIG['filter']              = $CONFIG['filter']              ?? '/./';
+$CONFIG['chat_history_length'] = $CONFIG['chat_history_length'] ?? 10;
+$CONFIG['debug_mode']          = $CONFIG['debug_mode']          ?? false;
+$CONFIG['allowed_origins']     = $CONFIG['allowed_origins']     ?? ['*'];
+$CONFIG['max_file_size']       = $CONFIG['max_file_size']       ?? 10 * 1024 * 1024;
+$CONFIG['allowed_file_types']  = $CONFIG['allowed_file_types']  ?? 'image/jpeg, image/png, image/gif, image/webp, application/pdf, text/plain, text/markdown, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.oasis.opendocument.text';
+// Derive runtime variables from the consolidated config
+$provider            = $CONFIG['provider'];
+$providerConfig      = getLlmProviderConfig($provider);
 $LLM_API_ENDPOINT_CHAT = $providerConfig['endpoint'] . '/chat/completions';
-$LLM_API_KEY = $providerConfig['key'] ?? '';
-$DEFAULT_TEXT_MODEL = $config['default_text_model'] ?? 'qwen2.5:1.5b';
-$DEFAULT_VISION_MODEL = $config['default_vision_model'] ?? 'gemma3:4b';
-$LLM_API_FILTER = $config['filter'] ?? '/./';
-$CHAT_HISTORY_LENGTH = $config_ini['chat']['chat_history_length'] ?? 10;
-$DEBUG_MODE = $config_ini['security']['debug_mode'] ?? false;
-$ALLOWED_ORIGINS = array_map('trim', explode(',', $config_ini['security']['allowed_origins'] ?? '*'));
-$MAX_FILE_SIZE = $config_ini['upload']['max_file_size'] ?? 10 * 1024 * 1024;
-$ALLOWED_FILE_TYPES = array_map('trim', explode(',', $config_ini['upload']['allowed_file_types'] ?? 'image/jpeg, image/png, image/gif, image/webp, application/pdf, text/plain, text/markdown, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.oasis.opendocument.text'));
+$LLM_API_KEY         = $providerConfig['key'] ?? '';
+$DEFAULT_TEXT_MODEL  = $CONFIG['default_text_model'];
+$DEFAULT_VISION_MODEL= $CONFIG['default_vision_model'];
+$LLM_API_FILTER      = $CONFIG['filter'];
+$CHAT_HISTORY_LENGTH = $CONFIG['chat_history_length'];
+$DEBUG_MODE          = $CONFIG['debug_mode'];
+$ALLOWED_ORIGINS     = $CONFIG['allowed_origins'];
+$MAX_FILE_SIZE       = $CONFIG['max_file_size'];
+$ALLOWED_FILE_TYPES  = $CONFIG['allowed_file_types'];
 
 /**
  * Fetches the X-Vqd-4 token from DuckDuckGo status endpoint.
