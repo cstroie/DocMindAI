@@ -14,11 +14,23 @@
 // =========================================================================
 
 // Load configuration if available
-if (file_exists('config.php')) {
-    include 'config.php';
-} else if (file_exists('config.php.example')) {
-    include 'config.php.example';
+$config_ini = parse_ini_file('config.ini', true);
+if ($config_ini === false) {
+    die('Configuration file config.ini not found or invalid.');
 }
+$config = $config_ini['general'] ?? [];
+$provider = $config['provider'] ?? 'ollama';
+$providerConfig = getLlmProviderConfig($provider);
+$LLM_API_ENDPOINT_CHAT = $providerConfig['endpoint'] . '/chat/completions';
+$LLM_API_KEY = $providerConfig['key'] ?? '';
+$DEFAULT_TEXT_MODEL = $config['default_text_model'] ?? 'qwen2.5:1.5b';
+$DEFAULT_VISION_MODEL = $config['default_vision_model'] ?? 'gemma3:4b';
+$LLM_API_FILTER = $config['filter'] ?? '/./';
+$CHAT_HISTORY_LENGTH = $config_ini['chat']['chat_history_length'] ?? 10;
+$DEBUG_MODE = $config_ini['security']['debug_mode'] ?? false;
+$ALLOWED_ORIGINS = array_map('trim', explode(',', $config_ini['security']['allowed_origins'] ?? '*'));
+$MAX_FILE_SIZE = $config_ini['upload']['max_file_size'] ?? 10 * 1024 * 1024;
+$ALLOWED_FILE_TYPES = array_map('trim', explode(',', $config_ini['upload']['allowed_file_types'] ?? 'image/jpeg, image/png, image/gif, image/webp, application/pdf, text/plain, text/markdown, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.oasis.opendocument.text'));
 
 /**
  * Fetches the X-Vqd-4 token from DuckDuckGo status endpoint.
