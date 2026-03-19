@@ -10,11 +10,15 @@
  */
 
 // =========================================================================
-// Initialization & Configuration
+// Configuration Management
 // =========================================================================
 
 /**
  * Load configuration from config.ini file (cached)
+ *
+ * This function reads and parses the config.ini file once per request,
+ * returning a structured configuration array that can be accessed
+ * using the pattern: $CONFIG['section']['key']
  *
  * @return array Configuration array or error message
  */
@@ -28,7 +32,29 @@ function loadConfig() {
     }
     return $CONFIG;
 }
-// Load configuration if available
+
+// Load configuration once at startup
+$CONFIG = loadConfig();
+
+// Extract runtime variables from configuration
+$provider_id = $CONFIG['llm']['provider'] ?? 'ollama';
+$provider_config = $CONFIG['provider.' . $provider_id] ?? $CONFIG['provider.ollama'];
+
+$LLM_API_ENDPOINT_CHAT = $provider_config['endpoint'] . '/chat/completions';
+$LLM_API_KEY = $provider_config['key'];
+$DEFAULT_TEXT_MODEL = $CONFIG['llm']['default_text_model'] ?? 'qwen2.5:1.5b';
+$DEFAULT_VISION_MODEL = $CONFIG['llm']['default_vision_model'] ?? 'gemma3:4b';
+$LLM_API_FILTER = $provider_config['filter'] ?? '/./';
+$CHAT_HISTORY_LENGTH = $CONFIG['chat']['chat_history_length'] ?? 10;
+$DEBUG_MODE = $CONFIG['security']['debug_mode'] ?? false;
+$ALLOWED_ORIGINS = $CONFIG['security']['allowed_origins'] ?? ['*'];
+$MAX_FILE_SIZE = $CONFIG['upload']['max_file_size'] ?? 10 * 1024 * 1024;
+$ALLOWED_FILE_TYPES = explode(',', $CONFIG['upload']['allowed_file_types'] ?? 'image/jpeg, image/png, image/gif, image/webp, application/pdf, text/plain, text/markdown, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.oasis.opendocument.text');
+
+/**
+ * Maximum file upload size (10MB)
+ */
+define('MAX_FILE_SIZE', $MAX_FILE_SIZE);
 >>>>>>> REPLACE```
 
 docmind.php
@@ -208,47 +234,15 @@ function callDuckDuckGoChat($query, $model = 'gpt-4o-mini', $token = null, $toke
 }
 
 /**
- * Get LLM API configuration based on provider
+ * Get LLM API configuration based on provider (deprecated)
  * 
- * This function returns the appropriate API endpoint and key for different LLM providers.
- * It supports various providers with their specific endpoint configurations.
- * 
- * @param string $provider The provider name (ollama, openrouter, openai, together, cerebras, local, duck)
+ * @deprecated Use $CONFIG['provider.' . $provider_id] directly instead
+ * @param string $provider The provider name
  * @return array Configuration array with 'endpoint' and 'key' keys
  */
 function getLlmProviderConfig($provider = 'ollama') {
-    $configs = [
-        'ollama' => [
-            'endpoint' => 'http://localhost:11434/v1',
-            'key' => 'ollama' // Ollama doesn't require API key but some clients expect one
-        ],
-        'openrouter' => [
-            'endpoint' => 'https://openrouter.ai/api/v1',
-            'key' => ''
-        ],
-        'openai' => [
-            'endpoint' => 'https://api.openai.com/v1',
-            'key' => ''
-        ],
-        'together' => [
-            'endpoint' => 'https://api.together.xyz/v1',
-            'key' => ''
-        ],
-        'cerebras' => [
-            'endpoint' => 'https://api.cerebras.ai/v1',
-            'key' => ''
-        ],
-        'local' => [
-            'endpoint' => 'http://localhost:8000/v1',
-            'key' => ''
-        ],
-        'duck' => [
-            'endpoint' => 'https://duckduckgo.com/duckchat/v1/chat',
-            'key' => '' // DuckDuckGo doesn't require API key
-        ]
-    ];
-    
-    return $configs[$provider] ?? $configs['ollama'];
+    // This function is kept for backward compatibility but should be removed
+    return $CONFIG['provider.' . $provider] ?? $CONFIG['provider.ollama'];
 }
 
 // =========================================================================
