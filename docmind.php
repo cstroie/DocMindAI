@@ -2166,7 +2166,7 @@ $LLM_API_KEY = $llm_config['key'];
 /**
  * Maximum file upload size (10MB)
  */
-define('MAX_FILE_SIZE', 10 * 1024 * 1024);
+define('MAX_FILE_SIZE', $MAX_FILE_SIZE);
 
 // Load default configuration from config.php.example if not already loaded
 if (!isset($LLM_API_KEY)) {
