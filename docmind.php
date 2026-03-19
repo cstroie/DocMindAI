@@ -9,87 +9,6 @@
  * @license GPL 3
  */
 
-// =========================================================================
-// Configuration Management
-// =========================================================================
-
-/**
- * Load configuration from config.ini file (cached)
- *
- * This function reads and parses the config.ini file once per request,
- * returning a structured configuration array that can be accessed
- * using the pattern: $CONFIG['section']['key']
- *
- * @return array Configuration array or error message
- */
-function loadConfig() {
-    static $CONFIG = null;
-    if ($CONFIG === null) {
-        $CONFIG = parse_ini_file(__DIR__ . '/config.ini', true);
-        if ($CONFIG === false) {
-            return ['error' => 'Failed to load config.ini'];
-        }
-    }
-    return $CONFIG;
-}
-
-// Load configuration once at startup
-$CONFIG = loadConfig();
-
-// Extract runtime variables from configuration
-$provider_id = $CONFIG['llm']['provider'] ?? 'ollama';
-$provider_config = $CONFIG['provider.' . $provider_id] ?? $CONFIG['provider.ollama'];
-
-$LLM_API_ENDPOINT_CHAT = $provider_config['endpoint'] . '/chat/completions';
-$LLM_API_KEY = $provider_config['key'];
-$DEFAULT_TEXT_MODEL = $CONFIG['llm']['default_text_model'] ?? 'qwen2.5:1.5b';
-$DEFAULT_VISION_MODEL = $CONFIG['llm']['default_vision_model'] ?? 'gemma3:4b';
-$LLM_API_FILTER = $provider_config['filter'] ?? '/./';
-$CHAT_HISTORY_LENGTH = $CONFIG['chat']['chat_history_length'] ?? 10;
-$DEBUG_MODE = $CONFIG['security']['debug_mode'] ?? false;
-$ALLOWED_ORIGINS = $CONFIG['security']['allowed_origins'] ?? ['*'];
-$MAX_FILE_SIZE = $CONFIG['upload']['max_file_size'] ?? 10 * 1024 * 1024;
-$ALLOWED_FILE_TYPES = explode(',', $CONFIG['upload']['allowed_file_types'] ?? 'image/jpeg, image/png, image/gif, image/webp, application/pdf, text/plain, text/markdown, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.oasis.opendocument.text');
-
-/**
- * Maximum file upload size (10MB)
- */
-define('MAX_FILE_SIZE', $MAX_FILE_SIZE);
->>>>>>> REPLACE```
-
-docmind.php
-```php
-<<<<<<< SEARCH
-$provider = $LLM_PROVIDER ?? 'ollama';
-$llm_config = getLlmProviderConfig($provider);
-$CONFIG = parse_ini_file('config.ini', true);
-if ($CONFIG === false) {
-    die('Configuration file config.ini not found or invalid.');
-}
-$CONFIG = $CONFIG['general'] ?? [];
-// Ensure all expected keys have sensible defaults
-$CONFIG['provider']            = $CONFIG['provider']            ?? 'ollama';
-$CONFIG['default_text_model']  = $CONFIG['default_text_model']  ?? 'qwen2.5:1.5b';
-$CONFIG['default_vision_model']= $CONFIG['default_vision_model']?? 'gemma3:4b';
-$CONFIG['filter']              = $CONFIG['filter']              ?? '/./';
-$CONFIG['chat_history_length'] = $CONFIG['chat_history_length'] ?? 10;
-$CONFIG['debug_mode']          = $CONFIG['debug_mode']          ?? false;
-$CONFIG['allowed_origins']     = $CONFIG['allowed_origins']     ?? ['*'];
-$CONFIG['max_file_size']       = $CONFIG['max_file_size']       ?? 10 * 1024 * 1024;
-$CONFIG['allowed_file_types']  = $CONFIG['allowed_file_types']  ?? 'image/jpeg, image/png, image/gif, image/webp, application/pdf, text/plain, text/markdown, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.oasis.opendocument.text';
-// Derive runtime variables from the consolidated config
-$providerConfig = $CONFIG['provider'][$CONFIG['provider']] ?? $CONFIG['provider'];
-$LLM_API_ENDPOINT_CHAT = $providerConfig['endpoint'] ?? 'http://localhost:11434/v1';
-$LLM_API_KEY = $providerConfig['key'] ?? '';
-$DEFAULT_TEXT_MODEL = $CONFIG['default_text_model'] ?? 'qwen2.5:1.5b';
-$DEFAULT_VISION_MODEL = $CONFIG['default_vision_model'] ?? 'gemma3:4b';
-$LLM_API_FILTER = $CONFIG['filter'] ?? '/./';
-$CHAT_HISTORY_LENGTH = $CONFIG['chat_history_length'] ?? 10;
-$DEBUG_MODE = $CONFIG['debug_mode'] ?? false;
-$ALLOWED_ORIGINS = $CONFIG['allowed_origins'] ?? ['*'];
-$MAX_FILE_SIZE = $CONFIG['max_file_size'] ?? 10 * 1024 * 1024;
-$ALLOWED_FILE_TYPES = $CONFIG['allowed_file_types'] ?? 'image/jpeg, image/png, image/gif, image/webp, application/pdf, text/plain, text/markdown, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.oasis.opendocument.text';
-
 /**
  * Fetches the X-Vqd-4 token from DuckDuckGo status endpoint.
  * 
@@ -324,13 +243,12 @@ function resizeImage($image, $max_size = 1000) {
  * @param string $max_size Maximum dimension for resizing ('original' or numeric string)
  * @return array|false Array with image data and MIME type, or false on error
  * 
- * @note Validates file size against MAX_FILE_SIZE constant
+ * @note Validates file size
  * @note Supports JPEG, PNG, GIF, and WebP formats
  * @note If max_size is 'original', returns unprocessed image data
  * @note Otherwise, resizes to fit within max_size and converts to JPEG
  * @note Returns array with keys: 'image_data' (binary), 'mime_type' (string)
  * @see resizeImage() - Used for resizing the image
- * @see MAX_FILE_SIZE - Maximum allowed file size constant
  * @note Used in handleProfileAction() for image uploads
  */
 function processUploadedImage($file, $max_size = '500') {
@@ -339,9 +257,10 @@ function processUploadedImage($file, $max_size = '500') {
         return ['error' => 'Invalid file upload'];
     }
     
+    $MAX_FILE_SIZE = $CONFIG['upload']['max_file_size'] ?? 10 * 1024 * 1024;
     // Validate file size
-    if ($file['size'] > MAX_FILE_SIZE || $file['size'] <= 0) {
-        return ['error' => 'The file is too large. Maximum ' . (MAX_FILE_SIZE / 1024 / 1024) . 'MB allowed.'];
+    if ($file['size'] > $MAX_FILE_SIZE || $file['size'] <= 0) {
+        return ['error' => 'The file is too large. Maximum ' . ($MAX_FILE_SIZE / 1024 / 1024) . 'MB allowed.'];
     }
     
     // Additional MIME type validation
@@ -1136,7 +1055,6 @@ function sendJsonResponse($data, $is_api_request = false) {
         header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         header('Pragma: no-cache');
 
-        global $DEBUG_MODE;
         if ($DEBUG_MODE) {
             // Add form data to debug output if available
             if (!empty($_POST)) {
@@ -1468,10 +1386,6 @@ function handleApiRequest() {
  * LLM API endpoint. It uses server-side configuration values and provides
  * fallback defaults if the API call fails.
  * 
- * @global string $LLM_API_ENDPOINT_CHAT The chat API endpoint URL
- * @global string $LLM_API_KEY The API authentication key
- * @global string $LLM_API_FILTER Optional regex filter for model names
- * 
  * @return void Sends JSON response with models list or error
  * 
  * @see getAvailableModels() - Fetches models from API
@@ -1480,12 +1394,10 @@ function handleApiRequest() {
  * @note If API call fails, returns default models for fallback functionality
  */
 function handleGetModels() {
-    global $LLM_API_ENDPOINT_CHAT, $LLM_API_KEY, $LLM_API_FILTER;
-
     // Extract base endpoint from chat endpoint
-    $api_endpoint = preg_replace('/\/chat\/completions$/', '', $LLM_API_ENDPOINT_CHAT);
-    $api_key = $LLM_API_KEY;
-    $filter = $LLM_API_FILTER;
+    $api_endpoint = $provider_config['endpoint'];
+    $api_key = $provider_config['key'] ?? '';
+    $filter = $provider_config['filter'] ?? '/./';
 
     // Validate required parameters
     if (empty($api_endpoint)) {
@@ -1667,8 +1579,6 @@ function getToolConfig(string $tool_id): array {
  * 5. Processes and returns the response
  * 
  * @param string $tool_id The identifier of the tool to process
- * @global string $LLM_API_ENDPOINT_CHAT The chat completion API endpoint
- * @global string $LLM_API_KEY The API authentication key
  * 
  * @return void Sends JSON response with processed results or errors
  * 
@@ -1685,14 +1595,6 @@ function getToolConfig(string $tool_id): array {
  * @note Sets CORS headers for cross-origin requests
  */
 function handleToolAction($tool_id) {
-    global $LLM_API_ENDPOINT_CHAT, $LLM_API_KEY;
-    global $DEBUG_MODE;
-
-    // Validate required parameters
-    if (empty($LLM_API_ENDPOINT_CHAT)) {
-        sendJsonResponse(['error' => 'API endpoint not configured'], true);
-    }
-
     // Load configuration (cached)
     $config_data = getConfigData();
     if (isset($config_data['error'])) {
@@ -1814,8 +1716,15 @@ function handleToolAction($tool_id) {
         ];
     }
 
+    $api_endpoint = $provider_config['endpoint'] . '/chat/completions';
+    $api_key = $provider_config['key'] ?? '';
+    // Validate required parameters
+    if (empty($api_endpoint)) {
+        sendJsonResponse(['error' => 'API endpoint not configured'], true);
+    }
+
     // Call LLM API
-    $response = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY, $provider);
+    $response = callLLMApi($api_endpoint, $api_data, $api_key, $provider);
 
     if (!isset($response['error'])) {
         // Process and return the response
@@ -2154,54 +2063,40 @@ function displayWebInterface() {
 
 
 
-// Get provider configuration (default to ollama if not specified)
-$provider = $LLM_PROVIDER ?? 'ollama';
-$llm_config = getLlmProviderConfig($provider);
-
-// Create chat endpoint URL by appending the chat completions path
-$LLM_API_ENDPOINT_CHAT = $llm_config['endpoint'] . '/chat/completions';
-$LLM_API_KEY = $llm_config['key'];
-
+// =========================================================================
+// Configuration Management
+// =========================================================================
 
 /**
- * Maximum file upload size (10MB)
+ * Load configuration from config.ini file (cached)
+ *
+ * This function reads and parses the config.ini file once per request,
+ * returning a structured configuration array that can be accessed
+ * using the pattern: $CONFIG['section']['key']
+ *
+ * @return array Configuration array or error message
  */
-define('MAX_FILE_SIZE', $MAX_FILE_SIZE);
+function loadConfig() {
+    static $CONFIG = null;
+    if ($CONFIG === null) {
+        $CONFIG = parse_ini_file(__DIR__ . '/config.ini', true);
+        if ($CONFIG === false) {
+            return ['error' => 'Failed to load config.ini'];
+        }
+    }
+    return $CONFIG;
+}
 
-// Load default configuration from config.php.example if not already loaded
-if (!isset($LLM_API_KEY)) {
-    $LLM_API_KEY = '';
-}
-if (!isset($DEFAULT_TEXT_MODEL)) {
-    $DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b';
-}
-if (!isset($DEFAULT_VISION_MODEL)) {
-    $DEFAULT_VISION_MODEL = 'gemma3:4b';
-}
-if (!isset($LLM_API_FILTER)) {
-    $LLM_API_FILTER = '/free/';
-}
-if (!isset($CHAT_HISTORY_LENGTH)) {
-    $CHAT_HISTORY_LENGTH = 10;
-}
-if (!isset($DEBUG_MODE)) {
-    $DEBUG_MODE = false;
-}
-if (!isset($ALLOWED_ORIGINS)) {
-    $ALLOWED_ORIGINS = ['*'];
-}
-if (!isset($MAX_FILE_SIZE)) {
-    $MAX_FILE_SIZE = 10 * 1024 * 1024;
-}
-if (!isset($ALLOWED_FILE_TYPES)) {
-    $ALLOWED_FILE_TYPES = [
-        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-        'application/pdf',
-        'text/plain', 'text/markdown',
-        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.oasis.opendocument.text'
-    ];
-}
+// Load configuration once at startup
+$CONFIG = loadConfig();
+$DEBUG_MODE = $CONFIG['security']['debug_mode'] ?? false;
+
+// Extract runtime variables from configuration
+$provider_id = $CONFIG['llm']['provider'] ?? 'ollama';
+$provider_config = $CONFIG['provider.' . $provider_id] ?? $CONFIG['provider.ollama'];
+
+$ALLOWED_FILE_TYPES = explode(',', $CONFIG['upload']['allowed_file_types'] ?? 'image/jpeg, image/png, image/gif, image/webp, application/pdf, text/plain, text/markdown, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.oasis.opendocument.text');
+
 
 // =========================================================================
 // Main Request Router
