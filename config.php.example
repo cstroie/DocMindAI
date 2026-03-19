@@ -1,58 +1,147 @@
 <?php
 /**
- * Configuration file for DocMind AI
+ * DocMind AI — Runtime Configuration
  *
- * IMPORTANT: This file should be renamed to config.php and placed in the same directory
- * as the application files. Do not commit config.php to version control as it may contain
- * sensitive information.
+ * Copy this file to config.php and fill in your values.
+ * Never commit config.php to version control — it contains API keys.
  *
- * @author Costin Stroie <costinstroie@eridu.eu.org>
+ * @author  Costin Stroie <costinstroie@eridu.eu.org>
  * @license GPL 3
  */
 
-/**
- * AI API Configuration
- *
- * @var string $LLM_API_ENDPOINT The base URL for your AI API endpoint
- * @var string $LLM_API_KEY Your API key if required (leave empty if not needed)
- * @var string $DEFAULT_TEXT_MODEL Default model for text processing
- * @var string $DEFAULT_VISION_MODEL Default model for vision/image processing
- * @var string $LLM_API_FILTER Regular expression to filter available models
- */
-$LLM_API_ENDPOINT = 'http://127.0.0.1:11434/v1'; // Your AI API endpoint
-$LLM_API_KEY = ''; // API key if required
-$DEFAULT_TEXT_MODEL = 'qwen2.5:1.5b'; // Default text model
-$DEFAULT_VISION_MODEL = 'gemma3:4b'; // Default vision model
-$LLM_API_FILTER = '/free/'; // Regular expression to filter models
+// =========================================================================
+// LLM Providers
+//
+// Each entry defines one OpenAI-compatible provider.
+//
+// Fields:
+//   name         Human-readable label shown in the UI
+//   endpoint     Base URL of the OpenAI-compatible API (no trailing slash,
+//                no /chat/completions — the backend appends those paths)
+//   key          API key; use '' for local providers that need none
+//   filter       PCRE regex applied to model IDs from /models; '' = no filter
+//   default_model  Model name used when the form submits no model, or when
+//                  the provider has no /models endpoint
+//   models_api   true  → query /models to populate the model selector
+//                false → skip the query and expose only default_model
+// =========================================================================
+$LLM_PROVIDERS = [
 
-/**
- * Application Configuration
- *
- * @var int $CHAT_HISTORY_LENGTH Maximum number of messages to keep in chat history
- */
-$CHAT_HISTORY_LENGTH = 10; // Maximum chat history length
+    'ollama' => [
+        'name'          => 'Ollama (local)',
+        'endpoint'      => 'http://127.0.0.1:11434/v1',
+        'key'           => '',
+        'filter'        => '',           // e.g. '/free/' to show only free models
+        'default_model' => 'qwen2.5:1.5b',
+        'models_api'    => true,
+    ],
 
-/**
- * Security Configuration
- *
- * @var bool $DEBUG_MODE Enable debug mode for development
- * @var array $ALLOWED_ORIGINS List of allowed origins for CORS
- */
-$DEBUG_MODE = false; // Set to true for development/debugging
-$ALLOWED_ORIGINS = ['*']; // List of allowed origins for CORS
+    'local' => [
+        'name'          => 'llama.cpp (local)',
+        'endpoint'      => 'http://127.0.0.1:8080/v1',
+        'key'           => '',
+        'filter'        => '',
+        'default_model' => 'llama-3.2-3b-instruct',
+        'models_api'    => false,        // llama.cpp does not expose /models
+    ],
 
-/**
- * File Upload Configuration
- *
- * @var int $MAX_FILE_SIZE Maximum file size for uploads in bytes
- * @var array $ALLOWED_FILE_TYPES Allowed file types for uploads
- */
-$MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-$ALLOWED_FILE_TYPES = [
-    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-    'application/pdf',
-    'text/plain', 'text/markdown',
-    'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.oasis.opendocument.text'
+    'openai' => [
+        'name'          => 'OpenAI',
+        'endpoint'      => 'https://api.openai.com/v1',
+        'key'           => 'sk-...',
+        'filter'        => '/^gpt/',     // show only GPT models
+        'default_model' => 'gpt-4o-mini',
+        'models_api'    => true,
+    ],
+
+    'openrouter' => [
+        'name'          => 'OpenRouter',
+        'endpoint'      => 'https://openrouter.ai/api/v1',
+        'key'           => 'sk-or-...',
+        'filter'        => '',
+        'default_model' => 'meta-llama/llama-3.3-70b-instruct:free',
+        'models_api'    => true,
+    ],
+
+    'cerebras' => [
+        'name'          => 'Cerebras',
+        'endpoint'      => 'https://api.cerebras.ai/v1',
+        'key'           => 'csk-...',
+        'filter'        => '',
+        'default_model' => 'llama-3.3-70b',
+        'models_api'    => true,
+    ],
+
+    'together' => [
+        'name'          => 'Together.xyz',
+        'endpoint'      => 'https://api.together.xyz/v1',
+        'key'           => '',
+        'filter'        => '',
+        'default_model' => 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+        'models_api'    => true,
+    ],
+
+    'anthropic' => [
+        'name'          => 'Anthropic (via proxy)',
+        'endpoint'      => 'https://api.anthropic.com/v1',
+        'key'           => 'sk-ant-...',
+        'filter'        => '/^claude/',
+        'default_model' => 'claude-sonnet-4-5',
+        'models_api'    => false,        // Anthropic has no OpenAI-compatible /models
+    ],
+
 ];
+
+// =========================================================================
+// Active Provider
+//
+// Must match one of the keys in $LLM_PROVIDERS above.
+// Change this single line to switch between providers.
+// =========================================================================
+$LLM_ACTIVE_PROVIDER = 'ollama';
+
+// =========================================================================
+// Application Settings
+// =========================================================================
+
+/** Maximum messages kept in chat history */
+$CHAT_HISTORY_LENGTH = 10;
+
+/** Set to true to include prompt and API payload in every response */
+$DEBUG_MODE = false;
+
+/** CORS allowed origins; use ['*'] to allow all, or list specific origins */
+$ALLOWED_ORIGINS = ['*'];
+
+// =========================================================================
+// File Upload Settings
+// =========================================================================
+
+$MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+$ALLOWED_FILE_TYPES = [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'application/pdf',
+    'text/plain',
+    'text/markdown',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.oasis.opendocument.text',
+];
+
+// =========================================================================
+// Legacy flat variables (optional — kept for backward compatibility)
+//
+// If $LLM_PROVIDERS / $LLM_ACTIVE_PROVIDER are defined above, these are
+// ignored. They are only used when the new provider array is absent, so
+// existing single-provider installs continue to work without changes.
+// =========================================================================
+// $LLM_API_ENDPOINT    = 'http://127.0.0.1:11434/v1';
+// $LLM_API_KEY         = '';
+// $LLM_API_FILTER      = '';
+// $DEFAULT_TEXT_MODEL  = 'qwen2.5:1.5b';
+// $DEFAULT_VISION_MODEL = 'gemma3:4b';
 ?>

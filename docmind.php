@@ -18,19 +18,82 @@ if (file_exists('config.php')) {
     include 'config.php';
 }
 
-// FIX #6: Guard against missing config — avoid undefined variable warnings
-// and broken endpoint string when config.php is absent.
-$LLM_API_ENDPOINT      = $LLM_API_ENDPOINT      ?? '';
-$LLM_API_KEY           = $LLM_API_KEY           ?? '';
-$LLM_API_FILTER        = $LLM_API_FILTER        ?? '';
-$DEFAULT_TEXT_MODEL    = $DEFAULT_TEXT_MODEL    ?? '';
-$DEFAULT_VISION_MODEL  = $DEFAULT_VISION_MODEL  ?? '';
-$CHAT_HISTORY_LENGTH   = $CHAT_HISTORY_LENGTH   ?? 10;
-$DEBUG_MODE            = $DEBUG_MODE            ?? false;
-$ALLOWED_ORIGINS       = $ALLOWED_ORIGINS       ?? ['*'];
+// -------------------------------------------------------------------------
+// Provider resolution
+//
+// New style: $LLM_PROVIDERS array + $LLM_ACTIVE_PROVIDER key.
+// Legacy style: flat $LLM_API_ENDPOINT / $LLM_API_KEY / $LLM_API_FILTER
+//               variables — still supported when the new array is absent.
+//
+// getActiveProvider() is the single source of truth for the rest of the
+// backend; all other code reads from it instead of touching globals directly.
+// -------------------------------------------------------------------------
 
-// Create chat endpoint URL by appending the chat completions path
-$LLM_API_ENDPOINT_CHAT = $LLM_API_ENDPOINT . '/chat/completions';
+/**
+ * Return the configuration for the currently active LLM provider.
+ *
+ * Prefers the new $LLM_PROVIDERS / $LLM_ACTIVE_PROVIDER style. Falls back
+ * to the legacy flat variables so existing single-provider installs continue
+ * to work without any changes to config.php.
+ *
+ * Returned array always contains:
+ *   name          string  Human-readable provider label
+ *   endpoint      string  Base URL (no trailing slash)
+ *   key           string  Bearer token (may be empty)
+ *   filter        string  PCRE regex for model filtering (may be empty)
+ *   default_model string  Model used when none is submitted / no /models API
+ *   models_api    bool    Whether the provider exposes GET /models
+ *   chat_endpoint string  Full chat-completions URL (appended automatically)
+ *
+ * @return array Provider config with all keys guaranteed to be present.
+ */
+function getActiveProvider(): array {
+    static $resolved = null;
+    if ($resolved !== null) return $resolved;
+
+    $providers      = $GLOBALS['LLM_PROVIDERS']       ?? null;
+    $active_key     = $GLOBALS['LLM_ACTIVE_PROVIDER'] ?? null;
+
+    if (is_array($providers) && !empty($providers)) {
+        // Validate the active key; fall back to first provider if invalid
+        if ($active_key === null || !isset($providers[$active_key])) {
+            $active_key = array_key_first($providers);
+        }
+
+        $p = $providers[$active_key];
+
+        $resolved = [
+            'id'            => $active_key,
+            'name'          => $p['name']          ?? $active_key,
+            'endpoint'      => rtrim($p['endpoint'] ?? '', '/'),
+            'key'           => $p['key']            ?? '',
+            'filter'        => $p['filter']         ?? '',
+            'default_model' => $p['default_model']  ?? '',
+            'models_api'    => $p['models_api']     ?? true,
+        ];
+    } else {
+        // Legacy flat-variable fallback
+        $endpoint = rtrim($GLOBALS['LLM_API_ENDPOINT'] ?? '', '/');
+        $resolved = [
+            'id'            => 'default',
+            'name'          => 'Default',
+            'endpoint'      => $endpoint,
+            'key'           => $GLOBALS['LLM_API_KEY']          ?? '',
+            'filter'        => $GLOBALS['LLM_API_FILTER']       ?? '',
+            'default_model' => $GLOBALS['DEFAULT_TEXT_MODEL']   ?? '',
+            'models_api'    => true,
+        ];
+    }
+
+    $resolved['chat_endpoint'] = $resolved['endpoint'] . '/chat/completions';
+
+    return $resolved;
+}
+
+// Guard application-level globals that are not provider-specific
+$CHAT_HISTORY_LENGTH = $CHAT_HISTORY_LENGTH ?? 10;
+$DEBUG_MODE          = $DEBUG_MODE          ?? false;
+$ALLOWED_ORIGINS     = $ALLOWED_ORIGINS     ?? ['*'];
 
 /**
  * Maximum file upload size (10MB)
@@ -1067,26 +1130,44 @@ function handleApiRequest(): void {
 
 /**
  * Return the list of available LLM models to the client.
+ *
+ * When the active provider exposes a /models endpoint (models_api = true),
+ * the list is fetched live and filtered by the provider's regex. Otherwise,
+ * or when the API call fails, only the provider's default_model is returned.
+ * The response also includes the active provider name so the UI can label
+ * the model selector appropriately.
  */
 function handleGetModels(): void {
-    global $LLM_API_ENDPOINT, $LLM_API_KEY, $LLM_API_FILTER;
+    $provider = getActiveProvider();
 
-    if (empty($LLM_API_ENDPOINT)) {
-        sendJsonResponse(['error' => 'API endpoint not configured'], true);
+    if (empty($provider['endpoint'])) {
+        sendJsonResponse(['error' => 'No LLM provider configured'], true);
     }
 
-    $models = getAvailableModels($LLM_API_ENDPOINT, $LLM_API_KEY ?? '', $LLM_API_FILTER ?? '');
+    $models = [];
 
-    if (isset($models['error'])) {
-        // Fallback to hardcoded defaults so the UI remains functional
-        $models = [
-            'gemma3:1b'    => 'Gemma 3 (1B)',
-            'qwen2.5:1.5b' => 'Qwen 2.5 (1.5B)',
-        ];
+    if ($provider['models_api']) {
+        $models = getAvailableModels($provider['endpoint'], $provider['key'], $provider['filter']);
+        if (isset($models['error'])) {
+            $models = []; // fall through to default_model below
+        }
+    }
+
+    // Always ensure the configured default model appears in the list
+    if (!empty($provider['default_model']) && !isset($models[$provider['default_model']])) {
+        $label = str_replace(['/', '-', ':'], [' / ', ' ', ' '], $provider['default_model']);
+        $models[$provider['default_model']] = ucwords($label);
+    }
+
+    if (empty($models)) {
+        sendJsonResponse(['error' => 'No models available from provider "' . $provider['name'] . '"'], true);
     }
 
     ksort($models);
-    sendJsonResponse(['models' => $models], true);
+    sendJsonResponse([
+        'models'   => $models,
+        'provider' => $provider['name'],
+    ], true);
 }
 
 /**
@@ -1123,10 +1204,11 @@ function handleGetPrompts(): void {
  * @param string $tool_id Tool identifier from the request action.
  */
 function handleToolAction(string $tool_id): void {
-    global $LLM_API_ENDPOINT_CHAT, $LLM_API_KEY, $DEBUG_MODE;
+    global $DEBUG_MODE;
 
-    if (empty($LLM_API_ENDPOINT_CHAT)) {
-        sendJsonResponse(['error' => 'API endpoint not configured'], true);
+    $provider = getActiveProvider();
+    if (empty($provider['endpoint'])) {
+        sendJsonResponse(['error' => 'No LLM provider configured'], true);
     }
 
     $config = getConfigData();
@@ -1157,13 +1239,13 @@ function handleToolAction(string $tool_id): void {
         ];
 
         // Determine real MIME type from bytes for routing
-        $finfo        = new finfo(FILEINFO_MIME_TYPE);
-        $real_mime    = $finfo->file($file['tmp_name']);
-        $image_mimes  = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $finfo       = new finfo(FILEINFO_MIME_TYPE);
+        $real_mime   = $finfo->file($file['tmp_name']);
+        $image_mimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
         if (in_array($real_mime, $image_mimes, true)) {
-            $is_image  = true;
-            $max_size  = $_POST['max_image_size'] ?? '500';
+            $is_image   = true;
+            $max_size   = $_POST['max_image_size'] ?? '500';
             $img_result = processUploadedImage($file, $max_size);
 
             if (isset($img_result['error'])) {
@@ -1214,11 +1296,11 @@ function handleToolAction(string $tool_id): void {
         $prompt .= "\n" . $file_content;
     }
 
-    $config_data  = getConfigData();
-    $default_model = $config_data['default_model'] ?? $GLOBALS['DEFAULT_TEXT_MODEL'] ?? '';
+    // Model priority: form submission > provider default
+    $model = (!empty($form_data['model'])) ? $form_data['model'] : $provider['default_model'];
 
     $api_data = [
-        'model'    => $form_data['model'] ?? $default_model,
+        'model'    => $model,
         'messages' => [['role' => 'user', 'content' => $prompt]],
         'stream'   => false,
     ];
@@ -1233,7 +1315,7 @@ function handleToolAction(string $tool_id): void {
         ];
     }
 
-    $response = callLLMApi($LLM_API_ENDPOINT_CHAT, $api_data, $LLM_API_KEY ?? '');
+    $response = callLLMApi($provider['chat_endpoint'], $api_data, $provider['key']);
 
     if (isset($response['error'])) {
         $result = ['error' => $response['error']];
@@ -1244,11 +1326,12 @@ function handleToolAction(string $tool_id): void {
         $result = processToolResponse($tool, $response);
     }
 
-    // Always include the rendered prompt for transparency (not just debug mode)
+    // Always include the rendered prompt for transparency
     $result['debug']['prompt'] = $prompt;
 
     if ($DEBUG_MODE) {
         $result['debug']['api_data'] = $api_data;
+        $result['debug']['provider'] = $provider['name'];
         if ($file_info !== null) {
             $result['debug']['file_info'] = $file_info;
         }
