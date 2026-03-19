@@ -1,0 +1,9 @@
+README.md
+setup.py
+DuckDuckAI.egg-info/PKG-INFO
+DuckDuckAI.egg-info/SOURCES.txt
+DuckDuckAI.egg-info/dependency_links.txt
+DuckDuckAI.egg-info/requires.txt
+DuckDuckAI.egg-info/top_level.txt
+duckduckai/__init__.py
+duckduckai/ask_chat.py
