@@ -30,18 +30,17 @@ $CONFIG['allowed_origins']     = $CONFIG['allowed_origins']     ?? ['*'];
 $CONFIG['max_file_size']       = $CONFIG['max_file_size']       ?? 10 * 1024 * 1024;
 $CONFIG['allowed_file_types']  = $CONFIG['allowed_file_types']  ?? 'image/jpeg, image/png, image/gif, image/webp, application/pdf, text/plain, text/markdown, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.oasis.opendocument.text';
 // Derive runtime variables from the consolidated config
-$provider            = $CONFIG['provider'];
-$providerConfig      = getLlmProviderConfig($provider);
-$LLM_API_ENDPOINT_CHAT = $providerConfig['endpoint'] . '/chat/completions';
-$LLM_API_KEY         = $providerConfig['key'] ?? '';
-$DEFAULT_TEXT_MODEL  = $CONFIG['default_text_model'];
-$DEFAULT_VISION_MODEL= $CONFIG['default_vision_model'];
-$LLM_API_FILTER      = $CONFIG['filter'];
-$CHAT_HISTORY_LENGTH = $CONFIG['chat_history_length'];
-$DEBUG_MODE          = $CONFIG['debug_mode'];
-$ALLOWED_ORIGINS     = $CONFIG['allowed_origins'];
-$MAX_FILE_SIZE       = $CONFIG['max_file_size'];
-$ALLOWED_FILE_TYPES  = $CONFIG['allowed_file_types'];
+$providerConfig = $CONFIG['provider'][$CONFIG['provider']] ?? $CONFIG['provider'];
+$LLM_API_ENDPOINT_CHAT = $providerConfig['endpoint'] ?? 'http://localhost:11434/v1';
+$LLM_API_KEY = $providerConfig['key'] ?? '';
+$DEFAULT_TEXT_MODEL = $CONFIG['default_text_model'] ?? 'qwen2.5:1.5b';
+$DEFAULT_VISION_MODEL = $CONFIG['default_vision_model'] ?? 'gemma3:4b';
+$LLM_API_FILTER = $CONFIG['filter'] ?? '/./';
+$CHAT_HISTORY_LENGTH = $CONFIG['chat_history_length'] ?? 10;
+$DEBUG_MODE = $CONFIG['debug_mode'] ?? false;
+$ALLOWED_ORIGINS = $CONFIG['allowed_origins'] ?? ['*'];
+$MAX_FILE_SIZE = $CONFIG['max_file_size'] ?? 10 * 1024 * 1024;
+$ALLOWED_FILE_TYPES = $CONFIG['allowed_file_types'] ?? 'image/jpeg, image/png, image/gif, image/webp, application/pdf, text/plain, text/markdown, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.oasis.opendocument.text';
 
 /**
  * Fetches the X-Vqd-4 token from DuckDuckGo status endpoint.
