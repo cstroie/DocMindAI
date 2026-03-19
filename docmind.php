@@ -1394,8 +1394,17 @@ function handleApiRequest() {
  * @note If API call fails, returns default models for fallback functionality
  */
 function handleGetModels() {
-    // Extract base endpoint from chat endpoint
-    $api_endpoint = $provider_config['endpoint'];
+    // Load configuration to get provider config
+    $config_data = getConfigData();
+    if (isset($config_data['error'])) {
+        sendJsonResponse(['error' => $config_data['error']], true);
+    }
+    
+    // Extract provider config
+    $provider_id = $config_data['llm']['provider'] ?? 'ollama';
+    $provider_config = $config_data['provider.' . $provider_id] ?? $config_data['provider.ollama'];
+    
+    $api_endpoint = $provider_config['endpoint'] ?? '';
     $api_key = $provider_config['key'] ?? '';
     $filter = $provider_config['filter'] ?? '/./';
 
