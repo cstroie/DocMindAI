@@ -70,6 +70,7 @@ function getActiveProvider(): array {
             'filter'        => $p['filter']         ?? '',
             'default_model' => $p['default_model']  ?? '',
             'models_api'    => $p['models_api']     ?? true,
+            'driver'        => $p['driver']         ?? 'openai',
         ];
     } else {
         // Legacy flat-variable fallback
@@ -82,9 +83,11 @@ function getActiveProvider(): array {
             'filter'        => $GLOBALS['LLM_API_FILTER']       ?? '',
             'default_model' => $GLOBALS['DEFAULT_TEXT_MODEL']   ?? '',
             'models_api'    => true,
+            'driver'        => 'openai',
         ];
     }
 
+    // chat_endpoint is only used by the 'openai' driver; DDG uses its own URL
     $resolved['chat_endpoint'] = $resolved['endpoint'] . '/chat/completions';
 
     return $resolved;
@@ -620,13 +623,28 @@ function getAvailableModels(string $api_endpoint, string $api_key = '', string $
     $models = [];
     foreach ($data['data'] as $model) {
         if (!isset($model['id'])) continue;
-        if ($filter_regex !== '' && !preg_match($filter_regex, $model['id'])) continue;
 
-        $id    = $model['id'];
-        $label = str_replace(':', ' ', $id);
+        // Gemini's OpenAI-compat layer may prefix IDs with 'models/' — strip it
+        // so the bare model name (e.g. 'gemini-2.5-flash') is used in API calls.
+        $id = $model['id'];
+        if (str_starts_with($id, 'models/')) {
+            $id = substr($id, strlen('models/'));
+        }
+
+        if ($filter_regex !== '' && !preg_match($filter_regex, $id)) continue;
+
+        // Build a readable label from the model ID:
+        //   'llama-3.3-70b-versatile'       → 'Llama 3.3 70b Versatile'
+        //   'gemini-2.5-flash'               → 'Gemini 2.5 Flash'
+        //   'mistral-small-latest'           → 'Mistral Small Latest'
+        //   'meta-llama/Llama-3.3-70B-...'  → 'Llama 3.3 70b ...' (basename only)
+        $label_base = strpos($id, '/') !== false ? substr($id, strrpos($id, '/') + 1) : $id;
+        $label      = ucwords(str_replace(['-', '_', ':'], ' ', strtolower($label_base)));
+
         if (stripos($id, 'vision') !== false || stripos($id, 'vl') !== false) {
             $label .= ' (Vision)';
         }
+
         $models[$id] = $label;
     }
 
@@ -1103,6 +1121,258 @@ function convertPromptArrayToText(array $prompt_array, int $indent_level = 0): s
 }
 
 // =========================================================================
+// DuckDuckGo AI Chat Driver
+//
+// Provides free access to GPT-4o-mini, Claude 3 Haiku, Llama 3.1 70B and
+// Mixtral 8x7B through DuckDuckGo's unofficial duck.ai API.
+//
+// The API uses a rotating token-pair scheme (X-Vqd-4 + x-vqd-hash-1).
+// Tokens are obtained from a status endpoint and must be forwarded with
+// every chat request. DDG rotates them per turn; the functions below cache
+// the current pair in static variables for the lifetime of a PHP request.
+//
+// No API key is required. Rate limits are undocumented and subject to change.
+// Not suitable for high-volume or production workloads.
+// =========================================================================
+
+/**
+ * Known DuckDuckGo AI Chat models.
+ * DDG has no /models endpoint; this list is the source of truth.
+ */
+const DDG_MODELS = [
+    'gpt-4o-mini'                                        => 'GPT-4o Mini (OpenAI)',
+    'claude-3-haiku-20240307'                            => 'Claude 3 Haiku (Anthropic)',
+    'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo'      => 'Llama 3.1 70B (Meta)',
+    'mistralai/Mixtral-8x7B-Instruct-v0.1'              => 'Mixtral 8x7B (Mistral)',
+];
+
+const DDG_STATUS_URL = 'https://duckduckgo.com/duckchat/v1/status';
+const DDG_CHAT_URL   = 'https://duckduckgo.com/duckchat/v1/chat';
+const DDG_UA         = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+
+/**
+ * Fetch a fresh DDG token pair from the status endpoint.
+ *
+ * Returns ['vqd' => string, 'hash' => string] on success, or
+ * ['error' => string] on failure.
+ *
+ * @return array
+ */
+function fetchDDGToken(): array {
+    $ch = curl_init(DDG_STATUS_URL);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HEADER         => true,       // we need response headers
+        CURLOPT_TIMEOUT        => 15,
+        CURLOPT_HTTPHEADER     => [
+            'Accept: */*',
+            'Referer: https://duckduckgo.com/',
+            'Origin: https://duckduckgo.com',
+            'User-Agent: ' . DDG_UA,
+            'X-Vqd-Accept: 1',               // signals "give me a token"
+            'Dnt: 1',
+            'Sec-Fetch-Site: same-origin',
+            'Sec-Fetch-Mode: cors',
+            'Sec-Fetch-Dest: empty',
+        ],
+    ]);
+
+    $raw       = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curl_err  = curl_errno($ch);
+    curl_close($ch);
+
+    if ($curl_err || $http_code !== 200 || $raw === false) {
+        return ['error' => 'DDG token fetch failed (HTTP ' . $http_code . ')'];
+    }
+
+    // Parse headers from the raw response (header + body)
+    $header_size = strpos($raw, "\r\n\r\n");
+    $header_text = substr($raw, 0, $header_size);
+
+    $vqd  = null;
+    $hash = null;
+
+    foreach (explode("\r\n", $header_text) as $line) {
+        $lower = strtolower($line);
+        if (str_starts_with($lower, 'x-vqd-4:')) {
+            $vqd  = trim(substr($line, strlen('x-vqd-4:')));
+        } elseif (str_starts_with($lower, 'x-vqd-hash-1:')) {
+            $hash = trim(substr($line, strlen('x-vqd-hash-1:')));
+        }
+    }
+
+    if (empty($vqd) || empty($hash)) {
+        return ['error' => 'DDG token not found in status response headers'];
+    }
+
+    return ['vqd' => $vqd, 'hash' => $hash];
+}
+
+/**
+ * Return the cached DDG token pair, fetching it on first call.
+ *
+ * Stores the pair in static variables so a single PHP request performs
+ * at most one token fetch, even across multiple tool calls.
+ * Pass $force = true to discard the cache and fetch a new pair (used
+ * after a 401 response).
+ *
+ * @param bool $force Bypass the static cache.
+ * @return array ['vqd' => string, 'hash' => string] or ['error' => string].
+ */
+function getDDGToken(bool $force = false): array {
+    static $vqd  = null;
+    static $hash = null;
+
+    if ($force || $vqd === null || $hash === null) {
+        $pair = fetchDDGToken();
+        if (isset($pair['error'])) return $pair;
+        $vqd  = $pair['vqd'];
+        $hash = $pair['hash'];
+    }
+
+    return ['vqd' => $vqd, 'hash' => $hash];
+}
+
+/**
+ * Send a chat request to DuckDuckGo AI Chat and return a response array
+ * in the same shape as callLLMApi() so the rest of the backend is unaware
+ * of the difference.
+ *
+ * Handles:
+ *   - Token fetch / cache on first call
+ *   - 401 retry with a fresh token (loop-based, max 2 attempts — no recursion)
+ *   - SSE stream parsing and full-message accumulation
+ *   - [DONE] sentinel detection
+ *   - Normalised OpenAI-compatible response envelope
+ *
+ * @param array  $data  Request payload with 'model' and 'messages' keys.
+ *                      Only the last user message is sent; DDG has no
+ *                      multi-turn memory beyond its own session token.
+ * @return array OpenAI-compatible response, or ['error' => string] on failure.
+ */
+function callDDGApi(array $data): array {
+    // Extract model and the last user message content
+    $model   = $data['model'] ?? array_key_first(DDG_MODELS);
+    $messages = $data['messages'] ?? [];
+
+    // Find the last user message to send
+    $user_content = '';
+    foreach (array_reverse($messages) as $msg) {
+        if (($msg['role'] ?? '') === 'user') {
+            $c = $msg['content'] ?? '';
+            // Content can be a string or an array of blocks (vision)
+            $user_content = is_string($c) ? $c : '';
+            break;
+        }
+    }
+
+    if (empty($user_content)) {
+        return ['error' => 'DDG driver: no user message content to send'];
+    }
+
+    $payload = json_encode([
+        'model'    => $model,
+        'messages' => [['role' => 'user', 'content' => $user_content]],
+    ]);
+
+    $max_attempts = 2;
+
+    for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
+        $force_refresh = ($attempt > 1);   // fresh token on retry
+        $tokens = getDDGToken($force_refresh);
+
+        if (isset($tokens['error'])) {
+            return ['error' => $tokens['error']];
+        }
+
+        $ch = curl_init(DDG_CHAT_URL);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_TIMEOUT        => 120,
+            CURLOPT_HTTPHEADER     => [
+                'Accept: text/event-stream',
+                'Content-Type: application/json',
+                'Referer: https://duckduckgo.com/',
+                'Origin: https://duckduckgo.com',
+                'User-Agent: ' . DDG_UA,
+                'X-Vqd-4: '      . $tokens['vqd'],
+                'x-vqd-hash-1: ' . $tokens['hash'],
+                'Dnt: 1',
+                'Sec-Fetch-Site: same-origin',
+                'Sec-Fetch-Mode: cors',
+                'Sec-Fetch-Dest: empty',
+            ],
+        ]);
+
+        $raw_response = curl_exec($ch);
+        $http_code    = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_err     = curl_errno($ch);
+        curl_close($ch);
+
+        if ($curl_err) {
+            return ['error' => 'DDG connection error: ' . curl_strerror($curl_err)];
+        }
+
+        if ($http_code === 401 && $attempt < $max_attempts) {
+            // Token expired — loop back with force_refresh = true
+            continue;
+        }
+
+        if ($http_code !== 200) {
+            return ['error' => 'DDG API error (HTTP ' . $http_code . ')'];
+        }
+
+        // ── Parse SSE stream ─────────────────────────────────────────────
+        $full_message = '';
+
+        foreach (explode("\n", $raw_response) as $line) {
+            $line = trim($line);
+            if ($line === '' || !str_starts_with($line, 'data:')) continue;
+
+            $data_str = trim(substr($line, strlen('data:')));
+
+            // Explicit [DONE] sentinel — end of stream
+            if ($data_str === '[DONE]') break;
+
+            $chunk = @json_decode($data_str, true);
+            if (!is_array($chunk)) continue;
+
+            // DDG sends {"message": "..."} chunks (not OpenAI delta format)
+            if (isset($chunk['message']) && is_string($chunk['message'])) {
+                $full_message .= $chunk['message'];
+            }
+        }
+
+        // ── Wrap in OpenAI-compatible envelope ───────────────────────────
+        return [
+            'id'      => 'ddg-' . uniqid(),
+            'object'  => 'chat.completion',
+            'model'   => $model,
+            'choices' => [[
+                'index'         => 0,
+                'message'       => ['role' => 'assistant', 'content' => $full_message],
+                'finish_reason' => 'stop',
+            ]],
+            'usage' => ['prompt_tokens' => 0, 'completion_tokens' => 0, 'total_tokens' => 0],
+        ];
+    }
+
+    return ['error' => 'DDG API: max retry attempts exceeded'];
+}
+
+/**
+ * Return the DDG model list in the same format as getAvailableModels().
+ *
+ * @return array<string, string> Map of model ID => human label.
+ */
+function getAvailableModelsDDG(): array {
+    return DDG_MODELS;
+}
+
+// =========================================================================
 // Core API Functions
 // =========================================================================
 
@@ -1146,7 +1416,9 @@ function handleGetModels(): void {
 
     $models = [];
 
-    if ($provider['models_api']) {
+    if ($provider['driver'] === 'ddg') {
+        $models = getAvailableModelsDDG();
+    } elseif ($provider['models_api']) {
         $models = getAvailableModels($provider['endpoint'], $provider['key'], $provider['filter']);
         if (isset($models['error'])) {
             $models = []; // fall through to default_model below
@@ -1315,7 +1587,12 @@ function handleToolAction(string $tool_id): void {
         ];
     }
 
-    $response = callLLMApi($provider['chat_endpoint'], $api_data, $provider['key']);
+    // Dispatch to the correct driver
+    if ($provider['driver'] === 'ddg') {
+        $response = callDDGApi($api_data);
+    } else {
+        $response = callLLMApi($provider['chat_endpoint'], $api_data, $provider['key']);
+    }
 
     if (isset($response['error'])) {
         $result = ['error' => $response['error']];

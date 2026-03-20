@@ -15,15 +15,17 @@
 // Each entry defines one OpenAI-compatible provider.
 //
 // Fields:
-//   name         Human-readable label shown in the UI
-//   endpoint     Base URL of the OpenAI-compatible API (no trailing slash,
-//                no /chat/completions — the backend appends those paths)
-//   key          API key; use '' for local providers that need none
-//   filter       PCRE regex applied to model IDs from /models; '' = no filter
-//   default_model  Model name used when the form submits no model, or when
-//                  the provider has no /models endpoint
-//   models_api   true  → query /models to populate the model selector
-//                false → skip the query and expose only default_model
+//   name          Human-readable label shown in the UI
+//   endpoint      Base URL of the OpenAI-compatible API (no trailing slash,
+//                 no /chat/completions — the backend appends those paths)
+//   key           API key; use '' for local providers that need none
+//   filter        PCRE regex applied to model IDs from /models; '' = no filter
+//   default_model Model name used when the form submits no model, or when
+//                 the provider has no /models endpoint
+//   models_api    true  → query /models to populate the model selector
+//                 false → skip the query and expose only default_model
+//   driver        'openai' (default) → standard OpenAI-compatible HTTP driver
+//                 'ddg'             → DuckDuckGo AI Chat driver (no API key)
 // =========================================================================
 $LLM_PROVIDERS = [
 
@@ -88,6 +90,49 @@ $LLM_PROVIDERS = [
         'filter'        => '/^claude/',
         'default_model' => 'claude-sonnet-4-5',
         'models_api'    => false,        // Anthropic has no OpenAI-compatible /models
+        'driver'        => 'openai',
+    ],
+
+    'groq' => [
+        'name'          => 'Groq (free tier)',
+        'endpoint'      => 'https://api.groq.com/openai/v1',
+        'key'           => 'gsk_...',   // console.groq.com — no credit card required
+        'filter'        => '',
+        'default_model' => 'llama-3.3-70b-versatile',
+        'models_api'    => true,
+    ],
+
+    'gemini' => [
+        'name'          => 'Google AI Studio (free tier)',
+        // OpenAI-compatible base URL — the backend appends /chat/completions and /models
+        'endpoint'      => 'https://generativelanguage.googleapis.com/v1beta/openai',
+        'key'           => 'AIza...',   // aistudio.google.com — no credit card required
+        // Filter to generative text models only; excludes embedding, vision-only,
+        // and deprecated 2.0 models (retired March 2026)
+        'filter'        => '/^gemini-(2\.5|3)/',
+        'default_model' => 'gemini-2.5-flash',
+        'models_api'    => true,
+    ],
+
+    'mistral' => [
+        'name'          => 'Mistral (La Plateforme)',
+        'endpoint'      => 'https://api.mistral.ai/v1',
+        'key'           => '',          // console.mistral.ai — free tier, no credit card
+        // Filter to generative chat models; excludes embedding (mistral-embed),
+        // fine-tuned (ft:...) and moderation models
+        'filter'        => '/^(mistral|codestral|magistral|pixtral|ministral|open-)/',
+        'default_model' => 'mistral-small-latest',
+        'models_api'    => true,
+    ],
+
+    'ddg' => [
+        'name'          => 'DuckDuckGo AI Chat (free)',
+        'endpoint'      => '',           // not used — DDG has its own fixed URLs
+        'key'           => '',           // no API key required
+        'filter'        => '',
+        'default_model' => 'gpt-4o-mini',
+        'models_api'    => false,        // hardcoded model list, no /models endpoint
+        'driver'        => 'ddg',        // activates the DDG-specific HTTP driver
     ],
 
 ];
@@ -98,6 +143,11 @@ $LLM_PROVIDERS = [
 // Must match one of the keys in $LLM_PROVIDERS above.
 // Change this single line to switch between providers.
 // =========================================================================
+// Free-tier options (no credit card required):
+//   'groq'   — fastest inference, Llama 3.3 70B, requires API key from console.groq.com
+//   'gemini' — 1M context window, Gemini 2.5, requires API key from aistudio.google.com
+//   'mistral'— EU-hosted, Mistral Small/Medium, requires API key from console.mistral.ai
+//   'ddg'    — zero-config, no key, unofficial API (GPT-4o-mini, Claude Haiku, Llama)
 $LLM_ACTIVE_PROVIDER = 'ollama';
 
 // =========================================================================
