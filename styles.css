@@ -538,6 +538,102 @@ ul.keywords li {
     font-size: 1.5rem;
 }
 
+/* =========================================================================
+   Badge — generic pill label with semantic colour variants.
+   Usage: <span class="badge badge--success">Recommended</span>
+   Reuses: --pico-border-radius, --success/--warning/--danger/--info
+   Used by: agr (AGREE II recommendation + item scores), extensible to any tool.
+   ========================================================================= */
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--pico-border-radius);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+    border: var(--pico-border-width) solid transparent;
+}
+
+.badge--success {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.badge--warning {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.badge--danger {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.badge--info {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: var(--info);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* =========================================================================
+   Score bar — horizontal progress bar for any percentage score.
+   Usage:
+     <div class="score-bar">
+       <span class="score-bar__label">Domain name</span>
+       <div class="score-bar__track">
+         <div class="score-bar__fill" style="width:75%"></div>
+       </div>
+       <span class="score-bar__value">75%</span>
+     </div>
+   Reuses: --pico-primary, --pico-border-radius, --pico-transition,
+           --pico-secondary-hover-background (track bg)
+   Used by: agr (AGREE II domain overview), extensible to any scored tool.
+   ========================================================================= */
+
+.score-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+}
+
+.score-bar__label {
+    flex: 0 0 18rem;
+    font-size: 0.875rem;
+    color: var(--pico-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.score-bar__track {
+    flex: 1;
+    height: 0.6rem;
+    background-color: var(--pico-secondary-hover-background);
+    border-radius: var(--pico-border-radius);
+    overflow: hidden;
+}
+
+.score-bar__fill {
+    height: 100%;
+    background-color: var(--pico-primary);
+    border-radius: var(--pico-border-radius);
+    transition: width var(--pico-transition);
+    min-width: 2px;
+}
+
+.score-bar__value {
+    flex: 0 0 3rem;
+    text-align: right;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--pico-primary);
+}
 
 /*!
   Theme: StackOverflow Light

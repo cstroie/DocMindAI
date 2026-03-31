@@ -1,0 +1,207 @@
+{
+  "id": "agr",
+  "name": "AGREE II Guideline Appraisal",
+  "description": "Appraise clinical practice guidelines using the AGREE II instrument across 6 domains and 23 items",
+  "icon": "📐",
+  "prompt": {
+    "role": "You are an expert methodologist specializing in clinical practice guideline appraisal using the AGREE II instrument (Appraisal of Guidelines for Research and Evaluation II).",
+    "task": "Your task is to rigorously appraise the provided clinical practice guideline document using the AGREE II instrument. Evaluate all 23 items across the 6 domains, assign a score from 1 (strongly disagree) to 7 (strongly agree) for each item, compute each domain's scaled score as a percentage, and provide a domain-level justification summarizing the evidence found in the document.",
+    "critical_instruction": "{language_instruction}",
+    "scoring_rules": [
+      "Score each item on a scale of 1 to 7: 1 = strongly disagree (criterion not met at all), 7 = strongly agree (criterion fully met)",
+      "Intermediate scores (2-6) reflect the degree to which the criterion is partially met",
+      "Domain scaled score (%) = (obtained score - minimum possible score) / (maximum possible score - minimum possible score) * 100",
+      "Minimum possible score for a domain = number of items * 1 * number of appraisers (assume 1 appraiser)",
+      "Maximum possible score for a domain = number of items * 7 * number of appraisers (assume 1 appraiser)",
+      "Round domain scores to the nearest integer",
+      "Base all scores strictly on content found in the document; do not infer or assume information not explicitly stated"
+    ],
+    "domains": [
+      {
+        "id": "scope_and_purpose",
+        "name": "Domain 1: Scope and Purpose",
+        "items": [
+          {"id": 1, "text": "The overall objective(s) of the guideline is (are) specifically described."},
+          {"id": 2, "text": "The health question(s) covered by the guideline is (are) specifically described."},
+          {"id": 3, "text": "The population (patients, public, etc.) to whom the guideline is meant to apply is specifically described."}
+        ]
+      },
+      {
+        "id": "stakeholder_involvement",
+        "name": "Domain 2: Stakeholder Involvement",
+        "items": [
+          {"id": 4, "text": "The guideline development group includes individuals from all relevant professional groups."},
+          {"id": 5, "text": "The views and preferences of the target population (patients, public, etc.) have been sought."},
+          {"id": 6, "text": "The target users of the guideline are clearly defined."}
+        ]
+      },
+      {
+        "id": "rigour_of_development",
+        "name": "Domain 3: Rigour of Development",
+        "items": [
+          {"id": 7,  "text": "Systematic methods were used to search for evidence."},
+          {"id": 8,  "text": "The criteria for selecting the evidence are clearly described."},
+          {"id": 9,  "text": "The strengths and limitations of the body of evidence are clearly described."},
+          {"id": 10, "text": "The methods for formulating the recommendations are clearly described."},
+          {"id": 11, "text": "The health benefits, side effects, and risks have been considered in formulating the recommendations."},
+          {"id": 12, "text": "There is an explicit link between the recommendations and the supporting evidence."},
+          {"id": 13, "text": "The guideline has been externally reviewed by experts prior to its publication."},
+          {"id": 14, "text": "A procedure for updating the guideline is provided."}
+        ]
+      },
+      {
+        "id": "clarity_of_presentation",
+        "name": "Domain 4: Clarity of Presentation",
+        "items": [
+          {"id": 15, "text": "The recommendations are specific and unambiguous."},
+          {"id": 16, "text": "The different options for management of the condition or health issue are clearly presented."},
+          {"id": 17, "text": "Key recommendations are easily identifiable."}
+        ]
+      },
+      {
+        "id": "applicability",
+        "name": "Domain 5: Applicability",
+        "items": [
+          {"id": 18, "text": "The guideline describes facilitators and barriers to its application."},
+          {"id": 19, "text": "The guideline provides advice and/or tools on how the recommendations can be put into practice."},
+          {"id": 20, "text": "The potential resource implications of applying the recommendations have been considered."},
+          {"id": 21, "text": "The guideline presents monitoring and/or auditing criteria."}
+        ]
+      },
+      {
+        "id": "editorial_independence",
+        "name": "Domain 6: Editorial Independence",
+        "items": [
+          {"id": 22, "text": "The views of the funding body have not influenced the content of the guideline."},
+          {"id": 23, "text": "Competing interests of guideline development group members have been recorded and addressed."}
+        ]
+      }
+    ],
+    "output_format": [
+      "```json",
+      "{",
+      "  \"title\": \"Title of the appraised guideline, extracted from the document\",",
+      "  \"overall_recommendation\": \"recommended | recommended_with_modifications | not_recommended\",",
+      "  \"overall_rationale\": \"2-3 sentence overall assessment justifying the recommendation\",",
+      "  \"domains\": [",
+      "    {",
+      "      \"id\": \"scope_and_purpose\",",
+      "      \"name\": \"Domain 1: Scope and Purpose\",",
+      "      \"scaled_score\": 85,",
+      "      \"justification\": \"Domain-level narrative justification citing evidence from the document (2-3 sentences)\",",
+      "      \"items\": [",
+      "        {\"id\": 1, \"score\": 6, \"rationale\": \"Brief rationale referencing specific content in the document\"},",
+      "        {\"id\": 2, \"score\": 7, \"rationale\": \"Brief rationale referencing specific content in the document\"},",
+      "        {\"id\": 3, \"score\": 5, \"rationale\": \"Brief rationale referencing specific content in the document\"}",
+      "      ]",
+      "    }",
+      "  ]",
+      "}",
+      "```"
+    ],
+    "rules": [
+      "Evaluate ALL 6 domains and ALL 23 items without exception",
+      "Each item score must be an integer between 1 and 7",
+      "Each domain scaled_score must be an integer between 0 and 100",
+      "overall_recommendation must be exactly one of: recommended, recommended_with_modifications, not_recommended",
+      "Item rationale must be concise (1-2 sentences) and reference specific content or its absence in the document",
+      "Domain justification must summarize the item-level findings in 2-3 sentences",
+      "If information for an item is completely absent from the document, score it 1 and state that explicitly",
+      "Do NOT fabricate or infer content not present in the document",
+      "Respond ONLY with the JSON, without any additional text or markdown outside the code fence"
+    ],
+    "guideline_document": "{document}"
+  },
+  "output": "json",
+  "display": "html",
+  "form": {
+    "title": "AGREE II Guideline Appraisal",
+    "description": "Appraise a clinical practice guideline using the validated AGREE II instrument. The AI will evaluate all 23 items across 6 domains and produce scaled domain scores with justifications and an overall recommendation.",
+    "fields": [
+      {
+        "name": "document",
+        "type": "textarea",
+        "label": "Guideline Document",
+        "help": "Paste the full text of the clinical practice guideline. Maximum 10,000 characters. For longer documents, use the file upload below.",
+        "placeholder": "Paste the guideline text here, or upload a file below...",
+        "required": false
+      },
+      "file",
+      "url",
+      "model",
+      "language"
+    ]
+  },
+  "template": [
+    "<article class=\"article\">",
+    "",
+    "  <!-- Header: title + overall recommendation -->",
+    "  <header class=\"diagnosis-header\">",
+    "    <hgroup style=\"flex:1; margin-bottom:0\">",
+    "      <h2>{{title}}</h2>",
+    "      <p>{{overall_rationale}}</p>",
+    "    </hgroup>",
+    "    <div>",
+    "      {{#if (eq overall_recommendation 'recommended')}}",
+    "      <span class=\"badge badge--success\">✅ Recommended</span>",
+    "      {{/if}}",
+    "      {{#if (eq overall_recommendation 'recommended_with_modifications')}}",
+    "      <span class=\"badge badge--warning\">⚠️ With Modifications</span>",
+    "      {{/if}}",
+    "      {{#if (eq overall_recommendation 'not_recommended')}}",
+    "      <span class=\"badge badge--danger\">❌ Not Recommended</span>",
+    "      {{/if}}",
+    "    </div>",
+    "  </header>",
+    "",
+    "  <hr>",
+    "",
+    "  <!-- Domain scores overview -->",
+    "  <h3>Domain Scores Overview</h3>",
+    "  {{#each domains}}",
+    "  <div class=\"score-bar\">",
+    "    <span class=\"score-bar__label\">{{name}}</span>",
+    "    <div class=\"score-bar__track\">",
+    "      <div class=\"score-bar__fill\" style=\"width:{{scaled_score}}%\"></div>",
+    "    </div>",
+    "    <span class=\"score-bar__value probability-score\">{{scaled_score}}%</span>",
+    "  </div>",
+    "  {{/each}}",
+    "",
+    "  <hr>",
+    "",
+    "  <!-- Per-domain detail sections -->",
+    "  {{#each domains}}",
+    "  <section>",
+    "    <header class=\"diagnosis-header\">",
+    "      <h3 style=\"flex:1; margin:0\">{{name}}</h3>",
+    "      <span class=\"probability-score\">{{scaled_score}}%</span>",
+    "    </header>",
+    "    <p>{{justification}}</p>",
+    "    <table>",
+    "      <thead>",
+    "        <tr>",
+    "          <th style=\"width:4rem\">Item</th>",
+    "          <th style=\"width:6rem\">Score (1–7)</th>",
+    "          <th>Rationale</th>",
+    "        </tr>",
+    "      </thead>",
+    "      <tbody>",
+    "        {{#each items}}",
+    "        <tr>",
+    "          <td style=\"text-align:center; font-weight:600\">{{id}}</td>",
+    "          <td style=\"text-align:center\">",
+    "            <span class=\"badge {{#if (gte score 6)}}badge--success{{else}}{{#if (gte score 4)}}badge--warning{{else}}badge--danger{{/if}}{{/if}}\">{{score}}</span>",
+    "          </td>",
+    "          <td>{{rationale}}</td>",
+    "        </tr>",
+    "        {{/each}}",
+    "      </tbody>",
+    "    </table>",
+    "  </section>",
+    "  {{#unless @last}}<hr>{{/unless}}",
+    "  {{/each}}",
+    "",
+    "</article>"
+  ]
+}

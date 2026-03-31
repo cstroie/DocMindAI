@@ -187,6 +187,7 @@
       "dps": "adm",
       "hda": "adm",
       "pre": "cli",
-      "ade": "cli"
+      "ade": "cli",
+      "agr": "res"
   }
 }
