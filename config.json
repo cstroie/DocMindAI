@@ -188,6 +188,7 @@
       "hda": "adm",
       "pre": "cli",
       "ade": "cli",
-      "agr": "res"
+      "agr": "res",
+      "inv": "cpr"
   }
 }
