@@ -1572,7 +1572,10 @@ function displayResults(results, fromHistory = false) {
 
     // Check if backend returned the prompt in debug/prompt
     if (results.debug && results.debug.prompt && detailsPrompt) {
-        detailsPrompt.innerHTML = `<code>${results.debug.prompt}</code>`;
+        const promptCode = document.createElement('code');
+        promptCode.textContent = results.debug.prompt;
+        detailsPrompt.innerHTML = '';
+        detailsPrompt.appendChild(promptCode);
     }
 
     if (results.error) {
@@ -1636,7 +1639,11 @@ function displayResults(results, fromHistory = false) {
     resultsContent.dataset.raw = responseContent;
     // Show the full response
     if (results.response && detailsResponse) {
-        detailsResponse.innerHTML = `<code class="language-json">${JSON.stringify(results.response, null, 2)}</code>`;
+        const responseCode = document.createElement('code');
+        responseCode.className = 'language-json';
+        responseCode.textContent = JSON.stringify(results.response, null, 2);
+        detailsResponse.innerHTML = '';
+        detailsResponse.appendChild(responseCode);
     }
 
     // Apply syntax highlighting
@@ -1747,7 +1754,10 @@ function showToast(message, type = 'success', duration = 5000) {
     };
 
     const icon = iconMap[type] || 'ℹ️';
-    toast.innerHTML = `<span>${icon}</span> ${message}`;
+    const iconSpan = document.createElement('span');
+    iconSpan.textContent = icon;
+    toast.appendChild(iconSpan);
+    toast.appendChild(document.createTextNode(' ' + message));
 
     // Add toast to container
     toastContainer.appendChild(toast);

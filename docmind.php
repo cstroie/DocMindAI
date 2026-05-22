@@ -885,9 +885,12 @@ function fetchArticleDetails(array $ids) {
  * @return array|null Decoded data, or null if no valid JSON was found.
  */
 function extractJsonFromResponse(string $content): ?array {
-    // 1. Prefer an explicit ```json … ``` fence
-    if (preg_match('/```(?:json)?\s*(\{.*?\})\s*```/s', $content, $m)) {
-        $json_str = $m[1];
+    // 1. Prefer an explicit ```json … ``` fence — capture fence content, then
+    //    extract the first balanced object depth-aware (the old lazy \{.*?\} regex
+    //    stopped at the first } and truncated any nested JSON structure).
+    if (preg_match('/```(?:json)?[ \t]*\r?\n?([\s\S]*?)\n?[ \t]*```/', $content, $m)) {
+        $json_str = extractFirstJsonObject(trim($m[1]));
+        if ($json_str === null) return null;
     } else {
         // 2. Find the first balanced { … } block — depth-aware, not greedy
         $json_str = extractFirstJsonObject($content);
