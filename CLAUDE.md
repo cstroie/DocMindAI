@@ -231,8 +231,8 @@ All via `docmind.php` with `?action=<value>` or `POST action=<value>`:
 
 ### Environment
 
-- PHP 8.0+ recommended (uses `str_starts_with`, `str_contains`, named arguments, union types in docblocks).
-- Minimum stated in README: PHP 7.0+ (but some syntax requires 8.x).
+- **Minimum: PHP 7.3** — `str_starts_with` and `str_contains` are polyfilled at the top of `docmind.php`; `array_key_first` requires 7.3.
+- PHP 8.x works without changes; no 8-only syntax is actually used in the code.
 - Required extensions: `curl`, `json`, `gd` (image processing), `fileinfo`.
 - Optional: `imagick` or `gmagick` (PDF→image), external CLI tools for doc extraction.
 
