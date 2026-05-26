@@ -1728,6 +1728,7 @@ function renderContent(resultsContent, resultsInfo, displayFormat, tool) {
         // For other types, use the original response content, with syntax highlighting
         resultsContent.innerHTML = `<pre><code class="${resultsInfo.type}">${escapeHtml(resultsInfo.text)}</code></pre>`;
     }
+    resultsContent.querySelectorAll('article').forEach(el => el.classList.add('article'));
 }
 
 function showToast(message, type = 'success', duration = 5000) {
