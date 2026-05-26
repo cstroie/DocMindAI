@@ -8,7 +8,7 @@
     "task": "Generate thoughtful questions based on medical findings to help patients have productive conversations with their doctors.",
     "critical_instruction": "{language_instruction}",
     "output_format": [
-      "### Questions to Ask Your Doctor",
+      "## Questions to Ask Your Doctor",
       "",
       "Based on the findings:",
       "* What does this mean for my health?",

@@ -327,187 +327,246 @@ ul.keywords li {
 
 
 
+/* ── Article: rich-text output renderer ─────────────────────────────────── */
 .article {
     margin: 0 auto;
     margin-bottom: 2em;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-    line-height: 1.7;
-    color: var(--text-primary);
+    line-height: 1.65;
+    color: var(--pico-color);
 }
 
-.article h1, .article h2, .article h3, .article h4, .article h5, .article h6 {
-    font-weight: 600;
-    margin-top: 0;
-    margin-bottom: 0.75em;
+/* shared heading reset */
+.article h1, .article h2, .article h3,
+.article h4, .article h5, .article h6 {
     line-height: 1.3;
-    color: var(--text-primary);
+    margin-top: 0;
+    margin-bottom: 0.5em;
 }
 
-.article h1:not(:first-child),
-.article h2:not(:first-child),
-.article h3:not(:first-child),
-.article h4:not(:first-child),
+.article h1:not(:first-child) { margin-top: 1.5em; }
+.article h2:not(:first-child) { margin-top: 1.5em; }
+.article h3:not(:first-child) { margin-top: 1em; }
+.article h4:not(:first-child) { margin-top: 0.9em; }
 .article h5:not(:first-child),
-.article h6:not(:first-child) {
-    margin-top: 1.5em;
+.article h6:not(:first-child) { margin-top: 0.75em; }
+
+/* h1 — patient / document identity card */
+.article h1 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: var(--pico-card-background-color);
+    border-left: 3px solid var(--pico-primary);
+    padding: 0.6rem 0.9rem;
+    border-radius: 0 var(--pico-border-radius) var(--pico-border-radius) 0;
+    margin-bottom: 1em;
 }
 
-.article h1 { font-size: 1.75rem; }
-.article h2 { font-size: 1.5rem; }
-.article h3 { font-size: 1.25rem; }
-.article h4 { font-size: 1.125rem; }
-.article h5 { font-size: 1rem; }
-.article h6 { font-size: 1rem; }
+/* h2 — section label (uppercase eyebrow) */
+.article h2 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--pico-primary);
+    border-bottom: 1px solid var(--pico-table-border-color);
+    padding-bottom: 0.3em;
+    margin-bottom: 0.5em;
+}
 
+/* h3 — sub-section / date block */
+.article h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--pico-color);
+    background: var(--pico-card-sectioning-background-color);
+    padding: 0.25em 0.6em;
+    border-radius: var(--pico-border-radius);
+    margin-bottom: 0.4em;
+}
+
+/* h4 — inline label / named entry */
+.article h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--pico-color);
+    border-left: 2px solid var(--pico-primary);
+    padding-left: 0.5em;
+    margin-bottom: 0.35em;
+}
+
+/* h5 — minor label */
+.article h5 {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--pico-muted-color);
+    margin-bottom: 0.3em;
+}
+
+/* h6 — annotation / note label */
+.article h6 {
+    font-size: 0.78rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--pico-muted-color);
+    margin-bottom: 0.3em;
+}
+
+/* paragraphs */
 .article p {
     margin-top: 0;
-    margin-bottom: 1.25em;
+    margin-bottom: 0.5em;
     font-size: 1rem;
 }
 
 .article p:not(:first-child) {
-    margin-top: 1.25em;
+    margin-top: 1em;
 }
 
+/* links */
 .article a {
-    color: var(--primary-color);
+    color: var(--pico-primary);
     text-decoration: underline;
-    transition: color 0.2s ease;
+    text-underline-offset: 2px;
+    transition: opacity 0.2s ease;
 }
 
-.article a:hover {
-    color: var(--primary-hover);
-}
+.article a:hover { opacity: 0.75; }
 
+/* inline emphasis */
 .article strong, .article b {
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--pico-color);
 }
 
 .article em, .article i {
     font-style: italic;
-    color: var(--text-secondary);
+    color: var(--pico-muted-color);
 }
 
 .article u {
     text-decoration: underline;
-    text-decoration-color: var(--primary-color);
+    text-decoration-color: var(--pico-primary);
     text-underline-offset: 2px;
 }
 
+/* key–value lists: bold label styled as muted key */
+.article li > strong:first-child {
+    color: var(--pico-muted-color);
+    font-weight: 600;
+}
+
+/* blockquote */
 .article blockquote {
-    border-left: 4px solid var(--primary-color);
-    padding-left: 1.5rem;
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 1.5em;
+    border-left: 3px solid var(--pico-primary);
+    margin: 1em 0;
+    padding: 0.75rem 1rem;
+    background: var(--pico-card-sectioning-background-color);
+    border-radius: 0 var(--pico-border-radius) var(--pico-border-radius) 0;
     font-style: italic;
-    color: var(--text-secondary);
-    background-color: rgba(37, 99, 235, 0.05);
-    padding: 1rem 1.5rem;
-    border-radius: 0.25rem;
+    color: var(--pico-muted-color);
 }
 
-.article blockquote:not(:first-child) {
-    margin-top: 1.5em;
-}
-
+/* lists */
 .article ul, .article ol {
     margin-top: 0;
-    margin-bottom: 1.5em;
-    padding-left: 2rem;
+    margin-bottom: 1em;
+    padding-left: 1.1rem;
 }
 
 .article ul:not(:first-child),
-.article ol:not(:first-child) {
-    margin-top: 1em;
-}
+.article ol:not(:first-child) { margin-top: 0.25em; }
+
+.article ul { list-style: disc; }
+.article ol { list-style: decimal; }
+
+.article ul li::marker,
+.article ol li::marker { color: var(--pico-primary); }
 
 .article li {
+    padding: 0.15em 0 0.15em 0.25em;
     margin-bottom: 0;
 }
 
+/* horizontal rule */
 .article hr {
-    border: 0;
-    border-top: 1px solid var(--border-color);
-    margin: 0;
-    margin-top: 2em;
-    margin-bottom: 2em;
+    border: none;
+    border-top: 1px solid var(--pico-table-border-color);
+    margin: 2em 0 0.75em;
 }
 
-.article hr:not(:first-child) {
-    margin-top: 2em;
+/* disclaimer line after hr */
+.article hr + p,
+.article hr + p em {
+    font-size: 0.78rem;
+    color: var(--pico-muted-color);
+    font-style: italic;
+    opacity: 0.8;
 }
 
+/* inline code */
 .article code {
-    font-family: var(--font-family-mono);
-    font-size: 0.9em;
-    background-color: rgba(37, 99, 235, 0.1);
-    padding: 0.2em 0.4em;
-    border-radius: 0.25rem;
-    color: var(--primary-color);
+    font-family: var(--pico-font-family-monospace);
+    font-size: 0.875em;
+    background: var(--pico-card-sectioning-background-color);
+    padding: 0.15em 0.4em;
+    border-radius: var(--pico-border-radius);
+    color: var(--pico-primary);
 }
 
+/* code block */
 .article pre {
-    background-color: var(--light-bg);
+    background: var(--pico-card-sectioning-background-color);
+    border: 1px solid var(--pico-table-border-color);
+    border-radius: var(--pico-border-radius);
     padding: 1rem;
-    border-radius: 0.5rem;
     overflow-x: auto;
-    margin-top: 0;
-    margin-bottom: 1.5em;
-    border: 1px solid var(--border-color);
-    font-family: var(--font-family-mono);
-}
-
-.article pre:not(:first-child) {
-    margin-top: 1.5em;
+    margin: 1em 0;
+    font-family: var(--pico-font-family-monospace);
+    font-size: 0.875em;
 }
 
 .article pre code {
-    background-color: transparent;
+    background: none;
     padding: 0;
-    font-size: 0.875em;
-    font-family: var(--font-family-mono);
+    color: inherit;
 }
 
+/* table */
 .article table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 0;
-    margin-bottom: 1.5em;
-}
-
-.article table:not(:first-child) {
-    margin-top: 1.5em;
+    margin: 1em 0;
+    font-size: 0.9rem;
 }
 
 .article th, .article td {
-    padding: 0.75rem;
-    border: 1px solid var(--border-color);
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--pico-table-border-color);
     text-align: left;
 }
 
 .article th {
-    background-color: var(--light-bg);
+    background: var(--pico-card-sectioning-background-color);
     font-weight: 600;
-    color: var(--text-primary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--pico-muted-color);
 }
 
-.article tr:nth-child(even) {
-    background-color: rgba(37, 99, 235, 0.02);
+.article tr:nth-child(even) td {
+    background: var(--pico-card-sectioning-background-color);
 }
 
+/* image */
 .article img {
     max-width: 100%;
     height: auto;
-    border-radius: 0.25rem;
-    margin-top: 0;
-    margin-bottom: 1.5em;
-}
-
-.article img:not(:first-child) {
-    margin-top: 1.5em;
+    border-radius: var(--pico-border-radius);
+    margin: 1em 0;
+    display: block;
 }
 
 

@@ -52,7 +52,7 @@
     "structure_guidelines": [
       "Organize output into relevant sections: Safety Concerns (if any), Extracted Medications, Patient Safety Information, Questions for Pharmacist, Additional Notes",
       "ALWAYS include Safety Concerns section FIRST if any issues detected (before medication details)",
-      "Use ### markdown headers for main sections, bullet points for details",
+      "Use ## markdown headers for main sections, bullet points for details",
       "Keep language accessible (8th-grade reading level); define medical terms",
       "Be specific and precise about dosages, frequencies, routes"
     ],

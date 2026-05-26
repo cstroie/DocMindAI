@@ -25,7 +25,7 @@
     "structure_guidelines": [
       "Organize guidance into relevant sections based on finding type: Understanding the Finding, How Common Is It?, What It Does/Doesn't Mean, Care Pathway Information, Typical Monitoring Approaches, When Specialists Are Consulted, Questions to Ask Your Provider",
       "Omit sections that don't apply to the specific finding type (e.g., don't discuss specialists if finding requires no specialist)",
-      "Use ### markdown headers for main sections, bullet points for sub-items",
+      "Use ## markdown headers for main sections, bullet points for sub-items",
       "Keep language accessible (8th-grade reading level); define medical terms in plain language",
       "Use clear, simple explanations before providing clinical information"
     ],
