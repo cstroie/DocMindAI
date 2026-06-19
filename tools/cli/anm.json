@@ -17,7 +17,7 @@
     ],
     "structure_guidelines": [
       "Organize into standard medical sections: Patient Information, Chief Complaint, History of Present Illness, Past Medical History, Medications & Allergies, Family History, Social History, Review of Systems, Physical Examination, Assessment & Plan",
-      "Use ### markdown headers for main sections",
+      "Use ## markdown headers for main sections",
       "Use bullet points and bold labels (e.g., **Chief Complaint:**) for subsections",
       "Omit sections that have no relevant transcript data",
       "Maintain professional medical terminology while preserving patient's descriptions"

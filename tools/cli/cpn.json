@@ -10,7 +10,7 @@
     "structure_guidelines": [
       "Organize into standard nursing care plan sections: Prioritized Nursing Diagnoses, Goals & Expected Outcomes, Interventions, Evaluation & Adaptation",
       "Generate 1-3 prioritized nursing diagnoses (highest acuity first)",
-      "Use ### markdown headers for main sections, bullet points for details",
+      "Use ## markdown headers for main sections, bullet points for details",
       "Omit empty sections, but every diagnosis requires goals and interventions",
       "Keep language professional, specific, and actionable"
     ],

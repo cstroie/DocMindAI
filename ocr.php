@@ -187,17 +187,19 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
         $processing = false;
     }
     
-    // Check file type
+    // Check file type using finfo (reads actual file bytes; client-supplied type is untrusted)
     $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
-    if (!in_array($image_file['type'], $allowed_types)) {
+    $finfo         = new finfo(FILEINFO_MIME_TYPE);
+    $detected_type = $finfo->file($image_file['tmp_name']);
+    if (!in_array($detected_type, $allowed_types, true)) {
         $error = 'Invalid file type. Only JPEG, PNG, GIF, WebP images and PDF documents are allowed.';
         $processing = false;
     }
-    
+
     // Only proceed with API call if validation passed
     if ($processing) {
         // Handle PDF files
-        if ($image_file['type'] === 'application/pdf') {
+        if ($detected_type === 'application/pdf') {
             // Check if Imagick or Gmagick extension is available
             if (!extension_loaded('imagick') && !extension_loaded('gmagick')) {
                 $error = 'PDF processing requires either the ImageMagick or GraphicsMagick extension which is not installed or enabled.';
@@ -212,6 +214,7 @@ if (($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_FILES['image']) || isset(
                     // Use the first image from PDF for OCR
                     $temp_image_path = tempnam(sys_get_temp_dir(), 'pdf_') . '.png';
                     if (file_put_contents($temp_image_path, $images[0]) === false) {
+                        @unlink($temp_image_path); // tempnam() creates the file; clean it up on write failure
                         $error = 'Failed to save extracted PDF image.';
                         $processing = false;
                     } else {

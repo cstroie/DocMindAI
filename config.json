@@ -184,6 +184,7 @@
       "eml": "ccr",
       "ocr": "dev",
       "mrs": "rad",
+      "crs": "adm",
       "dps": "adm",
       "hda": "adm",
       "pre": "cli",
