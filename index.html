@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="DocMind AI - Advanced document processing and analysis tools">
     <title>DocMind AI | Intelligent Document Processing</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em'
-font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.blue.min.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b7cf6' stroke-width='1.7'%3E%3Cpath d='M12 3l8 9-8 9-8-9z'/%3E%3Cpath d='M12 8.5l3.5 3.5-3.5 3.5-3.5-3.5z'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="scripts.js" defer></script>
     <script src="handlebars.min.js" defer></script>
     <script src="marked.js" defer></script>
@@ -19,127 +17,172 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="container-fluid">
-        <ul>
-            <li>
-                <a href="#" class="logo" onclick="switchView('home')" data-tooltip="Home" data-placement="bottom">
-                    <span class="logo-icon">💠</span>
-                    <strong class="logo-text">
-                        <span class="logo-text-first">DocMind</span>
-                        <span class="logo-text-second">AI</span>
-                    </strong>
-                </a>
-            </li>
-        </ul>
-        <ul class="menu" id="categoriesMenu">
-        </ul>
-        <ul>
-            <li>
-                <a href="#" data-view="history" data-tooltip="View history" data-placement="bottom" aria-label="View history" onclick="switchView('history')">📜</a>
-            </li>
-            <li>
-                <a href="#" id="themeToggle" class="outline" data-tooltip="Toggle theme" data-placement="bottom" aria-label="Toggle theme" onclick="toggleTheme()">🌙</a>
-            </li>
-        </ul>
+    <nav class="dm-nav">
+        <button class="dm-nav-logo" onclick="switchView('home')" aria-label="DocMind AI Home">
+            <span class="dm-nav-logo-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3l8 9-8 9-8-9z"/><path d="M12 8.5l3.5 3.5-3.5 3.5-3.5-3.5z"/></svg>
+            </span>
+            <span class="dm-nav-logo-text">DocMind<span class="dm-nav-logo-accent">AI</span></span>
+            <span class="dm-nav-version">v3.2</span>
+        </button>
+
+        <div class="dm-nav-categories" id="categoriesMenu"></div>
+
+        <div class="dm-nav-actions">
+            <span class="dm-status">
+                <span class="dm-status-dot"></span>ONLINE
+            </span>
+            <button class="dm-nav-btn dm-nav-btn--bordered" title="History" aria-label="View history" onclick="switchView('history')">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 1.6"/></svg>
+            </button>
+            <button class="dm-nav-btn dm-nav-btn--bordered" id="themeToggle" title="Toggle theme" aria-label="Toggle theme" onclick="toggleTheme()">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 7 7 0 1 0 20 14.5z"/></svg>
+            </button>
+        </div>
     </nav>
 
     <!-- Page Header -->
-    <header class="container">
-        <aside>💠</aside>
-        <hgroup>
+    <header class="dm-page-header container">
+        <div class="dm-page-header-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l8 9-8 9-8-9z"/><path d="M12 8.5l3.5 3.5-3.5 3.5-3.5-3.5z"/></svg>
+        </div>
+        <div class="dm-page-header-text">
+            <div id="pageSubtitle" class="dm-page-header-kicker">WORKSPACE</div>
             <h1 id="pageTitle">Welcome to DocMind AI</h1>
-            <p  id="pageSubtitle">Intelligent Document Processing</p>
-        </hgroup>
-        <select id="toolSelect">
-            <option selected disabled value=""></option>
-        </select>
+        </div>
+        <div class="dm-page-header-select">
+            <span class="dm-page-header-arrow">›</span>
+            <select id="toolSelect">
+                <option selected disabled value="">select a tool…</option>
+            </select>
+        </div>
     </header>
 
     <!-- Main Content Area -->
     <main class="container view-container">
         <!-- Home View -->
         <section class="view home-view active-view">
-            <article class="hero">
-                <main>
-                    <hgroup>
-                        <h2>Intelligent Document Processing</h2>
-                        <p>Transform documents into actionable insights with our AI-powered toolkit. Extract text, analyze content, and process medical literature with advanced OCR, web scraping, and AI analysis tools.</p>
-                    </hgroup>
-                </main>
-                <aside>
-                    <div>📄🔍🤖</div>
-                </aside>
-            </article>
-
-            <div class="grid" id="categoriesGrid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                <!-- Category cards will be populated by JavaScript -->
+            <!-- Hero -->
+            <div class="hero">
+                <div class="hero-text">
+                    <div class="hero-kicker">// INTELLIGENT DOCUMENT PROCESSING</div>
+                    <h2>Transform documents into<br>actionable clinical insight.</h2>
+                    <p>An AI-powered toolkit to extract text, analyze content, and process medical literature — with OCR, web scraping, and structured analysis.</p>
+                </div>
+                <div class="hero-graphic">
+                    <div class="hero-pipeline">
+                        <div class="hero-pipeline-step">
+                            <div class="hero-pipeline-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 16h6"/></svg>
+                            </div>
+                            <span>DOC</span>
+                        </div>
+                        <div class="hero-pipeline-arrow"></div>
+                        <div class="hero-pipeline-step">
+                            <div class="hero-pipeline-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 8V5h3M20 8V5h-3M4 16v3h3M20 16v3h-3"/><path d="M8 12h8"/></svg>
+                            </div>
+                            <span>OCR</span>
+                        </div>
+                        <div class="hero-pipeline-arrow"></div>
+                        <div class="hero-pipeline-step hero-pipeline-step--accent">
+                            <div class="hero-pipeline-icon hero-pipeline-icon--accent">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg>
+                            </div>
+                            <span>LLM</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <div class="dm-categories-header">
+                <span class="dm-kicker">TOOL CATEGORIES</span>
+                <span id="toolCountLabel" class="dm-kicker"></span>
+            </div>
+
+            <div id="categoriesGrid"></div>
         </section>
 
         <!-- Results View -->
-        <article id="resultsArea" class="view results-view" style="display: none;">
-            <header>
-                <aside></aside>
-                <hgroup>
-                    <h2></h2>
-                    <p></p>
-                </hgroup>
-            </header>
-            <main id="resultsContent">
-                <!-- Results will be displayed here -->
-            </main>
-            <footer>
-                <details name="detailsPrompt">
-                    <summary>Prompt</summary>
-                    <pre id="detailsPrompt"></pre>
-                </details>
-                <details name="detailsResponse">
-                    <summary>Raw response</summary>
-                    <pre id="detailsResponse"></pre>
-                </details>
-            </footer>
-            <footer class="grid">
-                <button class="primary" id="copyResultsBtn" onclick="copyResultsToClipboard();">Copy Results</button>
-                <button class="primary" id="downloadResultsBtn" onclick="downloadResults();">Download</button>
-                <button class="secondary" id="showFormBtn">Show Form</button>
-            </footer>
-        </article>
+        <div id="resultsArea" class="view results-view" style="display: none;">
+            <article class="results-card">
+                <header>
+                    <div class="results-header-left">
+                        <div class="view-header-icon"></div>
+                        <div class="view-header-text">
+                            <div class="view-header-kicker"></div>
+                            <h2></h2>
+                        </div>
+                    </div>
+                    <span id="resultsModel" class="results-model-name"></span>
+                </header>
+                <main id="resultsContent"></main>
+                <div class="results-details">
+                    <details>
+                        <summary><span>PROMPT</span><span class="details-arrow">▾</span></summary>
+                        <pre id="detailsPrompt"></pre>
+                    </details>
+                    <details>
+                        <summary><span>RAW RESPONSE</span><span class="details-arrow">▾</span></summary>
+                        <pre id="detailsResponse"></pre>
+                    </details>
+                </div>
+            </article>
+            <div class="results-actions">
+                <button class="secondary" id="copyResultsBtn" onclick="copyResultsToClipboard();">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                    Copy Results
+                </button>
+                <button class="secondary" id="downloadResultsBtn" onclick="downloadResults();">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M8 11l4 4 4-4M5 20h14"/></svg>
+                    Download
+                </button>
+                <button class="primary" id="showFormBtn">Show Form</button>
+            </div>
+        </div>
 
         <!-- Form View -->
         <article id="toolForm" class="view form-view" style="display: none;">
             <header>
-                <aside>📝</aside>
-                <hgroup>
+                <div class="view-header-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="2.4"/></svg>
+                </div>
+                <div class="view-header-text">
+                    <div class="view-header-kicker"></div>
                     <h2></h2>
-                    <p></p>
-                </hgroup>
+                </div>
             </header>
             <form id="apiForm" enctype="multipart/form-data">
                 <input type="hidden" name="action" id="action">
-                <fieldset class="form-fields" id="formFields">
-                    <!-- Will be populated by JavaScript -->
-                </fieldset>
+                <div class="form-fields" id="formFields"></div>
             </form>
-            <footer class="grid">
-                <button type="submit" form="apiForm" class="primary" id="submitBtn">Submit</button>
+            <footer>
                 <button type="button" class="secondary" id="cancelBtn">Cancel</button>
+                <button type="submit" form="apiForm" id="submitBtn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4l14 8-14 8z"/></svg>
+                    Run Analysis
+                </button>
             </footer>
         </article>
 
         <!-- History View -->
         <article class="view history-view">
             <header>
-                <aside>📜</aside>
-                <hgroup>
+                <div class="history-header-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 1.6"/></svg>
+                </div>
+                <div class="history-header-text">
+                    <div class="history-header-kicker">SESSION LOG</div>
                     <h2>Analysis History</h2>
-                    <p>Track your previous analysis sessions and results</p>
-                </hgroup>
+                </div>
+                <span id="historyEntryCount" class="history-entry-count"></span>
             </header>
-            <main>
-                <!-- History items will be displayed here -->
-            </main>
-            <footer class="grid">
-                <button class="secondary" id="clearHistoryBtn" onclick="clearHistory();">Clear History</button>
+            <main></main>
+            <footer>
+                <button id="clearHistoryBtn" onclick="clearHistory();">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>
+                    Clear History
+                </button>
             </footer>
         </article>
     </main>
@@ -160,52 +203,62 @@ font-size='90'%3E%F0%9F%92%A0%3C/text%3E%3C/svg%3E">
 
     <!-- Tools View Template -->
     <template id="toolsViewTemplate">
-        <section class="view tools-view">
-            <header>
-                <aside>🔧</aside>
-                <hgroup>
-                    <h2>AI Tools</h2>
-                    <p>Select a tool to process your documents</p>
-                </hgroup>
-            </header>
-            <main class="grid">
-            </main>
-        </section>
+        <section class="view tools-view"></section>
     </template>
 
+    <!-- Category Card Template (home grid) -->
+    <template id="categoryCardTemplate">
+        <article class="card">
+            <div class="card-top">
+                <aside></aside>
+                <span class="card-index"></span>
+            </div>
+            <h4></h4>
+            <p></p>
+            <div class="card-footer">
+                <span class="card-count"></span>
+                <span class="card-arrow">→</span>
+            </div>
+        </article>
+    </template>
+
+    <!-- Tool Card Template (category grid) -->
     <template id="cardTemplate">
         <article class="card">
-            <aside></aside>
-            <hgroup>
-                <h4></h4>
-                <p></p>
-            </hgroup>
+            <div class="card-top">
+                <aside></aside>
+            </div>
+            <h4></h4>
+            <p></p>
         </article>
     </template>
 
     <!-- History Templates -->
     <template id="historyItemTemplate">
         <section class="history-item">
-            <header>
-                <aside></aside>
-                <hgroup>
+            <span class="history-item-icon"></span>
+            <div class="history-item-body">
+                <div class="history-item-row">
                     <h4></h4>
-                    <p></p>
-                </hgroup>
-            </header>
-            <code></code>
+                    <span class="history-item-date"></span>
+                </div>
+                <p></p>
+            </div>
         </section>
     </template>
 
     <template id="historyEmptyTemplate">
-        <section class="history-item">
-            <header>
-                <aside>📜</aside>
-                <hgroup>
+        <section class="history-item history-item--empty">
+            <span class="history-item-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 1.6"/></svg>
+            </span>
+            <div class="history-item-body">
+                <div class="history-item-row">
                     <h4>No history yet</h4>
-                    <p>Your analysis history will appear here</p>
-                </hgroup>
-            </header>
+                    <span class="history-item-date"></span>
+                </div>
+                <p>Your analysis history will appear here</p>
+            </div>
         </section>
     </template>
 </body>

@@ -10,27 +10,32 @@ let promptsData = null;
  *
  * This creates clickable menu items for each category in the main navigation bar
  */
+// SVG icons for each category ID (matches mockup)
+const CATEGORY_SVGS = {
+    rad: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="2.4"/></svg>',
+    cli: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8.5v7M8.5 12h7"/></svg>',
+    adm: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M8 12h8M8 16h5"/></svg>',
+    pac: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/></svg>',
+    res: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 4l8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 16l8 4 8-4"/></svg>',
+    cpr: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>',
+    ccr: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19l2.5-.7L18 7.8 16.2 6 5.7 16.5z"/><path d="M14.5 7.5l2 2"/></svg>',
+    dev: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></svg>',
+};
+
 function populateCategoriesMenu() {
     const menuContainer = document.getElementById('categoriesMenu');
     if (!menuContainer || !categoriesData) return;
 
     for (const [categoryId, categoryData] of Object.entries(categoriesData)) {
-        const menuItem = document.createElement('li');
-        const menuLink = document.createElement('a');
-        menuLink.href = '#';
-        menuLink.dataset.view = `tools-${categoryId}`;
-        //menuLink.title = categoryData.name;
-        menuLink.dataset.tooltip = categoryData.name || '';
-        menuLink.dataset.placement = "bottom";
-        menuLink.innerHTML = `${categoryData.icon || '📁'}`;
+        const btn = document.createElement('button');
+        btn.className = 'dm-nav-btn';
+        btn.title = categoryData.name || categoryId;
+        btn.setAttribute('aria-label', categoryData.name || categoryId);
+        btn.innerHTML = CATEGORY_SVGS[categoryId] ||
+            `<span style="font-size:15px">${categoryData.icon || '📁'}</span>`;
 
-        menuLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            switchView(`tools-${categoryId}`);
-        });
-
-        menuItem.appendChild(menuLink);
-        menuContainer.appendChild(menuItem);
+        btn.addEventListener('click', () => switchView(`tools-${categoryId}`));
+        menuContainer.appendChild(btn);
     }
 }
 
@@ -215,10 +220,16 @@ function applyTheme() {
         themeIconChar = systemPrefersDark ? '☀️' : '🌙';
     }
 
-    // Update theme button icon
+    // Update theme button icon (SVG sun/moon)
     const themeButton = document.getElementById('themeToggle');
     if (themeButton) {
-        themeButton.textContent = themeIconChar;
+        if (actualTheme === 'dark') {
+            // Show sun (switch to light)
+            themeButton.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M5 5l1.8 1.8M17.2 17.2L19 19M19 5l-1.8 1.8M6.8 17.2L5 19"/></svg>';
+        } else {
+            // Show moon (switch to dark)
+            themeButton.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 7 7 0 1 0 20 14.5z"/></svg>';
+        }
     }
 
     // Apply the theme
@@ -614,26 +625,10 @@ function createCategoriesViews(categories) {
         const templateContent = toolsViewTemplate.content.cloneNode(true);
         const categoryView = templateContent.querySelector('section');
 
-        // Update the view properties
-        //categoryView.classList.add('category-view');
         categoryView.classList.add(`tools-${categoryId}-view`);
         categoryView.dataset.view = `tools-${categoryId}`;
+        categoryView.id = `${categoryId}ToolsGrid`;
         categoryView.style.display = 'none';
-
-        // Update the title and description
-        const iconElement = categoryView.querySelector('header aside');
-        const titleElement = categoryView.querySelector('header h2');
-        const descriptionElement = categoryView.querySelector('header p');
-        
-        iconElement.textContent = categoryData.icon || '📁';
-        titleElement.textContent = categoryData.name || `Category: ${categoryId}`;
-        descriptionElement.textContent = categoryData.description || '';
-
-        // Update the tools grid ID
-        const toolsGrid = categoryView.querySelector('.grid');
-        if (toolsGrid) {
-            toolsGrid.id = `${categoryId}ToolsGrid`;
-        }
 
         // Append the category view to the container BEFORE populating tools
         viewContainer.appendChild(categoryView);
@@ -722,35 +717,51 @@ function populateCategoryCards() {
         return;
     }
 
-    // Clear existing grid content
     categoriesGrid.innerHTML = '';
 
-    // Get category card template
-    const template = document.getElementById('cardTemplate');
+    const template = document.getElementById('categoryCardTemplate') || document.getElementById('cardTemplate');
     if (!template) {
         showToast('Category card template not found', 'error');
         return;
     }
 
-    // Add a card for each category
+    // Count tools per category
+    const toolCounts = {};
+    if (toolsData) {
+        for (const toolData of Object.values(toolsData)) {
+            const cat = toolData.category;
+            toolCounts[cat] = (toolCounts[cat] || 0) + 1;
+        }
+    }
+
+    const totalTools = Object.values(toolCounts).reduce((a, b) => a + b, 0);
+    const catCount = Object.keys(categoriesData).length;
+    const countLabel = document.getElementById('toolCountLabel');
+    if (countLabel) countLabel.textContent = `${String(catCount).padStart(2,'0')} / ${totalTools} TOOLS`;
+
+    let index = 1;
     for (const [categoryId, categoryData] of Object.entries(categoriesData)) {
         const clone = template.content.cloneNode(true);
-        // Populate card elements
-        const iconElement = clone.querySelector('aside');
-        const titleElement = clone.querySelector('h4');
-        const descriptionElement = clone.querySelector('p');
-        if (iconElement) iconElement.textContent = categoryData.icon || '📁';
-        if (titleElement) titleElement.textContent = categoryData.name;
-        if (descriptionElement) descriptionElement.textContent = categoryData.description || '';
-        // Add click handler to show category tools
-        card = clone.querySelector('article');
+
+        const iconEl = clone.querySelector('.card-top aside') || clone.querySelector('aside');
+        const indexEl = clone.querySelector('.card-index');
+        const titleEl = clone.querySelector('h4');
+        const descEl = clone.querySelector('p');
+        const countEl = clone.querySelector('.card-count');
+
+        if (iconEl) iconEl.innerHTML = CATEGORY_SVGS[categoryId] || categoryData.icon || '📁';
+        if (indexEl) indexEl.textContent = String(index).padStart(2, '0');
+        if (titleEl) titleEl.textContent = categoryData.name;
+        if (descEl) descEl.textContent = categoryData.description || '';
+        const tc = toolCounts[categoryId] || 0;
+        if (countEl) countEl.textContent = `${tc} TOOL${tc !== 1 ? 'S' : ''}`;
+
+        const card = clone.querySelector('article');
         if (card) {
-            card.addEventListener('click', () => {
-                switchView('tools-' + categoryId);
-            });
+            card.addEventListener('click', () => switchView('tools-' + categoryId));
         }
-        // Add the card
         categoriesGrid.appendChild(clone);
+        index++;
     }
 }
 
@@ -818,11 +829,11 @@ function loadToolsInCategory(category) {
         const clone = template.content.cloneNode(true);
 
         // Populate card elements
-        const iconElement = clone.querySelector('aside');
+        const iconElement = clone.querySelector('.card-top aside');
         const titleElement = clone.querySelector('h4');
         const descriptionElement = clone.querySelector('p');
 
-        if (iconElement) iconElement.textContent = tool.icon;
+        if (iconElement) iconElement.innerHTML = CATEGORY_SVGS[tool.category] || tool.icon || '📄';
         if (titleElement) titleElement.textContent = tool.name;
         if (descriptionElement) descriptionElement.textContent = tool.description;
 
@@ -995,15 +1006,18 @@ async function displayToolForm(toolId) {
         const toolForm = document.getElementById('toolForm');
 
         // Update form title and description
-        const formIcon = toolForm.querySelector('header aside');
-        const formTitle = toolForm.querySelector('header h2');
-        const formSubtitle = toolForm.querySelector('header p');
-        formIcon.textContent = tool.icon || '📄';
-        formTitle.textContent = tool.name || 'Unnamed Tool';
-        formSubtitle.textContent = tool.description || '';
+        const formIcon = toolForm.querySelector('.view-header-icon');
+        const formTitle = toolForm.querySelector('.view-header-text h2');
+        const formKicker = toolForm.querySelector('.view-header-kicker');
+        if (formIcon) formIcon.innerHTML = CATEGORY_SVGS[tool.category] || tool.icon || '';
+        if (formTitle) formTitle.textContent = tool.name || 'Unnamed Tool';
+        if (formKicker) {
+            const cat = category ? category.name.toUpperCase() : 'CONFIGURE';
+            formKicker.textContent = cat + ' · CONFIGURE';
+        }
 
-        // Update page title and subtitle with category info
-        updatePageTitle(category.name, category.description, category.icon);
+        // Update page header with tool and category info
+        updatePageTitle(tool.name || category.name, (category.name || 'CONFIGURE').toUpperCase() + ' · TOOL');
 
         // Populate the form fields
         const formFields = document.getElementById('formFields');
@@ -1054,6 +1068,15 @@ async function displayToolForm(toolId) {
                     formFields.appendChild(fieldElement);
                 }
             });
+        }
+
+        // Group consecutive paired fields (model + language) into a 2-col row
+        const paired = formFields.querySelectorAll('.form-field--paired');
+        if (paired.length >= 2) {
+            const row = document.createElement('div');
+            row.className = 'form-fields-row';
+            paired[0].parentNode.insertBefore(row, paired[0]);
+            paired.forEach(f => row.appendChild(f));
         }
 
         // Show the form and hide results area
@@ -1256,8 +1279,51 @@ function createFormField(field, cookies = {}) {
                 input.placeholder = field.placeholder;
             }
     }
-    // Append input to container
-    container.appendChild(input);
+    // Wrap selects in relative div with arrow indicator
+    if (field.type === 'select') {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'select-wrapper';
+        wrapper.appendChild(input);
+        const arrow = document.createElement('span');
+        arrow.className = 'select-arrow';
+        arrow.textContent = '▾';
+        wrapper.appendChild(arrow);
+        container.appendChild(wrapper);
+    } else if (field.type === 'file') {
+        // Custom drop zone — real input hidden, visual zone triggers it
+        input.id = field.name;
+        input.style.display = 'none';
+        const zone = document.createElement('div');
+        zone.className = 'file-drop-zone';
+        zone.innerHTML = `
+            <span class="file-drop-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M8 9l4-4 4 4M5 19h14"/></svg>
+            </span>
+            <div class="file-drop-text">
+                <div class="file-drop-label">Drop a file or click to browse</div>
+                <div class="file-drop-hint">TXT · PDF · IMAGE — MAX 10MB</div>
+            </div>`;
+        zone.addEventListener('click', () => input.click());
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+        zone.addEventListener('drop', e => {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                const dt = new DataTransfer();
+                dt.items.add(e.dataTransfer.files[0]);
+                input.files = dt.files;
+                zone.querySelector('.file-drop-label').textContent = e.dataTransfer.files[0].name;
+            }
+        });
+        input.addEventListener('change', () => {
+            if (input.files.length) zone.querySelector('.file-drop-label').textContent = input.files[0].name;
+        });
+        container.appendChild(input);
+        container.appendChild(zone);
+    } else {
+        container.appendChild(input);
+    }
 
     // Add help text if available
     if (field.help) {
@@ -1266,7 +1332,11 @@ function createFormField(field, cookies = {}) {
         container.appendChild(helpElement);
     }
 
-    // Return the container
+    // Mark paired fields (model + language) for 2-col layout
+    if (field.name === 'model' || field.name === 'language') {
+        container.classList.add('form-field--paired');
+    }
+
     return container;
 }
 
@@ -1561,9 +1631,10 @@ function displayResults(results, fromHistory = false) {
     // Get results area and title elements
     const resultsArea = document.getElementById('resultsArea');
     const resultsContent = document.getElementById('resultsContent');
-    const resultsTitle = resultsArea.querySelector('header>hgroup>h2');
-    const resultsSubtitle = resultsArea.querySelector('header>hgroup>p');
-    const resultsIcon = resultsArea.querySelector('header>aside');
+    const resultsTitle = resultsArea.querySelector('.view-header-text h2');
+    const resultsSubtitle = resultsArea.querySelector('.view-header-kicker');
+    const resultsIcon = resultsArea.querySelector('.view-header-icon');
+    const resultsModel = document.getElementById('resultsModel');
     const detailsPrompt = document.getElementById('detailsPrompt');
     const detailsResponse = document.getElementById('detailsResponse');
 
@@ -1598,22 +1669,28 @@ function displayResults(results, fromHistory = false) {
     const toolId = results.tool || '';
     const tool = toolsData[toolId] || null;
 
-    // Update results title and subtitle
-    if (resultsTitle && tool && tool.form && tool.form.title) {
-        resultsTitle.textContent = tool.form.title;
-    } else {
-        resultsTitle.textContent = 'Results';
+    // Update results panel header — p = kicker, h2 = title
+    if (resultsSubtitle) {
+        const cat = tool?.category ? categoriesData[tool.category] : null;
+        resultsSubtitle.textContent = cat ? cat.name.toUpperCase() + ' · COMPLETE' : 'ANALYSIS COMPLETE';
     }
-    if (resultsSubtitle && tool && tool.form && tool.form.description) {
-        resultsSubtitle.textContent = tool.form.description;
-    } else {
-        resultsSubtitle.textContent = 'Review the AI-generated results below. You can copy the content or download it as a file.';
+    if (resultsTitle) {
+        resultsTitle.textContent = (tool?.form?.title) || tool?.name || 'Results';
     }
-    if (resultsIcon && tool && tool.form && tool.form.icon) {
-        resultsIcon.textContent = tool.form.icon;
-    } else {
-        resultsIcon.textContent = '';
+    if (resultsIcon && tool?.category) {
+        resultsIcon.innerHTML = CATEGORY_SVGS[tool.category] || tool.icon || '';
+    } else if (resultsIcon) {
+        resultsIcon.innerHTML = '';
     }
+
+    // Show model name in header
+    if (resultsModel) {
+        const modelName = results.response?.model || results.model || '';
+        resultsModel.textContent = modelName ? modelName.toUpperCase() : '';
+    }
+
+    // Update page header
+    updatePageTitle(tool?.name || 'Results', 'OUTPUT · ANALYSIS');
 
     // Check if the result contains markdown code fences
     const resultsInfo = extractCodeFenceInfo(responseContent, 'markdown');
@@ -1628,7 +1705,7 @@ function displayResults(results, fromHistory = false) {
     // Check if resultsContent is not empty
     if (resultsContent.innerHTML.trim() !== '') {
         // Show results area
-        resultsArea.style.display = 'block';
+        resultsArea.style.display = 'flex';
         // Switch to results view
         switchView('results');
     } else {
@@ -1843,7 +1920,7 @@ function showModalError(title, message) {
 function showResults() {
     const resultsArea = document.getElementById('resultsArea');
     if (resultsArea && resultsArea.style) {
-        resultsArea.style.display = 'block';
+        resultsArea.style.display = 'flex';
         switchView('results');
         resultsArea.scrollIntoView({ behavior: 'smooth' });
     }
@@ -2101,6 +2178,19 @@ function switchView(viewName, params = {}) {
         selectedView.classList.add('active-view');
         selectedView.style.display = 'block';
     }
+
+    // Update page header for well-known views
+    const viewTitles = {
+        'home':    { title: 'Welcome to DocMind AI', kicker: 'WORKSPACE' },
+        'history': { title: 'Analysis History',      kicker: 'SESSION LOG' },
+    };
+    if (viewTitles[viewName]) {
+        updatePageTitle(viewTitles[viewName].title, viewTitles[viewName].kicker);
+    } else if (viewName.startsWith('tools-')) {
+        const catId = viewName.replace('tools-', '');
+        const cat = categoriesData && categoriesData[catId];
+        if (cat) updatePageTitle(cat.name, (cat.name || catId).toUpperCase() + ' · TOOLS');
+    }
 }
 
 /**
@@ -2114,35 +2204,12 @@ function switchView(viewName, params = {}) {
  *
  * @note Updates pageTitle and pageSubtitle elements
  */
-function updatePageTitle(title, subtitle, icon) {
-    const pageTitle = document.querySelector('body>header h1');
-    const pageSubtitle = document.querySelector('body>header p');
-    const pageIcon = document.querySelector('body>header aside');
+function updatePageTitle(title, kicker) {
+    const pageTitle = document.getElementById('pageTitle');
+    const pageKicker = document.getElementById('pageSubtitle');
 
-    if (pageTitle && title) {
-        pageTitle.textContent = title;
-    }
-    if (pageSubtitle && subtitle) {
-        pageSubtitle.textContent = subtitle;
-    }
-    if (pageIcon && icon) {
-        pageIcon.textContent = icon;
-    }
-
-    const titles = {
-        'home': {
-            title: '🏠 Home',
-            subtitle: 'Welcome to DocMind AI - Intelligent Document Processing'
-        },
-        'history': {
-            title: '⏳ History',
-            subtitle: 'View your previous analysis sessions and results'
-        },
-        'settings': {
-            title: '⚙️ Settings',
-            subtitle: 'Configure your preferences and account settings'
-        }
-    };
+    if (pageTitle && title) pageTitle.textContent = title;
+    if (pageKicker && kicker) pageKicker.textContent = kicker;
 }
 
 /**
@@ -2443,16 +2510,21 @@ async function displayHistory(maxItems = 10, page = 1) {
         const paginatedResults = results.slice(startIndex, startIndex + maxItems);
 
         if (paginatedResults.length === 0) {
-            // Show empty state using template
+            const entryCount = document.getElementById('historyEntryCount');
+            if (entryCount) entryCount.textContent = '0 ENTRIES';
             const emptyTemplate = document.getElementById('historyEmptyTemplate');
             if (emptyTemplate) {
                 const emptyState = emptyTemplate.content.cloneNode(true);
                 historyContent.appendChild(emptyState);
             } else {
-                historyContent.innerHTML = "<p>No history yet.</p>";
+                historyContent.innerHTML = '<p>No history yet.</p>';
             }
             return;
         }
+
+        // Update entry count
+        const entryCount = document.getElementById('historyEntryCount');
+        if (entryCount) entryCount.textContent = `${results.length} ENTR${results.length !== 1 ? 'IES' : 'Y'}`;
 
         // Get history item template
         const template = document.getElementById('historyItemTemplate');
@@ -2468,21 +2540,22 @@ async function displayHistory(maxItems = 10, page = 1) {
             historyItem.dataset.resultId = result.id;
 
             // Populate template elements
-            const iconElement = clone.querySelector('aside');
+            const iconElement = clone.querySelector('.history-item-icon');
             const titleElement = clone.querySelector('h4');
-            const dateElement = clone.querySelector('p');
-            const previewElement = clone.querySelector('code');
+            const dateElement = clone.querySelector('.history-item-date');
+            const previewElement = clone.querySelector('p');
 
-            // Format date
+            // Format date as DD.MM.YYYY · HH:MM
             const date = new Date(result.timestamp);
-            const formattedDate = date.toLocaleString();
+            const pad = n => String(n).padStart(2, '0');
+            const formattedDate = `${pad(date.getDate())}.${pad(date.getMonth()+1)}.${date.getFullYear()} · ${pad(date.getHours())}:${pad(date.getMinutes())}`;
             if (dateElement) dateElement.textContent = formattedDate;
 
             if (result.tool) {
-                // Get tool data from toolsData
                 const tool = toolsData[result.tool];
                 if (tool) {
-                    iconElement.textContent = tool.icon || '📄';
+                    const catId = tool.category;
+                    iconElement.innerHTML = CATEGORY_SVGS[catId] || tool.icon || '📄';
                     titleElement.textContent = tool.name || result.title;
                 } else {
                     iconElement.textContent = '📄';
@@ -2493,10 +2566,9 @@ async function displayHistory(maxItems = 10, page = 1) {
                 titleElement.textContent = result.title;
             }
 
-            // Add preview text with optimized processing
+            // Add preview text
             if (previewElement) {
                 let previewText = '';
-                // Try to get preview from different sources (optimized order)
                 if (result.response?.choices?.[0]?.message?.content) {
                     previewText = result.response.choices[0].message.content;
                 } else if (result.content?.response?.choices?.[0]?.message?.content) {
@@ -2506,15 +2578,8 @@ async function displayHistory(maxItems = 10, page = 1) {
                 } else {
                     previewText = String(result);
                 }
-                // Take first 200 characters and add ellipsis if truncated
-                if (previewText.length > 200) {
-                    previewText = previewText.substring(0, 200) + '...';
-                }
-                // Set the preview text content
+                if (previewText.length > 200) previewText = previewText.substring(0, 200) + '…';
                 previewElement.textContent = previewText;
-                if (typeof hljs !== 'undefined') {
-                    hljs.highlightElement(previewElement);
-                }
             }
 
             // Add click handler to entire item
