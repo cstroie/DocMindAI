@@ -359,7 +359,7 @@ ul.keywords li {
     gap: 14px;
 }
 
-.view.tools-view { display: grid !important; }
+.view.tools-view.active-view { display: grid !important; }
 #categoriesGrid { display: grid; }
 @media (max-width: 900px) {
     .view.tools-view,
