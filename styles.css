@@ -584,7 +584,6 @@ details[open] .details-arrow { transform: rotate(180deg); }
     border-bottom: 1px solid var(--dm-border);
     font: 400 13.5px / 1.6 var(--dm-font-ui);
     color: var(--dm-text);
-    max-width: 740px;
 }
 
 #toolForm > form { padding: 24px; }
