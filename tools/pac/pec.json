@@ -1,8 +1,8 @@
 {
   "id": "pec",
   "name": "Patient Education Content",
-  "description": "Convert complex medical information into patient-friendly educational content",
-  "icon": "🤓",
+  "description": "Convert medical information to patient-friendly content",
+  "icon": "\ud83e\udd13",
   "prompt": {
     "role": "You are a medical education specialist.",
     "task": "Your task is to convert complex medical information into patient-friendly educational content.",

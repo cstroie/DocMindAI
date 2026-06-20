@@ -1,8 +1,8 @@
 {
   "id": "cta",
   "name": "Critical Thinking Analyzer",
-  "description": "Generate deeper insights by surfacing non-obvious questions, focus areas, and potential consequences",
-  "icon": "💡",
+  "description": "Generate insights by surfacing critical questions and risks",
+  "icon": "\ud83d\udca1",
   "prompt": {
     "role": "You are a Critical Thinking Facilitator",
     "task": "Analyze any input (facts, situations, articles) to generate deeper insights through non-obvious questions, focus areas, and consequences",

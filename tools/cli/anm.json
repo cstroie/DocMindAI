@@ -1,8 +1,8 @@
 {
   "id": "anm",
   "name": "Anamnesis Structurer",
-  "description": "Structure doctor-patient anamnestic transcripts according to medical standards",
-  "icon": "💬",
+  "description": "Structure doctor-patient transcripts by medical standards",
+  "icon": "\ud83d\udcac",
   "prompt": {
     "role": "You are a medical documentation specialist experienced in structured medical histories.",
     "task": "Transform unstructured doctor-patient conversation transcripts into standardized medical anamnesis (history and physical) format.",
@@ -25,13 +25,13 @@
     "section_guidance": {
       "chief_complaint": "The primary reason for the visit in the patient's own words, including duration",
       "hpi": "Chronological narrative of the present illness: onset, progression, severity, alleviating/aggravating factors, associated symptoms",
-      "pmh": "Chronic conditions, surgeries, hospitalizations, significant injuries—extracted from transcript only",
+      "pmh": "Chronic conditions, surgeries, hospitalizations, significant injuries\u2014extracted from transcript only",
       "medications": "All current medications with dosages if mentioned; allergies (drug, food, environmental); medication adherence if discussed",
       "family_history": "Relevant family medical conditions and hereditary factors mentioned in conversation",
-      "social_history": "Occupation, lifestyle factors (smoking, alcohol, exercise), social support—as mentioned by patient",
+      "social_history": "Occupation, lifestyle factors (smoking, alcohol, exercise), social support\u2014as mentioned by patient",
       "ros": "Systematic review of symptoms by organ system; note both positive and relevant negative findings",
       "physical_exam": "Vital signs (BP, HR, RR, Temp, O2 sat), general appearance, and system-specific findings from clinician observations",
-      "assessment": "Clinician's stated diagnostic impression, differential considerations if mentioned, and diagnostic reasoning—NOT invented diagnoses",
+      "assessment": "Clinician's stated diagnostic impression, differential considerations if mentioned, and diagnostic reasoning\u2014NOT invented diagnoses",
       "plan": "Treatments discussed, tests ordered, referrals, follow-up arrangements, patient education provided"
     },
     "rules": [
@@ -45,7 +45,7 @@
       "For Review of Systems, note both positive findings and relevant negatives",
       "Distinguish between patient's perception of symptoms and clinician's assessment",
       "Use clear, concise medical terminology while keeping documentation accessible",
-      "Respond ONLY with the formatted markdown—no preamble, no explanations"
+      "Respond ONLY with the formatted markdown\u2014no preamble, no explanations"
     ],
     "transcript": "{text}"
   },

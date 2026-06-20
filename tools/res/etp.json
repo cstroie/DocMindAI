@@ -1,8 +1,8 @@
 {
   "id": "etp",
   "name": "Education Programme Analyzer",
-  "description": "Comprehensive analysis of education/training programs with curriculum review and strategic recommendations",
-  "icon": "🎓",
+  "description": "Comprehensive analysis of education and training programs",
+  "icon": "\ud83c\udf93",
   "prompt": {
     "role": "You are an education policy analyst specializing in program evaluation",
     "task": "Critically analyze education/training programs and provide structured recommendations",

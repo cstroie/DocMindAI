@@ -1,8 +1,8 @@
 {
   "id": "wpc",
   "name": "Web Page Converter",
-  "description": "Scrape web pages and convert them to clean Markdown format using AI processing",
-  "icon": "🕸️",
+  "description": "Convert web pages to clean Markdown format",
+  "icon": "\ud83d\udd78\ufe0f",
   "prompt": {
     "role": "You are a content extraction assistant.",
     "task": "Your task is to identify the main content of a web page and convert it to clean, well-formatted {format} document.",
@@ -62,8 +62,14 @@
         "label": "Output Format",
         "help": "Select the output format for the converted content.",
         "options": [
-          {"value": "markdown", "label": "Markdown"},
-          {"value": "dokuwiki", "label": "DokuWiki"}
+          {
+            "value": "markdown",
+            "label": "Markdown"
+          },
+          {
+            "value": "dokuwiki",
+            "label": "DokuWiki"
+          }
         ]
       },
       "model",

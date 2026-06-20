@@ -1,8 +1,8 @@
 {
   "id": "rdg",
   "name": "Reader's Digest",
-  "description": "Convert long papers and articles into short, easily digestible summaries",
-  "icon": "📖",
+  "description": "Summarize long papers into digestible summaries",
+  "icon": "\ud83d\udcd6",
   "prompt": {
     "role": "You are an editorial assistant trained in the Reader's Digest style",
     "task": "Condense this long content into a short, engaging summary while preserving key information.",

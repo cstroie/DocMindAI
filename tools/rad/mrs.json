@@ -1,8 +1,8 @@
 {
   "id": "mrs",
   "name": "Pediatric MRS Brain Lesion Analyser",
-  "description": "Analyse MR Spectroscopy data combined with conventional MRI findings in paediatric patients to generate a spectro-imaging synthesis, most probable diagnosis, and top 3 differential diagnoses.",
-  "icon": "🧠",
+  "description": "Analyze MR Spectroscopy for pediatric brain lesions",
+  "icon": "\ud83e\udde0",
   "prompt": {
     "role": "You are a specialist radiologist with expertise in paediatric neuroradiology and MR spectroscopy (MRS).",
     "task": "Analyse the MRS spectroscopic data and conventional MRI findings provided below for a brain lesion in a paediatric patient. Integrate the patient's age and clinical context and generate a structured report in {language} containing: (1) a spectro-imaging synthesis, (2) the most probable diagnosis with supporting arguments, and (3) a top 3 differential diagnosis table with supporting and excluding criteria.",
@@ -43,109 +43,109 @@
     ],
     "reference_data": [
       "Age-adjusted reference ranges for internal use (peak area ratios, short TE):",
-      "- Neonates / infants <2y: Cho/Cr may be up to 2.0 (normal); NAA/Cr may be as low as 0.8–1.0 (normal maturation); mI prominent.",
-      "- Children 2–10y: Cho/Cr normal <1.5; NAA/Cr normal >1.2.",
+      "- Neonates / infants <2y: Cho/Cr may be up to 2.0 (normal); NAA/Cr may be as low as 0.8\u20131.0 (normal maturation); mI prominent.",
+      "- Children 2\u201310y: Cho/Cr normal <1.5; NAA/Cr normal >1.2.",
       "- Adolescents >10y: Cho/Cr normal <1.2; NAA/Cr normal >1.5.",
-      "- Taurine (3.3–3.4 ppm): absent in normal brain at any age — presence is always pathological and strongly suggests embryonal tumour.",
-      "- Lac/Lip overlap at short TE — confirm Lac with TE 135ms inversion."
+      "- Taurine (3.3\u20133.4 ppm): absent in normal brain at any age \u2014 presence is always pathological and strongly suggests embryonal tumour.",
+      "- Lac/Lip overlap at short TE \u2014 confirm Lac with TE 135ms inversion."
     ],
     "spectral_interpretation_guidelines": [
       "Paediatric tumour MRS spectral fingerprints (use for pattern matching against patient data):",
       "",
       "  MEDULLOBLASTOMA (classic / desmoplastic / WNT / SHH):",
-      "  - Cho: markedly ↑↑ | NAA: markedly ↓↓ or absent | Cr: ↓ | Cho/Cr: >3.0 (often 3–6) | NAA/Cr: <0.5",
+      "  - Cho: markedly \u2191\u2191 | NAA: markedly \u2193\u2193 or absent | Cr: \u2193 | Cho/Cr: >3.0 (often 3\u20136) | NAA/Cr: <0.5",
       "  - Tau: PRESENT (pathognomonic in paediatrics, especially classic variant) | Lac: often present | Lip: may be present",
-      "  - mI: variable | Pattern: ↑↑Cho + ↓↓NAA + Tau = HIGHLY SPECIFIC for medulloblastoma",
-      "  - Peak age: 5–9 years | Location: midline posterior fossa / cerebellar vermis",
+      "  - mI: variable | Pattern: \u2191\u2191Cho + \u2193\u2193NAA + Tau = HIGHLY SPECIFIC for medulloblastoma",
+      "  - Peak age: 5\u20139 years | Location: midline posterior fossa / cerebellar vermis",
       "",
       "  AT/RT (Atypical Teratoid / Rhabdoid Tumour):",
-      "  - Cho: markedly ↑↑ | NAA: markedly ↓↓ or absent | Cr: ↓↓ | Cho/Cr: >3.0",
+      "  - Cho: markedly \u2191\u2191 | NAA: markedly \u2193\u2193 or absent | Cr: \u2193\u2193 | Cho/Cr: >3.0",
       "  - Tau: often PRESENT | Lac: present | Lip: prominent (necrosis common) | mI: variable",
       "  - Pattern: similar to medulloblastoma but younger age (<3y), haemorrhagic foci on SWI, heterogeneous",
       "  - Peak age: <3 years | INI1 loss on immunohistochemistry (molecular marker)",
       "",
       "  PILOCYTIC ASTROCYTOMA (WHO Grade 1):",
-      "  - Cho: mildly to moderately ↑ | NAA: mildly ↓ | Cr: normal or ↓ | Cho/Cr: 1.5–2.5",
+      "  - Cho: mildly to moderately \u2191 | NAA: mildly \u2193 | Cr: normal or \u2193 | Cho/Cr: 1.5\u20132.5",
       "  - Tau: ABSENT | Lac: often present (does NOT indicate high grade in this tumour) | Lip: may be present",
-      "  - mI: ↑ (glial marker) | Pattern: Lac presence in a low-grade-appearing lesion is characteristic",
-      "  - Peak age: 5–15 years | Location: cerebellum, optic pathway, hypothalamus, brainstem",
+      "  - mI: \u2191 (glial marker) | Pattern: Lac presence in a low-grade-appearing lesion is characteristic",
+      "  - Peak age: 5\u201315 years | Location: cerebellum, optic pathway, hypothalamus, brainstem",
       "",
-      "  EPENDYMOMA (posterior fossa, WHO Grade 2–3):",
-      "  - Cho: ↑ | NAA: ↓ | Cr: variable | Cho/Cr: 2.0–3.5",
+      "  EPENDYMOMA (posterior fossa, WHO Grade 2\u20133):",
+      "  - Cho: \u2191 | NAA: \u2193 | Cr: variable | Cho/Cr: 2.0\u20133.5",
       "  - Tau: usually ABSENT (key distinction from medulloblastoma) | Lac: variable | Lip: variable",
-      "  - mI: may be ↑ | Pattern: ↑Cho + ↓NAA without Tau; arises from floor of 4th ventricle",
-      "  - Peak age: 1–5 years | Location: 4th ventricle / posterior fossa (infratentorial) or spinal cord",
+      "  - mI: may be \u2191 | Pattern: \u2191Cho + \u2193NAA without Tau; arises from floor of 4th ventricle",
+      "  - Peak age: 1\u20135 years | Location: 4th ventricle / posterior fossa (infratentorial) or spinal cord",
       "",
-      "  DIPG — Diffuse Intrinsic Pontine Glioma (now: Diffuse Midline Glioma H3K27M, WHO Grade 4):",
-      "  - Cho: ↑ | NAA: ↓ | Cr: variable | Cho/Cr: 1.5–3.0 | NAA/Cr: <1.0",
+      "  DIPG \u2014 Diffuse Intrinsic Pontine Glioma (now: Diffuse Midline Glioma H3K27M, WHO Grade 4):",
+      "  - Cho: \u2191 | NAA: \u2193 | Cr: variable | Cho/Cr: 1.5\u20133.0 | NAA/Cr: <1.0",
       "  - Tau: ABSENT | Lac: present in higher-grade areas | Lip: may be present",
-      "  - mI: variable | Pattern: diffuse pontine expansion with ↑Cho + ↓NAA; voxel must be placed in brainstem",
-      "  - Peak age: 5–9 years | Location: pons (>50% involvement) | H3K27M mutation on biopsy",
+      "  - mI: variable | Pattern: diffuse pontine expansion with \u2191Cho + \u2193NAA; voxel must be placed in brainstem",
+      "  - Peak age: 5\u20139 years | Location: pons (>50% involvement) | H3K27M mutation on biopsy",
       "",
-      "  LOW-GRADE GLIOMA — Diffuse / Fibrillary (WHO Grade 2):",
-      "  - Cho: mildly ↑ | NAA: mildly ↓ | Cr: normal | Cho/Cr: 1.2–2.0 | NAA/Cr: 1.0–1.4",
-      "  - Tau: ABSENT | Lac: absent | Lip: absent | mI: ↑ (prominent glial marker)",
-      "  - Pattern: mildest spectral abnormality; ↑mI + mildly ↑Cho is characteristic",
+      "  LOW-GRADE GLIOMA \u2014 Diffuse / Fibrillary (WHO Grade 2):",
+      "  - Cho: mildly \u2191 | NAA: mildly \u2193 | Cr: normal | Cho/Cr: 1.2\u20132.0 | NAA/Cr: 1.0\u20131.4",
+      "  - Tau: ABSENT | Lac: absent | Lip: absent | mI: \u2191 (prominent glial marker)",
+      "  - Pattern: mildest spectral abnormality; \u2191mI + mildly \u2191Cho is characteristic",
       "  - Peak age: any | Location: cerebral hemispheres, often frontal or temporal",
       "",
       "  HIGH-GRADE GLIOMA / GBM (rare in children, more in adolescents):",
-      "  - Cho: markedly ↑↑ | NAA: markedly ↓↓ | Cr: ↓ | Cho/Cr: >3.0 | NAA/Cr: <0.5",
+      "  - Cho: markedly \u2191\u2191 | NAA: markedly \u2193\u2193 | Cr: \u2193 | Cho/Cr: >3.0 | NAA/Cr: <0.5",
       "  - Tau: ABSENT | Lac: present | Lip: prominent (necrosis) | mI: variable",
-      "  - Pattern: ↑↑Cho + ↓↓NAA + Lip/Lac without Tau; ring-enhancing on MRI",
+      "  - Pattern: \u2191\u2191Cho + \u2193\u2193NAA + Lip/Lac without Tau; ring-enhancing on MRI",
       "  - Peak age: adolescents | Location: cerebral hemispheres",
       "",
-      "  GANGLIOGLIOMA (WHO Grade 1–2):",
-      "  - Cho: mildly ↑ or normal | NAA: variable (may be preserved) | Cr: normal | Cho/Cr: 1.0–1.8",
-      "  - Tau: ABSENT | Lac: absent | Lip: absent | mI: mildly ↑",
+      "  GANGLIOGLIOMA (WHO Grade 1\u20132):",
+      "  - Cho: mildly \u2191 or normal | NAA: variable (may be preserved) | Cr: normal | Cho/Cr: 1.0\u20131.8",
+      "  - Tau: ABSENT | Lac: absent | Lip: absent | mI: mildly \u2191",
       "  - Pattern: near-normal spectrum with mild Cho elevation; often associated with epilepsy",
       "  - Peak age: children and young adults | Location: temporal lobe (most common)",
       "",
       "  CRANIOPHARYNGIOMA (adamantinomatous type):",
-      "  - MRS often non-diagnostic due to cystic/calcified content | Cho: variable | NAA: absent or markedly ↓",
+      "  - MRS often non-diagnostic due to cystic/calcified content | Cho: variable | NAA: absent or markedly \u2193",
       "  - Tau: ABSENT | Lac: may be present in cyst fluid | Lip: prominent (cholesterol-rich cyst content)",
       "  - Pattern: large Lip peak from cholesterol; NAA absent if purely cystic",
-      "  - Peak age: 5–14 years | Location: suprasellar / third ventricle",
+      "  - Peak age: 5\u201314 years | Location: suprasellar / third ventricle",
       "",
-      "  BRAIN ABSCESS (non-tumour — important DDx):",
-      "  - Cho: absent or ↓ | NAA: absent | Cr: absent | Cho/Cr: not calculable",
-      "  - Tau: ABSENT | Lac: prominent ↑↑ | Lip: prominent ↑↑",
-      "  - Acetate (1.9 ppm), Succinate (2.4 ppm), Amino acids (0.9 ppm): PRESENT — pathognomonic for pyogenic abscess",
+      "  BRAIN ABSCESS (non-tumour \u2014 important DDx):",
+      "  - Cho: absent or \u2193 | NAA: absent | Cr: absent | Cho/Cr: not calculable",
+      "  - Tau: ABSENT | Lac: prominent \u2191\u2191 | Lip: prominent \u2191\u2191",
+      "  - Acetate (1.9 ppm), Succinate (2.4 ppm), Amino acids (0.9 ppm): PRESENT \u2014 pathognomonic for pyogenic abscess",
       "  - Pattern: absent NAA/Cho/Cr + prominent Lac + Lip + amino acids = abscess until proven otherwise",
       "  - Location: any | DWI: marked restricted diffusion in cavity",
       "",
-      "  DEMYELINATING LESION / ADEM (non-tumour — important DDx):",
-      "  - Cho: ↑ (active phase) | NAA: ↓ (may recover) | Cr: normal | Cho/Cr: 1.5–2.5",
+      "  DEMYELINATING LESION / ADEM (non-tumour \u2014 important DDx):",
+      "  - Cho: \u2191 (active phase) | NAA: \u2193 (may recover) | Cr: normal | Cho/Cr: 1.5\u20132.5",
       "  - Tau: ABSENT | Lac: may be present in acute phase | Lip: absent",
-      "  - mI: ↑ | Pattern: ↑Cho + ↓NAA + ↑mI without Tau; NAA recovery on follow-up MRS supports demyelination over tumour",
+      "  - mI: \u2191 | Pattern: \u2191Cho + \u2193NAA + \u2191mI without Tau; NAA recovery on follow-up MRS supports demyelination over tumour",
       "  - Context: acute presentation, multiple lesions, post-infectious history",
       "",
-      "  DNET — Dysembryoplastic Neuroepithelial Tumour:",
-      "  - Cho: normal or minimally ↑ | NAA: normal or minimally ↓ | Cr: normal | Cho/Cr: 1.0–1.4",
-      "  - Tau: ABSENT | Lac: absent | Lip: absent | mI: normal or mildly ↑",
-      "  - Pattern: NEAR-NORMAL spectrum is itself diagnostically valuable — a cortical lesion with chronic epilepsy and near-normal MRS strongly favours DNET over neoplasm",
+      "  DNET \u2014 Dysembryoplastic Neuroepithelial Tumour:",
+      "  - Cho: normal or minimally \u2191 | NAA: normal or minimally \u2193 | Cr: normal | Cho/Cr: 1.0\u20131.4",
+      "  - Tau: ABSENT | Lac: absent | Lip: absent | mI: normal or mildly \u2191",
+      "  - Pattern: NEAR-NORMAL spectrum is itself diagnostically valuable \u2014 a cortical lesion with chronic epilepsy and near-normal MRS strongly favours DNET over neoplasm",
       "  - Key distinction: ganglioglioma has similar MRS but usually shows mild Cho elevation; DNET is flatter",
       "  - Peak age: children and adolescents | Location: cortical / subcortical, temporal lobe most common | T2: bubbly multicystic appearance | No contrast enhancement | No mass effect",
       "",
       "  CHOROID PLEXUS CARCINOMA (CPC, WHO Grade 3):",
-      "  - Cho: markedly ↑↑ | NAA: markedly ↓↓ or absent | Cr: ↓ | Cho/Cr: >3.0",
+      "  - Cho: markedly \u2191\u2191 | NAA: markedly \u2193\u2193 or absent | Cr: \u2193 | Cho/Cr: >3.0",
       "  - Tau: may be present | Lac: often present | Lip: present (necrosis common) | mI: variable",
       "  - Pattern: aggressive spectral profile similar to AT/RT; location within ventricle is key distinguishing feature",
-      "  - Key distinction from Choroid Plexus Papilloma (CPP, Grade 1): CPP shows milder Cho elevation (Cho/Cr 1.5–2.5) and no Lac/Lip",
+      "  - Key distinction from Choroid Plexus Papilloma (CPP, Grade 1): CPP shows milder Cho elevation (Cho/Cr 1.5\u20132.5) and no Lac/Lip",
       "  - Peak age: <5 years (CPC); <2 years most common | Location: lateral ventricle (children), 4th ventricle (adults) | Marked contrast enhancement | Often large with hydrocephalus",
       "",
       "  GERMINOMA (intracranial germ cell tumour):",
-      "  - Cho: ↑ to ↑↑ | NAA: ↓↓ or absent | Cr: ↓ | Cho/Cr: 2.0–4.0",
+      "  - Cho: \u2191 to \u2191\u2191 | NAA: \u2193\u2193 or absent | Cr: \u2193 | Cho/Cr: 2.0\u20134.0",
       "  - Tau: ABSENT | Lac: may be present | Lip: may be present | mI: variable",
-      "  - Pattern: markedly ↑Cho + absent NAA without Tau; midline location is essential clue",
+      "  - Pattern: markedly \u2191Cho + absent NAA without Tau; midline location is essential clue",
       "  - Lipid peak may reflect cholesterol from syncytiotrophoblastic giant cells in mixed GCT",
-      "  - Peak age: 10–20 years (adolescents) | Location: pineal gland or suprasellar region | CSF tumour markers (beta-hCG, AFP) essential for diagnosis | Exquisitely radiosensitive",
+      "  - Peak age: 10\u201320 years (adolescents) | Location: pineal gland or suprasellar region | CSF tumour markers (beta-hCG, AFP) essential for diagnosis | Exquisitely radiosensitive",
       "",
-      "  SEGA — Subependymal Giant Cell Astrocytoma (WHO Grade 1):",
-      "  - Cho: mildly ↑ | NAA: mildly ↓ or normal | Cr: normal | Cho/Cr: 1.2–2.0",
-      "  - Tau: ABSENT | Lac: absent | Lip: absent | mI: mildly ↑",
+      "  SEGA \u2014 Subependymal Giant Cell Astrocytoma (WHO Grade 1):",
+      "  - Cho: mildly \u2191 | NAA: mildly \u2193 or normal | Cr: normal | Cho/Cr: 1.2\u20132.0",
+      "  - Tau: ABSENT | Lac: absent | Lip: absent | mI: mildly \u2191",
       "  - Pattern: mild, non-specific spectral abnormality; diagnosis relies heavily on location, clinical context and imaging rather than MRS alone",
       "  - Key diagnostic clue: location at foramen of Monro + Tuberous Sclerosis Complex (TSC) history + cortical/subcortical tubers on MRI = SEGA until proven otherwise",
-      "  - Peak age: 8–18 years | Location: lateral ventricle wall near foramen of Monro | Slow-growing; serial MRS may show stable spectrum | Strong contrast enhancement typical"
+      "  - Peak age: 8\u201318 years | Location: lateral ventricle wall near foramen of Monro | Slow-growing; serial MRS may show stable spectrum | Strong contrast enhancement typical"
     ],
     "patient_data": "Age: {age} | Sex: {sex} | Clinical context: {clinical_context}",
     "lesion_mri": "Location: {lesion_location} | Size: {lesion_size} | T1: {lesion_t1} | T2: {lesion_t2} | FLAIR: {lesion_flair} | DWI/ADC: {lesion_dwi} | SWI: {lesion_swi} | Contrast: {lesion_contrast} | Mass effect: {lesion_mass_effect} | Margins: {lesion_margins} | Other: {lesion_other}",
@@ -160,7 +160,7 @@
         "name": "age",
         "type": "text",
         "label": "Patient Age",
-        "help": "Patient age — be precise, as metabolite reference ranges are highly age-dependent in children (e.g. '8 months', '3 years', '14 years').",
+        "help": "Patient age \u2014 be precise, as metabolite reference ranges are highly age-dependent in children (e.g. '8 months', '3 years', '14 years').",
         "placeholder": "e.g. 7 years",
         "required": true
       },
@@ -170,8 +170,14 @@
         "label": "Patient Sex",
         "help": "Biological sex of the patient.",
         "options": [
-          {"value": "M", "label": "Male"},
-          {"value": "F", "label": "Female"}
+          {
+            "value": "M",
+            "label": "Male"
+          },
+          {
+            "value": "F",
+            "label": "Female"
+          }
         ],
         "required": true
       },
@@ -204,11 +210,26 @@
         "label": "T1 Signal",
         "help": "Signal intensity of the lesion on T1-weighted sequence.",
         "options": [
-          {"value": "hypointense", "label": "Hypointense"},
-          {"value": "isointense", "label": "Isointense"},
-          {"value": "hyperintense", "label": "Hyperintense"},
-          {"value": "heterogeneous", "label": "Heterogeneous"},
-          {"value": "N/A", "label": "Not available"}
+          {
+            "value": "hypointense",
+            "label": "Hypointense"
+          },
+          {
+            "value": "isointense",
+            "label": "Isointense"
+          },
+          {
+            "value": "hyperintense",
+            "label": "Hyperintense"
+          },
+          {
+            "value": "heterogeneous",
+            "label": "Heterogeneous"
+          },
+          {
+            "value": "N/A",
+            "label": "Not available"
+          }
         ],
         "required": true
       },
@@ -218,11 +239,26 @@
         "label": "T2 Signal",
         "help": "Signal intensity of the lesion on T2-weighted sequence.",
         "options": [
-          {"value": "hypointense", "label": "Hypointense"},
-          {"value": "isointense", "label": "Isointense"},
-          {"value": "hyperintense", "label": "Hyperintense"},
-          {"value": "heterogeneous", "label": "Heterogeneous"},
-          {"value": "N/A", "label": "Not available"}
+          {
+            "value": "hypointense",
+            "label": "Hypointense"
+          },
+          {
+            "value": "isointense",
+            "label": "Isointense"
+          },
+          {
+            "value": "hyperintense",
+            "label": "Hyperintense"
+          },
+          {
+            "value": "heterogeneous",
+            "label": "Heterogeneous"
+          },
+          {
+            "value": "N/A",
+            "label": "Not available"
+          }
         ],
         "required": true
       },
@@ -230,15 +266,36 @@
         "name": "lesion_flair",
         "type": "select",
         "label": "FLAIR Signal",
-        "help": "Signal intensity on FLAIR. Note: FLAIR is unreliable under 18–24 months due to incomplete myelination.",
+        "help": "Signal intensity on FLAIR. Note: FLAIR is unreliable under 18\u201324 months due to incomplete myelination.",
         "options": [
-          {"value": "hypointense", "label": "Hypointense"},
-          {"value": "isointense", "label": "Isointense"},
-          {"value": "hyperintense", "label": "Hyperintense"},
-          {"value": "suppressed", "label": "Suppressed"},
-          {"value": "heterogeneous", "label": "Heterogeneous"},
-          {"value": "N/A — patient under 2 years", "label": "N/A — patient under 2 years"},
-          {"value": "N/A", "label": "Not available"}
+          {
+            "value": "hypointense",
+            "label": "Hypointense"
+          },
+          {
+            "value": "isointense",
+            "label": "Isointense"
+          },
+          {
+            "value": "hyperintense",
+            "label": "Hyperintense"
+          },
+          {
+            "value": "suppressed",
+            "label": "Suppressed"
+          },
+          {
+            "value": "heterogeneous",
+            "label": "Heterogeneous"
+          },
+          {
+            "value": "N/A \u2014 patient under 2 years",
+            "label": "N/A \u2014 patient under 2 years"
+          },
+          {
+            "value": "N/A",
+            "label": "Not available"
+          }
         ],
         "required": true
       },
@@ -247,7 +304,7 @@
         "type": "text",
         "label": "DWI / ADC",
         "help": "Diffusion restriction: yes / no / partial. ADC: low / high / normal. Restricted diffusion is common in embryonal tumours (medulloblastoma, AT/RT) due to high cellularity.",
-        "placeholder": "e.g. Marked restricted diffusion, ADC low (~500 µm²/s)"
+        "placeholder": "e.g. Marked restricted diffusion, ADC low (~500 \u00b5m\u00b2/s)"
       },
       {
         "name": "lesion_swi",
@@ -262,13 +319,34 @@
         "label": "Contrast Enhancement",
         "help": "Pattern of gadolinium contrast enhancement.",
         "options": [
-          {"value": "absent", "label": "Absent"},
-          {"value": "ring", "label": "Ring-enhancing"},
-          {"value": "nodular", "label": "Nodular"},
-          {"value": "homogeneous", "label": "Homogeneous"},
-          {"value": "heterogeneous", "label": "Heterogeneous"},
-          {"value": "leptomeningeal", "label": "Leptomeningeal / drop metastases"},
-          {"value": "N/A", "label": "Not performed"}
+          {
+            "value": "absent",
+            "label": "Absent"
+          },
+          {
+            "value": "ring",
+            "label": "Ring-enhancing"
+          },
+          {
+            "value": "nodular",
+            "label": "Nodular"
+          },
+          {
+            "value": "homogeneous",
+            "label": "Homogeneous"
+          },
+          {
+            "value": "heterogeneous",
+            "label": "Heterogeneous"
+          },
+          {
+            "value": "leptomeningeal",
+            "label": "Leptomeningeal / drop metastases"
+          },
+          {
+            "value": "N/A",
+            "label": "Not performed"
+          }
         ]
       },
       {
@@ -277,11 +355,26 @@
         "label": "Mass Effect",
         "help": "Degree of mass effect and peritumoral oedema. Include hydrocephalus if present.",
         "options": [
-          {"value": "absent", "label": "Absent"},
-          {"value": "mild", "label": "Mild"},
-          {"value": "moderate", "label": "Moderate"},
-          {"value": "significant with hydrocephalus", "label": "Significant — with obstructive hydrocephalus"},
-          {"value": "significant without hydrocephalus", "label": "Significant — without hydrocephalus"}
+          {
+            "value": "absent",
+            "label": "Absent"
+          },
+          {
+            "value": "mild",
+            "label": "Mild"
+          },
+          {
+            "value": "moderate",
+            "label": "Moderate"
+          },
+          {
+            "value": "significant with hydrocephalus",
+            "label": "Significant \u2014 with obstructive hydrocephalus"
+          },
+          {
+            "value": "significant without hydrocephalus",
+            "label": "Significant \u2014 without hydrocephalus"
+          }
         ],
         "required": true
       },
@@ -291,10 +384,22 @@
         "label": "Lesion Margins",
         "help": "Appearance of the lesion borders.",
         "options": [
-          {"value": "well-defined", "label": "Well-defined"},
-          {"value": "ill-defined", "label": "Ill-defined"},
-          {"value": "infiltrative", "label": "Infiltrative"},
-          {"value": "N/A", "label": "Not assessable"}
+          {
+            "value": "well-defined",
+            "label": "Well-defined"
+          },
+          {
+            "value": "ill-defined",
+            "label": "Ill-defined"
+          },
+          {
+            "value": "infiltrative",
+            "label": "Infiltrative"
+          },
+          {
+            "value": "N/A",
+            "label": "Not assessable"
+          }
         ]
       },
       {
@@ -308,12 +413,24 @@
         "name": "mrs_te",
         "type": "select",
         "label": "MRS Echo Time (TE)",
-        "help": "Short TE (35ms) is preferred in paediatric imaging — it captures mI and Tau, which are critical for paediatric tumour diagnosis. Long TE better isolates Lac via doublet inversion.",
+        "help": "Short TE (35ms) is preferred in paediatric imaging \u2014 it captures mI and Tau, which are critical for paediatric tumour diagnosis. Long TE better isolates Lac via doublet inversion.",
         "options": [
-          {"value": "35ms (short TE)", "label": "Short TE — 35 ms (preferred in paediatrics)"},
-          {"value": "135ms (long TE)", "label": "Long TE — 135 ms"},
-          {"value": "144ms (long TE)", "label": "Long TE — 144 ms"},
-          {"value": "288ms (long TE)", "label": "Long TE — 288 ms"}
+          {
+            "value": "35ms (short TE)",
+            "label": "Short TE \u2014 35 ms (preferred in paediatrics)"
+          },
+          {
+            "value": "135ms (long TE)",
+            "label": "Long TE \u2014 135 ms"
+          },
+          {
+            "value": "144ms (long TE)",
+            "label": "Long TE \u2014 144 ms"
+          },
+          {
+            "value": "288ms (long TE)",
+            "label": "Long TE \u2014 288 ms"
+          }
         ],
         "required": true
       },
@@ -323,12 +440,30 @@
         "label": "Voxel Placement",
         "help": "Location of the MRS voxel relative to the lesion.",
         "options": [
-          {"value": "centred on lesion", "label": "Centred on lesion"},
-          {"value": "solid peripheral zone", "label": "Solid peripheral zone (avoiding necrosis/cyst)"},
-          {"value": "peritumoral region", "label": "Peritumoral region"},
-          {"value": "normal-appearing white matter", "label": "Normal-appearing white matter (reference)"},
-          {"value": "brainstem", "label": "Brainstem (e.g. DIPG)"},
-          {"value": "other", "label": "Other"}
+          {
+            "value": "centred on lesion",
+            "label": "Centred on lesion"
+          },
+          {
+            "value": "solid peripheral zone",
+            "label": "Solid peripheral zone (avoiding necrosis/cyst)"
+          },
+          {
+            "value": "peritumoral region",
+            "label": "Peritumoral region"
+          },
+          {
+            "value": "normal-appearing white matter",
+            "label": "Normal-appearing white matter (reference)"
+          },
+          {
+            "value": "brainstem",
+            "label": "Brainstem (e.g. DIPG)"
+          },
+          {
+            "value": "other",
+            "label": "Other"
+          }
         ]
       },
       {
@@ -341,15 +476,15 @@
       {
         "name": "mrs_naa",
         "type": "text",
-        "label": "NAA — Peak Area",
-        "help": "Peak area of N-acetylaspartate at the chemical shift position 1.98–2.02 ppm. Enter the area value only (e.g. 153).",
+        "label": "NAA \u2014 Peak Area",
+        "help": "Peak area of N-acetylaspartate at the chemical shift position 1.98\u20132.02 ppm. Enter the area value only (e.g. 153).",
         "placeholder": "e.g. 153",
         "required": true
       },
       {
         "name": "mrs_cho",
         "type": "text",
-        "label": "Cho — Peak Area",
+        "label": "Cho \u2014 Peak Area",
         "help": "Peak area of Choline at the chemical shift position 3.2 ppm. Enter the area value only (e.g. 210).",
         "placeholder": "e.g. 210",
         "required": true
@@ -357,7 +492,7 @@
       {
         "name": "mrs_cr",
         "type": "text",
-        "label": "Cr — Peak Area",
+        "label": "Cr \u2014 Peak Area",
         "help": "Peak area of Creatine at the chemical shift position 3.0 ppm. Enter the area value only (e.g. 98). Used as denominator for Cho/Cr and NAA/Cr ratios.",
         "placeholder": "e.g. 98",
         "required": true
@@ -366,7 +501,7 @@
         "name": "mrs_cho_cr",
         "type": "text",
         "label": "Cho/Cr Ratio",
-        "help": "Choline-to-Creatine ratio calculated from peak areas. Age-adjusted normals: <2y up to 2.0; 2–10y <1.5; >10y <1.2. Values above these thresholds suggest neoplasm.",
+        "help": "Choline-to-Creatine ratio calculated from peak areas. Age-adjusted normals: <2y up to 2.0; 2\u201310y <1.5; >10y <1.2. Values above these thresholds suggest neoplasm.",
         "placeholder": "e.g. 2.14",
         "required": true
       },
@@ -374,7 +509,7 @@
         "name": "mrs_naa_cr",
         "type": "text",
         "label": "NAA/Cr Ratio",
-        "help": "NAA-to-Creatine ratio calculated from peak areas. Age-adjusted normals: <2y as low as 0.8 (normal maturation); 2–10y >1.2; >10y >1.5. Reduced values indicate neuronal loss.",
+        "help": "NAA-to-Creatine ratio calculated from peak areas. Age-adjusted normals: <2y as low as 0.8 (normal maturation); 2\u201310y >1.2; >10y >1.5. Reduced values indicate neuronal loss.",
         "placeholder": "e.g. 0.82",
         "required": true
       },
@@ -391,40 +526,73 @@
         "label": "Lac (Lactate)",
         "help": "Lactate peak presence. In paediatrics: Lac may be seen in high-grade tumours, mitochondrial disease, hypoxic-ischaemic injury, and some low-grade tumours. Inverted doublet at TE 135ms confirms Lac vs Lip.",
         "options": [
-          {"value": "absent", "label": "Absent"},
-          {"value": "present — not confirmed", "label": "Present — not confirmed"},
-          {"value": "confirmed — inverted doublet at TE 135ms", "label": "Confirmed — inverted doublet at TE 135ms"},
-          {"value": "N/A", "label": "Not assessed"}
+          {
+            "value": "absent",
+            "label": "Absent"
+          },
+          {
+            "value": "present \u2014 not confirmed",
+            "label": "Present \u2014 not confirmed"
+          },
+          {
+            "value": "confirmed \u2014 inverted doublet at TE 135ms",
+            "label": "Confirmed \u2014 inverted doublet at TE 135ms"
+          },
+          {
+            "value": "N/A",
+            "label": "Not assessed"
+          }
         ]
       },
       {
         "name": "mrs_lip",
         "type": "select",
         "label": "Lip (Lipids)",
-        "help": "Lipid peaks at 0.9 and 1.3 ppm. Prominent lipids indicate necrosis — common in AT/RT and high-grade glioma. May overlap with Lac at short TE.",
+        "help": "Lipid peaks at 0.9 and 1.3 ppm. Prominent lipids indicate necrosis \u2014 common in AT/RT and high-grade glioma. May overlap with Lac at short TE.",
         "options": [
-          {"value": "absent", "label": "Absent"},
-          {"value": "present — mild", "label": "Present — mild"},
-          {"value": "present — prominent", "label": "Present — prominent (necrosis likely)"},
-          {"value": "N/A", "label": "Not assessed"}
+          {
+            "value": "absent",
+            "label": "Absent"
+          },
+          {
+            "value": "present \u2014 mild",
+            "label": "Present \u2014 mild"
+          },
+          {
+            "value": "present \u2014 prominent",
+            "label": "Present \u2014 prominent (necrosis likely)"
+          },
+          {
+            "value": "N/A",
+            "label": "Not assessed"
+          }
         ]
       },
       {
         "name": "mrs_mi",
         "type": "text",
-        "label": "mI — Peak Area (optional)",
-        "help": "Peak area of Myo-inositol as reported by your spectroscopy software. Only visible at short TE. Note: mI is physiologically elevated in infants — interpret with caution under 2 years.",
+        "label": "mI \u2014 Peak Area (optional)",
+        "help": "Peak area of Myo-inositol as reported by your spectroscopy software. Only visible at short TE. Note: mI is physiologically elevated in infants \u2014 interpret with caution under 2 years.",
         "placeholder": "e.g. 74"
       },
       {
         "name": "mrs_tau",
         "type": "select",
         "label": "Tau (Taurine)",
-        "help": "Taurine peak at 3.3–3.4 ppm. Only visible at short TE. KEY paediatric marker — presence is always pathological and strongly suggests an embryonal tumour (medulloblastoma, AT/RT, PNET). Absent in normal brain at any age.",
+        "help": "Taurine peak at 3.3\u20133.4 ppm. Only visible at short TE. KEY paediatric marker \u2014 presence is always pathological and strongly suggests an embryonal tumour (medulloblastoma, AT/RT, PNET). Absent in normal brain at any age.",
         "options": [
-          {"value": "absent", "label": "Absent"},
-          {"value": "present", "label": "Present ⚠️ — consider embryonal tumour"},
-          {"value": "N/A — long TE used", "label": "N/A — long TE used (Tau not assessable)"}
+          {
+            "value": "absent",
+            "label": "Absent"
+          },
+          {
+            "value": "present",
+            "label": "Present \u26a0\ufe0f \u2014 consider embryonal tumour"
+          },
+          {
+            "value": "N/A \u2014 long TE used",
+            "label": "N/A \u2014 long TE used (Tau not assessable)"
+          }
         ]
       },
       "model",

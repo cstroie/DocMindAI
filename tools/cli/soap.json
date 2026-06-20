@@ -1,8 +1,8 @@
 {
   "id": "soap",
   "name": "SOAP Note Generator",
-  "description": "Convert medical transcripts into structured SOAP (Subjective, Objective, Assessment, Plan) notes",
-  "icon": "📑",
+  "description": "Convert medical transcripts to SOAP notes",
+  "icon": "\ud83d\udcd1",
   "prompt": {
     "role": "You are a clinical documentation assistant.",
     "task": "Your task is to read medical transcripts (dialogues between clinicians and patients) and convert them into structured clinical notes using the SOAP format.",

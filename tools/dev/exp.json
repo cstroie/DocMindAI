@@ -1,8 +1,8 @@
 {
   "id": "exp",
   "name": "Experiment Tool",
-  "description": "Test and experiment with different AI models using custom or predefined prompts",
-  "icon": "🧪",
+  "description": "Test and experiment with AI models",
+  "icon": "\ud83e\uddea",
   "form": {
     "title": "AI Model Experimentation",
     "description": "Review the AI model's response to your custom prompt. This output shows how the selected model processes your input and generates a response.",

@@ -1,17 +1,17 @@
 {
   "id": "ade",
   "name": "Admission & Discharge Extractor",
-  "description": "Extract structured patient and clinical metadata from admission/discharge documents and medical records",
-  "icon": "📋",
+  "description": "Extract admission/discharge metadata from medical records",
+  "icon": "\ud83d\udccb",
   "prompt": {
     "role": "You are a medical records specialist skilled in extracting and structuring administrative and clinical data from medical documents.",
     "task": "Extract key patient, provider, and clinical information from medical documents and discharge summaries.",
     "critical_instruction": "{language_instruction}",
     "rules": [
-        "Extract ONLY information explicitly stated in the document",
-        "Do NOT invent or assume missing data",
-        "If a value is not found in the document, use the default value provided.",
-        "For dates, use ISO format (YYYY-MM-DD) or the exact format found in document"
+      "Extract ONLY information explicitly stated in the document",
+      "Do NOT invent or assume missing data",
+      "If a value is not found in the document, use the default value provided.",
+      "For dates, use ISO format (YYYY-MM-DD) or the exact format found in document"
     ],
     "extraction_keys": [
       "doctor_name: Full name of the attending physician or primary provider (if multiple providers listed, use the primary or attending)",

@@ -1,8 +1,8 @@
 {
   "id": "rrs",
   "name": "Radiology Report Summarizer",
-  "description": "Analyze radiology reports and extract key medical information as a structured triage card",
-  "icon": "⚡",
+  "description": "Extract structured radiology triage card",
+  "icon": "\u26a1",
   "prompt": {
     "role": "You are a radiology expert extracting structured triage information from radiology reports.",
     "task": "Read the radiology report and extract the key pathological information in the JSON format specified below.",
@@ -12,16 +12,16 @@
       "{",
       "  \"pathologic\": \"yes/no\",",
       "  \"severity\": 0-10,",
-      "  \"summary\": \"short clinical phrase — the dominant finding or diagnosis, max 6 words\",",
+      "  \"summary\": \"short clinical phrase \u2014 the dominant finding or diagnosis, max 6 words\",",
       "  \"findings\": [\"specific finding or diagnosis 1\", \"specific finding or diagnosis 2\"]",
       "}",
       "```"
     ],
     "rules": [
       "\"pathologic\": \"yes\" if any anomaly, abnormality, or significant incidental finding is present; \"no\" if the report is entirely within normal limits",
-      "\"severity\": numeric 0–10 — 0=normal/no pathology, 1–2=minimal incidental findings, 3–4=mild pathology, 5–6=moderate pathology requiring follow-up, 7–8=significant pathology, 9–10=critical/urgent; if pathologic=no then severity must be 0",
+      "\"severity\": numeric 0\u201310 \u2014 0=normal/no pathology, 1\u20132=minimal incidental findings, 3\u20134=mild pathology, 5\u20136=moderate pathology requiring follow-up, 7\u20138=significant pathology, 9\u201310=critical/urgent; if pathologic=no then severity must be 0",
       "\"summary\": the dominant finding or diagnosis expressed as a short clinical phrase, maximum 6 words (e.g. 'Left lower lobe pneumonia', 'Pulmonary nodule, right upper lobe', 'Normal chest radiograph')",
-      "\"findings\": 1–4 specific imaging findings or diagnoses extracted from the report; prefer precise radiological terms (e.g. 'right hilar lymphadenopathy' over 'lymph node enlargement'); if the report is normal, use [\"No significant findings\"]",
+      "\"findings\": 1\u20134 specific imaging findings or diagnoses extracted from the report; prefer precise radiological terms (e.g. 'right hilar lymphadenopathy' over 'lymph node enlargement'); if the report is normal, use [\"No significant findings\"]",
       "Do not invent findings not stated in the report",
       "Ignore spelling errors in the report",
       "Respond ONLY with the JSON, without additional text"
@@ -50,10 +50,10 @@
     "  <div style=\"display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;\">",
     "    {{#if (eq pathologic 'yes')}}",
     "      <span style=\"display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 6px; background: rgba(240, 104, 104, 0.13); border: 1px solid rgba(240, 104, 104, 0.34); color: var(--dm-danger); font: 600 11px var(--dm-font-mono); letter-spacing: 0.08em;\"><span style=\"width: 6px; height: 6px; border-radius: 50%; background: var(--dm-danger);\"></span>PATHOLOGIC</span>",
-    "      <span style=\"font: 600 12px var(--dm-font-mono); letter-spacing: 0.06em; color: var(--dm-warn);\">{{getSeverityLabel severity}} · {{severity}}/10</span>",
+    "      <span style=\"font: 600 12px var(--dm-font-mono); letter-spacing: 0.06em; color: var(--dm-warn);\">{{getSeverityLabel severity}} \u00b7 {{severity}}/10</span>",
     "    {{else}}",
     "      <span style=\"display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 6px; background: rgba(15, 160, 107, 0.13); border: 1px solid rgba(15, 160, 107, 0.34); color: var(--dm-ok); font: 600 11px var(--dm-font-mono); letter-spacing: 0.08em;\"><span style=\"width: 6px; height: 6px; border-radius: 50%; background: var(--dm-ok);\"></span>NORMAL</span>",
-    "      <span style=\"font: 600 12px var(--dm-font-mono); letter-spacing: 0.06em; color: var(--dm-ok);\">{{getSeverityLabel severity}} · {{severity}}/10</span>",
+    "      <span style=\"font: 600 12px var(--dm-font-mono); letter-spacing: 0.06em; color: var(--dm-ok);\">{{getSeverityLabel severity}} \u00b7 {{severity}}/10</span>",
     "    {{/if}}",
     "    <div style=\"display: flex; gap: 3px; margin-left: 4px;\" data-severity=\"{{severity}}\" data-pathologic=\"{{pathologic}}\">",
     "      {{#loop 10}}<span class=\"severity-box\" style=\"width: 14px; height: 7px; border-radius: 2px; background: var(--dm-border-strong);\"></span>{{/loop}}",

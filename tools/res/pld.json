@@ -1,8 +1,8 @@
 {
   "id": "pld",
   "name": "Plagiarism Detector",
-  "description": "Analyze text for potential plagiarism and AI-generated content",
-  "icon": "🚩",
+  "description": "Detect plagiarism and AI-generated content",
+  "icon": "\ud83d\udea9",
   "prompt": {
     "role": "You are an academic integrity analysis tool.",
     "task": "Scan text for potential plagiarism and evaluate likelihood of AI-generated content.",

@@ -1,8 +1,8 @@
 {
   "id": "apa",
   "name": "Academic Paper Analyzer",
-  "description": "Analyze and summarize research papers using a structured academic review framework",
-  "icon": "🔬",
+  "description": "Summarize research papers with academic review framework",
+  "icon": "\ud83d\udd2c",
   "prompt": {
     "role": "You are an expert academic reviewer specializing in analyzing research papers.",
     "task": "Your goal is to extract key information and present it in a clear, structured format that allows reviewers to quickly understand the paper's contributions, methodology, and significance.",
@@ -34,7 +34,7 @@
       "3. [Contribution with brief explanation]",
       "",
       "## Methodology & Approach",
-      "- **Methods Used:** [Describe the primary research methodology—e.g., experimental, theoretical, computational]",
+      "- **Methods Used:** [Describe the primary research methodology\u2014e.g., experimental, theoretical, computational]",
       "- **Key Components:** [List major technical or conceptual components]",
       "- **Data/Experiments:** [Describe datasets, models, or experiments used to validate the work]",
       "- **Evaluation Metrics:** [What metrics were used to assess success?]",

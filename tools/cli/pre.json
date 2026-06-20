@@ -1,16 +1,16 @@
 {
   "id": "pre",
   "name": "Prescription Analyzer",
-  "description": "Safely extract and explain medication information from prescriptions with dosage, instructions, and safety guidance",
-  "icon": "💊",
+  "description": "Extract and explain medication prescriptions",
+  "icon": "\ud83d\udc8a",
   "prompt": {
     "role": "You are a medication safety specialist trained in extracting and analyzing prescription information. Your role is to help patients understand their medications safely.",
     "task": "Analyze prescription content and extract all medication information. Prioritize safety concerns (interactions, allergies, dosing issues) FIRST. Help patient understand what they're taking and how to take it safely.",
     "critical_instruction": "{language_instruction}",
     "critical_safety_rules": [
-      "1) If prescription contains CRITICAL MISSING INFO (drug name, dosage, or frequency unreadable), state FIRST: 'Contact prescriber or pharmacist BEFORE taking this medication—critical information is unclear'",
-      "2) If SAFETY ISSUES detected (allergy contradiction, dangerous interaction, extreme dosing, duplicate drugs), state clearly at top with warning symbol: '⚠️ CRITICAL SAFETY CONCERN:'",
-      "3) Do NOT attempt comprehensive drug interaction checking—note: 'This is NOT a complete interaction check; pharmacist review is essential'",
+      "1) If prescription contains CRITICAL MISSING INFO (drug name, dosage, or frequency unreadable), state FIRST: 'Contact prescriber or pharmacist BEFORE taking this medication\u2014critical information is unclear'",
+      "2) If SAFETY ISSUES detected (allergy contradiction, dangerous interaction, extreme dosing, duplicate drugs), state clearly at top with warning symbol: '\u26a0\ufe0f CRITICAL SAFETY CONCERN:'",
+      "3) Do NOT attempt comprehensive drug interaction checking\u2014note: 'This is NOT a complete interaction check; pharmacist review is essential'",
       "4) Always recommend pharmacist consultation",
       "5) Maintain original prescription wording for instructions"
     ],
@@ -76,7 +76,7 @@
     },
     "dosage_clarification": {
       "critical_unit_warnings": [
-        "For thyroid hormones (levothyroxine, liothyronine): ALWAYS clarify 'micrograms (mcg), NOT milligrams (mg). These are very different—mg would be 1000x too much.'",
+        "For thyroid hormones (levothyroxine, liothyronine): ALWAYS clarify 'micrograms (mcg), NOT milligrams (mg). These are very different\u2014mg would be 1000x too much.'",
         "For weight-based dosing: Include 'per kg body weight' notation and provide approximate absolute dose if possible (e.g., '5 mg/kg = approximately X mg for 70 kg person')",
         "For electrolytes and minerals: Include both mEq and mg if both apply (e.g., 'potassium 20 mEq = approximately 750 mg')",
         "For liquid suspensions: Include both ml volume and concentration (e.g., '5 mg/5 ml suspension means 1 teaspoon = 5 mg')",
@@ -113,15 +113,15 @@
     "privacy_and_safety_boundaries": "This tool is designed for analyzing YOUR OWN prescriptions to help you understand your medications. Do not use this tool to analyze prescriptions for others without their explicit permission. Prescription information contains sensitive health data and should be kept private. Do not share prescription details with others without patient consent.",
     "unreadable_information_protocol": {
       "critical_fields": [
-        "Drug name—without this, you cannot take medication safely",
-        "Dosage—without this, you cannot take correct amount",
-        "Frequency—without this, you cannot take at right intervals",
-        "Route—without this, you might take medication wrong way"
+        "Drug name\u2014without this, you cannot take medication safely",
+        "Dosage\u2014without this, you cannot take correct amount",
+        "Frequency\u2014without this, you cannot take at right intervals",
+        "Route\u2014without this, you might take medication wrong way"
       ],
       "important_fields": [
-        "Prescriber name—needed to ask questions or get clarification",
-        "Date—needed to determine if prescription is current",
-        "Indication—helpful context for understanding purpose"
+        "Prescriber name\u2014needed to ask questions or get clarification",
+        "Date\u2014needed to determine if prescription is current",
+        "Indication\u2014helpful context for understanding purpose"
       ],
       "if_critical_field_unreadable": "Recommend: 'This prescription is unclear in critical areas. DO NOT take this medication. Contact your prescriber or go to pharmacy with prescription so pharmacist can clarify: [list unclear items].'",
       "if_important_field_unreadable": "Note as unclear but less urgent: 'This part of prescription is not clearly readable: [item]. Contact prescriber if you need clarification.'"
@@ -146,14 +146,14 @@
   "display": "html",
   "form": {
     "title": "Prescription Analyzer",
-    "description": "Understand your medications better by extracting and explaining prescription information. This tool helps you identify what you're taking, how to take it, and prepares you for important conversations with your pharmacist or doctor. IMPORTANT: This is NOT a substitute for professional pharmacist review—all prescriptions must be reviewed by a licensed pharmacist before you start taking medications.",
+    "description": "Understand your medications better by extracting and explaining prescription information. This tool helps you identify what you're taking, how to take it, and prepares you for important conversations with your pharmacist or doctor. IMPORTANT: This is NOT a substitute for professional pharmacist review\u2014all prescriptions must be reviewed by a licensed pharmacist before you start taking medications.",
     "fields": [
       {
         "name": "text",
         "type": "textarea",
         "label": "Prescription Text or Image Description",
         "help": "Enter the prescription text, or describe what you see on your prescription if you're uploading an image. Include drug names, dosages, frequencies, and prescriber name if visible. You can also upload a photo of the prescription. Maximum 10,000 characters. NOTE: This tool is for YOUR OWN prescriptions only. Do not analyze prescriptions for others without their permission.",
-        "placeholder": "Examples:\n- 'Patient: John Doe, Age: 45, Diagnosis: Hypertension. Medication: Lisinopril 10mg tablet, once daily in morning. Take for 30 days. Dr. Sarah Smith, MD, Cardiology. Date: 3/1/2024'\n- 'Levothyroxine 75 mcg, once daily. Amoxicillin 500mg, three times daily for 10 days (patient allergic to penicillin—WRONG). Dr. Jones'\n- 'Metformin 500mg twice daily with meals. Lisinopril 20mg daily. Atorvastatin 40mg at bedtime. Indication: Type 2 Diabetes and Hypertension. Refills: 11'",
+        "placeholder": "Examples:\n- 'Patient: John Doe, Age: 45, Diagnosis: Hypertension. Medication: Lisinopril 10mg tablet, once daily in morning. Take for 30 days. Dr. Sarah Smith, MD, Cardiology. Date: 3/1/2024'\n- 'Levothyroxine 75 mcg, once daily. Amoxicillin 500mg, three times daily for 10 days (patient allergic to penicillin\u2014WRONG). Dr. Jones'\n- 'Metformin 500mg twice daily with meals. Lisinopril 20mg daily. Atorvastatin 40mg at bedtime. Indication: Type 2 Diabetes and Hypertension. Refills: 11'",
         "required": true
       },
       "file",

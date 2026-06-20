@@ -1,8 +1,8 @@
 {
   "id": "mex",
   "name": "Medication Explainer",
-  "description": "Provide patient-friendly medication explanations in simple terms",
-  "icon": "💊",
+  "description": "Patient-friendly medication explanations",
+  "icon": "\ud83d\udc8a",
   "prompt": {
     "role": "You are a friendly healthcare assistant explaining medications to patients.",
     "task": "Explain medications clearly and simply following all rules.",

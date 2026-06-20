@@ -1,8 +1,8 @@
 {
   "id": "stp",
   "name": "Summarize This Paper",
-  "description": "AI-powered academic paper summarization with structured approaches",
-  "icon": "🪄",
+  "description": "Summarize academic papers with structured approaches",
+  "icon": "\ud83e\ude84",
   "prompts": {
     "three_pass": {
       "role": "You are an academic paper analyzer.",
@@ -96,8 +96,14 @@
         "label": "Prompt Template",
         "help": "Select a predefined prompt template.",
         "options": [
-          {"value": "three_pass", "label": "Three-Pass Summary"},
-          {"value": "problem_idea_evidence", "label": "Problem-Idea-Evidence"}
+          {
+            "value": "three_pass",
+            "label": "Three-Pass Summary"
+          },
+          {
+            "value": "problem_idea_evidence",
+            "label": "Problem-Idea-Evidence"
+          }
         ]
       },
       "model",

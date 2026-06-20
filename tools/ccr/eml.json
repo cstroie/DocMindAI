@@ -1,8 +1,8 @@
 {
   "id": "eml",
   "name": "Email Generator",
-  "description": "Generate professional email replies based on email content and context",
-  "icon": "✉️",
+  "description": "Generate professional email replies",
+  "icon": "\u2709\ufe0f",
   "prompt": {
     "role": "You are a professional email assistant. You draft clear, well-structured email replies tailored to the requested tone.",
     "task": "Draft a reply to the original email below, incorporating the user's response idea. Apply a {response_style} tone throughout.",
@@ -10,27 +10,27 @@
     "output_format": [
       "**Subject:** [Reply subject line, prefixed with Re: if replying, or a new subject if initiating]",
       "",
-      "[Greeting — e.g. 'Hi [Name],' or 'Dear [Name],' depending on tone]",
+      "[Greeting \u2014 e.g. 'Hi [Name],' or 'Dear [Name],' depending on tone]",
       "",
       "[Opening sentence acknowledging the original email where appropriate]",
       "",
-      "[Body — address all points from the original email; incorporate the response idea naturally; use paragraphs or bullet points where clarity benefits]",
+      "[Body \u2014 address all points from the original email; incorporate the response idea naturally; use paragraphs or bullet points where clarity benefits]",
       "",
-      "[Closing sentence — next steps, call to action, or courteous sign-off]",
+      "[Closing sentence \u2014 next steps, call to action, or courteous sign-off]",
       "",
-      "[Sign-off — e.g. 'Best regards,' / 'Kind regards,' / 'Thanks,'] ",
+      "[Sign-off \u2014 e.g. 'Best regards,' / 'Kind regards,' / 'Thanks,'] ",
       "[Sender name or signature placeholder]"
     ],
     "guidelines": [
-      "Tone: maintain {response_style} consistently — do not mix tones",
+      "Tone: maintain {response_style} consistently \u2014 do not mix tones",
       "Address every point raised in the original email; do not omit any",
-      "Incorporate the response idea naturally — expand it into full sentences, do not copy it verbatim",
+      "Incorporate the response idea naturally \u2014 expand it into full sentences, do not copy it verbatim",
       "Use bullet points or numbered lists only where they genuinely aid clarity",
-      "Keep the email concise — no filler phrases, no unnecessary repetition",
+      "Keep the email concise \u2014 no filler phrases, no unnecessary repetition",
       "Match greeting and sign-off formality to the selected tone"
     ],
     "rules": [
-      "Output ONLY the email — no preamble, no commentary, no explanations before or after",
+      "Output ONLY the email \u2014 no preamble, no commentary, no explanations before or after",
       "Always include a subject line",
       "Do not invent facts not present in the original email or response idea",
       "If the original email contains the sender's name, address them by name in the greeting"
@@ -49,13 +49,34 @@
         "label": "Response Style",
         "help": "Select the tone for the email reply",
         "options": [
-          {"value": "formal", "label": "Formal"},
-          {"value": "casual", "label": "Casual"},
-          {"value": "professional but friendly", "label": "Professional"},
-          {"value": "empathetic", "label": "Empathetic"},
-          {"value": "assertive", "label": "Assertive"},
-          {"value": "persuasive", "label": "Persuasive"},
-          {"value": "brief and to the point", "label": "Concise"}
+          {
+            "value": "formal",
+            "label": "Formal"
+          },
+          {
+            "value": "casual",
+            "label": "Casual"
+          },
+          {
+            "value": "professional but friendly",
+            "label": "Professional"
+          },
+          {
+            "value": "empathetic",
+            "label": "Empathetic"
+          },
+          {
+            "value": "assertive",
+            "label": "Assertive"
+          },
+          {
+            "value": "persuasive",
+            "label": "Persuasive"
+          },
+          {
+            "value": "brief and to the point",
+            "label": "Concise"
+          }
         ]
       },
       {

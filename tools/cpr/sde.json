@@ -1,8 +1,8 @@
 {
   "id": "sde",
   "name": "Structured Data Extractor",
-  "description": "Convert unstructured text or documents into structured JSON, YAML, XML, HTML, or Markdown formats",
-  "icon": "📊",
+  "description": "Convert unstructured text to structured formats (JSON, YAML, XML, HTML, Markdown)",
+  "icon": "\ud83d\udcca",
   "prompt": {
     "role": "You are a data extraction API.",
     "task": "Extract structured data from the following. If a file is provided, extract data from the file content as well.",

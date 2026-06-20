@@ -1,8 +1,8 @@
 {
   "id": "sta",
   "name": "Survey Tool Analyzer",
-  "description": "Analyze research questionnaires and surveys for structural validity, question quality and response bias",
-  "icon": "🗳️",
+  "description": "Analyze research surveys for validity and bias",
+  "icon": "\ud83d\uddf3\ufe0f",
   "prompt": {
     "role": "You are a research methods specialist analyzing survey instruments.",
     "task": "Critically evaluate surveys/questionnaires using established research methodology frameworks.",
@@ -68,7 +68,7 @@
         "type": "textarea",
         "label": "Survey Content",
         "help": "Paste full survey questions, instructions and response options. Maximum 1,000,000 characters.",
-        "placeholder": "Survey Title:\nIntroduction Text:\n\n1. Question 1\n☐ Option 1\n☐ Option 2...\n\n2. Question 2...",
+        "placeholder": "Survey Title:\nIntroduction Text:\n\n1. Question 1\n\u2610 Option 1\n\u2610 Option 2...\n\n2. Question 2...",
         "required": true
       },
       "file",

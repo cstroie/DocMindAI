@@ -1,8 +1,8 @@
 {
   "id": "cpn",
   "name": "Care Plan",
-  "description": "Generate structured nursing care plans with prioritized diagnoses, SMART goals, evidence-based interventions, and adaptive evaluation criteria",
-  "icon": "❤️‍🩹",
+  "description": "Generate structured nursing care plans with SMART goals",
+  "icon": "\u2764\ufe0f\u200d\ud83e\ude79",
   "prompt": {
     "role": "You are an experienced clinical nursing specialist skilled in developing comprehensive, patient-centered care plans using NANDA-I nursing diagnoses.",
     "task": "Read clinical observations and create a comprehensive, prioritized nursing care plan with measurable goals and actionable interventions tailored to the patient's acuity and care setting.",
@@ -41,8 +41,8 @@
         "chronic": "4-12 weeks or ongoing"
       },
       "examples_short_term": [
-        "Patient will report pain ≤4/10 using 0-10 scale within 24 hours",
-        "Patient will maintain SPO2 ≥94% on current oxygen therapy within 12 hours",
+        "Patient will report pain \u22644/10 using 0-10 scale within 24 hours",
+        "Patient will maintain SPO2 \u226594% on current oxygen therapy within 12 hours",
         "Patient will demonstrate proper use of incentive spirometer within 2 hours",
         "Patient will void 200-300 mL spontaneously within 8 hours post-op"
       ],
@@ -50,7 +50,7 @@
         "Patient will ambulate 100 feet with minimal assistance by discharge (1 week post-op)",
         "Patient will independently perform wound self-care and dressing changes within 2 weeks",
         "Patient will verbalize understanding of discharge medications and schedule within 24 hours before discharge",
-        "Patient will report pain ≤3/10 with activity by discharge (post-op day 5-7)"
+        "Patient will report pain \u22643/10 with activity by discharge (post-op day 5-7)"
       ]
     },
     "interventions_specifications": {
@@ -94,7 +94,7 @@
           "Teach diaphragmatic breathing technique using demonstration and return demonstration; assess understanding",
           "Provide written discharge instructions including medication schedule, precautions, and when to call provider",
           "Teach splinting technique: 'Hold pillow against knee when coughing or moving to reduce pain'",
-          "Educate on signs/symptoms requiring immediate attention (fever >101.5°F, excessive bleeding, severe swelling, chest pain)",
+          "Educate on signs/symptoms requiring immediate attention (fever >101.5\u00b0F, excessive bleeding, severe swelling, chest pain)",
           "Teach leg elevation and ice therapy for home use; provide written handout with illustrations"
         ]
       }
@@ -132,10 +132,10 @@
         }
       },
       "example_evaluation": {
-        "goal": "Patient will report pain ≤4/10 within 24 hours",
+        "goal": "Patient will report pain \u22644/10 within 24 hours",
         "criteria": "Pain assessment using 0-10 scale every 2-4 hours",
         "success_indicator": "Patient reports pain 3-4/10 with current interventions; states relief is adequate",
-        "adaptive_if_not_met": "If pain remains ≥6/10 after 24 hours: Request medication adjustment from MD; consider additional comfort measures (heat, positioning, distraction)",
+        "adaptive_if_not_met": "If pain remains \u22656/10 after 24 hours: Request medication adjustment from MD; consider additional comfort measures (heat, positioning, distraction)",
         "escalation": "Notify RN/MD immediately if pain unrelieved after medication or increases suddenly (sign of complication)",
         "reassess": "Every shift; modify plan if pain increases or fails to improve within target timeframe"
       }
@@ -177,8 +177,8 @@
         "name": "text",
         "type": "textarea",
         "label": "Clinical Notes",
-        "help": "Enter comprehensive patient observations, assessment findings, vital signs, clinical status, and relevant history. Include specific findings (e.g., pain 7/10, limited ROM 0-45°, ambulates with walker). Maximum 50,000 characters.",
-        "placeholder": "Example:\nPatient: 67-year-old male\nAdmission: Post-op day 2 following right total knee replacement\nVital Signs: BP 128/82, HR 92, RR 18, Temp 98.6°F\nKey Findings: Pain 7/10 in right knee, significant swelling, difficulty ambulating, knee ROM limited 0-45°, performs quadriceps sets, pain with weight-bearing, uses walker\nLaboratory: Hgb 10.2 (down from 11.5 pre-op), WBC 7.8 normal\nMedications: Morphine 2-4 mg IV q3h prn, Ketorolac 30 mg IV q6h, Enoxaparin 40 mg SC daily\nPatient goal: 'Want to walk without help and go home by end of week'",
+        "help": "Enter comprehensive patient observations, assessment findings, vital signs, clinical status, and relevant history. Include specific findings (e.g., pain 7/10, limited ROM 0-45\u00b0, ambulates with walker). Maximum 50,000 characters.",
+        "placeholder": "Example:\nPatient: 67-year-old male\nAdmission: Post-op day 2 following right total knee replacement\nVital Signs: BP 128/82, HR 92, RR 18, Temp 98.6\u00b0F\nKey Findings: Pain 7/10 in right knee, significant swelling, difficulty ambulating, knee ROM limited 0-45\u00b0, performs quadriceps sets, pain with weight-bearing, uses walker\nLaboratory: Hgb 10.2 (down from 11.5 pre-op), WBC 7.8 normal\nMedications: Morphine 2-4 mg IV q3h prn, Ketorolac 30 mg IV q6h, Enoxaparin 40 mg SC daily\nPatient goal: 'Want to walk without help and go home by end of week'",
         "required": true
       },
       {
@@ -187,10 +187,22 @@
         "label": "Patient Acuity Level",
         "help": "Select the acuity level to adjust goal timelines (4-8 hrs vs 24-48 hrs) and intervention frequency appropriately",
         "options": [
-          {"value": "critical", "label": "Critical/ICU (Immediate stabilization - 4-8 hour goals)"},
-          {"value": "acute", "label": "Acute Care (Early improvement - 24-48 hour goals)"},
-          {"value": "stable", "label": "Stable/Transitional (Functional recovery - 2-4 week goals)"},
-          {"value": "chronic", "label": "Chronic/Home Care (Long-term management - 4-12 week+ goals)"}
+          {
+            "value": "critical",
+            "label": "Critical/ICU (Immediate stabilization - 4-8 hour goals)"
+          },
+          {
+            "value": "acute",
+            "label": "Acute Care (Early improvement - 24-48 hour goals)"
+          },
+          {
+            "value": "stable",
+            "label": "Stable/Transitional (Functional recovery - 2-4 week goals)"
+          },
+          {
+            "value": "chronic",
+            "label": "Chronic/Home Care (Long-term management - 4-12 week+ goals)"
+          }
         ]
       },
       {
@@ -199,11 +211,26 @@
         "label": "Care Setting",
         "help": "Select the care environment to tailor interventions to available resources, staffing, and constraints",
         "options": [
-          {"value": "icu", "label": "ICU (Continuous monitoring, intensive interventions)"},
-          {"value": "acute_floor", "label": "Acute Care Floor (Nursing staff available, routine monitoring)"},
-          {"value": "rehabilitation", "label": "Rehabilitation (PT/OT services available, focus on functional gains)"},
-          {"value": "home", "label": "Home Health (Limited resources, family/patient dependent, focus on self-management)"},
-          {"value": "outpatient", "label": "Outpatient/Clinic (Episodic care, patient-directed activities)"}
+          {
+            "value": "icu",
+            "label": "ICU (Continuous monitoring, intensive interventions)"
+          },
+          {
+            "value": "acute_floor",
+            "label": "Acute Care Floor (Nursing staff available, routine monitoring)"
+          },
+          {
+            "value": "rehabilitation",
+            "label": "Rehabilitation (PT/OT services available, focus on functional gains)"
+          },
+          {
+            "value": "home",
+            "label": "Home Health (Limited resources, family/patient dependent, focus on self-management)"
+          },
+          {
+            "value": "outpatient",
+            "label": "Outpatient/Clinic (Episodic care, patient-directed activities)"
+          }
         ]
       },
       {
@@ -212,10 +239,22 @@
         "label": "Patient Timeline & Phase",
         "help": "Select the phase to adjust goal timelines and focus area appropriately",
         "options": [
-          {"value": "admission", "label": "Recently Admitted (0-24 hrs) - Focus: Stabilization & immediate needs"},
-          {"value": "acute_phase", "label": "Acute Phase (1-7 days) - Focus: Symptom management & early improvement"},
-          {"value": "recovery", "label": "Recovery Phase (1-4 weeks) - Focus: Functional gains & discharge planning"},
-          {"value": "chronic", "label": "Chronic/Long-term (Ongoing) - Focus: Self-management & quality of life"}
+          {
+            "value": "admission",
+            "label": "Recently Admitted (0-24 hrs) - Focus: Stabilization & immediate needs"
+          },
+          {
+            "value": "acute_phase",
+            "label": "Acute Phase (1-7 days) - Focus: Symptom management & early improvement"
+          },
+          {
+            "value": "recovery",
+            "label": "Recovery Phase (1-4 weeks) - Focus: Functional gains & discharge planning"
+          },
+          {
+            "value": "chronic",
+            "label": "Chronic/Long-term (Ongoing) - Focus: Self-management & quality of life"
+          }
         ]
       },
       {

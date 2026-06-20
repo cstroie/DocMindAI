@@ -1,8 +1,8 @@
 {
   "id": "agr",
   "name": "AGREE II Guideline Appraisal",
-  "description": "Appraise clinical practice guidelines using the AGREE II instrument across 6 domains and 23 items",
-  "icon": "📐",
+  "description": "Appraise clinical guidelines using the AGREE II instrument",
+  "icon": "\ud83d\udcd0",
   "prompt": {
     "role": "You are an expert methodologist specializing in clinical practice guideline appraisal using the AGREE II instrument (Appraisal of Guidelines for Research and Evaluation II).",
     "task": "Your task is to rigorously appraise the provided clinical practice guideline document using the AGREE II instrument. Evaluate all 23 items across the 6 domains, assign a score from 1 (strongly disagree) to 7 (strongly agree) for each item, compute each domain's scaled score as a percentage, and provide a domain-level justification summarizing the evidence found in the document.",
@@ -21,59 +21,128 @@
         "id": "scope_and_purpose",
         "name": "Domain 1: Scope and Purpose",
         "items": [
-          {"id": 1, "text": "The overall objective(s) of the guideline is (are) specifically described."},
-          {"id": 2, "text": "The health question(s) covered by the guideline is (are) specifically described."},
-          {"id": 3, "text": "The population (patients, public, etc.) to whom the guideline is meant to apply is specifically described."}
+          {
+            "id": 1,
+            "text": "The overall objective(s) of the guideline is (are) specifically described."
+          },
+          {
+            "id": 2,
+            "text": "The health question(s) covered by the guideline is (are) specifically described."
+          },
+          {
+            "id": 3,
+            "text": "The population (patients, public, etc.) to whom the guideline is meant to apply is specifically described."
+          }
         ]
       },
       {
         "id": "stakeholder_involvement",
         "name": "Domain 2: Stakeholder Involvement",
         "items": [
-          {"id": 4, "text": "The guideline development group includes individuals from all relevant professional groups."},
-          {"id": 5, "text": "The views and preferences of the target population (patients, public, etc.) have been sought."},
-          {"id": 6, "text": "The target users of the guideline are clearly defined."}
+          {
+            "id": 4,
+            "text": "The guideline development group includes individuals from all relevant professional groups."
+          },
+          {
+            "id": 5,
+            "text": "The views and preferences of the target population (patients, public, etc.) have been sought."
+          },
+          {
+            "id": 6,
+            "text": "The target users of the guideline are clearly defined."
+          }
         ]
       },
       {
         "id": "rigour_of_development",
         "name": "Domain 3: Rigour of Development",
         "items": [
-          {"id": 7,  "text": "Systematic methods were used to search for evidence."},
-          {"id": 8,  "text": "The criteria for selecting the evidence are clearly described."},
-          {"id": 9,  "text": "The strengths and limitations of the body of evidence are clearly described."},
-          {"id": 10, "text": "The methods for formulating the recommendations are clearly described."},
-          {"id": 11, "text": "The health benefits, side effects, and risks have been considered in formulating the recommendations."},
-          {"id": 12, "text": "There is an explicit link between the recommendations and the supporting evidence."},
-          {"id": 13, "text": "The guideline has been externally reviewed by experts prior to its publication."},
-          {"id": 14, "text": "A procedure for updating the guideline is provided."}
+          {
+            "id": 7,
+            "text": "Systematic methods were used to search for evidence."
+          },
+          {
+            "id": 8,
+            "text": "The criteria for selecting the evidence are clearly described."
+          },
+          {
+            "id": 9,
+            "text": "The strengths and limitations of the body of evidence are clearly described."
+          },
+          {
+            "id": 10,
+            "text": "The methods for formulating the recommendations are clearly described."
+          },
+          {
+            "id": 11,
+            "text": "The health benefits, side effects, and risks have been considered in formulating the recommendations."
+          },
+          {
+            "id": 12,
+            "text": "There is an explicit link between the recommendations and the supporting evidence."
+          },
+          {
+            "id": 13,
+            "text": "The guideline has been externally reviewed by experts prior to its publication."
+          },
+          {
+            "id": 14,
+            "text": "A procedure for updating the guideline is provided."
+          }
         ]
       },
       {
         "id": "clarity_of_presentation",
         "name": "Domain 4: Clarity of Presentation",
         "items": [
-          {"id": 15, "text": "The recommendations are specific and unambiguous."},
-          {"id": 16, "text": "The different options for management of the condition or health issue are clearly presented."},
-          {"id": 17, "text": "Key recommendations are easily identifiable."}
+          {
+            "id": 15,
+            "text": "The recommendations are specific and unambiguous."
+          },
+          {
+            "id": 16,
+            "text": "The different options for management of the condition or health issue are clearly presented."
+          },
+          {
+            "id": 17,
+            "text": "Key recommendations are easily identifiable."
+          }
         ]
       },
       {
         "id": "applicability",
         "name": "Domain 5: Applicability",
         "items": [
-          {"id": 18, "text": "The guideline describes facilitators and barriers to its application."},
-          {"id": 19, "text": "The guideline provides advice and/or tools on how the recommendations can be put into practice."},
-          {"id": 20, "text": "The potential resource implications of applying the recommendations have been considered."},
-          {"id": 21, "text": "The guideline presents monitoring and/or auditing criteria."}
+          {
+            "id": 18,
+            "text": "The guideline describes facilitators and barriers to its application."
+          },
+          {
+            "id": 19,
+            "text": "The guideline provides advice and/or tools on how the recommendations can be put into practice."
+          },
+          {
+            "id": 20,
+            "text": "The potential resource implications of applying the recommendations have been considered."
+          },
+          {
+            "id": 21,
+            "text": "The guideline presents monitoring and/or auditing criteria."
+          }
         ]
       },
       {
         "id": "editorial_independence",
         "name": "Domain 6: Editorial Independence",
         "items": [
-          {"id": 22, "text": "The views of the funding body have not influenced the content of the guideline."},
-          {"id": 23, "text": "Competing interests of guideline development group members have been recorded and addressed."}
+          {
+            "id": 22,
+            "text": "The views of the funding body have not influenced the content of the guideline."
+          },
+          {
+            "id": 23,
+            "text": "Competing interests of guideline development group members have been recorded and addressed."
+          }
         ]
       }
     ],
@@ -144,13 +213,13 @@
     "    </hgroup>",
     "    <div>",
     "      {{#if (eq overall_recommendation 'recommended')}}",
-    "      <span class=\"badge badge--success\">✅ Recommended</span>",
+    "      <span class=\"badge badge--success\">\u2705 Recommended</span>",
     "      {{/if}}",
     "      {{#if (eq overall_recommendation 'recommended_with_modifications')}}",
-    "      <span class=\"badge badge--warning\">⚠️ With Modifications</span>",
+    "      <span class=\"badge badge--warning\">\u26a0\ufe0f With Modifications</span>",
     "      {{/if}}",
     "      {{#if (eq overall_recommendation 'not_recommended')}}",
-    "      <span class=\"badge badge--danger\">❌ Not Recommended</span>",
+    "      <span class=\"badge badge--danger\">\u274c Not Recommended</span>",
     "      {{/if}}",
     "    </div>",
     "  </header>",
