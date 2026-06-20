@@ -61,7 +61,7 @@
   "display": "html",
   "form": {
     "title": "Survey Analysis",
-    "description": "Analyze surveys for validity and bias",
+    "description": "Review the comprehensive analysis of your survey instrument. The AI has evaluated question quality, response scales, validity considerations and reliability indicators.",
     "fields": [
       {
         "name": "content",

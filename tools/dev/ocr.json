@@ -5,7 +5,7 @@
   "icon": "\ud83d\udcf7",
   "form": {
     "title": "OCR Form",
-    "description": "Extract text from images",
+    "description": "Review the extracted text from your uploaded image. The OCR tool has processed the image and converted it to editable text format.",
     "fields": [
       "file",
       "model",

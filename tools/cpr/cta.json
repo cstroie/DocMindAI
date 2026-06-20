@@ -55,7 +55,7 @@
   "helper": "lynx",
   "form": {
     "title": "Critical Analysis",
-    "description": "Generate critical insights and failure analysis",
+    "description": "Review the deeper insights generated from your input. The AI has analyzed the content to surface non-obvious questions, focus areas, and potential consequences.",
     "fields": [
       {
         "name": "content",

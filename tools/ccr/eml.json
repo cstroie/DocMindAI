@@ -41,7 +41,7 @@
   "display": "markdown",
   "form": {
     "title": "Email Generator",
-    "description": "Generate professional email replies",
+    "description": "Generate a professional email reply based on the original email and your response idea.",
     "fields": [
       {
         "name": "response_style",

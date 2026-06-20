@@ -1018,12 +1018,12 @@ async function displayToolForm(toolId) {
             formTitle.title = tool.description || '';
         }
         if (formKicker) {
-            const cat = category ? category.name.toUpperCase() : 'TOOL';
-            formKicker.textContent = cat;
+            // Show concise tool description in kicker
+            formKicker.textContent = tool.description || 'Configure Tool';
         }
         if (formSubtitle) {
             // Show longer form description as subtitle
-            formSubtitle.textContent = tool.form?.description || tool.description || '';
+            formSubtitle.textContent = tool.form?.description || '';
         }
 
         // Update page header with category info

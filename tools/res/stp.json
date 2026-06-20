@@ -79,7 +79,7 @@
   "display": "html",
   "form": {
     "title": "Academic Paper Summarization",
-    "description": "Summarize academic papers structurally",
+    "description": "Review the structured summary of the academic paper. The AI has analyzed the paper using the selected approach (three-pass or problem-idea-evidence) and extracted key information.",
     "fields": [
       {
         "name": "content",

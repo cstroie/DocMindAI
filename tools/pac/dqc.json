@@ -43,7 +43,7 @@
   "display": "html",
   "form": {
     "title": "Doctor Questions",
-    "description": "Create patient questions for consultations",
+    "description": "Review the generated questions to discuss with your doctor. These questions are designed to help you better understand your medical findings and next steps.",
     "fields": [
       {
         "name": "report",

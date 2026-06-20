@@ -39,7 +39,7 @@
   "display": "html",
   "form": {
     "title": "Inversion Analysis",
-    "description": "Apply inversion thinking to reveal risks",
+    "description": "Apply Charlie Munger's Inversion Rule to your goal or situation. Instead of asking how to succeed, the AI asks how to guarantee failure \u2014 then exposes which of those traps you may already be falling into.",
     "fields": [
       {
         "name": "goal",

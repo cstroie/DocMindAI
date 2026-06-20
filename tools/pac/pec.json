@@ -47,7 +47,7 @@
   "display": "html",
   "form": {
     "title": "Patient Education Content",
-    "description": "Convert medical info to patient-friendly content",
+    "description": "Review the patient-friendly educational content generated from your medical text. The AI has simplified complex medical information into clear, accessible language with appropriate formatting.",
     "fields": [
       {
         "name": "content",

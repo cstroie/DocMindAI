@@ -186,7 +186,7 @@
   "display": "html",
   "form": {
     "title": "AGREE II Guideline Appraisal",
-    "description": "Appraise clinical guidelines using AGREE II",
+    "description": "Appraise a clinical practice guideline using the validated AGREE II instrument. The AI will evaluate all 23 items across 6 domains and produce scaled domain scores with justifications and an overall recommendation.",
     "fields": [
       {
         "name": "document",

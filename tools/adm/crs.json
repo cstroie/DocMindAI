@@ -52,7 +52,7 @@
   "display": "html",
   "form": {
     "title": "Clinical Record Synthesizer",
-    "description": "Synthesize clinical records for radiologists",
+    "description": "Paste the clinical record text below. The tool will extract and structure the clinically and radiologically relevant information to prepare you for the imaging examination.",
     "fields": [
       {
         "name": "text",

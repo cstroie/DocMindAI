@@ -114,7 +114,7 @@
   "display": "html",
   "form": {
     "title": "Academic Paper Analysis",
-    "description": "Summarize research papers with academic framework",
+    "description": "Review the structured academic analysis of the research paper generated using the analysis framework. The AI has extracted key metadata, contributions, methodology findings, and critical assessment.",
     "fields": [
       {
         "name": "content",

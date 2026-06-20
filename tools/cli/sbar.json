@@ -44,7 +44,7 @@
   "display": "html",
   "form": {
     "title": "SBAR Report",
-    "description": "Generate SBAR clinical communication notes",
+    "description": "Review the generated SBAR report. The AI has structured clinical information using Situation-Background-Assessment-Recommendation framework.",
     "fields": [
       {
         "name": "text",

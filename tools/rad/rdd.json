@@ -39,7 +39,7 @@
   "display": "html",
   "form": {
     "title": "Differential Diagnosis",
-    "description": "Generate differential diagnoses with evidence",
+    "description": "Ranked differential diagnoses generated from the radiology report, with supporting evidence, opposing features, and references.",
     "fields": [
       {
         "name": "report",

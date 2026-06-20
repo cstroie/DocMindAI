@@ -43,7 +43,7 @@
   "helper": "lynx",
   "form": {
     "title": "Reader's Digest Summary",
-    "description": "Summarize papers into digestible summaries",
+    "description": "Review your condensed article in classic Reader's Digest format. The AI has processed the long content and created a short, engaging summary.",
     "fields": [
       {
         "name": "content",
