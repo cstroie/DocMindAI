@@ -1772,23 +1772,21 @@ function wrapInResultsTemplate(htmlContent, rawText, tool) {
     processedContent = processResultsContent(processedContent);
 
     return `
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-            <div style="background: var(--dm-panel); border: 1px solid var(--dm-border); border-radius: 12px; overflow: hidden;">
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 24px; border-bottom: 1px solid var(--dm-border); background: var(--dm-panel-2);">
-                    <div style="display: flex; align-items: center; gap: 14px;">
-                        <div style="display: grid; place-items: center; width: 40px; height: 40px; border-radius: 9px; border: 1px solid var(--dm-accent-line); background: var(--dm-accent-soft); color: var(--dm-accent); flex: 0 0 auto;">
-                            ${categoryIcon}
-                        </div>
-                        <div>
-                            <div style="font: 500 9.5px var(--dm-font-mono); letter-spacing: 0.14em; color: var(--dm-accent); margin-bottom: 2px;">${categoryName}</div>
-                            <h2 style="margin: 0px; font: 600 18px var(--dm-font-ui); color: var(--dm-text);">${escapeHtml(toolName)}</h2>
-                        </div>
+        <div style="display: flex; flex-direction: column; gap: 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 24px; border-bottom: 1px solid var(--dm-border); background: var(--dm-panel-2); border-radius: 12px 12px 0 0;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="display: grid; place-items: center; width: 40px; height: 40px; border-radius: 9px; border: 1px solid var(--dm-accent-line); background: var(--dm-accent-soft); color: var(--dm-accent); flex: 0 0 auto;">
+                        ${categoryIcon}
                     </div>
-                    <span style="font: 500 10px var(--dm-font-mono); color: var(--dm-faint);">🌐 ${langCode}</span>
+                    <div>
+                        <div style="font: 500 9.5px var(--dm-font-mono); letter-spacing: 0.14em; color: var(--dm-accent); margin-bottom: 2px;">${categoryName}</div>
+                        <h2 style="margin: 0px; font: 600 18px var(--dm-font-ui); color: var(--dm-text);">${escapeHtml(toolName)}</h2>
+                    </div>
                 </div>
-                <div style="padding: 26px 32px;">
-                    <div class="article" style="max-width: 740px;">${processedContent}</div>
-                </div>
+                <span style="font: 500 10px var(--dm-font-mono); color: var(--dm-faint);">🌐 ${langCode}</span>
+            </div>
+            <div style="padding: 26px 32px; background: var(--dm-panel); border: 1px solid var(--dm-border); border-top: none; border-radius: 0 0 12px 12px; overflow: hidden;">
+                <div class="article" style="max-width: 740px;">${processedContent}</div>
             </div>
         </div>
     `;
