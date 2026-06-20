@@ -1736,6 +1736,114 @@ function displayResults(results, fromHistory = false) {
 }
 
 /**
+ * Wrap content in Results View template for long-form text
+ *
+ * Creates a modern card-based layout for displaying long-form text responses
+ * with header, sections, info callouts, and styled question boxes.
+ */
+function wrapInResultsTemplate(htmlContent, rawText, tool) {
+    // Detect if content is long-form (more than 500 chars) to justify card wrapper
+    const isLongForm = rawText.length > 500;
+
+    if (!isLongForm) {
+        // For short content, use simple article wrapper
+        return `<div class="article">${htmlContent}</div>`;
+    }
+
+    const toolName = tool?.form?.title || tool?.name || 'Results';
+    const categoryName = tool?.category ? (categoriesData[tool.category]?.name.toUpperCase() || 'RESULTS') : 'RESULTS';
+    const langCode = (typeof appState !== 'undefined' && appState?.language) ? appState.language.toUpperCase().substring(0, 2) : 'EN';
+    const categoryIcon = tool?.category ? CATEGORY_SVGS[tool.category] || '' : '';
+
+    // Process HTML to add structured sections and styling
+    const processedContent = processResultsContent(htmlContent);
+
+    return `
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="background: var(--dm-panel); border: 1px solid var(--dm-border); border-radius: 12px; overflow: hidden;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 24px; border-bottom: 1px solid var(--dm-border); background: var(--dm-panel-2);">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div style="display: grid; place-items: center; width: 40px; height: 40px; border-radius: 9px; border: 1px solid var(--dm-accent-line); background: var(--dm-accent-soft); color: var(--dm-accent); flex: 0 0 auto;">
+                            ${categoryIcon}
+                        </div>
+                        <div>
+                            <div style="font: 500 9.5px var(--dm-font-mono); letter-spacing: 0.14em; color: var(--dm-accent); margin-bottom: 2px;">${categoryName}</div>
+                            <h2 style="margin: 0px; font: 600 18px var(--dm-font-ui); color: var(--dm-text);">${escapeHtml(toolName)}</h2>
+                        </div>
+                    </div>
+                    <span style="font: 500 10px var(--dm-font-mono); color: var(--dm-faint);">🌐 ${langCode}</span>
+                </div>
+                <div style="padding: 26px 32px;">
+                    <div class="article" style="max-width: 740px;">${processedContent}</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Process results content to add structured sections, callouts, and question styling
+ */
+function processResultsContent(htmlContent) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    let sectionCount = 0;
+
+    // Convert h2 and h3 headers into numbered sections
+    doc.querySelectorAll('h2, h3').forEach(header => {
+        sectionCount++;
+        const sectionNum = String(sectionCount).padStart(2, '0');
+        const sectionDiv = document.createElement('div');
+        sectionDiv.style.cssText = 'display: flex; align-items: center; gap: 11px; padding-bottom: 9px; margin-bottom: 13px; border-bottom: 1px solid var(--dm-border);';
+
+        const numSpan = document.createElement('span');
+        numSpan.style.cssText = 'font: 600 11px var(--dm-font-mono); color: var(--dm-accent);';
+        numSpan.textContent = sectionNum;
+
+        const titleSpan = document.createElement('span');
+        titleSpan.style.cssText = 'font: 600 11px var(--dm-font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dm-muted);';
+        titleSpan.textContent = header.textContent;
+
+        sectionDiv.appendChild(numSpan);
+        sectionDiv.appendChild(titleSpan);
+        header.replaceWith(sectionDiv);
+    });
+
+    // Style paragraphs
+    doc.querySelectorAll('p').forEach(para => {
+        para.style.cssText = 'margin: 0px 0px 28px; font: 400 14.5px / 1.72 var(--dm-font-ui); color: var(--dm-text);';
+    });
+
+    // Wrap lists in flex container and style items
+    doc.querySelectorAll('ul, ol').forEach(list => {
+        const flexDiv = document.createElement('div');
+        flexDiv.style.cssText = 'display: flex; flex-direction: column; gap: 9px;';
+
+        list.querySelectorAll('li').forEach(item => {
+            const isQuestion = item.textContent.includes('?');
+            const itemWrapper = document.createElement('div');
+            itemWrapper.style.cssText = 'display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; background: var(--dm-panel-2); border: 1px solid var(--dm-border); border-radius: 8px;';
+
+            const indicator = document.createElement('span');
+            indicator.style.cssText = 'display: grid; place-items: center; width: 22px; height: 22px; flex: 0 0 auto; border-radius: 6px; background: var(--dm-accent-soft); color: var(--dm-accent); font: 600 11px var(--dm-font-mono);';
+            indicator.textContent = isQuestion ? '?' : '•';
+
+            const content = document.createElement('span');
+            content.style.cssText = 'font: 400 13.5px / 1.5 var(--dm-font-ui); color: var(--dm-text);';
+            content.innerHTML = item.innerHTML;
+
+            itemWrapper.appendChild(indicator);
+            itemWrapper.appendChild(content);
+            flexDiv.appendChild(itemWrapper);
+        });
+
+        list.replaceWith(flexDiv);
+    });
+
+    return doc.body.innerHTML;
+}
+
+/**
  * Render content based on type and format
  *
  * This function renders content based on the content type and display format.
@@ -1795,8 +1903,9 @@ function renderContent(resultsContent, resultsInfo, displayFormat, tool) {
     } else if (resultsInfo.type === 'markdown') {
         // If the result is markdown, convert it to HTML
         if (displayFormat === 'html') {
-            // Convert JSON to HTML via markdown
-            resultsContent.innerHTML = `<div class="article">${marked.parse(resultsInfo.text)}</div>`;
+            // Convert markdown to HTML and wrap in Results View template for long-form text
+            const htmlContent = marked.parse(resultsInfo.text);
+            resultsContent.innerHTML = wrapInResultsTemplate(htmlContent, resultsInfo.text, tool);
         } else {
             // Keep as markdown with syntax highlighting
             resultsContent.innerHTML = `<pre><code class="markdown">${escapeHtml(resultsInfo.text)}</code></pre>`;
