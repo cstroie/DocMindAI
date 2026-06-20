@@ -720,8 +720,10 @@ button.primary,
     border: none;
     color: #fff;
     font-weight: 600;
-    padding: 10px 22px;
-    box-shadow: 0 1px 0 rgba(0,0,0,.06);
+    padding: 10px 20px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
 }
 button.primary:hover,
 #submitBtn:hover { filter: brightness(1.08); }
@@ -729,9 +731,17 @@ button.primary:hover,
 button.secondary,
 button.outline,
 #cancelBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     background: transparent;
     border: 1px solid var(--dm-border-strong);
     color: var(--dm-text);
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
 }
 button.secondary:hover,
 button.outline:hover,
