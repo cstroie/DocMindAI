@@ -57,42 +57,42 @@
     "rad": {
       "name": "Radiology",
       "icon": "☢️",
-      "description": "Tools for radiology decision support and imaging data extraction"
+      "description": "Imaging analysis and decision support"
     },
     "cli": {
       "name": "Clinical",
       "icon": "🏥",
-      "description": "Tools for direct clinical use and patient care"
+      "description": "Direct clinical use and patient care"
     },
     "adm": {
       "name": "Medical Administration",
       "icon": "📋",
-      "description": "Tools for processing medical documentation and administrative tasks"
+      "description": "Medical documentation and administration"
     },
     "pac": {
       "name": "Patient Education",
       "icon": "🧑",
-      "description": "Tools for patient education, awareness, and care guidance"
+      "description": "Patient education and care guidance"
     },
     "res": {
       "name": "Research & Academia",
       "icon": "📚",
-      "description": "Tools for academic research and literature analysis"
+      "description": "Academic research and literature analysis"
     },
     "cpr": {
       "name": "Content Processing",
       "icon": "🧠",
-      "description": "Tools for document processing and content transformation"
+      "description": "Document processing and transformation"
     },
     "ccr": {
       "name": "Content Creation",
       "icon": "✍️",
-      "description": "Tools for generating and composing content including emails and more"
+      "description": "Generate and compose medical content"
     },
     "dev": {
       "name": "Development & Testing",
       "icon": "🧪",
-      "description": "Tools for AI model testing and experimentation"
+      "description": "AI model testing and experimentation"
     }
   },
   "common": {
