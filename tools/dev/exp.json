@@ -5,7 +5,7 @@
   "icon": "\ud83e\uddea",
   "form": {
     "title": "AI Model Experimentation",
-    "description": "Review the AI model's response to your custom prompt. This output shows how the selected model processes your input and generates a response.",
+    "description": "Test and experiment with AI models",
     "fields": [
       {
         "name": "prompts",

@@ -46,7 +46,7 @@
   "helper": "web_scraper",
   "form": {
     "title": "Web Page Conversion",
-    "description": "Review the converted web page content in Markdown format. The AI has processed the web page and extracted the main content, removing ads and navigation elements.",
+    "description": "Convert web pages to clean Markdown",
     "fields": [
       {
         "name": "url",

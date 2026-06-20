@@ -122,7 +122,7 @@
   "display": "html",
   "form": {
     "title": "Decision Support Navigator",
-    "description": "Get general, non-diagnostic guidance to help you understand clinical findings and prepare for conversations with your healthcare providers. This tool explains common care pathways and suggests questions to ask, but does not provide personalized medical advice. IMPORTANT: If you have emergency symptoms (chest pain, difficulty breathing, severe headache, signs of stroke, severe bleeding, loss of consciousness), call 911 or go to the nearest emergency department immediately rather than using this tool.",
+    "description": "Guidance for healthcare discussions",
     "fields": [
       {
         "name": "findings",

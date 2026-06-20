@@ -54,7 +54,7 @@
   "display": "html",
   "form": {
     "title": "Education Programme Analysis",
-    "description": "Review the comprehensive analysis of your education/training program including curriculum evaluation, pedagogical assessment, and strategic recommendations.",
+    "description": "Analyze education and training programs",
     "fields": [
       {
         "name": "text",

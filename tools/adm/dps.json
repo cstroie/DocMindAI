@@ -33,7 +33,7 @@
   "display": "html",
   "form": {
     "title": "Discharge Paper Summary",
-    "description": "Rapid radiology-focused triage card extracted from the discharge paper: pathological status, severity, imaging history, key findings, and relevant keywords.",
+    "description": "Rapid radiology-focused discharge triage",
     "fields": [
       {
         "name": "text",

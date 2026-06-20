@@ -43,7 +43,7 @@
   "display": "html",
   "form": {
     "title": "Plagiarism Analysis",
-    "description": "These are the plagiarism detection results. The AI has analyzed the text against known sources and calculated similarity scores.",
+    "description": "Detect plagiarism and AI-generated content",
     "fields": [
       {
         "name": "text",

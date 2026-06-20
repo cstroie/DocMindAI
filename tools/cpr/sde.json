@@ -11,7 +11,7 @@
   },
   "form": {
     "title": "Structured Data Extraction",
-    "description": "Review the extracted structured data from your input. The AI has processed the text and converted it into the requested format (JSON, YAML, XML, HTML, or Markdown).",
+    "description": "Convert text to structured formats",
     "fields": [
       {
         "name": "text",

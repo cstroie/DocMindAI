@@ -96,7 +96,7 @@
   "display": "html",
   "form": {
     "title": "Hospital Discharge Analysis \u2014 Radiologist View",
-    "description": "Paste or upload a hospital discharge paper to generate a structured radiologist-oriented overview: patient summary, dedicated imaging section, and a chronological timeline of findings and interventions.",
+    "description": "Hospital discharge analysis for radiologists",
     "fields": [
       {
         "name": "text",

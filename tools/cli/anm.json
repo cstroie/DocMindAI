@@ -52,7 +52,7 @@
   "display": "html",
   "form": {
     "title": "Anamnesis Structuring",
-    "description": "Review the structured medical anamnesis generated from your doctor-patient transcript. The AI has organized the conversation into standardized medical documentation format following clinical standards.",
+    "description": "Structure medical transcripts by standards",
     "fields": [
       {
         "name": "text",

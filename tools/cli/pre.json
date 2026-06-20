@@ -146,7 +146,7 @@
   "display": "html",
   "form": {
     "title": "Prescription Analyzer",
-    "description": "Understand your medications better by extracting and explaining prescription information. This tool helps you identify what you're taking, how to take it, and prepares you for important conversations with your pharmacist or doctor. IMPORTANT: This is NOT a substitute for professional pharmacist review\u2014all prescriptions must be reviewed by a licensed pharmacist before you start taking medications.",
+    "description": "Extract and explain medication prescriptions",
     "fields": [
       {
         "name": "text",

@@ -48,7 +48,7 @@
   "display": "yaml",
   "form": {
     "title": "Admission & Discharge Data Extraction",
-    "description": "Review the extracted structured metadata from your medical document. The AI has parsed patient demographics, provider information, admission/discharge details, and clinical history into a standardized {output_format} format.",
+    "description": "Extract structured admission/discharge metadata",
     "fields": [
       {
         "name": "text",

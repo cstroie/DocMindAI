@@ -154,7 +154,7 @@
   "display": "html",
   "form": {
     "title": "Pediatric MRS Brain Lesion Analyser",
-    "description": "Enter MRS spectroscopic peak areas and MRI lesion characteristics to generate a paediatric-oriented synthesis, primary diagnosis, and differential diagnosis.",
+    "description": "Analyze pediatric brain lesion MR spectroscopy",
     "fields": [
       {
         "name": "age",

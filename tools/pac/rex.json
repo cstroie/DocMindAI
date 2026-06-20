@@ -41,7 +41,7 @@
   "display": "html",
   "form": {
     "title": "Radiology Report Explanation",
-    "description": "A plain-language explanation of radiology findings to help patients understand their results before speaking with their doctor.",
+    "description": "Explain radiology in patient-friendly language",
     "fields": [
       {
         "name": "report",

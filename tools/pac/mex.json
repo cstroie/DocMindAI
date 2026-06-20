@@ -40,7 +40,7 @@
   "display": "html",
   "form": {
     "title": "Medication Explanation",
-    "description": "Review the patient-friendly medication explanation. The AI has simplified complex medical information into clear instructions.",
+    "description": "Patient-friendly medication explanations",
     "fields": [
       {
         "name": "info",

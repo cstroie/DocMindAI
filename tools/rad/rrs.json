@@ -31,7 +31,7 @@
   "display": "html",
   "form": {
     "title": "Radiology Report Summary",
-    "description": "Structured triage card extracted from the radiology report: pathological status, severity, dominant finding, and key diagnoses.",
+    "description": "Extract structured radiology triage card",
     "fields": [
       {
         "name": "text",

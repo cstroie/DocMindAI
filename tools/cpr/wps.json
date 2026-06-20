@@ -74,7 +74,7 @@
   "helper": "web_scraper",
   "form": {
     "title": "Web Page Summary",
-    "description": "Review the AI-generated summary of the web page content. The summary highlights the most important points and key information from the article.",
+    "description": "Summarize web pages to key points",
     "fields": [
       {
         "name": "url",

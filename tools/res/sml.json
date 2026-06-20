@@ -110,7 +110,7 @@
   "helper": "medical_literature_search",
   "form": {
     "title": "Medical Literature Search",
-    "description": "Review the search results and AI-summarized research papers related to your medical query. The results include relevant studies with key findings.",
+    "description": "Search medical literature with AI summaries",
     "fields": [
       {
         "name": "query",
