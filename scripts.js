@@ -1787,114 +1787,89 @@ function wrapInResultsTemplate(htmlContent, rawText, tool) {
  * and wrap it with severity indicators and diagnostic styling
  */
 function maybeWrapDiagnosticContent(htmlContent) {
-    // Check if content contains diagnostic indicators
-    const hasDiagnosticMarkers = /leziune|sindrom|bursit|tendinopatie|condromalacia|osteoartrit|inflamatie|patologic|normal|stabil|diagnosis/i.test(htmlContent);
-    const hasStructuredLists = /<li>/i.test(htmlContent);
+    // Check if this looks like diagnostic content with h3 header and lists
+    const hasH3 = /<h3/i.test(htmlContent);
+    const hasLists = /<li>/i.test(htmlContent);
 
-    if (!hasDiagnosticMarkers || !hasStructuredLists) {
-        return htmlContent; // Not diagnostic content
+    if (!hasH3 || !hasLists) {
+        return htmlContent;
     }
 
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlContent, 'text/html');
+    try {
+        const contentText = htmlContent.toLowerCase();
 
-    // Extract first h3 as the main condition
-    const mainCondition = doc.querySelector('h3');
-    if (!mainCondition) return htmlContent;
+        // Determine severity level from keywords in content
+        let severityLevel = 'mild';
+        let severityScore = 2;
+        let severityColor = 'ok';
+        let statusLabel = 'NORMAL';
 
-    const conditionName = mainCondition.textContent;
+        if (contentText.includes('moderat') || contentText.includes('moderate')) {
+            severityLevel = 'moderate';
+            severityScore = 4;
+            severityColor = 'warn';
+            statusLabel = 'PATHOLOGIC';
+        } else if (contentText.includes('sever') || contentText.includes('significant')) {
+            severityLevel = 'severe';
+            severityScore = 8;
+            severityColor = 'danger';
+            statusLabel = 'CRITICAL';
+        }
 
-    // Determine severity level from content
-    const contentText = htmlContent.toLowerCase();
-    let severityLevel = 'mild';
-    let severityScore = 2;
-    let severityColor = 'ok';
-    let statusLabel = 'NORMAL';
+        // Create severity indicator HTML string
+        const statusColors = {
+            'NORMAL': { bg: 'rgba(15, 160, 107, 0.13)', border: 'rgba(15, 160, 107, 0.34)', color: 'var(--dm-ok)' },
+            'PATHOLOGIC': { bg: 'rgba(240, 104, 104, 0.13)', border: 'rgba(240, 104, 104, 0.34)', color: 'var(--dm-danger)' },
+            'CRITICAL': { bg: 'rgba(201, 127, 26, 0.13)', border: 'rgba(201, 127, 26, 0.34)', color: 'var(--dm-warn)' }
+        };
+        const colors = statusColors[statusLabel];
 
-    if (contentText.includes('moderat') || contentText.includes('moderate')) {
-        severityLevel = 'moderate';
-        severityScore = 4;
-        severityColor = 'warn';
-        statusLabel = 'PATHOLOGIC';
-    } else if (contentText.includes('sever') || contentText.includes('significant')) {
-        severityLevel = 'severe';
-        severityScore = 8;
-        severityColor = 'danger';
-        statusLabel = 'CRITICAL';
+        // Build severity bar HTML
+        let severityBarHtml = '';
+        for (let i = 0; i < 10; i++) {
+            const isFilled = i < severityScore;
+            severityBarHtml += `<span style="width: 14px; height: 7px; border-radius: 2px; background: ${isFilled ? `var(--dm-${severityColor})` : 'var(--dm-border-strong)'};"></span>`;
+        }
+
+        // Extract h3 text
+        const h3Match = htmlContent.match(/<h3[^>]*>([^<]+)<\/h3>/i);
+        const conditionName = h3Match ? h3Match[1] : 'Finding';
+
+        // Extract first list items for key findings
+        const listMatch = htmlContent.match(/<li>([^<]+)<\/li>/g);
+        let keyFindingsHtml = '';
+        if (listMatch && listMatch.length > 0) {
+            keyFindingsHtml = `
+                <div style="font: 500 10px var(--dm-font-mono); letter-spacing: 0.14em; color: var(--dm-faint); margin-bottom: 10px;">KEY FINDINGS</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px;">
+            `;
+            listMatch.slice(0, 3).forEach(item => {
+                const text = item.replace(/<\/?li>/gi, '').trim();
+                keyFindingsHtml += `<span style="padding: 6px 12px; border-radius: 6px; background: var(--dm-panel-2); border: 1px solid var(--dm-border); font: 400 12.5px var(--dm-font-ui); color: var(--dm-text);">${text}</span>`;
+            });
+            keyFindingsHtml += '</div>';
+        }
+
+        // Build the diagnostic wrapper HTML
+        const diagnosticHtml = `
+            <div style="padding: 24px;">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;">
+                    <span style="display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 6px; background: ${colors.bg}; border: 1px solid ${colors.border}; color: ${colors.color}; font: 600 11px var(--dm-font-mono); letter-spacing: 0.08em;">
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: ${colors.color};"></span>${statusLabel}
+                    </span>
+                    <span style="font: 600 12px var(--dm-font-mono); letter-spacing: 0.06em; color: var(--dm-${severityColor});">${severityLevel.toUpperCase()} · ${severityScore}/10</span>
+                    <div style="display: flex; gap: 3px; margin-left: 4px;">${severityBarHtml}</div>
+                </div>
+                <h3 style="margin: 0px 0px 18px; font: 600 20px var(--dm-font-ui); letter-spacing: -0.01em; color: var(--dm-text);">${conditionName}</h3>
+                ${keyFindingsHtml}
+            </div>
+        `;
+
+        return diagnosticHtml + htmlContent;
+    } catch (error) {
+        console.warn('Error in maybeWrapDiagnosticContent:', error);
+        return htmlContent;
     }
-
-    // Create severity indicator
-    const severityDiv = document.createElement('div');
-    severityDiv.style.cssText = 'display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;';
-
-    const statusBadge = document.createElement('span');
-    const statusColors = {
-        'NORMAL': { bg: 'rgba(15, 160, 107, 0.13)', border: 'rgba(15, 160, 107, 0.34)', color: 'var(--dm-ok)' },
-        'PATHOLOGIC': { bg: 'rgba(240, 104, 104, 0.13)', border: 'rgba(240, 104, 104, 0.34)', color: 'var(--dm-danger)' },
-        'CRITICAL': { bg: 'rgba(201, 127, 26, 0.13)', border: 'rgba(201, 127, 26, 0.34)', color: 'var(--dm-warn)' }
-    };
-    const colors = statusColors[statusLabel] || statusColors['NORMAL'];
-
-    statusBadge.style.cssText = `display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 6px; background: ${colors.bg}; border: 1px solid ${colors.border}; color: ${colors.color}; font: 600 11px var(--dm-font-mono); letter-spacing: 0.08em;`;
-    statusBadge.innerHTML = `<span style="width: 6px; height: 6px; border-radius: 50%; background: ${colors.color};"></span>${statusLabel}`;
-
-    const severityText = document.createElement('span');
-    severityText.style.cssText = `font: 600 12px var(--dm-font-mono); letter-spacing: 0.06em; color: var(--dm-${severityColor});`;
-    severityText.textContent = `${severityLevel.toUpperCase()} · ${severityScore}/10`;
-
-    const severityBar = document.createElement('div');
-    severityBar.style.cssText = 'display: flex; gap: 3px; margin-left: 4px;';
-    for (let i = 0; i < 10; i++) {
-        const bar = document.createElement('span');
-        bar.style.cssText = `width: 14px; height: 7px; border-radius: 2px; background: ${i < severityScore ? `var(--dm-${severityColor})` : 'var(--dm-border-strong)'};`;
-        severityBar.appendChild(bar);
-    }
-
-    severityDiv.appendChild(statusBadge);
-    severityDiv.appendChild(severityText);
-    severityDiv.appendChild(severityBar);
-
-    // Create wrapper div with styling
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'padding: 24px;';
-
-    wrapper.appendChild(severityDiv);
-
-    // Copy the main condition title with styling
-    const styledTitle = document.createElement('h3');
-    styledTitle.style.cssText = 'margin: 0px 0px 18px; font: 600 20px var(--dm-font-ui); letter-spacing: -0.01em; color: var(--dm-text);';
-    styledTitle.textContent = conditionName;
-    wrapper.appendChild(styledTitle);
-
-    // Find and style "Supporting Features" or similar sections as "KEY FINDINGS"
-    const firstUl = doc.querySelector('ul, ol');
-    if (firstUl && firstUl.querySelectorAll('li').length > 0) {
-        const keyFindingsLabel = document.createElement('div');
-        keyFindingsLabel.style.cssText = 'font: 500 10px var(--dm-font-mono); letter-spacing: 0.14em; color: var(--dm-faint); margin-bottom: 10px;';
-        keyFindingsLabel.textContent = 'KEY FINDINGS';
-        wrapper.appendChild(keyFindingsLabel);
-
-        const findingsContainer = document.createElement('div');
-        findingsContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px;';
-
-        firstUl.querySelectorAll('li').forEach(item => {
-            const badge = document.createElement('span');
-            badge.style.cssText = 'padding: 6px 12px; border-radius: 6px; background: var(--dm-panel-2); border: 1px solid var(--dm-border); font: 400 12.5px var(--dm-font-ui); color: var(--dm-text);';
-            badge.textContent = item.textContent;
-            findingsContainer.appendChild(badge);
-        });
-
-        wrapper.appendChild(findingsContainer);
-
-        // Remove the first ul from the body to avoid duplication
-        firstUl.remove();
-    }
-
-    // Get remaining content and append to wrapper
-    const remainingContent = doc.body.innerHTML;
-    wrapper.innerHTML += remainingContent;
-
-    return wrapper.outerHTML;
 }
 
 /**
