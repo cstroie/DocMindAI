@@ -6,8 +6,37 @@ DocMind AI is a PHP web application providing AI-powered document processing too
 
 - **Author:** Costin Stroie <costinstroie@eridu.eu.org>
 - **License:** GPL v3
-- **Version:** 3.2 (config.json)
+- **Version:** 4.1 (config.json)
 - **Repo:** https://github.com/cstroie/DocMindAI
+
+---
+
+## Version History
+
+### v4.1 (Current)
+**UI/UX Refinements**
+- ✨ Added Recent Analyses section to home page (max 3 items, clickable)
+- 🎨 Flattened results card structure (removed nested boxes)
+- 🎯 Consolidated header hierarchy (eliminated triple header repetition)
+- 🔧 Improved form subtitle system with full-width content
+- 📐 Refined button styling for consistency (flex layout, padding, border-radius)
+
+**Form System Improvements**
+- ✅ Three-level header hierarchy now properly implemented:
+  - Page header: category context (name + description)
+  - Form header: tool context (name + concise description)
+  - Form subtitle: longer form-specific description (full context)
+- ✅ All 33 tool form descriptions restored to original longer versions
+- ✅ Concise tool descriptions in form kicker, fuller guidance in subtitle
+
+### v4.0 
+**Techno Redesign**
+- Dropped PicoCSS, implemented standalone design system
+- Implemented diagnostic styling with severity indicators and segmented bars
+- Added Results View template for long-form content
+- Severity box filling with color based on pathologic status
+- Improved text report visual hierarchy with numbered sections
+- Enhanced headers with category and tool descriptions
 
 ---
 
