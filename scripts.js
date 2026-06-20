@@ -763,6 +763,48 @@ function populateCategoryCards() {
         categoriesGrid.appendChild(clone);
         index++;
     }
+
+    // Populate recent history on home page
+    populateRecentHistory();
+}
+
+/**
+ * Populate recent history section on home page (max 3 items)
+ */
+function populateRecentHistory() {
+    const historyList = document.getElementById('recentHistoryList');
+    if (!historyList) return;
+
+    // Get results from localStorage
+    const allResults = JSON.parse(localStorage.getItem('docmind-results')) || [];
+    const recentItems = allResults.slice(0, 3); // Get first 3 (already sorted most recent first)
+
+    historyList.innerHTML = '';
+
+    if (recentItems.length === 0) {
+        historyList.innerHTML = '<p style="padding: 12px 14px; color: var(--dm-faint); font: 400 12px var(--dm-font-ui);">No recent analyses yet</p>';
+        return;
+    }
+
+    recentItems.forEach(item => {
+        const toolData = toolsData?.[item.tool];
+        const category = toolData?.category ? categoriesData[toolData.category] : null;
+        const toolIcon = toolData?.icon || '📋';
+
+        const div = document.createElement('div');
+        div.className = 'dm-recent-history-item';
+        div.innerHTML = `
+            <div class="dm-recent-history-item-icon">${toolIcon}</div>
+            <div class="dm-recent-history-item-content">
+                <h4 class="dm-recent-history-item-title">${escapeHtml(item.title || item.tool || 'Unknown')}</h4>
+                <p class="dm-recent-history-item-subtitle">${category ? category.name : 'Tools'} • ${new Date(item.timestamp).toLocaleDateString()}</p>
+            </div>
+        `;
+        div.addEventListener('click', () => {
+            displayHistoryResult(item.id);
+        });
+        historyList.appendChild(div);
+    });
 }
 
 /**
