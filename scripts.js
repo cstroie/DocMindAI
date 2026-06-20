@@ -1773,7 +1773,7 @@ function wrapInResultsTemplate(htmlContent, rawText, tool) {
 
     return `
         <div style="background: var(--dm-panel); border: 1px solid var(--dm-border); border-radius: 12px; overflow: hidden;">
-            <div class="article" style="padding: 26px 32px; max-width: 740px;">${processedContent}</div>
+            <div class="article" style="padding: 26px 32px;">${processedContent}</div>
         </div>
     `;
 }
