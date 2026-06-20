@@ -1010,14 +1010,21 @@ async function displayToolForm(toolId) {
         const formTitle = toolForm.querySelector('.view-header-text h2');
         const formKicker = toolForm.querySelector('.view-header-kicker');
         if (formIcon) formIcon.innerHTML = CATEGORY_SVGS[tool.category] || tool.icon || '';
-        if (formTitle) formTitle.textContent = tool.name || 'Unnamed Tool';
+        if (formTitle) {
+            formTitle.textContent = tool.name || 'Unnamed Tool';
+            // Add tool description below title
+            formTitle.title = tool.description || '';
+        }
         if (formKicker) {
             const cat = category ? category.name.toUpperCase() : 'CONFIGURE';
-            formKicker.textContent = cat + ' · CONFIGURE';
+            const toolDesc = tool.form?.description ? ' — ' + tool.form.description : '';
+            formKicker.textContent = cat + ' · CONFIGURE' + (toolDesc ? toolDesc.substring(0, 60) : '');
         }
 
-        // Update page header with tool and category info
-        updatePageTitle(tool.name || category.name, (category.name || 'CONFIGURE').toUpperCase() + ' · TOOL');
+        // Update page header with category and category description
+        const categoryDesc = category?.description || '';
+        const pageKickerText = (category?.name || 'CONFIGURE').toUpperCase() + ' · CATEGORY';
+        updatePageTitle(category?.name || tool.name, pageKickerText);
 
         // Populate the form fields
         const formFields = document.getElementById('formFields');
