@@ -2946,6 +2946,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Register Handlebars helpers to ensure they're available
     if (typeof Handlebars !== 'undefined') {
         Handlebars.registerHelper('eq', (a, b) => a === b);
+        Handlebars.registerHelper('gte', (a, b) => a >= b);
+        Handlebars.registerHelper('lt', (a, b) => a < b);
+        Handlebars.registerHelper('loop', function(count, block) {
+            let result = '';
+            for (let i = 0; i < count; i++) {
+                result += block.fn({...this, '@index': i});
+            }
+            return new Handlebars.SafeString(result);
+        });
         Handlebars.registerHelper('getSeverityColor', severity => {
             if (severity == 0) return '#10b981';
             if (severity <= 3) return '#3b82f6';
