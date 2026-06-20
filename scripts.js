@@ -1009,16 +1009,21 @@ async function displayToolForm(toolId) {
         const formIcon = toolForm.querySelector('.view-header-icon');
         const formTitle = toolForm.querySelector('.view-header-text h2');
         const formKicker = toolForm.querySelector('.view-header-kicker');
+        const formSubtitle = document.getElementById('formSubtitle');
+
         if (formIcon) formIcon.innerHTML = CATEGORY_SVGS[tool.category] || tool.icon || '';
         if (formTitle) {
             formTitle.textContent = tool.name || 'Unnamed Tool';
-            // Add tool description below title
+            // Add tool description as tooltip
             formTitle.title = tool.description || '';
         }
         if (formKicker) {
             const cat = category ? category.name.toUpperCase() : 'TOOL';
-            const toolDesc = tool.form?.description ? ' — ' + tool.form.description : '';
-            formKicker.textContent = cat + toolDesc;
+            formKicker.textContent = cat;
+        }
+        if (formSubtitle) {
+            // Show longer form description as subtitle
+            formSubtitle.textContent = tool.form?.description || tool.description || '';
         }
 
         // Update page header with category info
