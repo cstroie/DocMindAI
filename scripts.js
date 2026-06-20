@@ -1907,47 +1907,52 @@ function processResultsContent(htmlContent) {
     const doc = parser.parseFromString(htmlContent, 'text/html');
     let sectionCount = 0;
 
-    // Convert h2 and h3 headers into numbered sections
-    doc.querySelectorAll('h2, h3').forEach(header => {
+    // Convert h2 and h3 headers into numbered sections with enhanced styling
+    doc.querySelectorAll('h2, h3').forEach((header, index) => {
         sectionCount++;
         const sectionNum = String(sectionCount).padStart(2, '0');
+        const headerText = header.textContent;
+        const isLastSection = headerText.toLowerCase().includes('urmează') || headerText.toLowerCase().includes('next');
+
         const sectionDiv = document.createElement('div');
-        sectionDiv.style.cssText = 'display: flex; align-items: center; gap: 11px; padding-bottom: 9px; margin-bottom: 13px; border-bottom: 1px solid var(--dm-border);';
+        const baseStyle = 'display: flex; align-items: center; gap: 14px; padding: 14px 16px; margin-bottom: 20px; border-radius: 10px; margin-top: 24px;';
+        const bgColor = isLastSection ? 'background: var(--dm-accent-soft); border: 1px solid var(--dm-accent-line);' : 'background: var(--dm-panel-2); border-bottom: 2px solid var(--dm-accent);';
+        sectionDiv.style.cssText = baseStyle + bgColor;
 
         const numSpan = document.createElement('span');
-        numSpan.style.cssText = 'font: 600 11px var(--dm-font-mono); color: var(--dm-accent);';
+        numSpan.style.cssText = `display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; background: var(--dm-accent); color: white; font: 600 13px var(--dm-font-mono); flex: 0 0 auto;`;
         numSpan.textContent = sectionNum;
 
         const titleSpan = document.createElement('span');
-        titleSpan.style.cssText = 'font: 600 11px var(--dm-font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dm-muted);';
-        titleSpan.textContent = header.textContent;
+        titleSpan.style.cssText = `font: 600 13.5px var(--dm-font-ui); letter-spacing: 0.08em; text-transform: uppercase; color: ${isLastSection ? 'var(--dm-accent)' : 'var(--dm-text)'};`;
+        titleSpan.textContent = headerText;
 
         sectionDiv.appendChild(numSpan);
         sectionDiv.appendChild(titleSpan);
         header.replaceWith(sectionDiv);
     });
 
-    // Style paragraphs
+    // Style paragraphs with better spacing
     doc.querySelectorAll('p').forEach(para => {
-        para.style.cssText = 'margin: 0px 0px 28px; font: 400 14.5px / 1.72 var(--dm-font-ui); color: var(--dm-text);';
+        para.style.cssText = 'margin: 0px 0px 20px; font: 400 14px / 1.7 var(--dm-font-ui); color: var(--dm-text); letter-spacing: 0.3px;';
     });
 
-    // Wrap lists in flex container and style items
+    // Wrap lists in flex container and style items with better visuals
     doc.querySelectorAll('ul, ol').forEach(list => {
         const flexDiv = document.createElement('div');
-        flexDiv.style.cssText = 'display: flex; flex-direction: column; gap: 9px;';
+        flexDiv.style.cssText = 'display: flex; flex-direction: column; gap: 11px; margin-bottom: 20px;';
 
         list.querySelectorAll('li').forEach(item => {
             const isQuestion = item.textContent.includes('?');
             const itemWrapper = document.createElement('div');
-            itemWrapper.style.cssText = 'display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; background: var(--dm-panel-2); border: 1px solid var(--dm-border); border-radius: 8px;';
+            itemWrapper.style.cssText = 'display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; background: var(--dm-panel-2); border: 1px solid var(--dm-border); border-radius: 9px; transition: border-color 0.2s;';
 
             const indicator = document.createElement('span');
-            indicator.style.cssText = 'display: grid; place-items: center; width: 22px; height: 22px; flex: 0 0 auto; border-radius: 6px; background: var(--dm-accent-soft); color: var(--dm-accent); font: 600 11px var(--dm-font-mono);';
-            indicator.textContent = isQuestion ? '?' : '•';
+            indicator.style.cssText = `display: grid; place-items: center; width: 24px; height: 24px; flex: 0 0 auto; border-radius: 6px; background: var(--dm-accent-soft); color: var(--dm-accent); font: 600 12px var(--dm-font-mono); min-width: 24px;`;
+            indicator.textContent = isQuestion ? '?' : '✓';
 
             const content = document.createElement('span');
-            content.style.cssText = 'font: 400 13.5px / 1.5 var(--dm-font-ui); color: var(--dm-text);';
+            content.style.cssText = 'font: 400 13px / 1.6 var(--dm-font-ui); color: var(--dm-text);';
             content.innerHTML = item.innerHTML;
 
             itemWrapper.appendChild(indicator);
