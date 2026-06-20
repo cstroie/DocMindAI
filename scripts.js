@@ -1016,15 +1016,14 @@ async function displayToolForm(toolId) {
             formTitle.title = tool.description || '';
         }
         if (formKicker) {
-            const cat = category ? category.name.toUpperCase() : 'CONFIGURE';
+            const cat = category ? category.name.toUpperCase() : 'TOOL';
             const toolDesc = tool.form?.description ? ' — ' + tool.form.description : '';
-            formKicker.textContent = cat + ' · CONFIGURE' + (toolDesc ? toolDesc.substring(0, 60) : '');
+            formKicker.textContent = cat + toolDesc;
         }
 
-        // Update page header with category and category description
-        const categoryDesc = category?.description || '';
-        const pageKickerText = (category?.name || 'CONFIGURE').toUpperCase() + ' · CATEGORY';
-        updatePageTitle(category?.name || tool.name, pageKickerText);
+        // Update page header with category only
+        const pageKickerText = (category?.name || 'DOCUMENT').toUpperCase();
+        updatePageTitle(category?.description || category?.name || 'Tools', pageKickerText);
 
         // Populate the form fields
         const formFields = document.getElementById('formFields');
