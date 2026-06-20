@@ -1021,9 +1021,10 @@ async function displayToolForm(toolId) {
             formKicker.textContent = cat + toolDesc;
         }
 
-        // Update page header with category only
-        const pageKickerText = (category?.name || 'DOCUMENT').toUpperCase();
-        updatePageTitle(category?.description || category?.name || 'Tools', pageKickerText);
+        // Update page header with category info
+        const pageKickerText = category?.description || 'Document Processing Tools';
+        const pageTitleText = (category?.name || 'Tools');
+        updatePageTitle(pageTitleText, pageKickerText);
 
         // Populate the form fields
         const formFields = document.getElementById('formFields');
