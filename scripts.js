@@ -1755,8 +1755,9 @@ function wrapInResultsTemplate(htmlContent, rawText, tool) {
     const langCode = (typeof appState !== 'undefined' && appState?.language) ? appState.language.toUpperCase().substring(0, 2) : 'EN';
     const categoryIcon = tool?.category ? CATEGORY_SVGS[tool.category] || '' : '';
 
-    // Process HTML to add structured sections and styling
-    const processedContent = processResultsContent(htmlContent);
+    // Process HTML to add structured sections, styling, and diagnostic wrappers
+    let processedContent = maybeWrapDiagnosticContent(htmlContent);
+    processedContent = processResultsContent(processedContent);
 
     return `
         <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -1779,6 +1780,121 @@ function wrapInResultsTemplate(htmlContent, rawText, tool) {
             </div>
         </div>
     `;
+}
+
+/**
+ * Detect if content appears to be diagnostic/summary content
+ * and wrap it with severity indicators and diagnostic styling
+ */
+function maybeWrapDiagnosticContent(htmlContent) {
+    // Check if content contains diagnostic indicators
+    const hasDiagnosticMarkers = /leziune|sindrom|bursit|tendinopatie|condromalacia|osteoartrit|inflamatie|patologic|normal|stabil|diagnosis/i.test(htmlContent);
+    const hasStructuredLists = /<li>/i.test(htmlContent);
+
+    if (!hasDiagnosticMarkers || !hasStructuredLists) {
+        return htmlContent; // Not diagnostic content
+    }
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+
+    // Extract first h3 as the main condition
+    const mainCondition = doc.querySelector('h3');
+    if (!mainCondition) return htmlContent;
+
+    const conditionName = mainCondition.textContent;
+
+    // Determine severity level from content
+    const contentText = htmlContent.toLowerCase();
+    let severityLevel = 'mild';
+    let severityScore = 2;
+    let severityColor = 'ok';
+    let statusLabel = 'NORMAL';
+
+    if (contentText.includes('moderat') || contentText.includes('moderate')) {
+        severityLevel = 'moderate';
+        severityScore = 4;
+        severityColor = 'warn';
+        statusLabel = 'PATHOLOGIC';
+    } else if (contentText.includes('sever') || contentText.includes('significant')) {
+        severityLevel = 'severe';
+        severityScore = 8;
+        severityColor = 'danger';
+        statusLabel = 'CRITICAL';
+    }
+
+    // Create severity indicator
+    const severityDiv = document.createElement('div');
+    severityDiv.style.cssText = 'display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;';
+
+    const statusBadge = document.createElement('span');
+    const statusColors = {
+        'NORMAL': { bg: 'rgba(15, 160, 107, 0.13)', border: 'rgba(15, 160, 107, 0.34)', color: 'var(--dm-ok)' },
+        'PATHOLOGIC': { bg: 'rgba(240, 104, 104, 0.13)', border: 'rgba(240, 104, 104, 0.34)', color: 'var(--dm-danger)' },
+        'CRITICAL': { bg: 'rgba(201, 127, 26, 0.13)', border: 'rgba(201, 127, 26, 0.34)', color: 'var(--dm-warn)' }
+    };
+    const colors = statusColors[statusLabel] || statusColors['NORMAL'];
+
+    statusBadge.style.cssText = `display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 6px; background: ${colors.bg}; border: 1px solid ${colors.border}; color: ${colors.color}; font: 600 11px var(--dm-font-mono); letter-spacing: 0.08em;`;
+    statusBadge.innerHTML = `<span style="width: 6px; height: 6px; border-radius: 50%; background: ${colors.color};"></span>${statusLabel}`;
+
+    const severityText = document.createElement('span');
+    severityText.style.cssText = `font: 600 12px var(--dm-font-mono); letter-spacing: 0.06em; color: var(--dm-${severityColor});`;
+    severityText.textContent = `${severityLevel.toUpperCase()} · ${severityScore}/10`;
+
+    const severityBar = document.createElement('div');
+    severityBar.style.cssText = 'display: flex; gap: 3px; margin-left: 4px;';
+    for (let i = 0; i < 10; i++) {
+        const bar = document.createElement('span');
+        bar.style.cssText = `width: 14px; height: 7px; border-radius: 2px; background: ${i < severityScore ? `var(--dm-${severityColor})` : 'var(--dm-border-strong)'};`;
+        severityBar.appendChild(bar);
+    }
+
+    severityDiv.appendChild(statusBadge);
+    severityDiv.appendChild(severityText);
+    severityDiv.appendChild(severityBar);
+
+    // Create wrapper div with styling
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'padding: 24px;';
+
+    wrapper.appendChild(severityDiv);
+
+    // Copy the main condition title with styling
+    const styledTitle = document.createElement('h3');
+    styledTitle.style.cssText = 'margin: 0px 0px 18px; font: 600 20px var(--dm-font-ui); letter-spacing: -0.01em; color: var(--dm-text);';
+    styledTitle.textContent = conditionName;
+    wrapper.appendChild(styledTitle);
+
+    // Find and style "Supporting Features" or similar sections as "KEY FINDINGS"
+    const firstUl = doc.querySelector('ul, ol');
+    if (firstUl && firstUl.querySelectorAll('li').length > 0) {
+        const keyFindingsLabel = document.createElement('div');
+        keyFindingsLabel.style.cssText = 'font: 500 10px var(--dm-font-mono); letter-spacing: 0.14em; color: var(--dm-faint); margin-bottom: 10px;';
+        keyFindingsLabel.textContent = 'KEY FINDINGS';
+        wrapper.appendChild(keyFindingsLabel);
+
+        const findingsContainer = document.createElement('div');
+        findingsContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px;';
+
+        firstUl.querySelectorAll('li').forEach(item => {
+            const badge = document.createElement('span');
+            badge.style.cssText = 'padding: 6px 12px; border-radius: 6px; background: var(--dm-panel-2); border: 1px solid var(--dm-border); font: 400 12.5px var(--dm-font-ui); color: var(--dm-text);';
+            badge.textContent = item.textContent;
+            findingsContainer.appendChild(badge);
+        });
+
+        wrapper.appendChild(findingsContainer);
+
+        // Remove the first ul from the body to avoid duplication
+        firstUl.remove();
+    }
+
+    // Get remaining content and append to wrapper
+    const remainingContent = doc.body.innerHTML;
+    wrapper.innerHTML += remainingContent;
+
+    return wrapper.outerHTML;
 }
 
 /**
