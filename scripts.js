@@ -1873,6 +1873,26 @@ function maybeWrapDiagnosticContent(htmlContent) {
 }
 
 /**
+ * Fill severity indicator boxes based on data attributes
+ */
+function fillSeverityBoxes(container) {
+    const severityDiv = container.querySelector('[data-severity]');
+    if (!severityDiv) return;
+
+    const severity = parseInt(severityDiv.getAttribute('data-severity'), 10);
+    const pathologic = severityDiv.getAttribute('data-pathologic');
+
+    const boxes = severityDiv.querySelectorAll('.severity-box');
+    const color = pathologic === 'yes' ? 'var(--dm-warn)' : 'var(--dm-ok)';
+
+    boxes.forEach((box, index) => {
+        if (index < severity) {
+            box.style.background = color;
+        }
+    });
+}
+
+/**
  * Process results content to add structured sections, callouts, and question styling
  */
 function processResultsContent(htmlContent) {
@@ -1967,6 +1987,8 @@ function renderContent(resultsContent, resultsInfo, displayFormat, tool) {
                             tool.template;
                         const template = Handlebars.compile(templateContent);
                         resultsContent.innerHTML = template(jsonData);
+                        // Fill severity boxes after template rendering
+                        fillSeverityBoxes(resultsContent);
                     } catch (error) {
                         showToast('Handlebars template error: ' + error.message, 'error');
                         // Fallback to markdown rendering
@@ -2951,7 +2973,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         Handlebars.registerHelper('loop', function(count, block) {
             let result = '';
             for (let i = 0; i < count; i++) {
-                result += block.fn({...this, '@index': i});
+                const context = Object.assign({}, this);
+                context['@index'] = i;
+                context['@first'] = (i === 0);
+                context['@last'] = (i === count - 1);
+                result += block.fn(context);
             }
             return new Handlebars.SafeString(result);
         });
