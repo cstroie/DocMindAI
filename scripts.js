@@ -3013,6 +3013,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         Handlebars.registerHelper('eq', (a, b) => a === b);
         Handlebars.registerHelper('gte', (a, b) => a >= b);
         Handlebars.registerHelper('lt', (a, b) => a < b);
+        Handlebars.registerHelper('and', (...args) => args.slice(0, -1).every(Boolean));
+        Handlebars.registerHelper('or', (...args) => args.slice(0, -1).some(Boolean));
+        Handlebars.registerHelper('not', a => !a);
         Handlebars.registerHelper('loop', function(count, block) {
             let result = '';
             for (let i = 0; i < count; i++) {
