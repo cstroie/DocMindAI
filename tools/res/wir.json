@@ -44,7 +44,7 @@
     ],
     "analyzed_text": "{text}"
   },
-  "display": "markdown",
+  "display": "html",
   "form": {
     "title": "Writing Integrity Review",
     "description": "Get a qualitative, honest read on a piece of writing for AI-authorship style signals and possible unattributed borrowing. This is not a validated detector or plagiarism database check — it surfaces specific, quotable observations for you to evaluate and investigate yourself, not scores or verdicts.",
