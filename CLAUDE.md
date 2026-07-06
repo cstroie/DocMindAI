@@ -127,7 +127,7 @@ Browser → docmind.php ──[GET]──→ index.html (web UI)
 
 ### Current tools (32 total)
 
-`dqc, rex, rrs, rdd, soap, dsn, pec, sbar, mex, anm, cpn, sde, rdg, wpc, wps, cta, apa, etp, stp, sta, sml, pld, exp, eml, ocr, mrs, dps, hda, pre, ade, agr` + `mrs` (in cli/)
+`dqc, rex, rrs, rdd, soap, dsn, pec, sbar, mex, anm, cpn, sde, rdg, wpc, wps, cta, apa, etp, stp, sta, sml, wir, exp, eml, ocr, mrs, dps, hda, pre, ade, agr` + `mrs` (in cli/)
 
 ---
 
