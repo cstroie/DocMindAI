@@ -10,6 +10,13 @@
     "output_structure": [
       "# [Patient Name] \u2014 [Age in years or months] \u2014 [Diagnosis, WHO Grade if applicable]",
       "",
+      "## Executive Summary",
+      "- **Diagnosis:** [primary diagnosis, WHO grade / stage if applicable]",
+      "- **Current status:** [in treatment / post-treatment / stable / progressing / newly diagnosed, etc.]",
+      "- **Reason for this examination:** [surveillance / suspected recurrence / treatment response / new symptoms, etc.]",
+      "- **Key concern:** [the single most important clinical question or risk this imaging should address]",
+      "*(3\u20135 bullets, one line each; a radiologist should grasp the clinical picture at a glance without reading further)*",
+      "",
       "## Chronology",
       "- YYYY-MM-DD: [single-line event description: diagnosis / surgery / treatment cycle / imaging / consultation]",
       "*(one bullet per event, chronological order; dates must be in YYYY-MM-DD format; if only month/year is known use YYYY-MM; if completely unknown use [date unknown]; keep each entry to one line)*",
@@ -40,6 +47,7 @@
     ],
     "output_principles": [
       "Extract only what is clinically and radiologically relevant",
+      "The executive summary must be readable at a glance and precede all other sections",
       "Chronology must be complete and in correct order",
       "The imaging section preserves exact dimensions and dates from the source document",
       "The imaging targets section is specific and actionable, never generic",
