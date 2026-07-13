@@ -505,6 +505,36 @@ function scrapeUrl(string $url) {
 }
 
 /**
+ * Reduce raw page HTML to a compact, LLM-friendly payload.
+ *
+ * Strips the bulky non-content parts of a page (scripts, styles, SVGs, the
+ * document head, HTML comments) and collapses whitespace, then caps the result
+ * to a maximum length. Without this a modern article page (hundreds of KB of
+ * markup and inline JS) can exceed the provider's request-size limit and the
+ * API returns HTTP 413. Structural body tags are kept so the model can still
+ * reconstruct headings, lists and links.
+ *
+ * @param string $html      Raw HTML.
+ * @param int    $max_chars Maximum characters to keep (default 50k ≈ safe for
+ *                          all common providers).
+ * @return string Cleaned, length-capped HTML.
+ */
+function cleanHtmlForLlm(string $html, int $max_chars = 50000): string {
+    // Drop whole blocks whose contents are never useful to the model
+    $html = preg_replace('#<(script|style|noscript|svg|head|template)\b[^>]*>.*?</\1>#is', ' ', $html) ?? $html;
+    // Drop HTML comments (often large ad/analytics blocks)
+    $html = preg_replace('#<!--.*?-->#s', ' ', $html) ?? $html;
+    // Collapse runs of whitespace introduced by the removals
+    $html = trim(preg_replace('/[ \t\r\n]+/', ' ', $html) ?? $html);
+
+    if (strlen($html) > $max_chars) {
+        $html = substr($html, 0, $max_chars) . ' … [content truncated]';
+    }
+
+    return $html;
+}
+
+/**
  * Extract clean text from a URL using lynx.
  *
  * @param string $url Raw URL from user input (validated internally).
@@ -1649,7 +1679,10 @@ function executeHelper(string $helper_name, array $form_data) {
             if (empty($url) || strlen($url) > 2048) return false;
             $v = processUrl($url);
             if (!$v['valid']) return false;
-            return scrapeUrl($v['data']);
+            $html = scrapeUrl($v['data']);
+            // Strip scripts/styles and cap length so large pages don't blow the
+            // provider's request-size limit (HTTP 413).
+            return $html === false ? false : cleanHtmlForLlm($html);
 
         case 'lynx':
             $url = $form_data['url'] ?? '';
