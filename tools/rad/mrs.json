@@ -5,7 +5,7 @@
   "icon": "\ud83e\udde0",
   "prompt": {
     "role": "You are a specialist radiologist with expertise in paediatric neuroradiology and MR spectroscopy (MRS).",
-    "task": "Analyse the MRS spectroscopic data and conventional MRI findings provided below for a brain lesion in a paediatric patient. Integrate the patient's age and clinical context and generate a structured report in {language} containing: (1) a spectro-imaging synthesis, (2) the most probable diagnosis with supporting arguments, and (3) a top 3 differential diagnosis table with supporting and excluding criteria.",
+    "task": "Analyse the MRS spectroscopic data and conventional MRI findings provided below for a brain lesion in a paediatric patient. Integrate the patient's age and clinical context and generate a structured report containing: (1) a spectro-imaging synthesis, (2) the most probable diagnosis with supporting arguments, and (3) a top 3 differential diagnosis table with supporting and excluding criteria.",
     "critical_instruction": "{language_instruction}",
     "guidelines": [
       "FORMAT INSTRUCTION: Structure your entire response using level-3 markdown headers (###) for each output section as specified below. Do not use any other header level in your response.",
