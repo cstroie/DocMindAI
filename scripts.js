@@ -1724,8 +1724,10 @@ function displayResults(results, fromHistory = false) {
     // Check the desired display format from tool
     const displayFormat = tool && tool.display ? tool.display.toLowerCase() : resultsInfo.type;
 
-    // Render content based on type and format
-    renderContent(resultsContent, resultsInfo, displayFormat, tool);
+    // Render content based on type and format. When the backend already
+    // extracted structured JSON (robust, tolerates prose around the object),
+    // prefer it over the frontend's stricter ```json fence detection.
+    renderContent(resultsContent, resultsInfo, displayFormat, tool, results.json ?? null);
 
     // Check if resultsContent is not empty
     if (resultsContent.innerHTML.trim() !== '') {
@@ -1800,49 +1802,68 @@ function fillSeverityBoxes(container) {
  * @note Calls jsonToMarkdown() for JSON content conversion
  * @see displayResults() - Calls this function for content rendering
  */
-function renderContent(resultsContent, resultsInfo, displayFormat, tool) {
-    if (resultsInfo.type === 'json') {
-        // If the result is JSON, parse it
-        try {
-            const jsonData = JSON.parse(resultsInfo.text);
-
-            // HTML display format with Handlebars template
-            if (displayFormat === 'html') {
-                if (tool && tool.template && typeof Handlebars !== 'undefined') {
-                    try {
-                        // Handle both string and array templates
-                        const templateContent = Array.isArray(tool.template) ?
-                            tool.template.join('\n') :
-                            tool.template;
-                        const template = Handlebars.compile(templateContent);
-                        resultsContent.innerHTML = template(jsonData);
-                    } catch (error) {
-                        showToast('Handlebars template error: ' + error.message, 'error');
-                        // Fallback to markdown rendering
-                        const markdownContent = jsonToMarkdown(jsonData);
-                        resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
-                    }
-                    // Post-render enhancement — outside the try so a helper error
-                    // can never discard a successfully rendered template
-                    fillSeverityBoxes(resultsContent);
-                } else {
-                    // Convert JSON to HTML via markdown
-                    const markdownContent = jsonToMarkdown(jsonData);
-                    resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
-                }
-            } else if (displayFormat === 'markdown') {
-                // Convert JSON to markdown
+/**
+ * Render a parsed JSON value into the results area according to display format.
+ * - html : Handlebars template if the tool defines one, else a markdown article
+ * - markdown : JSON serialised to markdown in a code block
+ * - other : pretty-printed JSON in a code block
+ *
+ * @param {HTMLElement} resultsContent
+ * @param {Object|Array} jsonData - already-parsed JSON value
+ * @param {string} displayFormat
+ * @param {Object} tool
+ */
+function renderJsonData(resultsContent, jsonData, displayFormat, tool) {
+    if (displayFormat === 'html') {
+        if (tool && tool.template && typeof Handlebars !== 'undefined') {
+            try {
+                // Handle both string and array templates
+                const templateContent = Array.isArray(tool.template) ?
+                    tool.template.join('\n') :
+                    tool.template;
+                const template = Handlebars.compile(templateContent);
+                resultsContent.innerHTML = template(jsonData);
+            } catch (error) {
+                showToast('Handlebars template error: ' + error.message, 'error');
+                // Fallback to markdown rendering
                 const markdownContent = jsonToMarkdown(jsonData);
-                resultsContent.innerHTML = `<pre><code class="${displayFormat}">${markdownContent}</code></pre>`;
-            } else {
-                // Convert JSON to pretty JSON string
-                const prettyJson = JSON.stringify(jsonData, null, 2);
-                resultsContent.innerHTML = `<pre><code class="json">${prettyJson}</code></pre>`;
+                resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
             }
+            // Post-render enhancement — outside the try so a helper error
+            // can never discard a successfully rendered template
+            fillSeverityBoxes(resultsContent);
+        } else {
+            // Convert JSON to HTML via markdown
+            const markdownContent = jsonToMarkdown(jsonData);
+            resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
+        }
+    } else if (displayFormat === 'markdown') {
+        // Convert JSON to markdown
+        const markdownContent = jsonToMarkdown(jsonData);
+        resultsContent.innerHTML = `<pre><code class="${displayFormat}">${markdownContent}</code></pre>`;
+    } else {
+        // Convert JSON to pretty JSON string
+        const prettyJson = JSON.stringify(jsonData, null, 2);
+        resultsContent.innerHTML = `<pre><code class="json">${prettyJson}</code></pre>`;
+    }
+}
+
+function renderContent(resultsContent, resultsInfo, displayFormat, tool, preParsedJson = null) {
+    // Prefer JSON already extracted by the backend (depth-aware, tolerates
+    // surrounding prose). Fall back to parsing a detected ```json fence.
+    let jsonData = preParsedJson;
+    if (jsonData == null && resultsInfo.type === 'json') {
+        try {
+            jsonData = JSON.parse(resultsInfo.text);
         } catch (error) {
             showToast('Error parsing JSON: ' + error.message, 'error');
-            resultsContent.innerHTML = `<pre><code>${resultsInfo.text}</code></pre>`;
+            resultsContent.innerHTML = `<pre><code>${escapeHtml(resultsInfo.text)}</code></pre>`;
+            return;
         }
+    }
+
+    if (jsonData != null) {
+        renderJsonData(resultsContent, jsonData, displayFormat, tool);
     } else if (resultsInfo.type === 'markdown') {
         // If the result is markdown, convert it to HTML
         if (displayFormat === 'html') {

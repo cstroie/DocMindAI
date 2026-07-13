@@ -1671,8 +1671,13 @@ function executeHelper(string $helper_name, array $form_data) {
 /**
  * Process the raw LLM API response for a tool.
  *
- * FIX #12: JSON extraction is now triggered by `"display": "json"` OR
- * `"output": "json"` — covering the rdd tool and any future JSON-output tools.
+ * JSON extraction runs when the tool declares `"output": "json"`,
+ * `"display": "json"`, or defines a Handlebars `template` (which consumes a
+ * JSON object). The extracted value is returned as `json` so the frontend can
+ * render it directly instead of re-parsing the raw text with stricter fence
+ * detection. Extraction here is depth-aware and tolerates prose around the
+ * object, making template rendering robust to models that don't return a bare
+ * fenced block.
  *
  * @param array $tool         Tool configuration.
  * @param array $api_response Raw decoded API response.
@@ -1685,7 +1690,8 @@ function processToolResponse(array $tool, array $api_response): array {
     ];
 
     $wants_json = (isset($tool['output'])   && $tool['output']   === 'json')
-               || (isset($tool['display'])  && $tool['display']  === 'json');
+               || (isset($tool['display'])  && $tool['display']  === 'json')
+               || !empty($tool['template']);
 
     if ($wants_json) {
         $content  = $api_response['choices'][0]['message']['content'] ?? '';
