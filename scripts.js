@@ -1790,6 +1790,28 @@ function displayResults(results, fromHistory = false) {
 }
 
 /**
+ * Fill severity indicator boxes based on data attributes.
+ * No-ops when the rendered template has no [data-severity] element, so it is
+ * safe to call after any Handlebars template render.
+ */
+function fillSeverityBoxes(container) {
+    const severityDiv = container.querySelector('[data-severity]');
+    if (!severityDiv) return;
+
+    const severity = parseInt(severityDiv.getAttribute('data-severity'), 10);
+    const pathologic = severityDiv.getAttribute('data-pathologic');
+
+    const boxes = severityDiv.querySelectorAll('.severity-box');
+    const color = pathologic === 'yes' ? 'var(--dm-warn)' : 'var(--dm-ok)';
+
+    boxes.forEach((box, index) => {
+        if (index < severity) {
+            box.style.background = color;
+        }
+    });
+}
+
+/**
  * Render content based on type and format
  *
  * This function renders content based on the content type and display format.
@@ -1822,14 +1844,15 @@ function renderContent(resultsContent, resultsInfo, displayFormat, tool) {
                             tool.template;
                         const template = Handlebars.compile(templateContent);
                         resultsContent.innerHTML = template(jsonData);
-                        // Fill severity boxes after template rendering
-                        fillSeverityBoxes(resultsContent);
                     } catch (error) {
                         showToast('Handlebars template error: ' + error.message, 'error');
                         // Fallback to markdown rendering
                         const markdownContent = jsonToMarkdown(jsonData);
                         resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
                     }
+                    // Post-render enhancement — outside the try so a helper error
+                    // can never discard a successfully rendered template
+                    fillSeverityBoxes(resultsContent);
                 } else {
                     // Convert JSON to HTML via markdown
                     const markdownContent = jsonToMarkdown(jsonData);
