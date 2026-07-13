@@ -185,7 +185,7 @@ The codebase had 15 bugs fixed (see commit `89c78da`). Current security posture:
 
 - **File upload MIME detection:** Uses `finfo` (reads actual bytes), not `$_FILES['type']` (client-supplied, untrusted).
 - **CORS:** Origin validated against `$ALLOWED_ORIGINS` allowlist; never reflected verbatim.
-- **CSRF:** Session-based token generated with `random_bytes(32)`; session only regenerated on fresh session creation (not every request).
+- **CSRF:** No token is used — the app exposes no authenticated, state-changing endpoints. (An earlier token was generated but never embedded in the page nor validated, so it was inert and has been removed.)
 - **Shell calls:** All file paths passed to external tools (`antiword`, `pdftotext`, `lynx`, etc.) are escaped with `escapeshellarg()`.
 - **JSON output:** `json_encode()` called with `JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP` to prevent XSS.
 - **Security headers:** `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Content-Security-Policy: default-src 'none'`.

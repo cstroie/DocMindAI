@@ -6,7 +6,7 @@
  */
 if (isset($_GET['hupl'])) {
     $name = 'Image OCR Tool';
-    $site_url = ($_SERVER['HTTPS'] ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
+    $site_url = (!empty($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
     header('Content-Type: text/plain');
     header('Content-Disposition: attachment; filename="' . $_SERVER['SERVER_NAME'] . '.hupl"');
     echo "{\n";

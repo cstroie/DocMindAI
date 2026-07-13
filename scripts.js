@@ -2,7 +2,7 @@
 let categoriesData = {};
 let toolsData = {};
 let commonData = {};
-let languagesData = {}
+let languagesData = {};
 let promptsData = null;
 
 /**
@@ -234,29 +234,6 @@ function applyTheme() {
 
     // Apply the theme
     document.documentElement.setAttribute('data-theme', actualTheme);
-}
-
-/**
- * Toggle sidebar menu for mobile devices
- *
- * This function toggles the visibility of the sidebar menu on mobile devices.
- * It adds/removes the 'active' class to show/hide the sidebar.
- *
- * @return {void}
- *
- * @note Toggles the 'active' class on the sidebar element
- * @note Updates the menu toggle button icon
- * @see Document.addEventListener('DOMContentLoaded') - Sets up menu toggle handler
- */
-function toggleMenu() {
-    const sidebar = document.querySelector('.sidebar');
-    const menuToggle = document.getElementById('menuToggle');
-
-    if (sidebar && menuToggle) {
-        sidebar.classList.toggle('active');
-        // Update menu icon based on sidebar state
-        menuToggle.innerHTML = sidebar.classList.contains('active') ? '✕' : '☰';
-    }
 }
 
 /**
@@ -659,8 +636,8 @@ function downloadResults() {
         return;
     }
 
-    // Get tool ID for filename
-    const toolId = document.getElementById('toolId')?.value || 'analysis';
+    // Get tool ID for filename (stored on the content element by displayResults)
+    const toolId = resultsContent.dataset.tool || 'analysis';
     const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const filename = `${toolId.replace(/[^a-z0-9]/gi, '_')}-${date}.txt`;
 
@@ -862,9 +839,6 @@ function loadToolsInCategory(category) {
             'icon': tool_data.icon || '📄'
         }));
 
-    // Get category info from categories.json
-    const categoryInfo = categoriesData && categoriesData[category] ? categoriesData[category] : null;
-
     // Clear existing tools grid
     toolsGrid.innerHTML = '';
 
@@ -899,16 +873,6 @@ function loadToolsInCategory(category) {
 
         toolsGrid.appendChild(clone);
     });
-
-    // Update category view title and description
-    const categoryTitle = document.getElementById('categoryTitle');
-    const categoryDescription = document.getElementById('categoryDescription');
-    if (categoryTitle) {
-        categoryTitle.textContent = (categoryInfo ? categoryInfo.icon + ' ' + categoryInfo.name : category);
-    }
-    if (categoryDescription) {
-        categoryDescription.textContent = categoryInfo && categoryInfo.description ? categoryInfo.description : '';
-    }
 }
 
 /**
@@ -1718,7 +1682,6 @@ function displayResults(results, fromHistory = false) {
         return;
     } else if (results.html) {
         // If results contain HTML, return it directly
-        showToast('HTML content found', 'debug');
         responseContent = results.html;
     } else if (results.response && results.response.choices && results.response.choices[0] && results.response.choices[0].message && results.response.choices[0].message.content) {
         // Extract content from LLM chat completion response
@@ -1760,7 +1723,6 @@ function displayResults(results, fromHistory = false) {
 
     // Check the desired display format from tool
     const displayFormat = tool && tool.display ? tool.display.toLowerCase() : resultsInfo.type;
-    showToast('Display format requested: ' + displayFormat, 'debug');
 
     // Render content based on type and format
     renderContent(resultsContent, resultsInfo, displayFormat, tool);
@@ -1775,8 +1737,9 @@ function displayResults(results, fromHistory = false) {
         showToast('Results content is empty', 'error');
     }
 
-    // Store the original raw response data (for copy functionality)
+    // Store the original raw response data (for copy/download functionality)
     resultsContent.dataset.raw = responseContent;
+    resultsContent.dataset.tool = toolId;
     // Show the full response
     if (results.response && detailsResponse) {
         const responseCode = document.createElement('code');
@@ -1964,55 +1927,6 @@ function showToast(message, type = 'success', duration = 5000) {
 
     // Return the toast element for potential further manipulation
     return toast;
-}
-
-// Simple modal dialog function
-function showModalError(title, message) {
-  // Remove any existing modal
-  const existingModal = document.getElementById('modalError');
-  if (existingModal) {
-    existingModal.remove();
-  }
-
-  // Create modal element
-  const modal = document.createElement("dialog");
-  modal.id = "modalError";
-  modal.innerHTML = `
-    <article>
-        <header>
-            <h2>${escapeHtml(title)}</h2>
-        </header>
-        <p>${escapeHtml(message)}</p>
-        <footer>
-            <button onclick="document.getElementById('modalError').remove()">OK</button>
-        </footer>
-    </article>
-    `;
-
-  document.body.appendChild(modal);
-  modal.showModal();
-}
-
-/**
- * Show the results area and switch to results view
- *
- * This function shows the results area and switches to the results view.
- *
- * @return {void}
- *
- * @note Shows the results area
- * @note Switches to results view
- * @note Scrolls to results
- * @see showToast() - Calls this function when showing errors
- * @see displayResults() - Calls this function when displaying results
- */
-function showResults() {
-    const resultsArea = document.getElementById('resultsArea');
-    if (resultsArea && resultsArea.style) {
-        resultsArea.style.display = 'flex';
-        switchView('results');
-        resultsArea.scrollIntoView({ behavior: 'smooth' });
-    }
 }
 
 /**
@@ -2456,69 +2370,6 @@ function displayHistoryResult(resultId) {
 }
 
 /**
- * Load and populate form with history data
- *
- * This function loads a saved result from history and populates the form
- * with the saved form data, then displays the form.
- *
- * @param {string} resultId - The ID of the result to load
- * @return {void}
- *
- * @note Finds the result by ID in localStorage
- * @note Populates the form with saved formData
- * @note Displays the tool form
- * @note Shows error if result is not found
- * @see displayHistory() - Calls this function when "Show Form" is clicked
- */
-function loadHistoryForm(resultId) {
-    try {
-        const results = loadResultsFromHistory();
-        const result = results.find(r => r.id === resultId);
-
-        if (result) {
-            // Get the tool ID from the saved result
-            const toolId = result.tool;
-            if (!toolId) {
-                showToast('Tool ID not found in saved result', 'error');
-                return;
-            }
-
-            // Display the tool form first
-            displayToolForm(toolId);
-
-            // Populate the form fields with saved data
-            const savedFormData = result.formData;
-            if (savedFormData && typeof savedFormData === 'object') {
-                // Wait for form to be populated, then set values
-                setTimeout(() => {
-                    const form = document.getElementById('apiForm');
-                    if (form) {
-                        // Set form values from saved data
-                        for (const [key, value] of Object.entries(savedFormData)) {
-                            const input = form.querySelector(`[name="${key}"]`);
-                            if (input) {
-                                if (input.type === 'checkbox' || input.type === 'radio') {
-                                    input.checked = value;
-                                } else if (field.type === 'file') {
-                                    input.value = '';
-                                    showToast('Please select a file manually', 'warning');
-                                } else {
-                                    input.value = value;
-                                }
-                            }
-                        }
-                    }
-                }, 100); // Small delay to ensure form is populated
-            }
-        } else {
-            showToast('Result not found in history', 'error');
-        }
-    } catch (error) {
-        showToast('Failed to load form from history: ' + error.message, 'error');
-    }
-}
-
-/**
  * Clear all saved results from history
  *
  * This function removes all saved results from localStorage and refreshes the history view.
@@ -2567,7 +2418,6 @@ function clearHistory() {
  * @see loadResultsFromHistory() - Loads paginated results from localStorage
  * @see createHistoryItemElement() - Builds each history preview item
  * @see displayHistoryResult() - Called when history items are clicked
- * @see loadHistoryForm() - Called when "Show Form" buttons are clicked
  * @see historyEmptyTemplate - Template used for empty state display
  * @example
  * // Display default number of history items (10)
@@ -2855,7 +2705,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    showToast(`Loaded ${successfulTools} out of ${toolPaths.length} tools`, 'info');
+    console.info(`Loaded ${successfulTools} out of ${toolPaths.length} tools`);
+    if (failedTools > 0) {
+        showToast(`Failed to load ${failedTools} tool${failedTools !== 1 ? 's' : ''}`, 'warning');
+    }
 
     // Create category views and buttons after loading data
     if (categoriesData) {
@@ -2868,8 +2721,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Set up form submission
     document.getElementById('apiForm')?.addEventListener('submit', handleFormSubmit);
-    // Set up menu toggle button
-    document.getElementById('menuToggle')?.addEventListener('click', toggleMenu);
     // Set up show form button
     document.getElementById('showFormBtn')?.addEventListener('click', () => {
         switchView('form');

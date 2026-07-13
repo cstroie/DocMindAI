@@ -5,7 +5,7 @@
  * Central endpoint for all AI tool operations, serving both as API and web interface
  *
  * @author Costin Stroie <costinstroie@eridu.eu.org>
- * @version 1.1
+ * @version 4.1
  * @license GPL 3
  */
 
@@ -1703,38 +1703,13 @@ function processToolResponse(array $tool, array $api_response): array {
 // =========================================================================
 
 /**
- * Serve the main HTML interface with CSRF protection.
+ * Serve the main HTML interface.
  *
- * FIX #9: session_regenerate_id() is called only when a new session is
- * created, not on every page load, which previously destroyed valid sessions
- * and invalidated CSRF tokens between requests.
+ * The app exposes no authenticated, state-changing endpoints, so it carries
+ * no CSRF token. (A previously generated token was never embedded in the page
+ * nor validated on POST, so it provided no protection and has been removed.)
  */
 function displayWebInterface(): void {
-    session_name('DOCMIND_SID');
-    session_set_cookie_params([
-        'lifetime' => 86400,
-        'path'     => '/',
-        'domain'   => $_SERVER['HTTP_HOST'] ?? '',
-        'secure'   => !empty($_SERVER['HTTPS']),
-        'httponly' => true,
-        'samesite' => 'Strict',
-    ]);
-
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-        // FIX #9: only regenerate on fresh session creation
-        if (empty($_SESSION['initiated'])) {
-            session_regenerate_id(true);
-            $_SESSION['initiated'] = true;
-        }
-    }
-
-    if (empty($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    }
-
-    define('CSRF_TOKEN', $_SESSION['csrf_token']);
-
     include 'index.html';
 }
 

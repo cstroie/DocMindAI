@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Fonts (Inter + JetBrains Mono) are loaded via <link> in index.html. */
 
 /* =========================================================================
    DocMind AI — Clinical-Tech design system (standalone, no framework)
@@ -349,8 +349,6 @@ ul.keywords li {
 }
 
 #toolSelect:focus { border-color: var(--dm-accent-line); }
-
-/* ---------- Hero ---------- */
 
 /* ---------- Cards / category grid ---------- */
 .view.tools-view,
@@ -984,16 +982,6 @@ ul.keywords li {
 .toast-error   { border-left: 3px solid var(--dm-danger); background: var(--dm-panel); }
 .toast-warning { border-left: 3px solid var(--dm-warn); background: var(--dm-panel); }
 .toast-info    { border-left: 3px solid var(--dm-accent); background: var(--dm-panel); }
-
-/* ---------- Loading overlay ---------- */
-.global-loading-overlay { background: color-mix(in srgb, var(--dm-bg) 88%, transparent); backdrop-filter: blur(4px); }
-.global-loading-overlay div {
-    background: var(--dm-panel);
-    border: 1px solid var(--dm-border);
-    border-radius: var(--dm-radius);
-    box-shadow: 0 12px 40px rgba(7, 9, 12, 0.25);
-}
-.global-loading-overlay div p { font: 500 13px var(--dm-font-mono); letter-spacing: 0.04em; color: var(--dm-muted); }
 
 /* ---------- Article (rendered markdown results) ---------- */
 .article {
