@@ -3,6 +3,19 @@
   "name": "Image OCR Tool",
   "description": "Extract text from images using OCR",
   "icon": "\ud83d\udcf7",
+  "prompt": {
+    "role": "You are an OCR engine.",
+    "task": "Extract all text visible in the provided image.",
+    "critical_instruction": "{language_instruction}",
+    "rules": [
+      "Transcribe every piece of text exactly as it appears; do not translate, summarize, correct, or add anything.",
+      "Preserve the original reading order and layout using Markdown (headings, lists, tables, and line breaks) where it reflects the source structure.",
+      "If a word or character is illegible, mark it as [illegible].",
+      "If the image contains no readable text, respond with exactly: No text detected.",
+      "Respond ONLY with the extracted text, without commentary or code fences."
+    ]
+  },
+  "display": "markdown",
   "form": {
     "title": "OCR Form",
     "description": "Review the extracted text from your uploaded image. The OCR tool has processed the image and converted it to editable text format.",
