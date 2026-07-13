@@ -548,7 +548,9 @@ function runLynxCommand(string $url) {
 
     $safe_url = $processed['data'];
     $ua       = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
-    $args     = '-dump -force_html -width=80 -nolist -nobold -nocolor -useragent=' . escapeshellarg($ua) . ' ' . escapeshellarg($safe_url) . ' 2>/dev/null';
+    // Wide wrap keeps paragraphs on single lines — better for LLM consumption
+    // and markdown reflow than the default 80-column hard wrap.
+    $args     = '-dump -force_html -width=1024 -nolist -nobold -nocolor -useragent=' . escapeshellarg($ua) . ' ' . escapeshellarg($safe_url) . ' 2>/dev/null';
 
     foreach (['/usr/bin/lynx', '/usr/local/bin/lynx'] as $bin) {
         if (file_exists($bin)) {

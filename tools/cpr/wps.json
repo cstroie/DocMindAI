@@ -71,7 +71,7 @@
     "  </footer>",
     "</article>"
   ],
-  "helper": "web_scraper",
+  "helper": "lynx",
   "form": {
     "title": "Web Page Summary",
     "description": "Review the AI-generated summary of the web page content. The summary highlights the most important points and key information from the article.",

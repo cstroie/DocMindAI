@@ -43,7 +43,7 @@
     "page_content": "{content}"
   },
   "display": "markdown",
-  "helper": "web_scraper",
+  "helper": "lynx",
   "form": {
     "title": "Web Page Conversion",
     "description": "Review the converted web page content in Markdown format. The AI has processed the web page and extracted the main content, removing ads and navigation elements.",
