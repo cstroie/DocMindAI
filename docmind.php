@@ -535,6 +535,24 @@ function cleanHtmlForLlm(string $html, int $max_chars = 50000): string {
 }
 
 /**
+ * Fetch a URL over HTTP and return a compact, LLM-friendly HTML payload.
+ *
+ * Validates the URL, retrieves the page with scrapeUrl(), then reduces it via
+ * cleanHtmlForLlm(). Used directly by the web_scraper helper and as the
+ * fallback for the lynx helper when the lynx binary is unavailable.
+ *
+ * @param string $url Raw URL from the submitted form.
+ * @return string|false Cleaned HTML, or false on validation / fetch failure.
+ */
+function fetchViaScraper(string $url) {
+    if (empty($url) || strlen($url) > 2048) return false;
+    $v = processUrl($url);
+    if (!$v['valid']) return false;
+    $html = scrapeUrl($v['data']);
+    return $html === false ? false : cleanHtmlForLlm($html);
+}
+
+/**
  * Extract clean text from a URL using lynx.
  *
  * @param string $url Raw URL from user input (validated internally).
@@ -1677,20 +1695,18 @@ function handleToolAction(string $tool_id): void {
 function executeHelper(string $helper_name, array $form_data) {
     switch ($helper_name) {
         case 'web_scraper':
-            $url = $form_data['url'] ?? '';
-            if (empty($url) || strlen($url) > 2048) return false;
-            $v = processUrl($url);
-            if (!$v['valid']) return false;
-            $html = scrapeUrl($v['data']);
-            // Strip scripts/styles and cap length so large pages don't blow the
-            // provider's request-size limit (HTTP 413).
-            return $html === false ? false : cleanHtmlForLlm($html);
+            return fetchViaScraper($form_data['url'] ?? '');
 
         case 'lynx':
             $url = $form_data['url'] ?? '';
             if (empty($url)) return false;
             $out = runLynxCommand($url);
-            return (is_string($out) && $out !== '') ? $out : false;
+            if (is_string($out) && $out !== '') {
+                return $out;
+            }
+            // lynx is not installed (or returned nothing) — fall back to the
+            // HTTP scraper so the tool still works without the lynx binary.
+            return fetchViaScraper($url);
 
         case 'medical_literature_search':
             $query = $form_data['query'] ?? '';
