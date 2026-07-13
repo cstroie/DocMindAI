@@ -769,6 +769,33 @@ function populateCategoryCards() {
 }
 
 /**
+ * Build a single history preview item.
+ * Shared by the home-page short history list and the full History view so
+ * both render with the same component.
+ */
+function createHistoryItemElement(item) {
+    const toolData = toolsData?.[item.tool];
+    const category = toolData?.category ? categoriesData[toolData.category] : null;
+    const toolIcon = toolData?.icon || '📋';
+    const title = toolData?.name || item.title || item.tool || 'Unknown';
+    const date = item.timestamp ? new Date(item.timestamp).toLocaleDateString() : '';
+
+    const div = document.createElement('div');
+    div.className = 'dm-recent-history-item';
+    div.innerHTML = `
+        <div class="dm-recent-history-item-icon">${toolIcon}</div>
+        <div class="dm-recent-history-item-content">
+            <h4 class="dm-recent-history-item-title">${escapeHtml(title)}</h4>
+            <p class="dm-recent-history-item-subtitle">${escapeHtml(category ? category.name : 'Tools')}${date ? ' • ' + date : ''}</p>
+        </div>
+    `;
+    div.addEventListener('click', () => {
+        displayHistoryResult(item.id);
+    });
+    return div;
+}
+
+/**
  * Populate recent history section on home page (max 3 items)
  */
 function populateRecentHistory() {
@@ -782,29 +809,11 @@ function populateRecentHistory() {
     historyList.innerHTML = '';
 
     if (recentItems.length === 0) {
-        historyList.innerHTML = '<p style="padding: 12px 14px; color: var(--dm-faint); font: 400 12px var(--dm-font-ui);">No recent analyses yet</p>';
+        historyList.innerHTML = '<p style="padding: 12px 14px; color: var(--dm-faint); font: 400 12px var(--dm-font-ui);">No history yet</p>';
         return;
     }
 
-    recentItems.forEach(item => {
-        const toolData = toolsData?.[item.tool];
-        const category = toolData?.category ? categoriesData[toolData.category] : null;
-        const toolIcon = toolData?.icon || '📋';
-
-        const div = document.createElement('div');
-        div.className = 'dm-recent-history-item';
-        div.innerHTML = `
-            <div class="dm-recent-history-item-icon">${toolIcon}</div>
-            <div class="dm-recent-history-item-content">
-                <h4 class="dm-recent-history-item-title">${escapeHtml(item.title || item.tool || 'Unknown')}</h4>
-                <p class="dm-recent-history-item-subtitle">${category ? category.name : 'Tools'} • ${new Date(item.timestamp).toLocaleDateString()}</p>
-            </div>
-        `;
-        div.addEventListener('click', () => {
-            displayHistoryResult(item.id);
-        });
-        historyList.appendChild(div);
-    });
+    recentItems.forEach(item => historyList.appendChild(createHistoryItemElement(item)));
 }
 
 /**
@@ -2259,6 +2268,11 @@ function switchView(viewName, params = {}) {
         selectedView.style.display = 'block';
     }
 
+    // Populate the full history when opening the history view
+    if (viewName === 'history') {
+        displayHistory();
+    }
+
     // Update page header for well-known views
     const viewTitles = {
         'home':    { title: 'Welcome to DocMind AI', kicker: 'WORKSPACE' },
@@ -2544,19 +2558,16 @@ function clearHistory() {
  * @throws {Error} If history content element is not found or template loading fails
  * @note Shows loading overlay during history data processing
  * @note Loads results from localStorage using loadResultsFromHistory() with pagination
- * @note Uses historyItemTemplate for consistent item rendering across the application
- * @note Populates items with tool icons, names, timestamps, and content previews
- * @note Sets up click handlers on entire items for viewing results and "Show Form" buttons
+ * @note Renders each item with the shared createHistoryItemElement() component
  * @note Handles missing tool data gracefully with fallback icons and names
  * @note Shows empty state message when no history is available using historyEmptyTemplate
- * @note Truncates preview text to 200 characters with ellipsis for better display
  * @note Integrates with toolsData to display accurate tool information and icons
  * @note Implements pagination for large history datasets
  * @see switchView() - Calls this function when history view is selected
  * @see loadResultsFromHistory() - Loads paginated results from localStorage
+ * @see createHistoryItemElement() - Builds each history preview item
  * @see displayHistoryResult() - Called when history items are clicked
  * @see loadHistoryForm() - Called when "Show Form" buttons are clicked
- * @see historyItemTemplate - Template used for rendering individual history items
  * @see historyEmptyTemplate - Template used for empty state display
  * @example
  * // Display default number of history items (10)
@@ -2606,68 +2617,9 @@ async function displayHistory(maxItems = 10, page = 1) {
         const entryCount = document.getElementById('historyEntryCount');
         if (entryCount) entryCount.textContent = `${results.length} ENTR${results.length !== 1 ? 'IES' : 'Y'}`;
 
-        // Get history item template
-        const template = document.getElementById('historyItemTemplate');
-        if (!template) {
-            showToast('History item template not found', 'error');
-            return;
-        }
-
-        // Process results in batches to improve performance
+        // Render each item with the shared history preview component
         paginatedResults.forEach(result => {
-            const clone = template.content.cloneNode(true);
-            const historyItem = clone.querySelector('section');
-            historyItem.dataset.resultId = result.id;
-
-            // Populate template elements
-            const iconElement = clone.querySelector('.history-item-icon');
-            const titleElement = clone.querySelector('h4');
-            const dateElement = clone.querySelector('.history-item-date');
-            const previewElement = clone.querySelector('p');
-
-            // Format date as DD.MM.YYYY · HH:MM
-            const date = new Date(result.timestamp);
-            const pad = n => String(n).padStart(2, '0');
-            const formattedDate = `${pad(date.getDate())}.${pad(date.getMonth()+1)}.${date.getFullYear()} · ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-            if (dateElement) dateElement.textContent = formattedDate;
-
-            if (result.tool) {
-                const tool = toolsData[result.tool];
-                if (tool) {
-                    const catId = tool.category;
-                    iconElement.innerHTML = CATEGORY_SVGS[catId] || tool.icon || '📄';
-                    titleElement.textContent = tool.name || result.title;
-                } else {
-                    iconElement.textContent = '📄';
-                    titleElement.textContent = result.title;
-                }
-            } else {
-                iconElement.textContent = '📄';
-                titleElement.textContent = result.title;
-            }
-
-            // Add preview text
-            if (previewElement) {
-                let previewText = '';
-                if (result.response?.choices?.[0]?.message?.content) {
-                    previewText = result.response.choices[0].message.content;
-                } else if (result.content?.response?.choices?.[0]?.message?.content) {
-                    previewText = result.content.response.choices[0].message.content;
-                } else if (result.content) {
-                    previewText = String(result.content);
-                } else {
-                    previewText = String(result);
-                }
-                if (previewText.length > 200) previewText = previewText.substring(0, 200) + '…';
-                previewElement.textContent = previewText;
-            }
-
-            // Add click handler to entire item
-            historyItem.addEventListener('click', () => {
-                displayHistoryResult(result.id);
-            });
-
-            historyContent.appendChild(clone);
+            historyContent.appendChild(createHistoryItemElement(result));
         });
 
         // Add pagination controls if there are more pages
@@ -2924,6 +2876,4 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('toolForm').scrollIntoView({ behavior: 'smooth' });
     });
 
-    // Load last 3 items from history on page load
-    displayHistory(3);
 });

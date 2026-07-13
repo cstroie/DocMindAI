@@ -104,7 +104,7 @@
 
             <div class="dm-recent-history">
                 <div class="dm-categories-header">
-                    <span class="dm-kicker">RECENT ANALYSES</span>
+                    <span class="dm-kicker">HISTORY</span>
                 </div>
                 <div id="recentHistoryList" class="dm-recent-history-list"></div>
             </div>
@@ -174,7 +174,7 @@
         </article>
 
         <!-- History View -->
-        <article class="view history-view">
+        <article class="view history-view" style="display: none;">
             <header>
                 <div class="history-header-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 1.6"/></svg>
@@ -242,19 +242,6 @@
     </template>
 
     <!-- History Templates -->
-    <template id="historyItemTemplate">
-        <section class="history-item">
-            <span class="history-item-icon"></span>
-            <div class="history-item-body">
-                <div class="history-item-row">
-                    <h4></h4>
-                    <span class="history-item-date"></span>
-                </div>
-                <p></p>
-            </div>
-        </section>
-    </template>
-
     <template id="historyEmptyTemplate">
         <section class="history-item history-item--empty">
             <span class="history-item-icon">
