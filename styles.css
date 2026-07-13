@@ -528,6 +528,9 @@ details[open] .details-arrow { transform: rotate(180deg); }
 .results-actions {
     display: flex;
     gap: 10px;
+    /* switchView() forces #resultsArea to display:block, dropping its flex gap,
+       so space the button row from the card explicitly */
+    margin-top: 16px;
 }
 
 .results-actions button {
