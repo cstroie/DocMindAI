@@ -1003,7 +1003,6 @@ function populateToolSelect(toolSelect) {
  * @note Supports both direct field objects and string references to common fields
  * @note Creates form fields using createFormField() with proper error handling
  * @note Sets up cancel button to return to the appropriate category view
- * @note Uses smooth scrolling to ensure the form is visible to the user
  * @see createFormField() - Called to create each form field with validation
  * @see toolsData - Global object containing tool configurations
  * @see categoriesData - Global object containing category information
@@ -1159,11 +1158,6 @@ async function displayToolForm(toolId) {
                     switchView('tools');
                 }
             };
-        }
-
-        // Scroll to form
-        if (toolForm.scrollIntoView) {
-            toolForm.scrollIntoView({ behavior: 'smooth' });
         }
     } catch (error) {
         // Show user-friendly error message
@@ -1677,7 +1671,6 @@ async function handleFormSubmit(event) {
  * @note Calls jsonToMarkdown() for JSON content conversion to markdown
  * @note Stores original raw response data for copy functionality
  * @note Automatically saves results to history unless fromHistory flag is true
- * @note Scrolls results into view with smooth scrolling for better UX
  * @see handleFormSubmit() - Calls this function on successful form submission
  * @see applySyntaxHighlighting() - Called to highlight code blocks
  * @see showToast() - Called if no valid response content is found
@@ -1786,9 +1779,6 @@ function displayResults(results, fromHistory = false) {
 
     // Apply syntax highlighting
     applySyntaxHighlighting(resultsArea);
-
-    // Scroll to results
-    resultsArea.scrollIntoView({ behavior: 'smooth' });
 
     // Save result to history only if it's not from history
     if (!fromHistory) {
@@ -2830,7 +2820,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Set up show form button
     document.getElementById('showFormBtn')?.addEventListener('click', () => {
         switchView('form');
-        document.getElementById('toolForm').scrollIntoView({ behavior: 'smooth' });
     });
 
 });

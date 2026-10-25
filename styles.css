@@ -1494,7 +1494,10 @@ ul.keywords li {
 }
 
 /* ---------- Responsive: tablet / phone ---------- */
-@media (max-width: 760px) {
+@media (max-width: 960px) {
+    .dm-status { display: none; }
+}
+@media (max-width: 860px) {
     .dm-nav {
         flex-wrap: wrap;
         height: auto;
@@ -1553,3 +1556,12 @@ ul.keywords li {
     word-break: break-word;
 }
 .form-error[hidden] { display: none; }
+
+/* Visual pass fixes */
+.results-model-name:empty { display: none; }
+main.container { padding-top: 0.5rem; }
+@media (max-width: 560px) {
+    .form-fields-row { grid-template-columns: 1fr; }
+    .results-actions button { flex: 1 1 auto; justify-content: center; }
+    .results-actions #showFormBtn { flex-basis: 100%; margin-left: 0; }
+}
