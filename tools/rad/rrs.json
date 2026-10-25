@@ -50,7 +50,7 @@
     "  <div style=\"display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;\">",
     "    {{#if (eq pathologic 'yes')}}",
     "      <span style=\"display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 6px; background: rgba(240, 104, 104, 0.13); border: 1px solid rgba(240, 104, 104, 0.34); color: var(--dm-danger); font: 600 11px var(--dm-font-mono); letter-spacing: 0.08em;\"><span style=\"width: 6px; height: 6px; border-radius: 50%; background: var(--dm-danger);\"></span>PATHOLOGIC</span>",
-    "      <span style=\"font: 600 12px var(--dm-font-mono); letter-spacing: 0.06em; color: var(--dm-warn);\">{{getSeverityLabel severity}} \u00b7 {{severity}}/10</span>",
+    "      <span style=\"font: 600 12px var(--dm-font-mono); letter-spacing: 0.06em; color: var(--severity-color, var(--dm-warn));\">{{getSeverityLabel severity}} \u00b7 {{severity}}/10</span>",
     "    {{else}}",
     "      <span style=\"display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 6px; background: rgba(15, 160, 107, 0.13); border: 1px solid rgba(15, 160, 107, 0.34); color: var(--dm-ok); font: 600 11px var(--dm-font-mono); letter-spacing: 0.08em;\"><span style=\"width: 6px; height: 6px; border-radius: 50%; background: var(--dm-ok);\"></span>NORMAL</span>",
     "      <span style=\"font: 600 12px var(--dm-font-mono); letter-spacing: 0.06em; color: var(--dm-ok);\">{{getSeverityLabel severity}} \u00b7 {{severity}}/10</span>",

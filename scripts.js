@@ -1809,7 +1809,12 @@ function fillSeverityBoxes(container) {
     const pathologic = severityDiv.getAttribute('data-pathologic');
 
     const boxes = severityDiv.querySelectorAll('.severity-box');
-    const color = pathologic === 'yes' ? 'var(--dm-warn)' : 'var(--dm-ok)';
+    // Scale colour with severity so critical findings stand out at a glance
+    const color = pathologic !== 'yes' ? 'var(--dm-ok)'
+        : severity >= 7 ? 'var(--dm-danger)'
+        : severity >= 4 ? 'var(--dm-warn)'
+        : 'var(--dm-accent)';
+    (severityDiv.parentElement || severityDiv).style.setProperty('--severity-color', color);
 
     boxes.forEach((box, index) => {
         if (index < severity) {
@@ -2236,6 +2241,9 @@ function switchView(viewName, params = {}) {
     // Populate the full history when opening the history view
     if (viewName === 'history') {
         displayHistory();
+    } else if (viewName === 'home') {
+        // Results saved since load must appear in the recent list
+        populateRecentHistory();
     }
 
     // Update page header for well-known views
@@ -2753,7 +2761,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (severity <= 3) return 'Minor';
             if (severity <= 6) return 'Moderate';
             if (severity <= 8) return 'Severe';
-            return 'Critic';
+            return 'Critical';
         });
     }
 
