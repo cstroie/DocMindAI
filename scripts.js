@@ -232,6 +232,12 @@ function applyTheme() {
         }
     }
 
+    if (themeButton) {
+        const label = `Theme: ${preference} (click to change)`;
+        themeButton.title = label;
+        themeButton.setAttribute('aria-label', label);
+    }
+
     // Apply the theme
     document.documentElement.setAttribute('data-theme', actualTheme);
 }
@@ -345,6 +351,35 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+/**
+ * Sanitize HTML produced from LLM output before inserting it into the DOM
+ *
+ * LLM responses are untrusted (prompt injection, pasted documents), and
+ * marked.js passes raw HTML through. This strips active content: dangerous
+ * elements, event-handler attributes and script-capable URLs.
+ *
+ * @param {string} html - HTML to clean
+ * @returns {string} Sanitized HTML
+ */
+const SANITIZE_DROP_TAGS = 'script,style,iframe,frame,frameset,object,embed,applet,link,meta,base,form,input,button,textarea,select,svg,math,template,noscript';
+function sanitizeHtml(html) {
+    const doc = new DOMParser().parseFromString(`<body>${html}</body>`, 'text/html');
+    doc.body.querySelectorAll(SANITIZE_DROP_TAGS).forEach(el => el.remove());
+    doc.body.querySelectorAll('*').forEach(el => {
+        for (const attr of Array.from(el.attributes)) {
+            const name = attr.name.toLowerCase();
+            const value = attr.value.replace(/[\s\u0000-\u001f]/g, '').toLowerCase();
+            if (name.startsWith('on') || name === 'srcdoc' ||
+                (['href', 'src', 'xlink:href', 'action', 'formaction'].includes(name) &&
+                 /^(javascript|vbscript|data):/.test(value) && !/^data:image\/(png|jpe?g|gif|webp);/.test(value))) {
+                el.removeAttribute(attr.name);
+            }
+        }
+        if (el.tagName === 'A') el.setAttribute('rel', 'noopener noreferrer');
+    });
+    return doc.body.innerHTML;
 }
 
 /**
@@ -605,7 +640,6 @@ function createCategoriesViews(categories) {
         categoryView.classList.add(`tools-${categoryId}-view`);
         categoryView.dataset.view = `tools-${categoryId}`;
         categoryView.id = `${categoryId}ToolsGrid`;
-        categoryView.style.display = 'none';
 
         // Append the category view to the container BEFORE populating tools
         viewContainer.appendChild(categoryView);
@@ -759,6 +793,8 @@ function createHistoryItemElement(item) {
 
     const div = document.createElement('div');
     div.className = 'dm-recent-history-item';
+    div.setAttribute('role', 'button');
+    div.tabIndex = 0;
     div.innerHTML = `
         <div class="dm-recent-history-item-icon">${toolIcon}</div>
         <div class="dm-recent-history-item-content">
@@ -1574,44 +1610,42 @@ async function handleFormSubmit(event) {
         localStorage.setItem('docmind-max_image_size', maxImageSize);
     }
 
+    const formError = document.getElementById('formError');
+    if (formError) formError.hidden = true;
+
     try {
-        try {
-            const response = await fetch('docmind.php', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            // Check if response is OK
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
+        const response = await fetch('docmind.php', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
             }
+        });
 
-            // Check if response has JSON content type
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                // Parse JSON response
-                const result = await response.json();
-                // Check for errors
-                if (result.error) {
-                    throw new Error(result.error);
-                }
-                // Display results
-                displayResults(result);
-            } else {
-                // Handle non-JSON response
-                const text = await response.text();
-                throw new Error(`Unexpected response format: ${text}`);
-            }
-        } catch (fetchError) {
-            // Re-throw to be caught by the outer error handler
-            throw fetchError;
+        // Check if response is OK
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText.slice(0, 300)}`);
         }
+
+        // Check if response has JSON content type
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            throw new Error(`Unexpected response format: ${text.slice(0, 300)}`);
+        }
+
+        const result = await response.json();
+        if (result.error) {
+            throw new Error(result.error);
+        }
+        displayResults(result);
     } catch (error) {
-        // Show user-friendly error message
+        // Keep the error visible next to the form, not only in a transient toast
+        if (formError) {
+            formError.textContent = error.message;
+            formError.hidden = false;
+        }
         showToast(error.message, 'error');
     } finally {
         // Restore button state and hide loading
@@ -1731,8 +1765,6 @@ function displayResults(results, fromHistory = false) {
 
     // Check if resultsContent is not empty
     if (resultsContent.innerHTML.trim() !== '') {
-        // Show results area
-        resultsArea.style.display = 'flex';
         // Switch to results view
         switchView('results');
     } else {
@@ -1822,12 +1854,12 @@ function renderJsonData(resultsContent, jsonData, displayFormat, tool) {
                     tool.template.join('\n') :
                     tool.template;
                 const template = Handlebars.compile(templateContent);
-                resultsContent.innerHTML = template(jsonData);
+                resultsContent.innerHTML = sanitizeHtml(template(jsonData));
             } catch (error) {
                 showToast('Handlebars template error: ' + error.message, 'error');
                 // Fallback to markdown rendering
                 const markdownContent = jsonToMarkdown(jsonData);
-                resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
+                resultsContent.innerHTML = `<div class="article">${sanitizeHtml(marked.parse(markdownContent))}</div>`;
             }
             // Post-render enhancement — outside the try so a helper error
             // can never discard a successfully rendered template
@@ -1835,16 +1867,16 @@ function renderJsonData(resultsContent, jsonData, displayFormat, tool) {
         } else {
             // Convert JSON to HTML via markdown
             const markdownContent = jsonToMarkdown(jsonData);
-            resultsContent.innerHTML = `<div class="article">${marked.parse(markdownContent)}</div>`;
+            resultsContent.innerHTML = `<div class="article">${sanitizeHtml(marked.parse(markdownContent))}</div>`;
         }
     } else if (displayFormat === 'markdown') {
         // Convert JSON to markdown
         const markdownContent = jsonToMarkdown(jsonData);
-        resultsContent.innerHTML = `<pre><code class="${displayFormat}">${markdownContent}</code></pre>`;
+        resultsContent.innerHTML = `<pre><code class="markdown">${escapeHtml(markdownContent)}</code></pre>`;
     } else {
         // Convert JSON to pretty JSON string
         const prettyJson = JSON.stringify(jsonData, null, 2);
-        resultsContent.innerHTML = `<pre><code class="json">${prettyJson}</code></pre>`;
+        resultsContent.innerHTML = `<pre><code class="json">${escapeHtml(prettyJson)}</code></pre>`;
     }
 }
 
@@ -1868,7 +1900,7 @@ function renderContent(resultsContent, resultsInfo, displayFormat, tool, prePars
         // If the result is markdown, convert it to HTML
         if (displayFormat === 'html') {
             // Convert markdown to HTML and render as a plain article
-            const htmlContent = marked.parse(resultsInfo.text);
+            const htmlContent = sanitizeHtml(marked.parse(resultsInfo.text));
             resultsContent.innerHTML = `<div class="article">${htmlContent}</div>`;
         } else {
             // Keep as markdown with syntax highlighting
@@ -1876,7 +1908,7 @@ function renderContent(resultsContent, resultsInfo, displayFormat, tool, prePars
         }
     } else {
         // For other types, use the original response content, with syntax highlighting
-        resultsContent.innerHTML = `<pre><code class="${resultsInfo.type}">${escapeHtml(resultsInfo.text)}</code></pre>`;
+        resultsContent.innerHTML = `<pre><code class="${escapeHtml(resultsInfo.type)}">${escapeHtml(resultsInfo.text)}</code></pre>`;
     }
     resultsContent.querySelectorAll('article').forEach(el => el.classList.add('article'));
 }
@@ -2192,15 +2224,12 @@ function arrayOfObjectsToTable(arr) {
 function switchView(viewName, params = {}) {
     // Hide all views
     const views = document.querySelectorAll('.view');
-    views.forEach(view => {
-        view.classList.remove('active-view');
-        view.style.display = 'none';
-    });
+    views.forEach(view => view.classList.remove('active-view'));
     // Show the selected view
     const selectedView = document.querySelector(`.${viewName}-view`);
     if (selectedView) {
         selectedView.classList.add('active-view');
-        selectedView.style.display = 'block';
+        window.scrollTo({ top: 0 });
     }
 
     // Populate the full history when opening the history view
@@ -2253,16 +2282,6 @@ function updatePageTitle(title, kicker) {
  * @note Called by displayToolForm() when showing a form
  */
 function showForm() {
-    const toolForm = document.getElementById('toolForm');
-    const resultsArea = document.getElementById('resultsArea');
-
-    if (toolForm) {
-        toolForm.style.display = 'block';
-    }
-    if (resultsArea) {
-        resultsArea.style.display = 'none';
-    }
-
     switchView('form');
 }
 
@@ -2311,8 +2330,16 @@ function saveResultToHistory(result) {
             existingResults.length = 10;
         }
 
-        // Save back to localStorage
-        localStorage.setItem('docmind-results', JSON.stringify(existingResults));
+        // Save back to localStorage, dropping the oldest entries if the quota is exceeded
+        while (existingResults.length) {
+            try {
+                localStorage.setItem('docmind-results', JSON.stringify(existingResults));
+                break;
+            } catch (quotaError) {
+                if (existingResults.length === 1) throw quotaError;
+                existingResults.pop();
+            }
+        }
     } catch (error) {
         showToast('Failed to save result to history: ' + error.message, 'error');
     }
@@ -2642,9 +2669,49 @@ function addPaginationControls(container, itemsPerPage, currentPage, totalItems)
  * @see switchView() - Handles view switching
  * @see applyTheme() - Applies theme preference
  */
+/**
+ * Probe the backend once and reflect provider state in the nav status badge
+ *
+ * @return {Promise<void>}
+ */
+async function updateProviderStatus() {
+    const badge = document.querySelector('.dm-status');
+    if (!badge) return;
+    const label = badge.querySelector('.dm-status-label');
+    const setState = (state, text, title) => {
+        badge.dataset.state = state;
+        label.textContent = text;
+        badge.title = title || '';
+    };
+    setState('loading', 'CONNECTING');
+    try {
+        const response = await fetch('docmind.php?action=get_models');
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+        const count = data.models ? Object.keys(data.models).length : 0;
+        setState('ok', (data.provider || 'ONLINE').toUpperCase(), `${count} model(s) available`);
+    } catch (error) {
+        setState('error', 'OFFLINE', error.message);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async function() {
     // Apply theme preference
     applyTheme();
+    updateProviderStatus();
+
+    // Follow OS theme changes live while the preference is "system"
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+
+    // Keyboard activation for non-button clickable elements (cards, history rows)
+    document.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        const target = event.target;
+        if (target.getAttribute && target.getAttribute('role') === 'button' && target.tagName !== 'BUTTON') {
+            event.preventDefault();
+            target.click();
+        }
+    });
 
     // Register Handlebars helpers to ensure they're available
     if (typeof Handlebars !== 'undefined') {

@@ -6,14 +6,25 @@ DocMind AI is a PHP web application providing AI-powered document processing too
 
 - **Author:** Costin Stroie <costinstroie@eridu.eu.org>
 - **License:** GPL v3
-- **Version:** 4.1 (config.json)
+- **Version:** 4.2 (config.json)
 - **Repo:** https://github.com/cstroie/DocMindAI
 
 ---
 
 ## Version History
 
-### v4.1 (Current)
+### v4.2 (Current)
+**Responsive, accessible, hardened**
+- 📱 Mobile layout: nav wraps, categories become a scrollable row, header/tool select stack (≤760px)
+- 🟢 Live provider status badge (CONNECTING / provider name / OFFLINE) from `get_models`
+- 🧭 View visibility owned by CSS (`.view:not(.active-view)`); removed inline display styles and grid `!important`
+- 📌 Sticky results actions; wide tables scroll; inline form error card
+- ♿ `:focus-visible` rings, keyboard-activatable cards/history rows, WCAG-contrast `--dm-faint`, reduced-motion, live OS theme following
+- 🔒 `sanitizeHtml()` on all marked/Handlebars output (LLM output is untrusted); escaped `<pre>` fallbacks; CSP on the HTML page (`connect-src 'self'`)
+- 💾 History save drops oldest entries on storage quota errors
+- 🔤 Inter + JetBrains Mono self-hosted in `fonts/` (no Google Fonts request)
+
+### v4.1
 **UI/UX Refinements**
 - ✨ Added Recent Analyses section to home page (max 3 items, clickable)
 - 🎨 Flattened results card structure (removed nested boxes)
