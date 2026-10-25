@@ -65,7 +65,8 @@ function toggleTheme() {
     } else if (currentPreference === 'dark') {
         newPreference = 'system';
     } else {
-        newPreference = 'light';
+        // From "system", flip to the opposite of what is shown so the click is visible
+        newPreference = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     }
 
     // Save theme preference
@@ -2702,6 +2703,15 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Follow OS theme changes live while the preference is "system"
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+
+    // Delegated handlers for static markup (keeps index.html free of inline JS for CSP)
+    const ACTIONS = { toggleTheme, copyResultsToClipboard, downloadResults, clearHistory };
+    document.addEventListener('click', event => {
+        const el = event.target.closest('[data-view], [data-action]');
+        if (!el) return;
+        if (el.dataset.view) switchView(el.dataset.view);
+        else if (ACTIONS[el.dataset.action]) ACTIONS[el.dataset.action]();
+    });
 
     // Keyboard activation for non-button clickable elements (cards, history rows)
     document.addEventListener('keydown', event => {

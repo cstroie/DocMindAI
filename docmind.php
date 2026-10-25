@@ -1767,9 +1767,9 @@ function processToolResponse(array $tool, array $api_response): array {
  * nor validated on POST, so it provided no protection and has been removed.)
  */
 function displayWebInterface(): void {
-    // Handlebars.compile() needs eval and index.html uses inline handlers;
+    // Handlebars.compile() needs eval;
     // connect-src 'self' is the key guard against exfiltrating clinical data.
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval'; "
         . "style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; "
         . "connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'");
     header('X-Content-Type-Options: nosniff');
